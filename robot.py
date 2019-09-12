@@ -146,7 +146,7 @@ class Ui_MainWindow(QMainWindow):
         # 当前图像帧
         self.image = None
         # 获取截图保存路径
-        self.screen_shot_path = self.get_config_value(gloVar.config_file_path, 'param', 'screen_shot_path')
+        self.picture_path = self.get_config_value(gloVar.config_file_path, 'param', 'picture_path')
 
 
     # 获取config的参数
@@ -296,7 +296,7 @@ class Ui_MainWindow(QMainWindow):
 
     # 摄像头截屏线程
     def screen_capture_thread(self, capture_type='jpg'):
-        capture_path = self.screen_shot_path
+        capture_path = os.path.join(self.picture_path, 'screen_shot')
         if os.path.exists(capture_path) is False:
             os.makedirs(capture_path)
         capture_name = str(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')) + '.' + capture_type
@@ -307,9 +307,14 @@ class Ui_MainWindow(QMainWindow):
 
     # 框选车机屏幕大小
     def box_screen(self):
-        reply = QMessageBox.question(self, '判断', '是否要框选车机屏幕?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-        if reply == QMessageBox.Yes:
-            gloVar.box_screen_flag = True
+        # 视频流未打开时不允许框选车机屏幕
+        if self.camera_status == self.camera_closed:
+            QMessageBox.warning(self, "警告", "请先打开视频流! 之后再框选屏幕!", QMessageBox.Yes | QMessageBox.No)
+        else:
+            reply = QMessageBox.question(self, '提示', '是否要框选车机屏幕?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                gloVar.box_screen_flag = True
+                uArm_action.uArm_action_type = None
 
 
     # 更新控制台内容
@@ -374,6 +379,13 @@ class Ui_MainWindow(QMainWindow):
             return '机械臂服务连接异常'
 
 
+    # 获取picture路径
+    def get_picture_path(self):
+        self.picture_path = QtWidgets.QFileDialog.getExistingDirectory(self.centralwidget, "浏览", self.picture_path)
+        self.set_config_value(gloVar.config_file_path, 'param', 'picture_path', self.picture_path)
+        logger('修改保存图片路径为: %s' %self.picture_path)
+
+
     def tool_bar(self):
         # ui相关action
         self.setting_action               = QAction(QIcon(icon_path.Icon_ui_setting), 'setting', self)
@@ -385,6 +397,7 @@ class Ui_MainWindow(QMainWindow):
         self.switch_camera_status_action.triggered.connect(self.switch_camera_status)
         self.capture_action.triggered.connect(self.screen_shot)
         self.box_screen_action.triggered.connect(self.box_screen)
+        self.picture_path_action.triggered.connect(self.get_picture_path)
         # robot相关action
         self.click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
         self.double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)
@@ -407,14 +420,15 @@ class Ui_MainWindow(QMainWindow):
         self.ui_toolbar.addAction(self.capture_action)
         self.ui_toolbar.addAction(self.box_screen_action)
         self.ui_toolbar.addAction(self.picture_path_action)
+        self.ui_toolbar.addSeparator()
         # robot工具栏
+        self.robot_operate_toolbar.addAction(self.robot_lock_action)
+        self.robot_operate_toolbar.addAction(self.robot_unlock_action)
         self.robot_operate_toolbar.addAction(self.robot_get_position_action)
         self.robot_operate_toolbar.addAction(self.click_action)
         self.robot_operate_toolbar.addAction(self.double_click_action)
         self.robot_operate_toolbar.addAction(self.long_click_action)
         self.robot_operate_toolbar.addAction(self.slide_action)
-        self.robot_operate_toolbar.addAction(self.robot_lock_action)
-        self.robot_operate_toolbar.addAction(self.robot_unlock_action)
 
 
     # 视频播放框架
@@ -625,7 +639,7 @@ class Ui_MainWindow(QMainWindow):
         #     maskImage_path = os.path.join(self.get_path, 'mask')
         # else:
         #     maskImage_path = None
-        maskImage_path = r'D:\Work\Performance\picture'
+        maskImage_path = self.picture_path
         Ui_MainWindow.MASK_PATH = maskImage_path
 
     # 空格键 播放/暂停/重播
@@ -911,7 +925,8 @@ class Video_Label(QLabel):
             elif uArm_action.uArm_action_type == uArm_action.uArm_slide:
                 start = self.calculating_point(self.x0, self.y0)
                 end   = self.calculating_point(self.x1, self.y1)
-                data = {'base': (173.1989, 85.1921, 14.495), 'speed': 150, 'leave': 1,
+                data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
+                        'speed': 150, 'leave': 1,
                         'start': start, 'end': end}
                 Thread(target=self.uArm_post_request, args=(uArm_action.uArm_slide, data,)).start()
                 logger('执行--[滑动动作]--起点: %s, 终点: %s' %(str(start), str(end)))
@@ -959,15 +974,21 @@ class Video_Label(QLabel):
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawLine(QPoint(self.x0, self.y0), QPoint(self.x1, self.y1))
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
         elif uArm_action.uArm_action_type in [uArm_action.uArm_click, uArm_action.uArm_long_click, uArm_action.uArm_double_click]:
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawEllipse(self.x0-5, self.y0-5, 10, 10)
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
         else:
             rect = QRect(self.x0, self.y0, abs(self.x1 - self.x0), abs(self.y1 - self.y0))
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(rect)
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
 
     # 保存模板
     def save_template(self):
