@@ -1,0 +1,6 @@
+*.log
+log
+.idea
+build
+dist
+__pycache__
