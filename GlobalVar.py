@@ -43,6 +43,9 @@ class icon_path():
     Icon_robot_lock         = 'config/Icon/robot_icon/lock.png'
     Icon_robot_unlock       = 'config/Icon/robot_icon/unlock.png'
     Icon_robot_get_position = 'config/Icon/robot_icon/get_position.png'
+    # 自定义控件相关图标
+    Icon_custom_delete = 'config/Icon/custom_widget_icon/delete.png'
+    Icon_custom_play   = 'config/Icon/custom_widget_icon/play1.png'
 
 class uArm_action():
     # 机械臂动作类型(点击/双击/长按/滑动)

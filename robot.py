@@ -134,8 +134,8 @@ class Ui_MainWindow(QMainWindow):
         # 视频流&视频尺寸
         self.video_width = 1280
         self.video_height = 720
-        # self.video_width = 640
-        # self.video_height = 480
+        # self.video_width = 1600
+        # self.video_height = 1000
         # 是否第一次窗口缩放
         self.first_window_zoom_flag = True
         # 是否使用电脑自带摄像头
