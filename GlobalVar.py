@@ -48,8 +48,13 @@ class icon_path():
     Icon_robot_unlock       = 'config/Icon/robot_icon/unlock.png'
     Icon_robot_get_position = 'config/Icon/robot_icon/get_position.png'
     # 自定义控件相关图标
-    Icon_custom_delete = 'config/Icon/custom_widget_icon/delete.png'
-    Icon_custom_play   = 'config/Icon/custom_widget_icon/play1.png'
+    Icon_custom_delete            = 'config/Icon/custom_widget_icon/delete.png'
+    Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'
+    Icon_tab_widget_add           = 'config/Icon/tab_widget_icon/add.png'
+    Icon_tab_widget_delete        = 'config/Icon/tab_widget_icon/delete.png'
+    Icon_tab_widget_all_select    = 'config/Icon/tab_widget_icon/all_select.png'
+    Icon_tab_widget_all_un_select = 'config/Icon/tab_widget_icon/all_un_select.png'
+    Icon_tab_widget_execute       = 'config/Icon/tab_widget_icon/execute.png'
 
 class uArm_action():
     # 机械臂动作类型(点击/双击/长按/滑动)

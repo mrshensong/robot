@@ -20,6 +20,7 @@ from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
+from uiclass.custom_tabwidget import Custom_TabWidget
 
 
 
@@ -162,6 +163,7 @@ class Ui_MainWindow(QMainWindow):
             config.write(cf)
 
 
+    # 视频流
     def video_stream(self):
         if self.use_system_camera == True:
             Thread(target=self.system_camera_stream, args=()).start()
@@ -541,24 +543,8 @@ class Ui_MainWindow(QMainWindow):
 
     # case展示
     def show_case(self):
-        self.case_show_frame = QtWidgets.QFrame(self.centralwidget)
-        self.case_show_frame.setFrameShape(QtWidgets.QFrame.Box)
-        self.case_show_frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.case_show_frame.setObjectName("case_show_frame")
-        self.case_show_frame.setMinimumWidth(80)
-        self.grid.addWidget(self.case_show_frame, 0, 8, 3, 2)
-        self.case_show_v_layout = QVBoxLayout(self.case_show_frame)
-        self.label_case_show = QtWidgets.QLabel(self.case_show_frame)
-        self.label_case_show.setText('[case描述]')
-        self.label_case_show.setFont(QFont(Ui_MainWindow.font, 12))
-        self.edit_case_show = QTextEdit(self.case_show_frame)
-        self.edit_case_show.ensureCursorVisible()
-        self.edit_case_show.setLineWrapMode(QTextEdit.FixedPixelWidth)
-        self.edit_case_show.setWordWrapMode(QTextOption.NoWrap)
-        self.edit_case_show.setFont(QFont(Ui_MainWindow.font, 12))
-        self.edit_case_show.setStyleSheet('background-color:lightGray')
-        self.case_show_v_layout.addWidget(self.label_case_show)
-        self.case_show_v_layout.addWidget(self.edit_case_show)
+        self.tab_widget = Custom_TabWidget(self.centralwidget)
+        self.grid.addWidget(self.tab_widget, 0, 8, 3, 2)
 
 
     # 控制台输出
@@ -636,6 +622,7 @@ class Ui_MainWindow(QMainWindow):
         #     maskImage_path = None
         maskImage_path = self.picture_path
         robot_other.mask_path = maskImage_path
+
 
     # 空格键 播放/暂停/重播
     def switch_video(self):
