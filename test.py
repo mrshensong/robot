@@ -14,6 +14,7 @@ class Custom_Tools(QWidget):
     def initUI(self):
 
         self.check_box = QCheckBox()
+        self.check_box.stateChanged.connect(self.connect_check_box)
 
         if self.type == 'click':
             pix_map = QPixmap(icon_path.Icon_robot_click)
@@ -36,16 +37,20 @@ class Custom_Tools(QWidget):
 
         self.play_botton = QToolButton(self)
         self.play_botton.setStyleSheet('border-image: url(' + icon_path.Icon_custom_play + ')')
-        self.delte_botton = QToolButton(self)
-        self.delte_botton.setStyleSheet('border-image: url(' + icon_path.Icon_custom_delete + ')')
+        self.delete_botton = QToolButton(self)
+        self.delete_botton.setStyleSheet('border-image: url(' + icon_path.Icon_custom_delete + ')')
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
         self.h_box.addWidget(self.type_label)
         self.h_box.addLayout(self.v_box)
         self.h_box.addWidget(self.play_botton)
-        self.h_box.addWidget(self.delte_botton)
+        self.h_box.addWidget(self.delete_botton)
         self.setLayout(self.h_box)
+
+
+    def connect_check_box(self):
+        print('the id is : ', self.id)
 
 
     # def main():
@@ -55,84 +60,13 @@ class Custom_Tools(QWidget):
     #     sys.exit(app.exec_())
 
 
-# class Demo(QWidget):
-#     def __init__(self, parent):
-#         super(Demo, self).__init__(parent)
-#
-#         self.tab_widget = QTabWidget(self)
-#         self.tab_widget.setTabPosition(QTabWidget.South)
-#
-#         self.tab1 = QWidget()  # 1
-#         self.tab2 = QTextEdit()
-#
-#         self.tab1_init()  # 2
-#         # self.tab2_init()
-#
-#         self.tab_widget.addTab(self.tab1, 'action')
-#         self.tab_widget.addTab(self.tab2, 'edit')
-#
-#
-#         self.tab_widget.currentChanged.connect(lambda: print(self.tab_widget.currentIndex()))  # 4
-#         self.setMinimumSize(400, 400)
-#
-#     def tab1_init(self):
-#         button1 = QToolButton()
-#         # button1.triggered.connect(self.add)
-#         button1.clicked.connect(self.add)
-#         button2 = QToolButton()
-#         button3 = QToolButton()
-#         button4 = QToolButton()
-#         hbox = QHBoxLayout()
-#         hbox.addWidget(button1)
-#         hbox.addWidget(button2)
-#         hbox.addWidget(button3)
-#         hbox.addWidget(button4)
-#         hbox.addStretch(1)
-#
-#         self.topFiller = QWidget()
-#         # topFiller.setMinimumSize(350, 2000)  #######设置滚动条的尺寸
-#         self.topFiller.setMinimumWidth(350)
-#         self.topFiller.setMinimumHeight(180)
-#         for filename in range(1):
-#             MapButton = Custom_Tools(parent=self.topFiller, type='click')
-#             MapButton.move(0, filename * 80)
-#         ##创建一个滚动条
-#         self.scroll = QScrollArea()
-#         self.scroll.setWidget(self.topFiller)
-#
-#         vbox = QVBoxLayout()
-#         vbox.addLayout(hbox)
-#         vbox.addWidget(self.scroll)
-#         self.tab1.setLayout(vbox)
-#
-#
-#     def add(self):
-#         print('into')
-#         self.topFiller.setMinimumHeight(2000)
-#         MapButton = Custom_Tools(parent=self.topFiller, type='click')
-#         MapButton.move(0, 2 * 80)
-#
-#
-# if __name__ == '__main__':
-#     app = QApplication(sys.argv)
-#     demo = Demo(None)
-#     demo.show()
-#     sys.exit(app.exec_())
-
-
-
-
-
-
-
-
 
 
 class Demo(QWidget):
     def __init__(self, parent):
         super(Demo, self).__init__(parent)
 
-        self.index = 0
+        self.index = -1
 
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setTabPosition(QTabWidget.South)
@@ -146,14 +80,19 @@ class Demo(QWidget):
         self.tab_widget.addTab(self.tab1, 'action')
         self.tab_widget.addTab(self.tab2, 'edit')
 
+        # 自定义控件列表
+        self.custom_control_list = []
+        # item列表
+        self.item_list = []
 
-        self.tab_widget.currentChanged.connect(lambda: print(self.tab_widget.currentIndex()))  # 4
+        # self.tab_widget.currentChanged.connect(lambda: print(self.tab_widget.currentIndex()))  # 4
         self.setMinimumSize(400, 400)
 
     def tab1_init(self):
         button1 = QToolButton()
         button1.clicked.connect(self.add)
         button2 = QToolButton()
+        button2.clicked.connect(self.clear)
         button3 = QToolButton()
         button4 = QToolButton()
         hbox = QHBoxLayout()
@@ -166,8 +105,7 @@ class Demo(QWidget):
         self.topFiller = QListWidget()
         self.topFiller.setMinimumWidth(350)
         # self.topFiller.clicked.connect(self.connect_item)
-        self.topFiller.setMouseTracking(True)
-        self.topFiller.entered.connect(self.connect_item)
+        # self.topFiller.focusInEvent.connect(self.connect_item)
         ##创建一个滚动条
         self.scroll = QScrollArea()
         self.scroll.setWidget(self.topFiller)
@@ -179,18 +117,41 @@ class Demo(QWidget):
 
 
     def add(self, type='click'):
+        self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 80))
-        MapButton = Custom_Tools(parent=None, id=self.index, type=type)
+        obj = Custom_Tools(parent=None, id=self.index, type=type)
+        obj.id = self.index
+        obj.play_botton.clicked.connect(lambda : self.play_item(obj.id))
+        obj.delete_botton.clicked.connect(lambda : self.delete_item(obj.id))
         self.topFiller.addItem(item)
-        self.topFiller.setItemWidget(item, MapButton)
+        self.topFiller.setItemWidget(item, obj)
         print('the totle item is : ', self.topFiller.count())
-        # MapButton.check_box.clicked.connect(lambda : self.connect_item(self.index))
-        self.index += 1
+        self.item_list.append(obj)
+        self.custom_control_list.append(obj)
 
 
-    def connect_item(self):
-        print('current index is : ', self.topFiller.currentIndex().row())
+    def clear(self):
+        self.topFiller.clear()
+        self.item_list = []
+        self.custom_control_list = []
+        self.index = -1
+
+
+    def play_item(self, id):
+        print('play', id)
+
+
+    def delete_item(self, id):
+        print('delete', id)
+        self.topFiller.takeItem(id)
+        self.item_list.pop(id)
+        self.custom_control_list.pop(id)
+        for i in range(id, self.index):
+            self.custom_control_list[i].id = i
+        self.index -= 1
+
+
 
 
 if __name__ == '__main__':

@@ -11,6 +11,10 @@ class gloVar():
 class robot_other():
     # 机械臂起点标志
     robot_start_flag = False
+    save_template = False
+    image = None
+    mask_path = None
+    data_process_flag = False
 
 
 # Icon路径
