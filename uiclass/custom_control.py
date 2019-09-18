@@ -1,7 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from GlobalVar import icon_path
 
+# 自定义动作展示控件
 class Custom_Control(QWidget):
     def __init__(self, parent, id, type='click'):
         super(Custom_Control, self).__init__(parent)
@@ -51,3 +53,78 @@ class Custom_Control(QWidget):
 
     def connect_check_box(self):
         print('the id is : ', self.id)
+
+
+# 动作添加控件
+class Add_Action_Control(QDialog):
+
+    def __init__(self, parent):
+        super(Add_Action_Control, self).__init__(parent)
+        self.initUI()
+
+
+    # 初始化
+    def initUI(self):
+        self.general_layout = QVBoxLayout()
+        #创建一个表单布局
+        self.from_layout = QFormLayout()
+        self.button_layout = QHBoxLayout()
+        #设置标签右对齐, 不设置是默认左对齐
+        self.from_layout.setLabelAlignment(Qt.AlignCenter)
+        items = ['click', 'double_click', 'long_click', 'slide']
+
+        # 设置表单内容
+        # 动作描述
+        self.des_text = QLineEdit(self)
+        self.des_text.setPlaceholderText('请输入动作描述(可不写)')
+        # 动作选择
+        self.com_box = QComboBox(self)
+        self.com_box.addItems(items)
+        # 坐标
+        self.points = QLineEdit(self)
+        # 是否收回
+        self.check_box = QCheckBox(self)
+        self.check_box.setCheckState(Qt.Checked)
+        # 表单布局
+        self.from_layout.addRow('描述: ', self.des_text)
+        self.from_layout.addRow('动作: ', self.com_box)
+        self.from_layout.addRow('坐标: ', self.points)
+        self.from_layout.addRow('是否收回: ', self.check_box)
+
+        # 获取坐标
+        self.get_points_button = QPushButton('获取坐标', self)
+        self.get_points_button.clicked.connect(self.connect_get_points)
+        # 确定按钮
+        self.sure_button = QPushButton('确定', self)
+        self.sure_button.clicked.connect(self.connect_sure)
+        # 两个button横向布局
+        self.button_layout.addStretch(1)
+        self.button_layout.addWidget(self.get_points_button)
+        self.button_layout.addStretch(1)
+        self.button_layout.addWidget(self.sure_button)
+        self.button_layout.addStretch(1)
+
+        self.general_layout.addLayout(self.from_layout)
+        self.general_layout.addLayout(self.button_layout)
+
+        self.setLayout(self.general_layout)
+        # 设置字体
+        QFontDialog.setFont(self, QFont('Times New Roman', 11))
+        # 设置最小尺寸
+        self.setMinimumWidth(300)
+
+
+    def connect_get_points(self):
+        pass
+
+
+    def connect_sure(self):
+        self.close()
+
+
+import sys
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = Add_Action_Control(None)
+    win.show()
+    sys.exit(app.exec_())

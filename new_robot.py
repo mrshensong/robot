@@ -21,6 +21,7 @@ from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
 from uiclass.custom_tabwidget import Custom_TabWidget
+from uiclass.custom_control import Add_Action_Control
 
 
 
@@ -80,6 +81,9 @@ class Ui_MainWindow(QMainWindow):
         self.show_case()
         # 控制台输出框架
         self.output_text()
+
+        # 子窗口
+        self.child_window_of_add_action = Add_Action_Control(self)
 
         # 视频进度条
         self.slider_thread = Timer(frequent=4)
@@ -547,6 +551,13 @@ class Ui_MainWindow(QMainWindow):
     def show_case(self):
         self.tab_widget = Custom_TabWidget(self.centralwidget)
         self.grid.addWidget(self.tab_widget, 0, 8, 3, 2)
+        self.tab_widget.add_button.clicked.connect(self.show_window_of_add_action)
+
+
+    # 展示添加动作子窗口
+    def show_window_of_add_action(self):
+        self.child_window_of_add_action.show()
+        self.child_window_of_add_action.exec()
 
 
     # 控制台输出
