@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from GlobalVar import icon_path
 from uiclass.custom_control import Custom_Control
 
@@ -23,15 +24,19 @@ class Custom_TabWidget(QTabWidget):
 
     def tab1_init(self):
         add_button = QToolButton()
-        add_button.setStyleSheet('border-image: url(' + icon_path.Icon_tab_widget_add + ')')
+        add_button.setToolTip('add')
+        add_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_add + ')}')
         add_button.clicked.connect(self.add_item)
         delete_button = QToolButton()
-        delete_button.setStyleSheet('border-image: url(' + icon_path.Icon_tab_widget_delete + ')')
+        delete_button.setToolTip('delete')
+        delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_delete + ')}')
         delete_button.clicked.connect(self.clear)
         select_all_button = QToolButton()
-        select_all_button.setStyleSheet('border-image: url(' + icon_path.Icon_tab_widget_all_select + ')')
+        select_all_button.setToolTip('select_all')
+        select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
         execute_button = QToolButton()
-        execute_button.setStyleSheet('border-image: url(' + icon_path.Icon_tab_widget_execute + ')')
+        execute_button.setToolTip('execute')
+        execute_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_execute + ')}')
         h_box = QHBoxLayout()
         h_box.addWidget(add_button)
         h_box.addWidget(delete_button)
