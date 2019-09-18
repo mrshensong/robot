@@ -34,9 +34,11 @@ class Custom_Control(QWidget):
         self.v_box.addWidget(self.points_line_edit)
 
         self.play_botton = QToolButton(self)
-        self.play_botton.setStyleSheet('border-image: url(' + icon_path.Icon_custom_play + ')')
+        self.play_botton.setToolTip('play')
+        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
         self.delete_botton = QToolButton(self)
-        self.delete_botton.setStyleSheet('border-image: url(' + icon_path.Icon_custom_delete + ')')
+        self.delete_botton.setToolTip('delete')
+        self.delete_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
