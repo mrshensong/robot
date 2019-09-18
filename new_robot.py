@@ -50,7 +50,8 @@ class Ui_MainWindow(QMainWindow):
         self.init_param()
         # 使用自定义定时器
         self.timer_video = Timer()
-        self.timer_video.timeSignal.signal[str].connect(self.show_video)
+        # self.timer_video.timeSignal.signal[str].connect(self.show_video)
+        self.timer_video.timeSignal[str].connect(self.show_video)
         # 使用pyqt定时器
         # self.timer_video = QTimer(self)
         # self.timer_video.timeout.connect(self.show_video)
@@ -82,7 +83,8 @@ class Ui_MainWindow(QMainWindow):
 
         # 视频进度条
         self.slider_thread = Timer(frequent=4)
-        self.slider_thread.timeSignal.signal[str].connect(self.slider_refresh)
+        # self.slider_thread.timeSignal.signal[str].connect(self.slider_refresh)
+        self.slider_thread.timeSignal[str].connect(self.slider_refresh)
         self.slider_thread.start()
 
         self.setCentralWidget(self.centralwidget)
