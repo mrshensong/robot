@@ -549,14 +549,17 @@ class Ui_MainWindow(QMainWindow):
         if add_action_window.add_action_flag is True:
             if info_list[0] in [uArm_action.uArm_click, uArm_action.uArm_double_click, uArm_action.uArm_long_click]:
                 position_str = str(info_list[1][0]) +','+ str(info_list[1][1])
+                position_tuple = info_list[1]
             elif info_list[0] == uArm_action.uArm_slide:
                 position_str = str(info_list[1][0]) + ',' + str(info_list[1][1]) + ';' +\
                                str(info_list[2][0])   + ',' + str(info_list[2][1])
+                position_tuple = info_list[1] + info_list[2]
             else: # 为了不让position_str有警告(无具体意义)
                 position_str = '0,0'
+                position_tuple = (0.0, 0.0)
             # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
             self.tab_widget.add_action_window.points.setText(position_str)
-            self.tab_widget.add_action_window.info_dict[add_action_window.points] = position_str
+            self.tab_widget.add_action_window.info_dict[add_action_window.points] = position_tuple
             self.tab_widget.add_action_window.setHidden(False)
             add_action_window.add_action_flag = False
         # 正常点击时会直接执行动作
@@ -613,6 +616,24 @@ class Ui_MainWindow(QMainWindow):
     def show_case(self):
         self.tab_widget = Custom_TabWidget(self.centralwidget)
         self.grid.addWidget(self.tab_widget, 0, 8, 3, 2)
+        self.tab_widget.signal[str].connect(self.recv_tab_widget_signal)
+
+
+    # 接收tab_widget的信号
+    def recv_tab_widget_signal(self, signal_str):
+        signal_dict = json.loads(signal_str)
+        action_type = signal_dict[add_action_window.action]
+        position_tuple = signal_dict[add_action_window.points]
+        # 有;存在则说明是滑动动作(两个坐标)
+        if len(position_tuple) == 2:
+            position = tuple(position_tuple)
+            Thread(target=self.uArm_action_execute, args=(action_type, position,)).start()
+        # 没有则说明是点击动作(单个坐标)
+        else:
+            start = (position_tuple[0], position_tuple[1])
+            end   = (position_tuple[2], position_tuple[3])
+            position = (0.0, 0.0)
+            Thread(target=self.uArm_action_execute, args=(action_type, position, start, end,)).start()
 
 
     # 控制台输出

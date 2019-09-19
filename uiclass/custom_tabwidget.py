@@ -3,10 +3,13 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action
+from GlobalVar import icon_path, add_action_window, uArm_action, logger
 from uiclass.custom_control import Custom_Control, Add_Action_Control
 
 class Custom_TabWidget(QTabWidget):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, tab1='action', tab2='edit'):
         super(Custom_TabWidget, self).__init__(parent)
         self.parent = parent
@@ -70,13 +73,24 @@ class Custom_TabWidget(QTabWidget):
 
     # 添加动作控件
     def add_item(self, info_dict):
+        # 给动作设置id
         self.index += 1
+        # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
+        # 先将坐标元素转为字符串类型
+        points = info_dict[add_action_window.points]
+        points = [str(x) for x in points]
+        if len(info_dict[add_action_window.points]) == 2:
+            points_text = ','.join(points)
+        elif len(info_dict[add_action_window.points]) == 4:
+            points_text = ','.join(points[:2]) +';' +','.join(points[2:])
+        else: # 无实际意义(单纯为了不让代码出现警告)
+            points_text = '0.0,0.0'
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 80))
         obj = Custom_Control(parent=None, id=self.index, type=info_dict[add_action_window.action])
         obj.id = self.index
         obj.des_line_edit.setText(info_dict[add_action_window.des_text])
-        obj.points_line_edit.setText(info_dict[add_action_window.points])
+        obj.points_line_edit.setText(points_text)
         obj.play_botton.clicked.connect(lambda : self.play_item(obj.id))
         obj.delete_botton.clicked.connect(lambda : self.delete_item(obj.id))
         self.list_widget.addItem(item)
@@ -85,17 +99,27 @@ class Custom_TabWidget(QTabWidget):
         self.item_list.append(obj)
         self.custom_control_list.append(obj)
         self.info_list.append(info_dict)
+        # 打印新建动作信息
+        if info_dict[add_action_window.des_text] == '':
+            logger('新建-->id[%d]--动作[%s]-->: 无描述信息' %(obj.id, info_dict[add_action_window.action]))
+        else:
+            logger('新建-->id[%d]--动作[%s]-->: %s' %(obj.id, info_dict[add_action_window.action], info_dict[add_action_window.des_text]))
 
 
     # 播放动作
     def play_item(self, id):
-        # print('play', id)
-        print(self.info_list[id][add_action_window.des_text])
+        # print(self.info_list[id][add_action_window.des_text])
+        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+        self.signal.emit(json.dumps(self.info_list[id]))
 
 
     # 删除动作
     def delete_item(self, id):
-        print('delete', id)
+        # 打印删除信息
+        if self.info_list[id][add_action_window.des_text] == '':
+            logger('删除-->id[%d]--动作[%s]-->: 无描述信息' %(id, self.info_list[id][add_action_window.action]))
+        else:
+            logger('删除-->id[%d]--动作[%s]-->: %s' %(id, self.info_list[id][add_action_window.action], self.info_list[id][add_action_window.des_text]))
         self.list_widget.takeItem(id)
         self.item_list.pop(id)
         self.custom_control_list.pop(id)
@@ -114,10 +138,10 @@ class Custom_TabWidget(QTabWidget):
 
 
     # 接收从添加动作子窗口传来的信号
-    def recv_add_action_window_signal(self, str):
+    def recv_add_action_window_signal(self, signal_str):
         # 确定按钮
-        if str.split('>')[0] == 'sure':
-            info_dict = json.loads(str.split('>')[1])
+        if signal_str.split('>')[0] == 'sure':
+            info_dict = json.loads(signal_str.split('>')[1])
             self.add_item(info_dict)
         else:
             pass

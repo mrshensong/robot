@@ -68,7 +68,7 @@ class Add_Action_Control(QDialog):
         self.info_dict = {add_action_window.des_text : None,
                           add_action_window.action   : uArm_action.uArm_click,
                           add_action_window.points   : None,
-                          add_action_window.take_back: True}
+                          add_action_window.take_back: 2}
         self.initUI()
 
 
