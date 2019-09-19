@@ -135,7 +135,8 @@ class Video_Label(QLabel):
                         mask_path = mask_path
                         if os.path.exists(mask_path) is False:
                             os.makedirs(mask_path)
-                        cv2.imencode('.jpg', cut_img)[1].tofile(os.path.join(mask_path, value + '.jpg'))
+                        cut_name = os.path.join(mask_path, value)
+                        cv2.imencode('.jpg', cut_img)[1].tofile(cut_name)
                     # 非数据处理情况
                     else:
                         if '-' in value:
