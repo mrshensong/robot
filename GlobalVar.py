@@ -77,6 +77,17 @@ class uArm_param():
     port_address = 'http://localhost:8000/uArm/'
 
 
+# 添加动作子窗口
+class add_action_window():
+    # 是否有添加动作
+    add_action_flag = False
+    # 添加动作子窗口的信息选项名称
+    des_text  = 'des_text'
+    action    = 'action'
+    points    = 'points'
+    take_back = 'take_back'
+
+
 # 自定义log对象
 import time
 class logger():

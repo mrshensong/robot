@@ -10,6 +10,7 @@ from GlobalVar import gloVar, uArm_action, uArm_param, logger, robot_other
 
 # 视频展示标签
 class Video_Label(QLabel):
+
     x0, y0, x1, y1 = 0, 0, 0, 0
     # 鼠标是否按下标志
     mouse_press_flag = False
@@ -20,6 +21,15 @@ class Video_Label(QLabel):
     y_unit = 0.0
     # 框选的屏幕大小
     box_screen_size = [0, 0, 0 ,0]
+    # 自定义信号
+    signal = pyqtSignal(str)
+
+
+    # 初始化
+    def __init__(self, parent):
+        super(Video_Label, self).__init__(parent)
+        self.parent = parent
+
 
     #鼠标点击事件
     def mousePressEvent(self,event):
@@ -38,38 +48,28 @@ class Video_Label(QLabel):
                 self.box_screen_size[3] = abs(self.y1-self.y0)
                 gloVar.box_screen_flag = False
                 logger('[框选车机屏幕]--起点及尺寸: %s' %str(self.box_screen_size))
+            # 如果是机械臂滑动动作
             elif uArm_action.uArm_action_type == uArm_action.uArm_slide:
                 start = self.calculating_point(self.x0, self.y0)
                 end   = self.calculating_point(self.x1, self.y1)
-                data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                        'speed': 150, 'leave': 1,
-                        'start': start, 'end': end}
-                Thread(target=self.uArm_post_request, args=(uArm_action.uArm_slide, data,)).start()
-                logger('执行--[滑动动作]--起点: %s, 终点: %s' %(str(start), str(end)))
+                info_list = [uArm_action.uArm_slide, start, end]
+                self.signal.emit(str(info_list))
+            # 其余情况判断是否暂停(若有暂停, 则可以进行模板框选)
             else:
                 self.save_template()
         else:
             if uArm_action.uArm_action_type == uArm_action.uArm_click:
                 position = self.calculating_point(self.x0, self.y0)
-                data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                        'speed': 150, 'leave': 1, 'time': 1,
-                        'position': position, 'pressure_duration': 0}
-                Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
-                logger('执行--[单击动作]--坐标: %s' %str(position))
+                info_list = [uArm_action.uArm_click, position]
+                self.signal.emit(str(info_list))
             elif uArm_action.uArm_action_type == uArm_action.uArm_double_click:
                 position = self.calculating_point(self.x0, self.y0)
-                data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                        'speed': 150, 'leave': 1, 'time': 2,
-                        'position': position, 'pressure_duration': 0}
-                Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
-                logger('执行--[双击动作]--坐标: %s' % str(position))
+                info_list = [uArm_action.uArm_double_click, position]
+                self.signal.emit(str(info_list))
             elif uArm_action.uArm_action_type == uArm_action.uArm_long_click:
                 position = self.calculating_point(self.x0, self.y0)
-                data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                        'speed': 150, 'leave': 1, 'time': 1,
-                        'position': position, 'pressure_duration': 1000}
-                Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
-                logger('执行--[长按动作]--坐标: %s' % str(position))
+                info_list = [uArm_action.uArm_long_click, position]
+                self.signal.emit(str(info_list))
         self.mouse_press_flag = False
         self.mouse_move_flag = False
 
@@ -165,9 +165,9 @@ class Video_Label(QLabel):
     # 计算传入机械臂的坐标
     def calculating_point(self, x, y):
         i = x - self.box_screen_size[0]
-        uArm_Y_offset = i / self.box_screen_size[2] * uArm_param.actual_screen_width
+        uArm_Y_offset = round((i / self.box_screen_size[2] * uArm_param.actual_screen_width), 3)
         j = y - (self.box_screen_size[1] + self.box_screen_size[3])
-        uArm_X_offset = j / self.box_screen_size[3] * uArm_param.actual_screen_height
+        uArm_X_offset = round((j / self.box_screen_size[3] * uArm_param.actual_screen_height), 3)
         return (uArm_X_offset, uArm_Y_offset)
 
 

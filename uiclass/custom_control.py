@@ -1,12 +1,14 @@
+import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path
+from GlobalVar import icon_path, uArm_action, add_action_window
 
 # 自定义动作展示控件
 class Custom_Control(QWidget):
     def __init__(self, parent, id, type='click'):
         super(Custom_Control, self).__init__(parent)
+        self.parent = parent
         self.id = id
         self.type = type
         self.initUI()
@@ -16,13 +18,13 @@ class Custom_Control(QWidget):
         self.check_box = QCheckBox()
         self.check_box.stateChanged.connect(self.connect_check_box)
 
-        if self.type == 'click':
+        if self.type == uArm_action.uArm_click:
             pix_map = QPixmap(icon_path.Icon_robot_click)
-        elif self.type == 'double_click':
+        elif self.type == uArm_action.uArm_double_click:
             pix_map = QPixmap(icon_path.Icon_robot_double_click)
-        elif self.type == 'long_click':
+        elif self.type == uArm_action.uArm_long_click:
             pix_map = QPixmap(icon_path.Icon_robot_long_click)
-        elif self.type == 'slide':
+        elif self.type == uArm_action.uArm_slide:
             pix_map = QPixmap(icon_path.Icon_robot_slide)
         else:
             pix_map = QPixmap(icon_path.Icon_robot_click)
@@ -58,8 +60,15 @@ class Custom_Control(QWidget):
 # 动作添加控件
 class Add_Action_Control(QDialog):
 
+    signal = pyqtSignal(str)
+
     def __init__(self, parent):
         super(Add_Action_Control, self).__init__(parent)
+        self.parent = parent
+        self.info_dict = {add_action_window.des_text : None,
+                          add_action_window.action   : uArm_action.uArm_click,
+                          add_action_window.points   : None,
+                          add_action_window.take_back: True}
         self.initUI()
 
 
@@ -71,7 +80,10 @@ class Add_Action_Control(QDialog):
         self.button_layout = QHBoxLayout()
         #设置标签右对齐, 不设置是默认左对齐
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
-        items = ['click', 'double_click', 'long_click', 'slide']
+        items = [uArm_action.uArm_click,
+                 uArm_action.uArm_double_click,
+                 uArm_action.uArm_long_click,
+                 uArm_action.uArm_slide]
 
         # 设置表单内容
         # 动作描述
@@ -80,6 +92,7 @@ class Add_Action_Control(QDialog):
         # 动作选择
         self.com_box = QComboBox(self)
         self.com_box.addItems(items)
+        self.com_box.currentIndexChanged.connect(self.connect_com_box)
         # 坐标
         self.points = QLineEdit(self)
         # 是否收回
@@ -114,11 +127,39 @@ class Add_Action_Control(QDialog):
         self.setMinimumWidth(300)
 
 
+    def connect_com_box(self):
+        uArm_action.uArm_action_type = self.com_box.currentText()
+
+
     def connect_get_points(self):
-        pass
+        self.setHidden(True)
 
 
     def connect_sure(self):
+        self.info_dict[add_action_window.des_text] = self.des_text.text()
+        self.info_dict[add_action_window.action] = self.com_box.currentText()
+        # 坐标信息需要通过主窗口传递过来
+        # self.info_dict[add_action_window.points] = None
+        self.info_dict[add_action_window.take_back] = self.check_box.checkState()
+        signal = json.dumps(self.info_dict)
+        # 发送开头sure标志-->判断是确认按钮按下
+        self.signal.emit('sure>' + signal)
+        self.close()
+
+
+    def closeEvent(self, event):
+        # 如果取消则恢复默认
+        add_action_window.add_action_flag = False
+        uArm_action.uArm_action_type = None
+        self.info_dict = {add_action_window.des_text: None,
+                          add_action_window.action: uArm_action.uArm_click,
+                          add_action_window.points: None,
+                          add_action_window.take_back: True}
+        self.des_text.setText('')
+        self.des_text.setPlaceholderText('请输入动作描述(可不写)')
+        self.com_box.setCurrentText(uArm_action.uArm_click)
+        self.points.setText('')
+        self.check_box.setCheckState(Qt.Checked)
         self.close()
 
 
