@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar
 from uiclass.custom_control import Custom_Control, Add_Action_Control
 
 class Custom_TabWidget(QTabWidget):
@@ -70,11 +70,15 @@ class Custom_TabWidget(QTabWidget):
 
     # 展示添加动作子窗口
     def connect_add_action_button(self):
-        add_action_window.add_action_flag = True
-        # 默认是单击动作
-        uArm_action.uArm_action_type = uArm_action.uArm_click
-        self.add_action_window.show()
-        self.add_action_window.exec()
+        if gloVar.add_action_button_flag is True:
+            add_action_window.add_action_flag = True
+            # 默认是单击动作
+            uArm_action.uArm_action_type = uArm_action.uArm_click
+            self.add_action_window.show()
+            self.add_action_window.exec()
+        else:
+            QMessageBox.about(self, "提示", "请先框选屏幕大小")
+            return
 
 
     def connect_delete_selected_items(self):

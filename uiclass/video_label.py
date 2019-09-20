@@ -47,6 +47,7 @@ class Video_Label(QLabel):
                 self.box_screen_size[3] = abs(self.y1-self.y0)
                 gloVar.box_screen_flag = False
                 robot_other.select_template_flag = False
+                gloVar.add_action_button_flag = True
                 self.setCursor(Qt.ArrowCursor)
                 logger('[框选车机屏幕]--起点及尺寸: %s' %str(self.box_screen_size))
             # 如果是机械臂滑动动作

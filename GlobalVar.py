@@ -6,6 +6,8 @@ class gloVar():
     box_screen_flag = False
     # 保存图片标志(是否需要保存图片,用来实时监测目标位置)
     save_pic_flag = False
+    # 添加动作按钮是否可以点击(需要先框选车机屏幕大小, 之后才能点击)
+    add_action_button_flag = False
 
 # 需要获取机械臂点击起点(录像case时起点标志位)
 class robot_other():

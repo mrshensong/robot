@@ -432,11 +432,11 @@ class Ui_MainWindow(QMainWindow):
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
         self.robot_get_position_action.triggered.connect(lambda : self.uArm_action_event(uArm_action.uArm_get_position))
         # ui工具栏
-        self.ui_toolbar.addAction(self.setting_action)
         self.ui_toolbar.addAction(self.switch_camera_status_action)
         self.ui_toolbar.addAction(self.capture_action)
         self.ui_toolbar.addAction(self.box_screen_action)
         self.ui_toolbar.addAction(self.picture_path_action)
+        self.ui_toolbar.addAction(self.setting_action)
         self.ui_toolbar.addSeparator()
         # robot工具栏
         self.robot_operate_toolbar.addAction(self.robot_lock_action)
