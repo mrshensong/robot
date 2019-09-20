@@ -108,9 +108,14 @@ class Custom_TabWidget(QTabWidget):
     def delete_item(self, id):
         # 打印删除信息
         if self.info_list[id][add_action_window.des_text] == '':
-            logger('删除-->id[%d]--动作[%s]-->: 无描述信息' %(id, self.info_list[id][add_action_window.action]))
+            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(id),
+                                                                            self.str_decorate(self.info_list[id][add_action_window.action]),
+                                                                            str(self.info_list[id][add_action_window.points])))
         else:
-            logger('删除-->id[%d]--动作[%s]-->: %s' %(id, self.info_list[id][add_action_window.action], self.info_list[id][add_action_window.des_text]))
+            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(id),
+                                                                      self.str_decorate(self.info_list[id][add_action_window.action]),
+                                                                      str(self.info_list[id][add_action_window.points]),
+                                                                      self.info_list[id][add_action_window.des_text]))
         self.list_widget.takeItem(id)
         self.item_list.pop(id)
         self.custom_control_list.pop(id)
@@ -118,6 +123,11 @@ class Custom_TabWidget(QTabWidget):
         for i in range(id, self.index):
             self.custom_control_list[i].id = i
         self.index -= 1
+
+
+    # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
+    def str_decorate(self, origin_str, decorate_str='[]'):
+        return str(origin_str).join(decorate_str)
 
 
     # 清除所有动作
@@ -206,9 +216,14 @@ class Custom_TabWidget(QTabWidget):
         self.info_list.append(info_dict)
         # 打印新建动作信息
         if info_dict[add_action_window.des_text] == '':
-            logger('新建-->id[%d]--动作[%s]-->: 无描述信息' %(obj.id, info_dict[add_action_window.action]))
+            logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
+                                                                            self.str_decorate(info_dict[add_action_window.action]),
+                                                                            str(info_dict[add_action_window.points])))
         else:
-            logger('新建-->id[%d]--动作[%s]-->: %s' %(obj.id, info_dict[add_action_window.action], info_dict[add_action_window.des_text]))
+            logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(obj.id),
+                                                                         self.str_decorate(info_dict[add_action_window.action]),
+                                                                         str(info_dict[add_action_window.points]),
+                                                                         info_dict[add_action_window.des_text]))
 
 
 
