@@ -101,7 +101,7 @@ class Custom_TabWidget(QTabWidget):
     def play_item(self, id):
         # print(self.info_list[id][add_action_window.des_text])
         # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        self.signal.emit(json.dumps(self.info_list[id]))
+        self.signal.emit('execute>'+json.dumps(self.info_list[id]))
 
 
     # 删除单个动作
@@ -178,10 +178,12 @@ class Custom_TabWidget(QTabWidget):
 
     # 接收从添加动作子窗口传来的信号
     def recv_add_action_window_signal(self, signal_str):
-        # 确定按钮
-        if signal_str.split('>')[0] == 'sure':
+        # 按下确定按钮后, 添加控件
+        if signal_str.startswith('sure>'):
             info_dict = json.loads(signal_str.split('>')[1])
             self.add_item(info_dict)
+        elif signal_str.startswith('action>'):
+            self.signal.emit(signal_str)
         else:
             pass
 

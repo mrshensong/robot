@@ -128,7 +128,7 @@ class Add_Action_Control(QDialog):
 
 
     def connect_com_box(self):
-        uArm_action.uArm_action_type = self.com_box.currentText()
+        self.signal.emit('action>'+self.com_box.currentText())
 
 
     def connect_get_points(self):

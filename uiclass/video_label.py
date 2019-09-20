@@ -1,8 +1,5 @@
 import os
 import cv2
-import json
-import requests
-from threading import Thread
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -36,6 +33,8 @@ class Video_Label(QLabel):
         self.mouse_press_flag = True
         self.x0 = event.x()
         self.y0 = event.y()
+        self.x0 = self.x0
+        self.y1 = self.y0
 
     #鼠标释放事件
     def mouseReleaseEvent(self, event):
@@ -47,6 +46,8 @@ class Video_Label(QLabel):
                 self.box_screen_size[2] = abs(self.x1-self.x0)
                 self.box_screen_size[3] = abs(self.y1-self.y0)
                 gloVar.box_screen_flag = False
+                robot_other.select_template_flag = False
+                self.setCursor(Qt.ArrowCursor)
                 logger('[框选车机屏幕]--起点及尺寸: %s' %str(self.box_screen_size))
             # 如果是机械臂滑动动作
             elif uArm_action.uArm_action_type == uArm_action.uArm_slide:
@@ -86,29 +87,41 @@ class Video_Label(QLabel):
     #绘制事件
     def paintEvent(self, event):
         super().paintEvent(event)
+        # 滑动动作直线显示
         if uArm_action.uArm_action_type == uArm_action.uArm_slide:
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawLine(QPoint(self.x0, self.y0), QPoint(self.x1, self.y1))
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+        # 点击动作画圆显示
         elif uArm_action.uArm_action_type in [uArm_action.uArm_click, uArm_action.uArm_long_click, uArm_action.uArm_double_click]:
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawEllipse(self.x0-5, self.y0-5, 10, 10)
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
-        else:
+        # 框选动作
+        elif robot_other.select_template_flag is True:
             rect = QRect(self.x0, self.y0, abs(self.x1 - self.x0), abs(self.y1 - self.y0))
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(rect)
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],self.box_screen_size[3]))
+        # 其余情况(不绘制图, 一个小点,几乎不能看到)
+        else:
+            point = [QPoint(self.x0, self.y0)]
+            painter = QPainter(self)
+            painter.setPen(QPen(Qt.red, 1, Qt.SolidLine))
+            painter.drawPoints(QPolygon(point))
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+
 
     # 保存模板
     def save_template(self):
-        if robot_other.save_template is True:
+        if robot_other.select_template_flag is True:
             # x_unit, y_unit = 1280 / 1280, 1024 / 1024
             x_unit, y_unit = self.x_unit, self.y_unit
             x0, y0, x1, y1 = int(self.x0 * x_unit), int(self.y0 * y_unit), int(self.x1 * x_unit), int(self.y1 * y_unit)

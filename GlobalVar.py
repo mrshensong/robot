@@ -11,7 +11,8 @@ class gloVar():
 class robot_other():
     # 机械臂起点标志
     robot_start_flag = False
-    save_template = False
+    # 需要进行框选动作时, 打开此标志
+    select_template_flag = False
     image = None
     mask_path = None
     data_process_flag = False
