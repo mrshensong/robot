@@ -1,5 +1,7 @@
 import sys
 import json
+import time
+from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -31,24 +33,27 @@ class Custom_TabWidget(QTabWidget):
         # 添加动作窗口
         self.add_action_window = Add_Action_Control(self)
         self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
+        # 是否全部选中状态(False:没有全部选中, True:全部选中)
+        self.select_all_flag = False
 
 
     def tab1_init(self):
         self.add_button = QToolButton()
         self.add_button.setToolTip('add')
         self.add_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_add + ')}')
-        # self.add_button.clicked.connect(self.add_item)
-        self.add_button.clicked.connect(self.open_child_window)
+        self.add_button.clicked.connect(self.connect_add_action_button)
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('delete')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_delete + ')}')
-        self.delete_button.clicked.connect(self.clear)
+        self.delete_button.clicked.connect(self.connect_delete_selected_items)
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('select_all')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+        self.select_all_button.clicked.connect(self.connect_select_all_items)
         self.execute_button = QToolButton()
         self.execute_button.setToolTip('execute')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_execute + ')}')
+        self.execute_button.clicked.connect(self.connect_execute_selected_items)
         h_box = QHBoxLayout()
         h_box.addWidget(self.add_button)
         h_box.addWidget(self.delete_button)
@@ -64,11 +69,111 @@ class Custom_TabWidget(QTabWidget):
 
 
     # 展示添加动作子窗口
-    def open_child_window(self):
+    def connect_add_action_button(self):
         add_action_window.add_action_flag = True
+        # 默认是单击动作
         uArm_action.uArm_action_type = uArm_action.uArm_click
         self.add_action_window.show()
         self.add_action_window.exec()
+
+
+    def connect_delete_selected_items(self):
+        # 没有item的时候让button无效
+        if self.index < 0:
+            pass
+        else:
+            Thread(target=self.delete_selected_items, args=()).start()
+
+
+    def connect_select_all_items(self):
+        # 没有item的时候让button无效
+        if self.index < 0:
+            pass
+        else:
+            Thread(target=self.select_or_un_select_all_items, args=()).start()
+
+
+    def connect_execute_selected_items(self):
+        pass
+
+
+    # 播放单个动作
+    def play_item(self, id):
+        # print(self.info_list[id][add_action_window.des_text])
+        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+        self.signal.emit(json.dumps(self.info_list[id]))
+
+
+    # 删除单个动作
+    def delete_item(self, id):
+        # 打印删除信息
+        if self.info_list[id][add_action_window.des_text] == '':
+            logger('删除-->id[%d]--动作[%s]-->: 无描述信息' %(id, self.info_list[id][add_action_window.action]))
+        else:
+            logger('删除-->id[%d]--动作[%s]-->: %s' %(id, self.info_list[id][add_action_window.action], self.info_list[id][add_action_window.des_text]))
+        self.list_widget.takeItem(id)
+        self.item_list.pop(id)
+        self.custom_control_list.pop(id)
+        self.info_list.pop(id)
+        for i in range(id, self.index):
+            self.custom_control_list[i].id = i
+        self.index -= 1
+
+
+    # 清除所有动作
+    def clear_all_items(self):
+        self.list_widget.clear()
+        self.item_list = []
+        self.custom_control_list = []
+        self.info_list = []
+        self.index = -1
+
+
+    # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
+    def delete_selected_items(self):
+        index = 0
+        while True:
+            if len(self.custom_control_list) < index+1:
+                # 全部删除后需要复位全部选中按钮的状态
+                self.select_all_flag = False
+                self.select_all_button.setToolTip('select_all')
+                self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+                break
+            else:
+                if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
+                    # 模拟点击action中的单独delete按钮
+                    self.custom_control_list[index].delete_botton.click()
+                    time.sleep(0.03)
+                else:
+                    index += 1
+
+
+    # 全部选中或者全部不选中items
+    def select_or_un_select_all_items(self):
+        if self.select_all_flag is False:
+            for i in range(self.index + 1):
+                self.custom_control_list[i].check_box.setCheckState(Qt.Checked)
+            self.select_all_flag = True
+            self.select_all_button.setToolTip('un_select_all')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
+            logger('[全部选中]-->所有动作')
+        else:
+            for i in range(self.index + 1):
+                self.custom_control_list[i].check_box.setCheckState(Qt.Unchecked)
+            self.select_all_flag = False
+            self.select_all_button.setToolTip('select_all')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+            logger('[全不选中]-->所有动作')
+
+
+    # 接收从添加动作子窗口传来的信号
+    def recv_add_action_window_signal(self, signal_str):
+        # 确定按钮
+        if signal_str.split('>')[0] == 'sure':
+            info_dict = json.loads(signal_str.split('>')[1])
+            self.add_item(info_dict)
+        else:
+            pass
 
 
     # 添加动作控件
@@ -104,47 +209,6 @@ class Custom_TabWidget(QTabWidget):
             logger('新建-->id[%d]--动作[%s]-->: 无描述信息' %(obj.id, info_dict[add_action_window.action]))
         else:
             logger('新建-->id[%d]--动作[%s]-->: %s' %(obj.id, info_dict[add_action_window.action], info_dict[add_action_window.des_text]))
-
-
-    # 播放动作
-    def play_item(self, id):
-        # print(self.info_list[id][add_action_window.des_text])
-        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        self.signal.emit(json.dumps(self.info_list[id]))
-
-
-    # 删除动作
-    def delete_item(self, id):
-        # 打印删除信息
-        if self.info_list[id][add_action_window.des_text] == '':
-            logger('删除-->id[%d]--动作[%s]-->: 无描述信息' %(id, self.info_list[id][add_action_window.action]))
-        else:
-            logger('删除-->id[%d]--动作[%s]-->: %s' %(id, self.info_list[id][add_action_window.action], self.info_list[id][add_action_window.des_text]))
-        self.list_widget.takeItem(id)
-        self.item_list.pop(id)
-        self.custom_control_list.pop(id)
-        self.info_list.pop(id)
-        for i in range(id, self.index):
-            self.custom_control_list[i].id = i
-        self.index -= 1
-
-
-    # 清除所有动作
-    def clear(self):
-        self.list_widget.clear()
-        self.item_list = []
-        self.custom_control_list = []
-        self.index = -1
-
-
-    # 接收从添加动作子窗口传来的信号
-    def recv_add_action_window_signal(self, signal_str):
-        # 确定按钮
-        if signal_str.split('>')[0] == 'sure':
-            info_dict = json.loads(signal_str.split('>')[1])
-            self.add_item(info_dict)
-        else:
-            pass
 
 
 

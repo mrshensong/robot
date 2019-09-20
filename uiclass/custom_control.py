@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window
+from GlobalVar import icon_path, uArm_action, add_action_window, logger
 
 # 自定义动作展示控件
 class Custom_Control(QWidget):
@@ -16,7 +16,7 @@ class Custom_Control(QWidget):
     def initUI(self):
 
         self.check_box = QCheckBox()
-        self.check_box.stateChanged.connect(self.connect_check_box)
+        # self.check_box.stateChanged.connect(self.connect_check_box)
 
         if self.type == uArm_action.uArm_click:
             pix_map = QPixmap(icon_path.Icon_robot_click)

@@ -170,12 +170,3 @@ class Video_Label(QLabel):
         j = y - (self.box_screen_size[1] + self.box_screen_size[3])
         uArm_X_offset = round((j / self.box_screen_size[3] * uArm_param.actual_screen_height), 3)
         return (uArm_X_offset, uArm_Y_offset)
-
-
-    # 机械臂命令请求
-    def uArm_post_request(self, action, data_dict):
-        try:
-            response = requests.post(url=uArm_param.port_address + str(action), data=json.dumps(data_dict))
-            return response.text
-        except:
-            return '机械臂服务连接异常'
