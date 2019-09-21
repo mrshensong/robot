@@ -57,8 +57,8 @@ class Ui_MainWindow(QMainWindow):
         # self.timer_video.start(1)
 
         self.setObjectName("MainWindow")
-        self.setGeometry(0, 0, 1500, 800)
-        self.setMinimumSize(QtCore.QSize(1500, 800))
+        self.setGeometry(0, 0, 1000, 600)
+        self.setMinimumSize(QtCore.QSize(1000, 600))
         self.setWindowTitle("Auto Robot")
         self.setWindowIcon(QIcon(Ui_MainWindow.icon_file))
 
@@ -969,6 +969,8 @@ class Ui_MainWindow(QMainWindow):
         if self.first_window_zoom_flag is True:
             self.first_window_zoom_flag  = False
             # 通过中心widget计算初始视频标签的大小(同时减去的50代表widget的边界部分)
+            # video_label高度和self.centralwidget的高度大致相同
+            # video_label宽度为self.centralwidget的宽度大3/4, 通过栅格布局可知
             self.video_label_size_width  = int((self.centralwidget.size().width() -50)*0.75)
             self.video_label_size_height = int((self.centralwidget.size().height()-50)*1.00)
         else: # (距离边框还有30左右)
@@ -978,7 +980,8 @@ class Ui_MainWindow(QMainWindow):
         # 真实视频比例
         video_size_scale = float(self.video_height/self.video_width)
         # 临界比例(根据页面网格布局得到, 不可随便修改)
-        limit_size_scale = float(982/1477)
+        # limit_size_scale = float(982/1477)
+        limit_size_scale = float(self.video_label_size_height/self.video_label_size_width)
         if video_size_scale >= limit_size_scale:
             self.video_label_size_height = self.video_label_size_height
             self.video_label_size_width = int((self.video_label_size_height/self.video_height) * self.video_width)
