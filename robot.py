@@ -60,7 +60,7 @@ class Ui_MainWindow(QMainWindow):
         self.setGeometry(0, 0, 1000, 600)
         self.setMinimumSize(QtCore.QSize(1000, 600))
         self.setWindowTitle("Auto Robot")
-        self.setWindowIcon(QIcon(Ui_MainWindow.icon_file))
+        self.setWindowIcon(QIcon(self.icon_file))
 
         self.centralwidget = QWidget(self)
 
@@ -69,7 +69,7 @@ class Ui_MainWindow(QMainWindow):
         # self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setObjectName('grid')
         ## 定义UI 字体 和 字号大小
-        QFontDialog.setFont(self, QFont(Ui_MainWindow.font, 13))
+        QFontDialog.setFont(self, QFont(self.font, 13))
         # 设置UI背景颜色为灰色
         # self.centralwidget.setStyleSheet('background-color:lightgrey')
 
@@ -98,6 +98,7 @@ class Ui_MainWindow(QMainWindow):
         # 工具栏
         self.ui_toolbar = self.addToolBar('ui_toolbar')
         self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
+        self.video_play_toolbar = self.addToolBar('video_play_toolbar')
         # 网上百度到的说明:其作用是如其名称一样，用来将QObject 里的子孙QObject的某些信号按照其objectName连接到相应的槽上
         # 如 button_hello.setObjectName("hello_button")
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -116,8 +117,9 @@ class Ui_MainWindow(QMainWindow):
         self.videos = []
         # 保存的视频中case类型和视频名字
         self.videos_title = []
-        # 获取到的视频目录
-        self.get_path = None
+        # 录播相关参数
+        self.video_cap = None # 当前视频对象
+        self.get_path = None # 获取到的视频根目录
         self.video_play_flag = False  # False直播/True录播
         self.current_video = 0  # 当前视频所在序列号(第0个视频)
         self.current_frame = 0  # 当前帧数
@@ -128,10 +130,12 @@ class Ui_MainWindow(QMainWindow):
         self.video_label_size_width = 0
         self.video_label_size_height = 0
         # 视频流&视频尺寸
-        self.video_width = 1280
-        self.video_height = 720
-        # self.video_width = 1600
-        # self.video_height = 1000
+        self.real_time_video_width = 1280
+        self.real_time_video_height = 720
+        # self.real_time_video_width = 1600
+        # self.real_time_video_height = 1000
+        self.offline_video_width = 0
+        self.offline_video_height = 0
         # 是否第一次窗口缩放
         self.first_window_zoom_flag = True
         # 是否使用电脑自带摄像头
@@ -186,7 +190,8 @@ class Ui_MainWindow(QMainWindow):
             self.timer_video.start()
             self.video_status = self.STATUS_PLAYING
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
-            self.status_video_button.clicked.connect(self.switch_video)
+            # self.status_video_button.clicked.connect(self.switch_video)
+            self.status_video_button.setEnabled(True)
         else:
             logger('关闭摄像头')
             # 关闭视频展示定时器
@@ -198,14 +203,15 @@ class Ui_MainWindow(QMainWindow):
             self.camera_status = self.camera_closed
             self.switch_camera_status_action.setIcon(QIcon(icon_path.Icon_ui_open_camera))
             self.switch_camera_status_action.setToolTip('open_camera')
-            self.status_video_button.clicked.disconnect(self.switch_video)
+            # self.status_video_button.clicked.disconnect(self.switch_video)
+            self.status_video_button.setEnabled(False)
 
 
     # 系统摄像头流
     def system_camera_stream(self):
         cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_height)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.real_time_video_width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.real_time_video_height)
         while self.camera_status == self.camera_opened:
             _, frame = cap.read()
             self.image = frame.copy()
@@ -234,10 +240,10 @@ class Ui_MainWindow(QMainWindow):
         # set gain(增益)
         cam.Gain.set(10.0)
         # set roi(ROI)
-        cam.Width.set(self.video_width)
-        cam.Height.set(self.video_height)
-        cam.OffsetX.set(int((1200-self.video_height)/2))
-        cam.OffsetY.set(int((1920-self.video_width)/2))
+        cam.Width.set(self.real_time_video_width)
+        cam.Height.set(self.real_time_video_height)
+        cam.OffsetX.set(int((1200-self.real_time_video_height)/2))
+        cam.OffsetY.set(int((1920-self.real_time_video_width)/2))
         # 自动白平衡
         cam.BalanceWhiteAuto.set(True)
         # set param of improving image quality
@@ -344,6 +350,31 @@ class Ui_MainWindow(QMainWindow):
             Thread(target=self.uArm_action_event_thread, args=(action,)).start()
 
 
+    # 存在的视频播放
+    def play_exist_video(self):
+        sep = os.sep # 分隔符
+        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', '/home/ss/python/robot')
+        if self.get_path:
+            for home, dirs, files in os.walk(self.get_path):
+                for file in files:
+                    # 文件名列表, 包含完整路径
+                    file = os.path.join(home, file)
+                    file_name = '/'.join(file.split(sep)[-2:])
+                    self.videos.append(file)
+                    self.videos_title.append(file_name)
+            self.label_video_title.setText(self.videos_title[0])
+            self.video_cap = cv2.VideoCapture(self.videos[0]) # 重新加载这个视频
+            self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            # 需要获取视频尺寸
+            self.offline_video_width  = int(self.video_cap.get(3))
+            self.offline_video_height = int(self.video_cap.get(4))
+            # 通过视频尺寸自适应视频播放窗口
+            self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
+            self.video_play_flag = True
+            self.video_status = self.STATUS_INIT
+            self.status_video_button.setEnabled(True)
+
+
     # 机械臂动作线程
     def uArm_action_event_thread(self, action):
         if action == uArm_action.uArm_click:
@@ -431,6 +462,9 @@ class Ui_MainWindow(QMainWindow):
         self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_lock))
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
         self.robot_get_position_action.triggered.connect(lambda : self.uArm_action_event(uArm_action.uArm_get_position))
+        # 视频播放工具栏
+        self.video_play_action = QAction(QIcon(icon_path.Icon_video_play), 'video_play', self)
+        self.video_play_action.triggered.connect(self.play_exist_video)
         # ui工具栏
         self.ui_toolbar.addAction(self.switch_camera_status_action)
         self.ui_toolbar.addAction(self.capture_action)
@@ -446,6 +480,8 @@ class Ui_MainWindow(QMainWindow):
         self.robot_operate_toolbar.addAction(self.double_click_action)
         self.robot_operate_toolbar.addAction(self.long_click_action)
         self.robot_operate_toolbar.addAction(self.slide_action)
+        # 存在的视频播放工具栏
+        self.video_play_toolbar.addAction(self.video_play_action)
 
 
     # 视频播放框架
@@ -484,6 +520,8 @@ class Ui_MainWindow(QMainWindow):
         # 图片铺满按钮背景
         self.status_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_play + ')')
         self.status_video_button.setShortcut(Qt.Key_Space)
+        self.status_video_button.clicked.connect(self.switch_video)
+        self.status_video_button.setEnabled(False)
         # 上一个视频
         self.last_video_button = QtWidgets.QPushButton(self.label_video)
         self.last_video_button.setObjectName('last_video_button')
@@ -521,7 +559,7 @@ class Ui_MainWindow(QMainWindow):
         self.label_frame_show.setObjectName("label_frame_show")
         self.label_frame_show.setAlignment(Qt.AlignCenter)
         self.label_frame_show.setText('')
-        self.label_frame_show.setFont(QFont(Ui_MainWindow.font, 12))
+        self.label_frame_show.setFont(QFont(self.font, 12))
         self.label_frame_show.setAlignment(Qt.AlignCenter)
         self.label_frame_show.setStyleSheet('color:black')
         # 显示视频名字
@@ -529,7 +567,7 @@ class Ui_MainWindow(QMainWindow):
         self.label_video_title.setObjectName("label_video_title")
         self.label_video_title.setAlignment(Qt.AlignCenter)
         self.label_video_title.setText('实时视频流')
-        self.label_video_title.setFont(QFont(Ui_MainWindow.font, 15))
+        self.label_video_title.setFont(QFont(self.font, 15))
         # 视频进度条
         self.video_progress_bar = QSlider(Qt.Horizontal, self.label_video)
         self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
@@ -619,8 +657,8 @@ class Ui_MainWindow(QMainWindow):
     def slider_refresh(self):
         if self.video_play_flag is True and self.slider_flag is True:
             try:
-                self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
-                flag, self.image = self.cap.read()
+                self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                flag, self.image = self.video_cap.read()
             except Exception as e:
                 pass
             self.slider_flag = False
@@ -670,13 +708,13 @@ class Ui_MainWindow(QMainWindow):
         self.label_output.setObjectName("label_output")
         self.label_output.setText('[Console输出]')
         self.label_output.setAlignment(Qt.AlignLeft)
-        self.label_output.setFont(QFont(Ui_MainWindow.font, 12))
+        self.label_output.setFont(QFont(self.font, 12))
         self.console = QTextEdit(self.frame_of_console_output)
         self.console.setReadOnly(True)
         self.console.ensureCursorVisible()
         self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.console.setWordWrapMode(QTextOption.NoWrap)
-        self.console.setFont(QFont(Ui_MainWindow.font, 12))
+        self.console.setFont(QFont(self.font, 12))
         self.console.setStyleSheet('background-color:lightGray')
         self.console_v_layout.addWidget(self.label_output)
         self.console_v_layout.addWidget(self.console)
@@ -696,7 +734,7 @@ class Ui_MainWindow(QMainWindow):
         else:
             if self.current_frame < self.frame_count:
                 self.current_frame += 1
-                flag, self.image = self.cap.read()
+                flag, self.image = self.video_cap.read()
                 if flag is True:
                     show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
                     show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
@@ -705,18 +743,20 @@ class Ui_MainWindow(QMainWindow):
                     self.label_frame_show.setStyleSheet('color:white')
                     self.video_progress_bar.setValue(self.current_frame)
                 else:
-                    self.cap.release()
-                    self.video_status = Ui_MainWindow.STATUS_STOP
+                    self.video_cap.release()
+                    self.video_status = self.STATUS_STOP
                     self.timer_video.stop()
-                    self.status_video_button.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+                    self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
                     self.video_progress_bar.setValue(self.frame_count-1)
                     self.last_video_button.setEnabled(True)
                     self.next_video_button.setEnabled(True)
             else:
-                self.video_status = Ui_MainWindow.STATUS_STOP
+                self.video_status = self.STATUS_STOP
                 self.timer_video.stop()
-                self.status_video_button.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
-        QApplication.processEvents() # 界面刷新
+                self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
+                self.last_video_button.setEnabled(True)
+                self.next_video_button.setEnabled(True)
+        # QApplication.processEvents() # 界面刷新
 
 
 # 暂停视频
@@ -740,83 +780,83 @@ class Ui_MainWindow(QMainWindow):
         self.status_video_button.setEnabled(False)
         # 如果是实时模式
         if self.video_play_flag is False:
-            if self.video_status is Ui_MainWindow.STATUS_INIT:
+            if self.video_status is self.STATUS_INIT:
                 self.timer_video.start()
                 self.label_video_title.setStyleSheet('color:white')
-                self.video_status = Ui_MainWindow.STATUS_PLAYING
+                self.video_status = self.STATUS_PLAYING
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 logger('打开视频流')
-            elif self.video_status is Ui_MainWindow.STATUS_PLAYING:
+            elif self.video_status is self.STATUS_PLAYING:
                 self.timer_video.stop()
-                self.video_status = Ui_MainWindow.STATUS_PAUSE
+                self.video_status = self.STATUS_PAUSE
                 robot_other.select_template_flag = True
                 self.label_video.setCursor(Qt.CrossCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
                 self.template_label()
                 logger('暂停视频流')
-            elif self.video_status is Ui_MainWindow.STATUS_PAUSE:
+            elif self.video_status is self.STATUS_PAUSE:
                 self.timer_video.start()
                 self.label_video_title.setStyleSheet('color:white')
-                self.video_status = Ui_MainWindow.STATUS_PLAYING
+                self.video_status = self.STATUS_PLAYING
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 logger('打开视频流')
-            elif self.video_status is Ui_MainWindow.STATUS_STOP:
+            elif self.video_status is self.STATUS_STOP:
                 if self.video_play_flag is False:
-                    self.cap = cv2.VideoCapture(0)
-                    self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_width)
-                    self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_height)
+                    self.video_cap = cv2.VideoCapture(0)
+                    self.video_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.real_time_video_width)
+                    self.video_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.real_time_video_height)
                 else:
-                    self.cap = cv2.VideoCapture(self.videos[self.current_video])
+                    self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
                 self.timer_video.start()
                 self.label_video_title.setStyleSheet('color:white')
-                self.video_status = Ui_MainWindow.STATUS_PLAYING
+                self.video_status = self.STATUS_PLAYING
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
         else: # 如果是录播模式
-            if self.video_status is Ui_MainWindow.STATUS_INIT:
+            if self.video_status is self.STATUS_INIT:
                 self.timer_video.start()
                 self.last_frame_button.setEnabled(False)
                 self.next_frame_button.setEnabled(False)
                 self.last_video_button.setEnabled(False)
                 self.next_video_button.setEnabled(False)
                 self.label_video_title.setStyleSheet('color:white')
-                self.video_status = Ui_MainWindow.STATUS_PLAYING
+                self.video_status = self.STATUS_PLAYING
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
-            elif self.video_status is Ui_MainWindow.STATUS_PLAYING:
+            elif self.video_status is self.STATUS_PLAYING:
                 self.timer_video.stop()
                 # 暂停后/使能上下一帧
                 self.last_frame_button.setEnabled(True)
                 self.next_frame_button.setEnabled(True)
                 self.last_video_button.setEnabled(True)
                 self.next_video_button.setEnabled(True)
-                self.video_status = Ui_MainWindow.STATUS_PAUSE
+                self.video_status = self.STATUS_PAUSE
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
                 robot_other.select_template_flag = True
                 self.label_video.setCursor(Qt.CrossCursor)
                 self.template_label()
-            elif self.video_status is Ui_MainWindow.STATUS_PAUSE:
+            elif self.video_status is self.STATUS_PAUSE:
                 self.timer_video.start()
                 self.last_frame_button.setEnabled(False)
                 self.next_frame_button.setEnabled(False)
                 self.last_video_button.setEnabled(False)
                 self.next_video_button.setEnabled(False)
                 self.label_video_title.setStyleSheet('color:white')
-                self.video_status = Ui_MainWindow.STATUS_PLAYING
+                self.video_status = self.STATUS_PLAYING
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
-            elif self.video_status is Ui_MainWindow.STATUS_STOP:
+            elif self.video_status is self.STATUS_STOP:
                 self.current_frame = 0
-                self.cap = cv2.VideoCapture(self.videos[self.current_video]) # 重新加载这个视频
-                self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                self.video_cap = cv2.VideoCapture(self.videos[self.current_video]) # 重新加载这个视频
+                self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
                 # 获取视频总帧数
-                self.frame_count = int(self.cap.get(7))
-                _, self.image = self.cap.read()
+                self.frame_count = int(self.video_cap.get(7))
+                _, self.image = self.video_cap.read()
                 show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
                 show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
                 self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
@@ -831,7 +871,7 @@ class Ui_MainWindow(QMainWindow):
                 self.next_video_button.setEnabled(False)
                 self.last_frame_button.setEnabled(False)
                 self.next_frame_button.setEnabled(False)
-                self.video_status = Ui_MainWindow.STATUS_PLAYING
+                self.video_status = self.STATUS_PLAYING
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
         time.sleep(0.1)  # 延时防抖
         self.status_video_button.setEnabled(True)
@@ -844,13 +884,13 @@ class Ui_MainWindow(QMainWindow):
         self.last_video_button.setEnabled(False)
         if self.video_play_flag is True:
             self.timer_video.stop()
-            self.video_status = Ui_MainWindow.STATUS_STOP
+            self.video_status = self.STATUS_STOP
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             if self.current_video > 0:
                 self.current_video = self.current_video - 1
             else:
                 self.current_video = len(self.videos) - 1
-            self.cap = self.videos[self.current_video]
+            self.video_cap = self.videos[self.current_video]
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'
                                            +self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:black')
@@ -873,13 +913,13 @@ class Ui_MainWindow(QMainWindow):
         self.next_video_button.setEnabled(False)
         if self.video_play_flag is True:
             self.timer_video.stop()
-            self.video_status = Ui_MainWindow.STATUS_STOP
+            self.video_status = self.STATUS_STOP
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             if self.current_video < len(self.videos) - 1:
                 self.current_video = self.current_video + 1
             else:
                 self.current_video = 0
-            self.cap = self.videos[self.current_video]
+            self.video_cap = self.videos[self.current_video]
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'
                                            +self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:black')
@@ -903,8 +943,8 @@ class Ui_MainWindow(QMainWindow):
             self.current_frame = self.current_frame - 1
         else:
             self.current_frame = 0
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
-        flag, self.image = self.cap.read()
+        self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+        flag, self.image = self.video_cap.read()
         if flag is True:
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
@@ -913,8 +953,8 @@ class Ui_MainWindow(QMainWindow):
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
         else:
-            self.cap.release()
-            self.video_status = Ui_MainWindow.STATUS_STOP
+            self.video_cap.release()
+            self.video_status = self.STATUS_STOP
             self.timer_video.stop()
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
             self.video_progress_bar.setValue(self.frame_count-1)
@@ -927,7 +967,7 @@ class Ui_MainWindow(QMainWindow):
             self.current_frame = self.current_frame + 1
         else:
             self.current_frame = self.frame_count - 1
-        flag, self.image = self.cap.read()
+        flag, self.image = self.video_cap.read()
         if flag is True:
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
@@ -936,8 +976,8 @@ class Ui_MainWindow(QMainWindow):
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
         else:
-            self.cap.release()
-            self.video_status = Ui_MainWindow.STATUS_STOP
+            self.video_cap.release()
+            self.video_status = self.STATUS_STOP
             self.timer_video.stop()
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
             self.video_progress_bar.setValue(self.frame_count-1)
@@ -950,6 +990,37 @@ class Ui_MainWindow(QMainWindow):
         self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
         self.label_frame_show.setStyleSheet('color:white')
         self.slider_flag = True
+
+
+    # 视频标签自适应
+    def video_label_adaptive(self, video_width, video_height):
+        # 第一次触发实在窗口生成的时候, 没有意义
+        if self.first_window_zoom_flag is True:
+            self.first_window_zoom_flag = False
+            # 通过中心widget计算初始视频标签的大小(同时减去的50代表widget的边界部分)
+            # video_label高度和self.centralwidget的高度大致相同
+            # video_label宽度为self.centralwidget的宽度大3/4, 通过栅格布局可知
+            self.video_label_size_width = int((self.centralwidget.size().width() - 50) * 0.75)
+            self.video_label_size_height = int((self.centralwidget.size().height() - 50) * 1.00)
+        else:  # (距离边框还有30左右)
+            self.video_label_size_width = self.video_frame.size().width() - 50
+            self.video_label_size_height = self.video_frame.size().height() - 50
+        # 更改label_video大小以确保视频展示不失比例
+        # 真实视频比例
+        video_size_scale = float(video_height / video_width)
+        # 临界比例(根据页面网格布局得到, 不可随便修改)
+        # limit_size_scale = float(982/1477)
+        limit_size_scale = float(self.video_label_size_height / self.video_label_size_width)
+        if video_size_scale >= limit_size_scale:
+            self.video_label_size_height = self.video_label_size_height
+            self.video_label_size_width = int((self.video_label_size_height / video_height) * video_width)
+        else:
+            self.video_label_size_width = self.video_label_size_width
+            self.video_label_size_height = int((self.video_label_size_width / video_width) * video_height)
+        self.label_video.setFixedSize(self.video_label_size_width, self.video_label_size_height)
+        # 计算视频和label_video之间比例因子(框选保存图片需要用到)
+        self.label_video.x_unit = float(video_width / self.video_label_size_width)
+        self.label_video.y_unit = float(video_height / self.video_label_size_height)
 
 
     # 重写窗口关闭时间
@@ -965,33 +1036,10 @@ class Ui_MainWindow(QMainWindow):
 
     # 监听窗口缩放事件
     def resizeEvent(self, event):
-        # 第一次触发实在窗口生成的时候, 没有意义
-        if self.first_window_zoom_flag is True:
-            self.first_window_zoom_flag  = False
-            # 通过中心widget计算初始视频标签的大小(同时减去的50代表widget的边界部分)
-            # video_label高度和self.centralwidget的高度大致相同
-            # video_label宽度为self.centralwidget的宽度大3/4, 通过栅格布局可知
-            self.video_label_size_width  = int((self.centralwidget.size().width() -50)*0.75)
-            self.video_label_size_height = int((self.centralwidget.size().height()-50)*1.00)
-        else: # (距离边框还有30左右)
-            self.video_label_size_width  = self.video_frame.size().width()  - 50
-            self.video_label_size_height = self.video_frame.size().height() - 50
-        # 更改label_video大小以确保视频展示不失比例
-        # 真实视频比例
-        video_size_scale = float(self.video_height/self.video_width)
-        # 临界比例(根据页面网格布局得到, 不可随便修改)
-        # limit_size_scale = float(982/1477)
-        limit_size_scale = float(self.video_label_size_height/self.video_label_size_width)
-        if video_size_scale >= limit_size_scale:
-            self.video_label_size_height = self.video_label_size_height
-            self.video_label_size_width = int((self.video_label_size_height/self.video_height) * self.video_width)
+        if self.video_play_flag is False:
+            self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
         else:
-            self.video_label_size_width = self.video_label_size_width
-            self.video_label_size_height = int((self.video_label_size_width/self.video_width) * self.video_height)
-        self.label_video.setFixedSize(self.video_label_size_width, self.video_label_size_height)
-        # 计算视频和label_video之间比例因子(框选保存图片需要用到)
-        self.label_video.x_unit = float(self.video_width /self.video_label_size_width)
-        self.label_video.y_unit = float(self.video_height/self.video_label_size_height)
+            self.video_label_adaptive(self.offline_video_width  , self.offline_video_height)
 
 
 if __name__ == "__main__":

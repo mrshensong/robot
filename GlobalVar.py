@@ -34,14 +34,14 @@ class icon_path():
     Icon_player_next_video = 'config/Icon/video_icon/next_video.png'
     Icon_player_last_frame = 'config/Icon/video_icon/last_frame.png'
     Icon_player_next_frame = 'config/Icon/video_icon/next_frame.png'
-    # ui相关action图标
+    # ui工具栏相关action图标
     Icon_ui_setting      = 'config/Icon/other_icon/setting.png'
     Icon_ui_open_camera  = 'config/Icon/other_icon/open_camera.png'
     Icon_ui_close_camera = 'config/Icon/other_icon/close_camera.png'
     Icon_ui_capture      = 'config/Icon/other_icon/capture.png'
     Icon_ui_box_screen   = 'config/Icon/other_icon/box_screen.png'
     Icon_ui_folder_go    = 'config/Icon/other_icon/folder_go.png'
-    # robot相关action图标
+    # robot工具栏相关action图标
     Icon_restart_server     = 'config/Icon/robot_icon/restart_server.png'
     Icon_robot_click        = 'config/Icon/robot_icon/click.png'
     Icon_robot_double_click = 'config/Icon/robot_icon/double_click.png'
@@ -50,6 +50,8 @@ class icon_path():
     Icon_robot_lock         = 'config/Icon/robot_icon/lock.png'
     Icon_robot_unlock       = 'config/Icon/robot_icon/unlock.png'
     Icon_robot_get_position = 'config/Icon/robot_icon/get_position.png'
+    # 视频播放工具栏相关图标
+    Icon_video_play         = 'config/Icon/other_icon/video_play.png'
     # 自定义控件相关图标
     Icon_custom_delete            = 'config/Icon/custom_widget_icon/delete.png'
     Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'
