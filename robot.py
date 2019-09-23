@@ -197,6 +197,8 @@ class Ui_MainWindow(QMainWindow):
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
             # self.status_video_button.clicked.connect(self.switch_video)
             self.status_video_button.setEnabled(True)
+            # 通过在线视频尺寸自适应视频播放窗口
+            self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
         else:
             logger('关闭摄像头')
             # 关闭视频展示定时器
@@ -358,6 +360,12 @@ class Ui_MainWindow(QMainWindow):
     # 离线视频播放
     def play_exist_video(self):
         sep = os.sep # 分隔符
+        camera_opened_flag = False # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
+        # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
+        # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
+        if self.camera_status == self.camera_opened:
+            camera_opened_flag = True
+            self.switch_camera_status()
         self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', os.getcwd())
         if self.get_path:
             self.videos, self.videos_title = [], []
@@ -372,9 +380,6 @@ class Ui_MainWindow(QMainWindow):
                         file_name = '/'.join(file.split(sep)[-2:])
                         self.videos.append(file)
                         self.videos_title.append(file_name)
-            # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
-            if self.camera_status == self.camera_opened:
-                self.switch_camera_status()
             # 加载离线视频对象
             self.video_cap = cv2.VideoCapture(self.videos[0]) # 重新加载这个视频
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -397,9 +402,14 @@ class Ui_MainWindow(QMainWindow):
             # 使能视频(播放/暂停/重播)按钮和视频进度条
             self.status_video_button.setEnabled(True)
             self.video_progress_bar.setEnabled(True)
+            self.last_video_button.setEnabled(True)
+            self.next_video_button.setEnabled(True)
             self.video_progress_bar.setRange(0, self.frame_count-1)
             # 通过离线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
+        else:
+            if camera_opened_flag is True:
+                self.switch_camera_status()
 
 
     # 机械臂动作线程
@@ -876,6 +886,9 @@ class Ui_MainWindow(QMainWindow):
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
             elif self.video_status is self.STATUS_STOP:
+                self.current_frame = 0
+                self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
+                self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
                 _, self.image = self.video_cap.read()
                 show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
                 show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
