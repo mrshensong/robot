@@ -355,7 +355,7 @@ class Ui_MainWindow(QMainWindow):
             Thread(target=self.uArm_action_event_thread, args=(action,)).start()
 
 
-    # 存在的视频播放
+    # 离线视频播放
     def play_exist_video(self):
         sep = os.sep # 分隔符
         self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', os.getcwd())
@@ -372,18 +372,9 @@ class Ui_MainWindow(QMainWindow):
                         file_name = '/'.join(file.split(sep)[-2:])
                         self.videos.append(file)
                         self.videos_title.append(file_name)
-            # 打开离线视频时, 不管在线视频是否播放都先停止播放
-            self.timer_video.stop()
             # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
             if self.camera_status == self.camera_opened:
-                self.status_video_button.click()
                 self.switch_camera_status()
-            # 更换视频标签背景
-            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
-            # 离线视频播放标志打开, 视频状态为STATUS_INIT
-            self.video_play_flag = True
-            self.video_status = self.STATUS_INIT
-            self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             # 加载离线视频对象
             self.video_cap = cv2.VideoCapture(self.videos[0]) # 重新加载这个视频
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -392,6 +383,12 @@ class Ui_MainWindow(QMainWindow):
             self.offline_video_height = int(self.video_cap.get(4))
             # 获取视频总帧数
             self.frame_count          = int(self.video_cap.get(7))
+            # 更换视频标签背景
+            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+            # 离线视频播放标志打开, 视频状态为STATUS_INIT
+            self.video_play_flag = True
+            self.video_status = self.STATUS_INIT
+            self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             # 设置视频title
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:black')
