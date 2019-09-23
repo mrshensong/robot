@@ -16,8 +16,10 @@ class Video_Label(QLabel):
     # 视频真实尺寸和video_label尺寸比例
     x_unit = 0.0
     y_unit = 0.0
+    # 框选的屏幕起点和终点所占label_video比例
+    box_screen_scale  = [0.0, 0.0, 0.0, 0.0]
     # 框选的屏幕大小
-    box_screen_size = [0, 0, 0 ,0]
+    box_screen_size   = [0, 0, 0 ,0]
     # 自定义信号
     signal = pyqtSignal(str)
 
@@ -41,10 +43,16 @@ class Video_Label(QLabel):
         if self.mouse_move_flag is True:
             # 如果框选屏幕大小(返回框选的尺寸信息)
             if gloVar.box_screen_flag is True:
+                # 框选的车机屏幕大小
                 self.box_screen_size[0] = self.x0
                 self.box_screen_size[1] = self.y0
                 self.box_screen_size[2] = abs(self.x1-self.x0)
                 self.box_screen_size[3] = abs(self.y1-self.y0)
+                # 起点和终点所占video_label比例
+                self.box_screen_scale[0] = round(float(self.x0/self.size().width()),  6)
+                self.box_screen_scale[1] = round(float(self.y0/self.size().height()), 6)
+                self.box_screen_scale[2] = round(float(self.x1/self.size().width()),  6)
+                self.box_screen_scale[3] = round(float(self.y1/self.size().height()), 6)
                 gloVar.box_screen_flag = False
                 robot_other.select_template_flag = False
                 gloVar.add_action_button_flag = True
