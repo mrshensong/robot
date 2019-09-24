@@ -181,7 +181,7 @@ class Ui_MainWindow(QMainWindow):
         if self.camera_status == self.camera_closed:
             # 不管离线视频是否正在播放(先关掉视频, 再切换到直播)
             self.timer_video.stop()
-            self.video_play_flag = False
+            self.label_video.video_play_flag = self.video_play_flag = False
             self.label_video_title.setText('实时视频流')
             self.video_progress_bar.setValue(0)
             self.label_frame_show.setText('')
@@ -380,7 +380,11 @@ class Ui_MainWindow(QMainWindow):
                     if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
                         # 文件名列表, 包含完整路径
                         file = merge_path([home, file]).merged_path
-                        file_name = merge_path(file.split('/')[-2:]).merged_path
+                        # 视频title(显示路径分割后的最后两段)/路径太短的话(全部显示)
+                        if len(file.split('/')) > 3:
+                            file_name = merge_path(file.split('/')[-2:]).merged_path
+                        else:
+                            file_name = file
                         self.videos.append(file)
                         self.videos_title.append(file_name)
             # 加载离线视频对象
@@ -394,7 +398,7 @@ class Ui_MainWindow(QMainWindow):
             # 更换视频标签背景
             self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
             # 离线视频播放标志打开, 视频状态为STATUS_INIT
-            self.video_play_flag = True
+            self.label_video.video_play_flag = self.video_play_flag = True
             self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             # 设置视频title
@@ -874,17 +878,6 @@ class Ui_MainWindow(QMainWindow):
                 self.label_video.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 logger('打开视频流')
-            elif self.video_status is self.STATUS_STOP:
-                if self.video_play_flag is False:
-                    self.video_cap = cv2.VideoCapture(0)
-                    self.video_cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.real_time_video_width)
-                    self.video_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.real_time_video_height)
-                else:
-                    self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
-                self.timer_video.start()
-                self.label_video_title.setStyleSheet('color:white')
-                self.video_status = self.STATUS_PLAYING
-                self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
         else: # 如果是录播模式
             if self.video_status is self.STATUS_INIT:
                 self.timer_video.start()

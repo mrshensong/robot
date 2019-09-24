@@ -20,6 +20,8 @@ class Video_Label(QLabel):
     box_screen_scale  = [0.0, 0.0, 0.0, 0.0]
     # 框选的屏幕大小
     box_screen_size   = [0, 0, 0 ,0]
+    # False直播/True录播
+    video_play_flag = False
     # 自定义信号
     signal = pyqtSignal(str)
 
@@ -101,31 +103,35 @@ class Video_Label(QLabel):
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawLine(QPoint(self.x0, self.y0), QPoint(self.x1, self.y1))
-            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+            if self.video_play_flag is False:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
         # 点击动作画圆显示
         elif uArm_action.uArm_action_type in [uArm_action.uArm_click, uArm_action.uArm_long_click, uArm_action.uArm_double_click]:
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawEllipse(self.x0-5, self.y0-5, 10, 10)
-            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+            if self.video_play_flag is False:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
         # 框选动作
         elif robot_other.select_template_flag is True:
             rect = QRect(self.x0, self.y0, abs(self.x1 - self.x0), abs(self.y1 - self.y0))
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(rect)
-            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],self.box_screen_size[3]))
+            if self.video_play_flag is False:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],self.box_screen_size[3]))
         # 其余情况(不绘制图, 一个小点,几乎不能看到)
         else:
             point = [QPoint(self.x0, self.y0)]
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 1, Qt.SolidLine))
             painter.drawPoints(QPolygon(point))
-            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+            if self.video_play_flag is False:
+                painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
 
 
     # 保存模板
@@ -187,6 +193,8 @@ class Video_Label(QLabel):
                     logger('[框选的模板保存路径为]: %s' %template_name)
                 else:
                     logger('[框选动作取消!]')
+            # 保存完图片后, 让红色框消失
+            self.x0, self.y0, self.x1, self.y1 = 0, 0, 0, 0
 
 
     # 计算传入机械臂的坐标
