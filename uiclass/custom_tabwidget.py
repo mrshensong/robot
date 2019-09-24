@@ -20,6 +20,10 @@ class Custom_TabWidget(QTabWidget):
         self.index = -1
         self.tab1 = QWidget()  # 1
         self.tab2 = QTextEdit()
+        # self.tab2.setLineWrapMode(QTextEdit.FixedPixelWidth)
+        self.tab2.setWordWrapMode(QTextOption.NoWrap)
+        self.tab2.setStyleSheet('background-color:lightGreen')
+        self.tab2.setFont(QFont('Times New Roman', 13))
         self.tab1_init()  # 2
         # self.tab2_init()
         self.addTab(self.tab1, tab1)
@@ -30,6 +34,8 @@ class Custom_TabWidget(QTabWidget):
         self.item_list = []
         # 控件中的描述/坐标/动作类型等信息(元素为dict类型)
         self.info_list = []
+        # 脚本标签
+        self.tag_list = []
         # 添加动作窗口
         self.add_action_window = Add_Action_Control(self)
         self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
@@ -124,9 +130,11 @@ class Custom_TabWidget(QTabWidget):
         self.item_list.pop(id)
         self.custom_control_list.pop(id)
         self.info_list.pop(id)
+        self.tag_list.pop(id)
         for i in range(id, self.index):
             self.custom_control_list[i].id = i
         self.index -= 1
+        self.tab2.setText(''.join(self.tag_list))
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -140,6 +148,7 @@ class Custom_TabWidget(QTabWidget):
         self.item_list = []
         self.custom_control_list = []
         self.info_list = []
+        self.tag_list = []
         self.index = -1
 
 
@@ -220,6 +229,9 @@ class Custom_TabWidget(QTabWidget):
         self.item_list.append(obj)
         self.custom_control_list.append(obj)
         self.info_list.append(info_dict)
+        self.tag_list.append(self.generate_tag(info_dict))
+        # 显示脚本标签
+        self.tab2.setText(''.join(self.tag_list))
         # 打印新建动作信息
         if info_dict[add_action_window.des_text] == '':
             logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
@@ -230,6 +242,18 @@ class Custom_TabWidget(QTabWidget):
                                                                          self.str_decorate(info_dict[add_action_window.action]),
                                                                          str(info_dict[add_action_window.points]),
                                                                          info_dict[add_action_window.des_text]))
+
+
+    # 添加动作时生成标签
+    def generate_tag(self, info_dict):
+        des_text = info_dict[add_action_window.des_text]
+        action =   info_dict[add_action_window.action]
+        points =   str(tuple(info_dict[add_action_window.points]))
+        tag = '<action description="' + des_text + '">\n' + \
+              '\t' + '<param name="type">'     + action  + '</param>\n' + \
+              '\t' + '<param name="position">' + points  + '</param>\n' + \
+              '</action>\n'
+        return tag
 
 
 

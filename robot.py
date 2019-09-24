@@ -705,7 +705,7 @@ class Ui_MainWindow(QMainWindow):
             logger('执行--[滑动动作]--起点: %s, 终点: %s' % (str(start), str(end)))
 
 
-# 进度条刷新
+    # 进度条刷新
     def slider_refresh(self):
         if self.video_play_flag is True and self.slider_flag is True:
             try:
@@ -780,8 +780,8 @@ class Ui_MainWindow(QMainWindow):
         self.console.ensureCursorVisible()
         self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.console.setWordWrapMode(QTextOption.NoWrap)
-        self.console.setFont(QFont(self.font, 12))
-        self.console.setStyleSheet('background-color:lightGray')
+        # self.console.setFont(QFont(self.font, 12))
+        # self.console.setStyleSheet('background-color:lightGray')
         self.console_v_layout.addWidget(self.label_output)
         self.console_v_layout.addWidget(self.console)
 
