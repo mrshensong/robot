@@ -98,3 +98,23 @@ import time
 class logger():
     def __init__(self, string):
         print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + ' >> -- ' + str(string))
+
+
+# 合并路径(传入要合并的几个部分)
+class merge_path():
+    merged_path = None
+    def __init__(self, section_path):
+        path_list = []
+        for section in section_path:
+            if '\\\\' in section:
+                section = section.replace('\\\\', '/')
+            elif '\\' in section:
+                section = section.replace('\\', '/')
+            else:
+                section = section
+            path_list.append(section)
+        merged_path = '/'.join(path_list)
+        if '//' in merged_path:
+            self.merged_path = merged_path.replace('//', '/')
+        else:
+            self.merged_path = merged_path

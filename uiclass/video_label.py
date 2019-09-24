@@ -3,7 +3,7 @@ import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GlobalVar import gloVar, uArm_action, uArm_param, logger, robot_other
+from GlobalVar import gloVar, uArm_action, uArm_param, logger, robot_other, merge_path
 
 # 视频展示标签
 class Video_Label(QLabel):
@@ -142,7 +142,6 @@ class Video_Label(QLabel):
                 value, ok = QInputDialog.getText(self, '标注输入框', '请输入文本', QLineEdit.Normal, '应用')
                 # 如果输入有效值
                 if ok:
-                    logger('框选的模板为: %s' %value)
                     # 如果是数据处理(需要对图像特殊处理)
                     if robot_other.data_process_flag is True:
                         # 将模板灰度化/并在模板起始位置打标记
@@ -157,32 +156,37 @@ class Video_Label(QLabel):
                         mask_path = mask_path
                         if os.path.exists(mask_path) is False:
                             os.makedirs(mask_path)
-                        cut_name = os.path.join(mask_path, value)
+                        cut_name = merge_path([mask_path, value]).merged_path
+                        template_name = cut_name
                         cv2.imencode('.jpg', cut_img)[1].tofile(cut_name)
                     # 非数据处理情况
                     else:
                         if '-' in value:
                             folder_layer_count = len(value.split('-')) - 1
                             if folder_layer_count == 1:
-                                mask_path = os.path.join(mask_path, value.split('-')[0])
+                                mask_path = merge_path([mask_path, value.split('-')[0]]).merged_path
                             elif folder_layer_count == 2:
-                                mask_path = os.path.join(mask_path, value.split('-')[0], value.split('-')[1])
+                                mask_path = merge_path([mask_path, value.split('-')[0], value.split('-')[1]]).merged_path
                             else:
                                 logger('[输入的模板名称错误!]')
                                 return
                             if os.path.exists(mask_path) is False:
                                 os.makedirs(mask_path)
                             if len(value.split('-')[1])==1 and value.split('-')[1].isupper(): # windows文件名大小写一样,此处需要区分(大写如A1.jpg, 小写如a.jpg)
-                                cv2.imencode('.jpg', cut_img)[1].tofile(os.path.join(mask_path, value.split('-')[-1] + '1.jpg'))
+                                template_name = merge_path([mask_path, value.split('-')[-1] + '1.jpg']).merged_path
+                                cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                             else:
-                                cv2.imencode('.jpg', cut_img)[1].tofile(os.path.join(mask_path, value.split('-')[-1] + '.jpg'))
+                                template_name = merge_path([mask_path, value.split('-')[-1] + '.jpg']).merged_path
+                                cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                         else:
-                            mask_path = os.path.join(mask_path, '其他')
+                            mask_path = merge_path([mask_path, '其他']).merged_path
                             if os.path.exists(mask_path) is False:
                                 os.makedirs(mask_path)
-                            cv2.imencode('.jpg', cut_img)[1].tofile(os.path.join(mask_path, value + '.jpg'))
+                            template_name = merge_path([mask_path, value + '.jpg']).merged_path
+                            cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                    logger('[框选的模板保存路径为]: %s' %template_name)
                 else:
-                    logger('框选动作取消!')
+                    logger('[框选动作取消!]')
 
 
     # 计算传入机械臂的坐标

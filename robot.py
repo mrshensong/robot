@@ -16,7 +16,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window
+from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
@@ -310,13 +310,13 @@ class Ui_MainWindow(QMainWindow):
 
     # 摄像头截屏线程
     def screen_capture_thread(self, capture_type='jpg'):
-        capture_path = os.path.join(self.picture_path, 'screen_shot')
+        capture_path = merge_path([self.picture_path, 'screen_shot']).merged_path
         if os.path.exists(capture_path) is False:
             os.makedirs(capture_path)
         capture_name = str(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')) + '.' + capture_type
-        capture_name = os.path.join(capture_path, capture_name)
+        capture_name = merge_path([capture_path, capture_name]).merged_path
         cv2.imencode('.' + capture_type, self.image.copy())[1].tofile(capture_name)
-        logger('[截取的图片为: %s]' %capture_name)
+        logger('[截取的图片为]: %s' %capture_name)
 
 
     # 框选车机屏幕大小
@@ -363,7 +363,6 @@ class Ui_MainWindow(QMainWindow):
 
     # 离线视频播放
     def play_exist_video(self):
-        sep = os.sep # 分隔符
         camera_opened_flag = False # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
         # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
         # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
@@ -380,8 +379,8 @@ class Ui_MainWindow(QMainWindow):
                     (file_text, extension) = os.path.splitext(file)
                     if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
                         # 文件名列表, 包含完整路径
-                        file = os.path.join(home, file)
-                        file_name = '/'.join(file.split(sep)[-2:])
+                        file = merge_path([home, file]).merged_path
+                        file_name = merge_path(file.split('/')[-2:]).merged_path
                         self.videos.append(file)
                         self.videos_title.append(file_name)
             # 加载离线视频对象
@@ -420,6 +419,7 @@ class Ui_MainWindow(QMainWindow):
             # 通过离线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
         else:
+            logger('没有选择视频路径!')
             if camera_opened_flag is True:
                 self.switch_camera_status()
 
@@ -465,6 +465,7 @@ class Ui_MainWindow(QMainWindow):
             return response.text
         except:
             return '机械臂服务连接异常'
+
 
     # post请求->机械臂命令(单击/双击/长按/滑动)
     def uArm_post_request(self, action, data_dict):
@@ -716,6 +717,7 @@ class Ui_MainWindow(QMainWindow):
                     self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                     self.label_frame_show.setStyleSheet('color:white')
                     self.video_progress_bar.setValue(self.current_frame)
+                    # 当遇到当前视频播放完毕时, 需要将进度条往回拉动的时候
                     if self.video_status == self.STATUS_STOP:
                         self.video_status = self.STATUS_PAUSE
                         self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
@@ -947,7 +949,6 @@ class Ui_MainWindow(QMainWindow):
         self.last_video_button.setEnabled(False)
         if self.video_play_flag is True:
             self.timer_video.stop()
-            # self.video_status = self.STATUS_STOP
             self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             if self.current_video > 0:
@@ -994,7 +995,6 @@ class Ui_MainWindow(QMainWindow):
         self.next_video_button.setEnabled(False)
         if self.video_play_flag is True:
             self.timer_video.stop()
-            # self.video_status = self.STATUS_STOP
             self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             if self.current_video < len(self.videos) - 1:
