@@ -414,6 +414,8 @@ class Ui_MainWindow(QMainWindow):
             self.video_progress_bar.setEnabled(True)
             self.last_video_button.setEnabled(True)
             self.next_video_button.setEnabled(True)
+            self.last_frame_button.setEnabled(True)
+            self.next_frame_button.setEnabled(True)
             self.video_progress_bar.setRange(0, self.frame_count-1)
             # 通过离线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
@@ -702,8 +704,21 @@ class Ui_MainWindow(QMainWindow):
     def slider_refresh(self):
         if self.video_play_flag is True and self.slider_flag is True:
             try:
-                self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
-                flag, self.image = self.video_cap.read()
+                if self.video_status == self.STATUS_PLAYING:
+                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                    flag, self.image = self.video_cap.read()
+                else:
+                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                    flag, self.image = self.video_cap.read()
+                    show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+                    show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+                    self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                    self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
+                    self.label_frame_show.setStyleSheet('color:white')
+                    self.video_progress_bar.setValue(self.current_frame)
+                    if self.video_status == self.STATUS_STOP:
+                        self.video_status = self.STATUS_PAUSE
+                        self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             except Exception as e:
                 pass
             self.slider_flag = False
@@ -795,12 +810,20 @@ class Ui_MainWindow(QMainWindow):
                     self.video_progress_bar.setValue(self.frame_count-1)
                     self.last_video_button.setEnabled(True)
                     self.next_video_button.setEnabled(True)
+                    self.last_frame_button.setEnabled(True)
+                    self.next_frame_button.setEnabled(True)
+                    # 再重新加载视频(有可能视频播放完毕后, 需要往前进一帧)
+                    self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
             else:
                 self.video_status = self.STATUS_STOP
                 self.timer_video.stop()
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
                 self.last_video_button.setEnabled(True)
                 self.next_video_button.setEnabled(True)
+                self.last_frame_button.setEnabled(True)
+                self.next_frame_button.setEnabled(True)
+                # 再重新加载视频(有可能视频播放完毕后, 需要往前进一帧)
+                self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
         # QApplication.processEvents() # 界面刷新
 
 
@@ -924,7 +947,8 @@ class Ui_MainWindow(QMainWindow):
         self.last_video_button.setEnabled(False)
         if self.video_play_flag is True:
             self.timer_video.stop()
-            self.video_status = self.STATUS_STOP
+            # self.video_status = self.STATUS_STOP
+            self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             if self.current_video > 0:
                 self.current_video = self.current_video - 1
@@ -953,8 +977,8 @@ class Ui_MainWindow(QMainWindow):
             # 设置视频title
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:white')
-            self.last_frame_button.setEnabled(False)
-            self.next_frame_button.setEnabled(False)
+            self.last_frame_button.setEnabled(True)
+            self.next_frame_button.setEnabled(True)
         self.last_video_button.setEnabled(True)
         self.next_video_button.setEnabled(True)
         self.status_video_button.setEnabled(True)
@@ -970,7 +994,8 @@ class Ui_MainWindow(QMainWindow):
         self.next_video_button.setEnabled(False)
         if self.video_play_flag is True:
             self.timer_video.stop()
-            self.video_status = self.STATUS_STOP
+            # self.video_status = self.STATUS_STOP
+            self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             if self.current_video < len(self.videos) - 1:
                 self.current_video = self.current_video + 1
@@ -999,8 +1024,8 @@ class Ui_MainWindow(QMainWindow):
             # 设置视频title
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:white')
-            self.last_frame_button.setEnabled(False)
-            self.next_frame_button.setEnabled(False)
+            self.last_frame_button.setEnabled(True)
+            self.next_frame_button.setEnabled(True)
         self.last_video_button.setEnabled(True)
         self.next_video_button.setEnabled(True)
         self.status_video_button.setEnabled(True)
@@ -1026,6 +1051,10 @@ class Ui_MainWindow(QMainWindow):
             self.label_frame_show.setText(str(self.current_frame+1)+'F/'+str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
+            # 当遇到当前视频播放完毕时, 需要回退帧的时候
+            if self.video_status == self.STATUS_STOP:
+                self.video_status = self.STATUS_PAUSE
+                self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
         else:
             self.video_cap.release()
             self.video_status = self.STATUS_STOP
