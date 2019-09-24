@@ -173,6 +173,11 @@ class Ui_MainWindow(QMainWindow):
 
     # 切换摄像头状态
     def switch_camera_status(self):
+        self.label_video.setCursor(Qt.ArrowCursor)
+        self.last_video_button.setEnabled(False)
+        self.next_video_button.setEnabled(False)
+        self.last_frame_button.setEnabled(False)
+        self.next_frame_button.setEnabled(False)
         if self.camera_status == self.camera_closed:
             # 不管离线视频是否正在播放(先关掉视频, 再切换到直播)
             self.timer_video.stop()
@@ -195,7 +200,6 @@ class Ui_MainWindow(QMainWindow):
             self.timer_video.start()
             self.video_status = self.STATUS_PLAYING
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
-            # self.status_video_button.clicked.connect(self.switch_video)
             self.status_video_button.setEnabled(True)
             # 通过在线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
@@ -210,7 +214,7 @@ class Ui_MainWindow(QMainWindow):
             self.camera_status = self.camera_closed
             self.switch_camera_status_action.setIcon(QIcon(icon_path.Icon_ui_open_camera))
             self.switch_camera_status_action.setToolTip('open_camera')
-            # self.status_video_button.clicked.disconnect(self.switch_video)
+            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
             self.status_video_button.setEnabled(False)
 
 
@@ -396,9 +400,15 @@ class Ui_MainWindow(QMainWindow):
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             # 设置视频title
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
-            self.label_video_title.setStyleSheet('color:black')
-            # 帧数现实标签设置
-            self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
+            self.label_video_title.setStyleSheet('color:white')
+            # 获取第一帧
+            _, self.image = self.video_cap.read()
+            show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            # 设置帧数显示
+            self.label_frame_show.setText(str(self.current_frame+1) + 'F/' + str(self.frame_count))
+            self.label_frame_show.setStyleSheet('color:white')
             # 使能视频(播放/暂停/重播)按钮和视频进度条
             self.status_video_button.setEnabled(True)
             self.video_progress_bar.setEnabled(True)
@@ -931,20 +941,24 @@ class Ui_MainWindow(QMainWindow):
             self.frame_count = int(self.video_cap.get(7))
             # 设置视频进度滑动条范围
             self.video_progress_bar.setRange(0, self.frame_count-1)
+            # 获取第一帧
+            _, self.image = self.video_cap.read()
+            show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            # 设置帧数显示
+            self.label_frame_show.setText(str(self.current_frame+1) + 'F/' + str(self.frame_count))
+            self.label_frame_show.setStyleSheet('color:white')
+            self.video_progress_bar.setValue(self.current_frame)
             # 设置视频title
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
-            self.label_video_title.setStyleSheet('color:black')
-            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+            self.label_video_title.setStyleSheet('color:white')
             self.last_frame_button.setEnabled(False)
             self.next_frame_button.setEnabled(False)
         self.last_video_button.setEnabled(True)
         self.next_video_button.setEnabled(True)
         self.status_video_button.setEnabled(True)
-        # 重置帧数显示位置
-        self.current_frame = 0
-        self.video_progress_bar.setValue(0)
-        self.label_frame_show.setText('')
-        self.label_frame_show.setStyleSheet('color:white')
+        self.label_video.setCursor(Qt.ArrowCursor)
         # 通过离线视频尺寸自适应视频播放窗口
         self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
         self.last_video_button.setEnabled(True)
@@ -973,20 +987,24 @@ class Ui_MainWindow(QMainWindow):
             self.frame_count = int(self.video_cap.get(7))
             # 设置视频进度滑动条范围
             self.video_progress_bar.setRange(0, self.frame_count - 1)
+            # 获取第一帧
+            _, self.image = self.video_cap.read()
+            show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            # 设置帧数显示
+            self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
+            self.label_frame_show.setStyleSheet('color:white')
+            self.video_progress_bar.setValue(self.current_frame)
             # 设置视频title
             self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
-            self.label_video_title.setStyleSheet('color:black')
-            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+            self.label_video_title.setStyleSheet('color:white')
             self.last_frame_button.setEnabled(False)
             self.next_frame_button.setEnabled(False)
         self.last_video_button.setEnabled(True)
         self.next_video_button.setEnabled(True)
         self.status_video_button.setEnabled(True)
-        # 重置帧数显示位置
-        self.current_frame = 0
-        self.video_progress_bar.setValue(0)
-        self.label_frame_show.setText('')
-        self.label_frame_show.setStyleSheet('color:white')
+        self.label_video.setCursor(Qt.ArrowCursor)
         # 通过离线视频尺寸自适应视频播放窗口
         self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
         self.next_video_button.setEnabled(True)
