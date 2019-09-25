@@ -60,6 +60,8 @@ class icon_path():
     Icon_tab_widget_all_select    = 'config/Icon/tab_widget_icon/all_select.png'
     Icon_tab_widget_all_un_select = 'config/Icon/tab_widget_icon/all_un_select.png'
     Icon_tab_widget_execute       = 'config/Icon/tab_widget_icon/execute.png'
+    Icon_tab_widget_import        = 'config/Icon/tab_widget_icon/import.png'
+    Icon_tab_widget_save          = 'config/Icon/tab_widget_icon/save.png'
 
 class uArm_action():
     # 机械臂动作类型(点击/双击/长按/滑动)

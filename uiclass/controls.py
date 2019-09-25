@@ -57,6 +57,31 @@ class Action_Control(QWidget):
         print('the id is : ', self.id)
 
 
+# 自定义动作展示控件
+class Case_Control(QWidget):
+    def __init__(self, parent, id):
+        super(Case_Control, self).__init__(parent)
+        self.parent = parent
+        self.id = id
+        self.initUI()
+
+    def initUI(self):
+        # 选择框
+        self.check_box = QCheckBox()
+        # case名
+        self.case_name_edit = QLineEdit(self)
+        # 播放按钮
+        self.play_botton = QToolButton(self)
+        self.play_botton.setToolTip('play')
+        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+
+        self.h_box = QHBoxLayout()
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.case_name_edit)
+        self.h_box.addWidget(self.play_botton)
+        self.setLayout(self.h_box)
+
+
 # 动作添加控件
 class Add_Action_Control(QDialog):
 

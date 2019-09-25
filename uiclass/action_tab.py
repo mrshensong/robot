@@ -1,3 +1,4 @@
+import os
 import json
 import time
 from threading import Thread
@@ -48,11 +49,18 @@ class Action_Tab(QWidget):
         self.execute_button.setToolTip('execute')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_items)
+
+        self.save_script_tag_button = QToolButton()
+        self.save_script_tag_button.setToolTip('save_tag')
+        self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_save + ')}')
+        self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
+
         h_box = QHBoxLayout()
         h_box.addWidget(self.add_button)
         h_box.addWidget(self.delete_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
+        h_box.addWidget(self.save_script_tag_button)
         h_box.addStretch(1)
         # self.list_widget = QListWidget(self.tab1)
         self.list_widget = QListWidget()
@@ -76,6 +84,7 @@ class Action_Tab(QWidget):
             return
 
 
+    # 删除工具栏操作
     def connect_delete_selected_items(self):
         # 没有item的时候让button无效
         if self.index < 0:
@@ -84,6 +93,7 @@ class Action_Tab(QWidget):
             Thread(target=self.delete_selected_items, args=()).start()
 
 
+    # 选择/不选择(所有)工具栏操作
     def connect_select_all_items(self):
         # 没有item的时候让button无效
         if self.index < 0:
@@ -92,8 +102,24 @@ class Action_Tab(QWidget):
             Thread(target=self.select_or_un_select_all_items, args=()).start()
 
 
+    # 执行工具栏操作
     def connect_execute_selected_items(self):
         pass
+
+
+    # 保存标签工具栏操作
+    def connect_save_script_tag(self):
+        if len(self.list_widget) > 0:
+            filename = QFileDialog.getSaveFileName(self, 'save script', os.getcwd(), 'script file(*.xml)')
+            if filename:
+                with open(filename[0], 'w', encoding='utf-8') as f:
+                    script_tag = ''.join(self.tag_list)
+                    f.write(script_tag)
+                    logger('[保存的脚本标签名为]: %s' %filename[0])
+            else:
+                logger('[保存脚本标签取消!]')
+        else:
+            logger('[没有要保存的脚本标签!]')
 
 
     # 播放单个动作
