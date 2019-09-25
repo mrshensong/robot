@@ -663,9 +663,9 @@ class Ui_MainWindow(QMainWindow):
                 position_str = '0,0'
                 position_tuple = (0.0, 0.0)
             # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
-            self.tab_widget.add_action_window.points.setText(position_str)
-            self.tab_widget.add_action_window.info_dict[add_action_window.points] = position_tuple
-            self.tab_widget.add_action_window.setHidden(False)
+            self.tab_widget.action_tab.add_action_window.points.setText(position_str)
+            self.tab_widget.action_tab.add_action_window.info_dict[add_action_window.points] = position_tuple
+            self.tab_widget.action_tab.add_action_window.setHidden(False)
             add_action_window.add_action_flag = False
         # 正常点击时会直接执行动作
         else:
