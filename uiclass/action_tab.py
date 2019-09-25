@@ -152,7 +152,10 @@ class Action_Tab(QWidget):
             self.custom_control_list[i].id = i
         self.index -= 1
         # 发送需要显示的脚本标签
-        self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        if len(self.tag_list) > 0:
+            self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        else:
+            self.signal.emit('script_tag>')
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')

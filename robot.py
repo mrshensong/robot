@@ -371,6 +371,8 @@ class Ui_MainWindow(QMainWindow):
             self.switch_camera_status()
         self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', os.getcwd())
         if self.get_path:
+            uArm_action.uArm_action_type = None
+            self.label_video.x0, self.label_video.y0 = self.label_video.x1, self.label_video.y1
             self.videos, self.videos_title = [], []
             self.current_frame, self.current_video, self.frame_count = 0, 0, 0
             for home, dirs, files in os.walk(self.get_path):
