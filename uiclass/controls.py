@@ -6,6 +6,9 @@ from GlobalVar import icon_path, uArm_action, add_action_window, logger
 
 # 自定义动作展示控件
 class Action_Control(QWidget):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, id, type='click'):
         super(Action_Control, self).__init__(parent)
         self.parent = parent
@@ -59,11 +62,15 @@ class Action_Control(QWidget):
 
 # 自定义动作展示控件
 class Case_Control(QWidget):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, id):
         super(Case_Control, self).__init__(parent)
         self.parent = parent
         self.id = id
         self.initUI()
+
 
     def initUI(self):
         # 选择框
@@ -77,9 +84,14 @@ class Case_Control(QWidget):
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
-        self.h_box.addWidget(self.case_name_edit)
         self.h_box.addWidget(self.play_botton)
+        self.h_box.addWidget(self.case_name_edit)
         self.setLayout(self.h_box)
+
+
+    # 当前控件双击事件后(发送信号到父控件, 发送当前id)
+    def mouseDoubleClickEvent(self, event):
+        self.signal.emit('open_case>'+str(self.id))
 
 
 # 动作添加控件
