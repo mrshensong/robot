@@ -35,5 +35,5 @@ class Custom_TabWidget(QTabWidget):
             self.signal.emit(signal_str)
         elif signal_str.startswith('script_tag>'):
             self.text_tab.setText(signal_str.split('script_tag>')[1])
-        else:
-            pass
+        elif signal_str.startswith('execute>'):
+            self.signal.emit(signal_str)
