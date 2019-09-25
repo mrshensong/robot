@@ -113,9 +113,11 @@ class Action_Tab(QWidget):
             filename = QFileDialog.getSaveFileName(self, 'save script', os.getcwd(), 'script file(*.xml)')
             if filename:
                 with open(filename[0], 'w', encoding='utf-8') as f:
-                    script_tag = ''.join(self.tag_list)
+                    script_tag = self.merge_to_script(''.join(self.tag_list))
+                    script_tag = '<case name="' +filename[0].split('/')[-1].split('.xml')[0]+ script_tag.split('<case name="')[1]
                     f.write(script_tag)
                     logger('[保存的脚本标签名为]: %s' %filename[0])
+                    self.signal.emit('script_tag>' + script_tag)
             else:
                 logger('[保存脚本标签取消!]')
         else:
@@ -150,7 +152,7 @@ class Action_Tab(QWidget):
             self.custom_control_list[i].id = i
         self.index -= 1
         # 发送需要显示的脚本标签
-        self.signal.emit('script_tag>' + ''.join(self.tag_list))
+        self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -247,7 +249,7 @@ class Action_Tab(QWidget):
         self.info_list.append(info_dict)
         self.tag_list.append(self.generate_tag(info_dict))
         # 发送需要显示的脚本标签
-        self.signal.emit('script_tag>' + ''.join(self.tag_list))
+        self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         # 打印新建动作信息
         if info_dict[add_action_window.des_text] == '':
             logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
@@ -265,8 +267,15 @@ class Action_Tab(QWidget):
         des_text = info_dict[add_action_window.des_text]
         action =   info_dict[add_action_window.action]
         points =   str(tuple(info_dict[add_action_window.points]))
-        tag = '<action description="' + des_text + '">\n' + \
-              '\t' + '<param name="type">'     + action  + '</param>\n' + \
-              '\t' + '<param name="position">' + points  + '</param>\n' + \
-              '</action>\n'
+        tag = '\t<action description="' + des_text + '">\n' + \
+              '\t\t' + '<param name="type">'     + action  + '</param>\n' + \
+              '\t\t' + '<param name="position">' + points  + '</param>\n' + \
+              '\t</action>\n'
         return tag
+
+
+    # 将所有action合并成为script
+    def merge_to_script(self, tag_string):
+        script_start = '<case name="' + '">\n'
+        script_end   = '</case>'
+        return script_start + tag_string + script_end

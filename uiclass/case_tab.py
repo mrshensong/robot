@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import xml.etree.cElementTree as ET
 from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -92,8 +93,8 @@ class Case_Tab(QWidget):
         # 打开当前case(拆分为action)
         if signal_str.startswith('open_case>'):
             id = int(signal_str.split('>')[1])
-            self.read_script_tag(id)
-            # self.signal.emit()
+            case_info_list = self.read_script_tag(id)
+            self.signal.emit('case_transform_to_action>'+str(case_info_list))
         else:
             pass
 
@@ -102,6 +103,24 @@ class Case_Tab(QWidget):
     def read_script_tag(self, id):
         case_file = self.case_file_list[id]
         logger('[打开的case路径为]: %s' %case_file)
+        tree = ET.ElementTree(file=case_file)
+        root = tree.getroot()
+        dict_list = []
+        for child_of_root in root:
+            child_info_list = []
+            if child_of_root.tag == 'action':
+                child_info_list.append(child_of_root.attrib)
+                for child_child_of_root in child_of_root:
+                    dict_info = {child_child_of_root.attrib['name']: child_child_of_root.text}
+                    child_info_list.append(dict_info)
+                dict_list.append(child_info_list)
+        new_dict_info = []
+        for info in dict_list:
+            dict_buffer = {}
+            for dict_info in info:
+                dict_buffer.update(dict_info)
+            new_dict_info.append(dict_buffer)
+        return new_dict_info
 
 
 
