@@ -20,7 +20,7 @@ from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
-from uiclass.custom_tabwidget import Custom_TabWidget
+from uiclass.tab_widget import TabWidget
 
 
 
@@ -732,7 +732,7 @@ class Ui_MainWindow(QMainWindow):
 
     # case展示
     def show_case(self):
-        self.tab_widget = Custom_TabWidget(self.centralwidget)
+        self.tab_widget = TabWidget(self.centralwidget)
         self.grid.addWidget(self.tab_widget, 0, 8, 3, 2)
         self.tab_widget.signal[str].connect(self.recv_tab_widget_signal)
 

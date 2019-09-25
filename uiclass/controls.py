@@ -5,9 +5,9 @@ from PyQt5.QtCore import *
 from GlobalVar import icon_path, uArm_action, add_action_window, logger
 
 # 自定义动作展示控件
-class Custom_Control(QWidget):
+class Action_Control(QWidget):
     def __init__(self, parent, id, type='click'):
-        super(Custom_Control, self).__init__(parent)
+        super(Action_Control, self).__init__(parent)
         self.parent = parent
         self.id = id
         self.type = type
@@ -161,11 +161,3 @@ class Add_Action_Control(QDialog):
         self.points.setText('')
         self.check_box.setCheckState(Qt.Checked)
         self.close()
-
-
-import sys
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Add_Action_Control(None)
-    win.show()
-    sys.exit(app.exec_())

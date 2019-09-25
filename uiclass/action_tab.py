@@ -1,4 +1,3 @@
-import sys
 import json
 import time
 from threading import Thread
@@ -6,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar
-from uiclass.custom_control import Custom_Control, Add_Action_Control
+from uiclass.controls import Action_Control, Add_Action_Control
 
 class Action_Tab(QWidget):
 
@@ -208,7 +207,7 @@ class Action_Tab(QWidget):
             points_text = '0.0,0.0'
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 80))
-        obj = Custom_Control(parent=None, id=self.index, type=info_dict[add_action_window.action])
+        obj = Action_Control(parent=None, id=self.index, type=info_dict[add_action_window.action])
         obj.id = self.index
         obj.des_line_edit.setText(info_dict[add_action_window.des_text])
         obj.points_line_edit.setText(points_text)

@@ -1,20 +1,14 @@
-import sys
-import json
-import time
-from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar
-from uiclass.custom_control import Custom_Control, Add_Action_Control
 from uiclass.action_tab import Action_Tab
 
-class Custom_TabWidget(QTabWidget):
+class TabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent, tab1='action', tab2='edit'):
-        super(Custom_TabWidget, self).__init__(parent)
+        super(TabWidget, self).__init__(parent)
         self.parent = parent
         self.setTabPosition(self.South)
 
