@@ -54,7 +54,6 @@ class Ui_MainWindow(QMainWindow):
         # 视频进度条
         self.slider_thread = Timer(frequent=4)
         self.slider_thread.timeSignal[str].connect(self.slider_refresh)
-        self.slider_thread.start()
         # 使用pyqt定时器
         # self.timer_video = QTimer(self)
         # self.timer_video.timeout.connect(self.show_video)
@@ -94,6 +93,8 @@ class Ui_MainWindow(QMainWindow):
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
         self.statusbar.showMessage(self.window_status_text)
+        self.statusbar.setStyleSheet('color:green')
+        self.statusbar.setFont(QFont(self.font, 13))
         # 工具栏
         self.ui_toolbar = self.addToolBar('ui_toolbar')
         self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
@@ -196,13 +197,15 @@ class Ui_MainWindow(QMainWindow):
             # 不管离线视频是否正在播放(先关掉视频, 再切换到直播)
             self.timer_video.stop()
             self.label_video.video_play_flag = self.video_play_flag = False
-            self.label_video_title.setText('实时视频流')
+            self.label_video_title.setText('[实时视频流]')
             self.video_progress_bar.setValue(0)
             self.label_frame_show.setText('')
             self.video_progress_bar.setEnabled(False)
             robot_other.select_template_flag = False
+            # 离线视频进度条关闭
+            self.slider_thread.stop()
             # 打开实时流视频并播放
-            logger('打开摄像头')
+            logger('<打开摄像头>')
             self.camera_status = self.camera_opened
             self.video_stream()
             self.switch_camera_status_action.setIcon(QIcon(icon_path.Icon_ui_close_camera))
@@ -215,14 +218,18 @@ class Ui_MainWindow(QMainWindow):
             self.video_status = self.STATUS_PLAYING
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
             self.status_video_button.setEnabled(True)
+            # 让tab_widget可以操作
+            self.tab_widget.setEnabled(True)
             # 通过在线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
         else:
-            logger('关闭摄像头')
+            logger('<关闭摄像头>')
             # 关闭视频展示定时器
             self.timer_video.stop()
             self.video_status = self.STATUS_INIT
             robot_other.select_template_flag = False
+            # 离线视频进度条打开
+            self.slider_thread.start()
             self.label_video.setCursor(Qt.ArrowCursor)
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             self.camera_status = self.camera_closed
@@ -436,6 +443,8 @@ class Ui_MainWindow(QMainWindow):
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
             self.video_progress_bar.setRange(0, self.frame_count-1)
+            # 让tab_widget不可以操作
+            self.tab_widget.setEnabled(False)
             # 通过离线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
         else:
@@ -635,7 +644,7 @@ class Ui_MainWindow(QMainWindow):
         self.label_video_title = QtWidgets.QLabel(self.label_video)
         self.label_video_title.setObjectName("label_video_title")
         self.label_video_title.setAlignment(Qt.AlignCenter)
-        self.label_video_title.setText('实时视频流')
+        self.label_video_title.setText('[实时视频流]')
         self.label_video_title.setFont(QFont(self.font, 15))
         # 视频进度条
         self.video_progress_bar = QSlider(Qt.Horizontal, self.label_video)
@@ -877,7 +886,7 @@ class Ui_MainWindow(QMainWindow):
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
-                logger('打开视频流')
+                logger('<打开视频流>')
             elif self.video_status is self.STATUS_PLAYING:
                 self.timer_video.stop()
                 self.video_status = self.STATUS_PAUSE
@@ -885,7 +894,7 @@ class Ui_MainWindow(QMainWindow):
                 self.label_video.setCursor(Qt.CrossCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
                 self.template_label()
-                logger('暂停视频流')
+                logger('<暂停视频流>')
             elif self.video_status is self.STATUS_PAUSE:
                 self.timer_video.start()
                 self.label_video_title.setStyleSheet('color:white')
@@ -893,7 +902,7 @@ class Ui_MainWindow(QMainWindow):
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
-                logger('打开视频流')
+                logger('<打开视频流>')
         else: # 如果是录播模式
             if self.video_status is self.STATUS_INIT:
                 self.timer_video.start()
@@ -906,6 +915,7 @@ class Ui_MainWindow(QMainWindow):
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
+                logger('<播放视频>')
             elif self.video_status is self.STATUS_PLAYING:
                 self.timer_video.stop()
                 # 暂停后/使能上下一帧
@@ -918,6 +928,7 @@ class Ui_MainWindow(QMainWindow):
                 robot_other.select_template_flag = True
                 self.label_video.setCursor(Qt.CrossCursor)
                 self.template_label()
+                logger('<暂停视频>')
             elif self.video_status is self.STATUS_PAUSE:
                 self.timer_video.start()
                 self.last_frame_button.setEnabled(False)
@@ -929,6 +940,7 @@ class Ui_MainWindow(QMainWindow):
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 robot_other.select_template_flag = False
                 self.label_video.setCursor(Qt.ArrowCursor)
+                logger('<播放视频>')
             elif self.video_status is self.STATUS_STOP:
                 self.current_frame = 0
                 self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
@@ -948,6 +960,7 @@ class Ui_MainWindow(QMainWindow):
                 self.next_video_button.setEnabled(False)
                 self.last_frame_button.setEnabled(False)
                 self.next_frame_button.setEnabled(False)
+                logger('<重新播放视频>')
         time.sleep(0.1)  # 延时防抖
         self.status_video_button.setEnabled(True)
 

@@ -115,7 +115,7 @@ class Action_Tab(QWidget):
     def connect_save_script_tag(self):
         if len(self.list_widget) > 0:
             filename = QFileDialog.getSaveFileName(self, 'save script', os.getcwd(), 'script file(*.xml)')
-            if filename:
+            if filename[0]:
                 with open(filename[0], 'w', encoding='utf-8') as f:
                     self.case_absolute_name = filename[0]
                     self.case_file_name = filename[0].split('/')[-1]
@@ -125,7 +125,7 @@ class Action_Tab(QWidget):
                     self.signal.emit('save_script_tag>' + script_tag)
                     robot_other.actions_saved_to_case = True
             else:
-                logger('[保存脚本标签取消!]')
+                logger('[取消保存脚本标签!]')
         else:
             logger('[没有要保存的脚本标签!]')
 
