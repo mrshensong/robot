@@ -48,10 +48,8 @@ class TabWidget(QTabWidget):
     def recv_case_tab_signal(self, signal_str):
         # 双击case后将case中的action展示出来
         if signal_str.startswith('case_transform_to_action>'):
-            signal_str = signal_str.replace('description', 'des_text')
-            signal_str = signal_str.replace('type', 'action')
-            signal_str = signal_str.replace('position', 'points')
             dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
             for id in range(len(dict_info_list)):
+                # 将字典中的'(0, 0)'转为元祖(0, 0)
                 dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
                 self.action_tab.add_item(dict_info_list[id])

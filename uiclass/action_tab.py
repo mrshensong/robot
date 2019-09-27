@@ -136,11 +136,11 @@ class Action_Tab(QWidget):
         # 打印删除信息
         if self.info_list[id][add_action_window.des_text] == '':
             logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(id),
-                                                                            self.str_decorate(self.info_list[id][add_action_window.action]),
+                                                                            self.str_decorate(self.info_list[id][add_action_window.action_type]),
                                                                             str(self.info_list[id][add_action_window.points])))
         else:
             logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(id),
-                                                                      self.str_decorate(self.info_list[id][add_action_window.action]),
+                                                                      self.str_decorate(self.info_list[id][add_action_window.action_type]),
                                                                       str(self.info_list[id][add_action_window.points]),
                                                                       self.info_list[id][add_action_window.des_text]))
         self.list_widget.takeItem(id)
@@ -238,7 +238,7 @@ class Action_Tab(QWidget):
             points_text = '0.0,0.0'
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 80))
-        obj = Action_Control(parent=None, id=self.index, type=info_dict[add_action_window.action])
+        obj = Action_Control(parent=None, id=self.index, type=info_dict[add_action_window.action_type])
         obj.id = self.index
         obj.des_line_edit.setText(info_dict[add_action_window.des_text])
         obj.points_line_edit.setText(points_text)
@@ -256,11 +256,11 @@ class Action_Tab(QWidget):
         # 打印新建动作信息
         if info_dict[add_action_window.des_text] == '':
             logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
-                                                                            self.str_decorate(info_dict[add_action_window.action]),
+                                                                            self.str_decorate(info_dict[add_action_window.action_type]),
                                                                             str(info_dict[add_action_window.points])))
         else:
             logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(obj.id),
-                                                                         self.str_decorate(info_dict[add_action_window.action]),
+                                                                         self.str_decorate(info_dict[add_action_window.action_type]),
                                                                          str(info_dict[add_action_window.points]),
                                                                          info_dict[add_action_window.des_text]))
 
@@ -268,11 +268,11 @@ class Action_Tab(QWidget):
     # 添加动作时生成标签
     def generate_tag(self, info_dict):
         des_text = info_dict[add_action_window.des_text]
-        action =   info_dict[add_action_window.action]
+        action_type =   info_dict[add_action_window.action_type]
         points =   str(tuple(info_dict[add_action_window.points]))
-        tag = '\t<action description="' + des_text + '">\n' + \
-              '\t\t' + '<param name="type">'     + action  + '</param>\n' + \
-              '\t\t' + '<param name="position">' + points  + '</param>\n' + \
+        tag = '\t<action '+add_action_window.des_text+'="' + des_text + '">\n'+\
+              '\t\t' + '<param name="'+add_action_window.action_type+'">' +action_type+ '</param>\n'+\
+              '\t\t' + '<param name="'+add_action_window.points+'">' +points+ '</param>\n'+\
               '\t</action>\n'
         return tag
 

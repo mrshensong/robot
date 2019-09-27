@@ -743,7 +743,7 @@ class Ui_MainWindow(QMainWindow):
     def recv_tab_widget_signal(self, signal_str):
         if signal_str.startswith('execute>'):
             signal_dict = json.loads(signal_str.split('>')[1])
-            action_type = signal_dict[add_action_window.action]
+            action_type = signal_dict[add_action_window.action_type]
             position_tuple = signal_dict[add_action_window.points]
             # 有;存在则说明是滑动动作(两个坐标)
             if len(position_tuple) == 2:

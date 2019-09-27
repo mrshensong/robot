@@ -1,18 +1,18 @@
 <case name="测试脚本">
-	<action description="单击">
-		<param name="type">click</param>
-		<param name="position">(-70.104, 109.595)</param>
+	<action des_text="单击">
+		<param name="action_type">click</param>
+		<param name="points">(-70.104, 109.595)</param>
 	</action>
-	<action description="双击">
-		<param name="type">double_click</param>
-		<param name="position">(-69.935, 95.004)</param>
+	<action des_text="双击">
+		<param name="action_type">double_click</param>
+		<param name="points">(-69.935, 95.004)</param>
 	</action>
-	<action description="长按">
-		<param name="type">long_click</param>
-		<param name="position">(-75.184, 109.271)</param>
+	<action des_text="长按">
+		<param name="action_type">long_click</param>
+		<param name="points">(-75.184, 109.271)</param>
 	</action>
-	<action description="滑动">
-		<param name="type">slide</param>
-		<param name="position">(-60.113, 88.357, -60.113, 147.532)</param>
+	<action des_text="滑动">
+		<param name="action_type">slide</param>
+		<param name="points">(-60.113, 88.357, -60.113, 147.532)</param>
 	</action>
 </case>

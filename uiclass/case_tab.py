@@ -174,10 +174,10 @@ class Case_Tab(QWidget):
     # 添加动作时生成标签
     def generate_tag(self, info_dict):
         des_text = info_dict[add_action_window.des_text]
-        action =   info_dict[add_action_window.action]
-        points =   str(tuple(info_dict[add_action_window.points]))
-        tag = '<action description="' + des_text + '">\n' + \
-              '\t' + '<param name="type">'     + action  + '</param>\n' + \
-              '\t' + '<param name="position">' + points  + '</param>\n' + \
-              '</action>\n'
+        action_type = info_dict[add_action_window.action_type]
+        points = str(tuple(info_dict[add_action_window.points]))
+        tag = '\t<action ' + add_action_window.des_text + '="' + des_text + '">\n' + \
+              '\t\t' + '<param name="' + add_action_window.action_type + '">' + action_type + '</param>\n' + \
+              '\t\t' + '<param name="' + add_action_window.points + '">' + points + '</param>\n' + \
+              '\t</action>\n'
         return tag
