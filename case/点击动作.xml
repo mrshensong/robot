@@ -1,4 +1,4 @@
-<case name="点击动作">
+<case name="点击动作.xml">
 	<action des_text="点击1">
 		<param name="action_type">click</param>
 		<param name="points">(-67.942, 110.661)</param>

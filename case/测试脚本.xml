@@ -1,4 +1,4 @@
-<case name="测试脚本">
+<case name="测试脚本.xml">
 	<action des_text="单击">
 		<param name="action_type">click</param>
 		<param name="points">(-70.104, 109.595)</param>

@@ -29,6 +29,9 @@ class Action_Tab(QWidget):
         self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
         # 是否全部选中状态(False:没有全部选中, True:全部选中)
         self.select_all_flag = False
+        # 当前所有action需要保存的文件名(或者打开case时现实的case文件名)
+        self.case_file_name = ''
+        # tab初始化
         self.action_tab_init()
 
 
@@ -113,8 +116,8 @@ class Action_Tab(QWidget):
             filename = QFileDialog.getSaveFileName(self, 'save script', os.getcwd(), 'script file(*.xml)')
             if filename:
                 with open(filename[0], 'w', encoding='utf-8') as f:
+                    self.case_file_name = filename[0].split('/')[-1]
                     script_tag = self.merge_to_script(''.join(self.tag_list))
-                    script_tag = '<case name="' +filename[0].split('/')[-1].split('.xml')[0]+ script_tag.split('<case name="')[1]
                     f.write(script_tag)
                     logger('[保存的脚本标签名为]: %s' %filename[0])
                     self.signal.emit('script_tag>' + script_tag)
@@ -279,6 +282,6 @@ class Action_Tab(QWidget):
 
     # 将所有action合并成为script
     def merge_to_script(self, tag_string):
-        script_start = '<case name="' + '">\n'
+        script_start = '<case name="'+self.case_file_name+'">\n'
         script_end   = '</case>'
         return script_start + tag_string + script_end

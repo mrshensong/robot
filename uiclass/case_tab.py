@@ -100,12 +100,14 @@ class Case_Tab(QWidget):
 
 
     # 读取当前的script_xml文件(通过id可以获取到当前脚本文件)
+    # 返回list为每个action的信息(字典形式)>>list第一个参数为case文件名, 后面参数为每个action的信息存储字典
     def read_script_tag(self, id):
         case_file = self.case_file_list[id]
         logger('[打开的case路径为]: %s' %case_file)
         tree = ET.ElementTree(file=case_file)
         root = tree.getroot()
-        dict_list = []
+        dict_list, new_dict_info = [], []
+        new_dict_info.append(root.attrib['name'])
         for child_of_root in root:
             child_info_list = []
             if child_of_root.tag == 'action':
@@ -114,7 +116,6 @@ class Case_Tab(QWidget):
                     dict_info = {child_child_of_root.attrib['name']: child_child_of_root.text}
                     child_info_list.append(dict_info)
                 dict_list.append(child_info_list)
-        new_dict_info = []
         for info in dict_list:
             dict_buffer = {}
             for dict_info in info:
