@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.action_tab import Action_Tab
 from uiclass.case_tab import Case_Tab
+from GlobalVar import robot_other
 
 class TabWidget(QTabWidget):
 
@@ -48,10 +49,19 @@ class TabWidget(QTabWidget):
     def recv_case_tab_signal(self, signal_str):
         # 双击case后将case中的action展示出来
         if signal_str.startswith('case_transform_to_action>'):
-            dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
-            # list中第一个参数为case文件名, 后面的为动作信息
-            self.action_tab.case_file_name = dict_info_list[0]
-            for id in range(1, len(dict_info_list)):
-                # 将字典中的'(0, 0)'转为元祖(0, 0)
-                dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                self.action_tab.add_item(dict_info_list[id])
+            # 如果还有actions未保存(判断是否需要将当前actions保存为case)
+            if robot_other.actions_saved_to_case is False:
+                reply = QMessageBox.question(self, '当前actions未保存为case', '是否要将当前actions保存为case?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                if reply == QMessageBox.Yes:
+                    self.action_tab.connect_save_script_tag()
+                else:
+                    self.action_tab.clear_all_items()
+            else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
+                self.action_tab.clear_all_items()
+                dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
+                # list中第一个参数为case文件名, 后面的为动作信息
+                self.action_tab.case_file_name = dict_info_list[0]
+                for id in range(1, len(dict_info_list)):
+                    # 将字典中的'(0, 0)'转为元祖(0, 0)
+                    dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
+                    self.action_tab.add_item(dict_info_list[id], flag=False)

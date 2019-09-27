@@ -9,15 +9,20 @@ class gloVar():
     # 添加动作按钮是否可以点击(需要先框选车机屏幕大小, 之后才能点击)
     add_action_button_flag = False
 
-# 需要获取机械臂点击起点(录像case时起点标志位)
+
 class robot_other():
     # 机械臂起点标志
     robot_start_flag = False
     # 需要进行框选动作时, 打开此标志
     select_template_flag = False
+    # 全局传递图像
     image = None
+    # 全局传递模板图片路径
     mask_path = None
+    # 数据处理标志
     data_process_flag = False
+    # 判断当前action是否已经保存成为case标志
+    actions_saved_to_case = True
 
 
 # Icon路径

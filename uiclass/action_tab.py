@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other
 from uiclass.controls import Action_Control, Add_Action_Control
 
 class Action_Tab(QWidget):
@@ -121,6 +121,7 @@ class Action_Tab(QWidget):
                     f.write(script_tag)
                     logger('[保存的脚本标签名为]: %s' %filename[0])
                     self.signal.emit('script_tag>' + script_tag)
+                    robot_other.actions_saved_to_case = True
             else:
                 logger('[保存脚本标签取消!]')
         else:
@@ -159,6 +160,7 @@ class Action_Tab(QWidget):
             self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         else:
             self.signal.emit('script_tag>')
+            robot_other.actions_saved_to_case = True
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -174,6 +176,9 @@ class Action_Tab(QWidget):
         self.info_list = []
         self.tag_list = []
         self.index = -1
+        # 取消脚本页的脚本
+        self.signal.emit('script_tag>')
+        robot_other.actions_saved_to_case = True
 
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
@@ -185,6 +190,7 @@ class Action_Tab(QWidget):
                 self.select_all_flag = False
                 self.select_all_button.setToolTip('select_all')
                 self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+                robot_other.actions_saved_to_case = True
                 break
             else:
                 if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
@@ -226,7 +232,7 @@ class Action_Tab(QWidget):
 
 
     # 添加动作控件
-    def add_item(self, info_dict):
+    def add_item(self, info_dict, flag=True):
         # 给动作设置id
         self.index += 1
         # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
@@ -249,23 +255,27 @@ class Action_Tab(QWidget):
         obj.delete_botton.clicked.connect(lambda : self.delete_item(obj.id))
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
-        # print('the totle item is : ', self.list_widget.count())
         self.item_list.append(obj)
         self.custom_control_list.append(obj)
         self.info_list.append(info_dict)
         self.tag_list.append(self.generate_tag(info_dict))
         # 发送需要显示的脚本标签
         self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
-        # 打印新建动作信息
-        if info_dict[add_action_window.des_text] == '':
-            logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
-                                                                            self.str_decorate(info_dict[add_action_window.action_type]),
-                                                                            str(info_dict[add_action_window.points])))
-        else:
-            logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(obj.id),
-                                                                         self.str_decorate(info_dict[add_action_window.action_type]),
-                                                                         str(info_dict[add_action_window.points]),
-                                                                         info_dict[add_action_window.des_text]))
+        # 如果确实是添加动作
+        if flag is True:
+            robot_other.actions_saved_to_case = False
+            # 打印新建动作信息
+            if info_dict[add_action_window.des_text] == '':
+                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
+                                                                                self.str_decorate(info_dict[add_action_window.action_type]),
+                                                                                str(info_dict[add_action_window.points])))
+            else:
+                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(obj.id),
+                                                                             self.str_decorate(info_dict[add_action_window.action_type]),
+                                                                             str(info_dict[add_action_window.points]),
+                                                                             info_dict[add_action_window.des_text]))
+        else: # 通过case文件打开actions
+            robot_other.actions_saved_to_case = True
 
 
     # 添加动作时生成标签

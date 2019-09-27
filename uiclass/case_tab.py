@@ -57,6 +57,7 @@ class Case_Tab(QWidget):
     def connect_import_button(self):
         case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', os.getcwd())
         if case_folder:
+            self.clear_all_items()
             for home, dirs, files in os.walk(case_folder):
                 for file in files:
                     # 判断脚本文件(通过后缀名)
