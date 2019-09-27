@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.action_tab import Action_Tab
 from uiclass.case_tab import Case_Tab
-from GlobalVar import robot_other
+from GlobalVar import robot_other, logger
 
 class TabWidget(QTabWidget):
 
@@ -49,13 +49,17 @@ class TabWidget(QTabWidget):
     def recv_case_tab_signal(self, signal_str):
         # 双击case后将case中的action展示出来
         if signal_str.startswith('case_transform_to_action>'):
+            # 设置当前tab页面
+            self.setCurrentWidget(self.action_tab)
             # 如果还有actions未保存(判断是否需要将当前actions保存为case)
             if robot_other.actions_saved_to_case is False:
-                reply = QMessageBox.question(self, '当前actions未保存为case', '是否要将当前actions保存为case?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                reply = QMessageBox.question(self, 'action_tab页有actions未保存为case', '是否要将当前actions保存为case?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
                     self.action_tab.connect_save_script_tag()
                 else:
                     self.action_tab.clear_all_items()
+                    logger('[请重新打开case脚本!]')
+                    self.setCurrentWidget(self.case_tab)
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
                 self.action_tab.clear_all_items()
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
