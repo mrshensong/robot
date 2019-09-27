@@ -100,6 +100,17 @@ class add_action_window():
     take_back   = 'take_back'
 
 
+class window_status():
+    # 机械臂('机械臂连接成功!' / '机械臂连接失败!')
+    robot_connect_status = '机械臂未连接!'
+    # 视频帧率
+    video_frame_rate = '120fps'
+    # action_tab页面
+    action_tab_status = '没有action'
+    # case_tab页面
+    case_tab_status = '没有打开case目录'
+
+
 # 自定义log对象
 import time
 class logger():

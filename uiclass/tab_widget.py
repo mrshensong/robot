@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.action_tab import Action_Tab
 from uiclass.case_tab import Case_Tab
-from GlobalVar import robot_other, logger
+from GlobalVar import robot_other, logger, window_status
 
 class TabWidget(QTabWidget):
 
@@ -34,8 +34,9 @@ class TabWidget(QTabWidget):
     def recv_action_tab_signal(self, signal_str):
         if signal_str.startswith('action>'):
             self.signal.emit(signal_str)
-        elif signal_str.startswith('script_tag>'):
-            self.text_tab.setText(signal_str.split('script_tag>')[1])
+        elif signal_str.startswith('save_script_tag>'):
+            self.text_tab.setText(signal_str.split('save_script_tag>')[1])
+            window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name
         elif signal_str.startswith('execute>'):
             self.signal.emit(signal_str)
         elif signal_str.startswith('case_transform_to_action>'):
@@ -56,16 +57,18 @@ class TabWidget(QTabWidget):
                 reply = QMessageBox.question(self, 'action_tab页有actions未保存为case', '是否要将当前actions保存为case?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
                     self.action_tab.connect_save_script_tag()
+                    self.recv_case_tab_signal(signal_str)
                 else:
                     self.action_tab.clear_all_items()
-                    logger('[请重新打开case脚本!]')
-                    self.setCurrentWidget(self.case_tab)
+                    self.recv_case_tab_signal(signal_str)
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
                 self.action_tab.clear_all_items()
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
                 # list中第一个参数为case文件名, 后面的为动作信息
                 self.action_tab.case_file_name = dict_info_list[0]
-                for id in range(1, len(dict_info_list)):
+                self.action_tab.case_absolute_name = dict_info_list[1]
+                for id in range(2, len(dict_info_list)):
                     # 将字典中的'(0, 0)'转为元祖(0, 0)
                     dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
                     self.action_tab.add_item(dict_info_list[id], flag=False)
+                window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name

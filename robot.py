@@ -16,7 +16,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path
+from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
@@ -47,6 +47,14 @@ class Ui_MainWindow(QMainWindow):
         # 使用自定义定时器
         self.timer_video = Timer()
         self.timer_video.timeSignal[str].connect(self.show_video)
+        # 显示窗口状态栏
+        self.timer_window_status = Timer(frequent=3)
+        self.timer_window_status.timeSignal[str].connect(self.show_window_status)
+        self.timer_window_status.start()
+        # 视频进度条
+        self.slider_thread = Timer(frequent=4)
+        self.slider_thread.timeSignal[str].connect(self.slider_refresh)
+        self.slider_thread.start()
         # 使用pyqt定时器
         # self.timer_video = QTimer(self)
         # self.timer_video.timeout.connect(self.show_video)
@@ -76,11 +84,6 @@ class Ui_MainWindow(QMainWindow):
         # 控制台输出框架
         self.output_text()
 
-        # 视频进度条
-        self.slider_thread = Timer(frequent=4)
-        self.slider_thread.timeSignal[str].connect(self.slider_refresh)
-        self.slider_thread.start()
-
         self.setCentralWidget(self.centralwidget)
         # 菜单栏
         self.menubar = QtWidgets.QMenuBar(self)
@@ -90,7 +93,7 @@ class Ui_MainWindow(QMainWindow):
         self.statusbar = QtWidgets.QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
-        self.statusbar.showMessage('ready')
+        self.statusbar.showMessage(self.window_status_text)
         # 工具栏
         self.ui_toolbar = self.addToolBar('ui_toolbar')
         self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
@@ -143,6 +146,10 @@ class Ui_MainWindow(QMainWindow):
         self.image = None
         # 获取截图保存路径
         self.picture_path = self.get_config_value(gloVar.config_file_path, 'param', 'picture_path')
+        # 窗口状态栏显示的固定格式
+        self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]'\
+                                  %(window_status.robot_connect_status, window_status.video_frame_rate,
+                                    window_status.action_tab_status, window_status.case_tab_status)
 
 
     # 获取config的参数
@@ -161,6 +168,13 @@ class Ui_MainWindow(QMainWindow):
         config.set(section, option, str(value))
         with open(file, 'w+', encoding='utf-8') as cf:
             config.write(cf)
+
+
+    def show_window_status(self):
+        self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
+                                  % (window_status.robot_connect_status, window_status.video_frame_rate,
+                                     window_status.action_tab_status, window_status.case_tab_status)
+        self.statusbar.showMessage(self.window_status_text)
 
 
     # 视频流
@@ -1134,6 +1148,8 @@ class Ui_MainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             # 关闭摄像头
             self.camera_status = self.camera_closed
+            self.timer_window_status.stop()
+            self.slider_thread.stop()
             event.accept()
         else:
             event.ignore()

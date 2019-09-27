@@ -6,7 +6,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, merge_path
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, merge_path, window_status
 from uiclass.controls import Case_Control
 
 class Case_Tab(QWidget):
@@ -67,6 +67,7 @@ class Case_Tab(QWidget):
                         case_file = merge_path([home, file]).merged_path
                         # 将文件名传入
                         self.add_item(case_file)
+            window_status.case_tab_status = 'case所在文件夹-->>%s!'%case_folder
         else:
             logger('没有选择case所在文件夹')
 
@@ -108,7 +109,8 @@ class Case_Tab(QWidget):
         tree = ET.ElementTree(file=case_file)
         root = tree.getroot()
         dict_list, new_dict_info = [], []
-        new_dict_info.append(root.attrib['name'])
+        new_dict_info.append(root.attrib['name']) # 文件名
+        new_dict_info.append(self.case_file_list[id]) # 完整路径
         for child_of_root in root:
             child_info_list = []
             if child_of_root.tag == 'action':

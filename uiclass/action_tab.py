@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status
 from uiclass.controls import Action_Control, Add_Action_Control
 
 class Action_Tab(QWidget):
@@ -31,6 +31,7 @@ class Action_Tab(QWidget):
         self.select_all_flag = False
         # 当前所有action需要保存的文件名(或者打开case时现实的case文件名)
         self.case_file_name = ''
+        self.case_absolute_name = ''
         # tab初始化
         self.action_tab_init()
 
@@ -116,11 +117,12 @@ class Action_Tab(QWidget):
             filename = QFileDialog.getSaveFileName(self, 'save script', os.getcwd(), 'script file(*.xml)')
             if filename:
                 with open(filename[0], 'w', encoding='utf-8') as f:
+                    self.case_absolute_name = filename[0]
                     self.case_file_name = filename[0].split('/')[-1]
                     script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
                     logger('[保存的脚本标签名为]: %s' %filename[0])
-                    self.signal.emit('script_tag>' + script_tag)
+                    self.signal.emit('save_script_tag>' + script_tag)
                     robot_other.actions_saved_to_case = True
             else:
                 logger('[保存脚本标签取消!]')
@@ -157,10 +159,15 @@ class Action_Tab(QWidget):
         self.index -= 1
         # 发送需要显示的脚本标签
         if len(self.tag_list) > 0:
+            robot_other.actions_saved_to_case = False
             self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         else:
             self.signal.emit('script_tag>')
             robot_other.actions_saved_to_case = True
+        if self.case_file_name == '':  # 空白新建action
+            window_status.action_tab_status = '新建case-->>未保存!'
+        else:  # case新增action
+            window_status.action_tab_status = '%s有改动-->>未保存!'%self.case_absolute_name
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -179,6 +186,8 @@ class Action_Tab(QWidget):
         # 取消脚本页的脚本
         self.signal.emit('script_tag>')
         robot_other.actions_saved_to_case = True
+        self.case_file_name = ''
+        self.case_absolute_name = ''
 
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
@@ -191,6 +200,8 @@ class Action_Tab(QWidget):
                 self.select_all_button.setToolTip('select_all')
                 self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
                 robot_other.actions_saved_to_case = True
+                self.case_file_name = ''
+                self.case_absolute_name = ''
                 break
             else:
                 if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
@@ -264,6 +275,10 @@ class Action_Tab(QWidget):
         # 如果确实是添加动作
         if flag is True:
             robot_other.actions_saved_to_case = False
+            if self.case_file_name == '': # 空白新建action
+                window_status.action_tab_status = '新建case-->>未保存!'
+            else: # case新增action
+                window_status.action_tab_status = '%s有改动-->>未保存!'%self.case_absolute_name
             # 打印新建动作信息
             if info_dict[add_action_window.des_text] == '':
                 logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
