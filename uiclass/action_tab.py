@@ -271,7 +271,7 @@ class Action_Tab(QWidget):
         self.info_list.append(info_dict)
         self.tag_list.append(self.generate_tag(info_dict))
         # 发送需要显示的脚本标签
-        self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         # 如果确实是添加动作
         if flag is True:
             robot_other.actions_saved_to_case = False
