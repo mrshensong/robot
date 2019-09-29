@@ -68,6 +68,7 @@ class icon_path():
     Icon_tab_widget_import        = 'config/Icon/tab_widget_icon/import.png'
     Icon_tab_widget_save          = 'config/Icon/tab_widget_icon/save.png'
 
+
 class uArm_action():
     # 机械臂动作类型(点击/双击/长按/滑动)
     uArm_action_type = None
@@ -78,6 +79,7 @@ class uArm_action():
     uArm_get_position = 'get_position'
     uArm_unlock = 'servo_detach'
     uArm_lock = 'servo_attach'
+
 
 # 机械臂操作参数
 class uArm_param():
@@ -109,6 +111,34 @@ class window_status():
     action_tab_status = '没有action'
     # case_tab页面
     case_tab_status = '没有打开case目录'
+
+
+# 配置文件的读取和写入
+import configparser
+class profile():
+    def __init__(self, type='read', file=None, section=None, option=None, value=None):
+        if type == 'read':
+            self.path = self.get_config_value(file=file, section=section, option=option)
+        if type == 'write':
+            self.set_config_value(file=file, section=section, option=option, value=value)
+
+
+    # 获取config的参数
+    def get_config_value(self, file, section, option):
+        config = configparser.ConfigParser()
+        config.read(file, encoding='utf-8')
+        return config.get(section, option)
+
+
+    # 设置config的参数
+    def set_config_value(self, file, section, option, value):
+        config = configparser.ConfigParser()
+        config.read(file, encoding='utf-8')
+        if section not in config.sections():
+            config.add_section(section)
+        config.set(section, option, str(value))
+        with open(file, 'w+', encoding='utf-8') as cf:
+            config.write(cf)
 
 
 # 自定义log对象

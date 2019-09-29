@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile
 from uiclass.controls import Action_Control, Add_Action_Control
 
 class Action_Tab(QWidget):
@@ -108,14 +108,25 @@ class Action_Tab(QWidget):
 
     # 执行工具栏操作
     def connect_execute_selected_items(self):
-        pass
+        index = 0
+        for i in range(len(self.list_widget)):
+            if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
+                # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+                self.signal.emit('execute>' + json.dumps(self.info_list[index]))
+                time.sleep(0.03)
+            index += 1
+
 
 
     # 保存标签工具栏操作
     def connect_save_script_tag(self):
         if len(self.list_widget) > 0:
-            filename = QFileDialog.getSaveFileName(self, 'save script', os.getcwd(), 'script file(*.xml)')
+            script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
+            filename = QFileDialog.getSaveFileName(self, 'save script', script_path, 'script file(*.xml)')
             if filename[0]:
+                current_path = ''.join(filename[0].split('/')[:-1])
+                if current_path != script_path:
+                    profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=current_path)
                 with open(filename[0], 'w', encoding='utf-8') as f:
                     self.case_absolute_name = filename[0]
                     self.case_file_name = filename[0].split('/')[-1]

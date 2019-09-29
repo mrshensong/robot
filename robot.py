@@ -16,7 +16,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status
+from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status, profile
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
@@ -146,29 +146,13 @@ class Ui_MainWindow(QMainWindow):
         # 当前图像帧
         self.image = None
         # 获取截图保存路径
-        self.picture_path = self.get_config_value(gloVar.config_file_path, 'param', 'picture_path')
+        self.picture_path = profile(type='read', file=gloVar.config_file_path, section='param', option='picture_path').path
+        # 视频所在的路径
+        self.videos_path = profile(type='read', file=gloVar.config_file_path, section='param', option='videos_path').path
         # 窗口状态栏显示的固定格式
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]'\
                                   %(window_status.robot_connect_status, window_status.video_frame_rate,
                                     window_status.action_tab_status, window_status.case_tab_status)
-
-
-    # 获取config的参数
-    def get_config_value(self, file, section, option):
-        config = configparser.ConfigParser()
-        config.read(file, encoding='utf-8')
-        return config.get(section, option)
-
-
-    # 设置config的参数
-    def set_config_value(self, file, section, option, value):
-        config = configparser.ConfigParser()
-        config.read(file, encoding='utf-8')
-        if section not in config.sections():
-            config.add_section(section)
-        config.set(section, option, str(value))
-        with open(file, 'w+', encoding='utf-8') as cf:
-            config.write(cf)
 
 
     def show_window_status(self):
@@ -390,8 +374,12 @@ class Ui_MainWindow(QMainWindow):
         if self.camera_status == self.camera_opened:
             camera_opened_flag = True
             self.switch_camera_status()
-        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', os.getcwd())
+        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
         if self.get_path:
+            if self.videos_path != self.get_path:
+                # 保存此次打开的路径(路径默认上一次)
+                self.videos_path = self.get_path
+                profile(type='write', file=gloVar.config_file_path, section='param', option='videos_path', value=self.get_path)
             uArm_action.uArm_action_type = None
             self.label_video.x0, self.label_video.y0 = self.label_video.x1, self.label_video.y1
             self.videos, self.videos_title = [], []

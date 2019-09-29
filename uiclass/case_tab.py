@@ -6,7 +6,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, merge_path, window_status
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, merge_path, window_status, profile
 from uiclass.controls import Case_Control
 
 class Case_Tab(QWidget):
@@ -55,8 +55,11 @@ class Case_Tab(QWidget):
 
     # 连接导入case按钮
     def connect_import_button(self):
-        case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', os.getcwd())
+        script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
+        case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', script_path)
         if case_folder:
+            if case_folder != script_path:
+                profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=case_folder)
             self.clear_all_items()
             for home, dirs, files in os.walk(case_folder):
                 for file in files:
