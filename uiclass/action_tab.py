@@ -249,13 +249,10 @@ class Action_Tab(QWidget):
         # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
         # 先将坐标元素转为字符串类型
         points = info_dict[add_action_window.points]
-        points = [str(x) for x in points]
-        if len(info_dict[add_action_window.points]) == 2:
-            points_text = ','.join(points)
-        elif len(info_dict[add_action_window.points]) == 4:
-            points_text = ','.join(points[:2]) +';' +','.join(points[2:])
+        if points:
+            points_text = str(tuple(points))
         else: # 无实际意义(单纯为了不让代码出现警告)
-            points_text = '0.0,0.0'
+            points_text = '(0.0, 0.0)'
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 80))
         obj = Action_Control(parent=None, id=self.index, type=info_dict[add_action_window.action_type])
@@ -281,13 +278,13 @@ class Action_Tab(QWidget):
                 window_status.action_tab_status = '%s有改动-->>未保存!'%self.case_absolute_name
             # 打印新建动作信息
             if info_dict[add_action_window.des_text] == '':
-                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(obj.id),
+                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(obj.id),
                                                                                 self.str_decorate(info_dict[add_action_window.action_type]),
-                                                                                str(info_dict[add_action_window.points])))
+                                                                                points_text))
             else:
-                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(obj.id),
+                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(obj.id),
                                                                              self.str_decorate(info_dict[add_action_window.action_type]),
-                                                                             str(info_dict[add_action_window.points]),
+                                                                             points_text,
                                                                              info_dict[add_action_window.des_text]))
         else: # 通过case文件打开actions
             robot_other.actions_saved_to_case = True

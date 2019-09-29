@@ -64,7 +64,8 @@ class Video_Label(QLabel):
             elif uArm_action.uArm_action_type == uArm_action.uArm_slide:
                 start = self.calculating_point(self.x0, self.y0)
                 end   = self.calculating_point(self.x1, self.y1)
-                info_list = [uArm_action.uArm_slide, start, end]
+                position = start + end
+                info_list = [uArm_action.uArm_slide, position]
                 self.signal.emit(str(info_list))
             # 其余情况判断是否暂停(若有暂停, 则可以进行模板框选)
             else:

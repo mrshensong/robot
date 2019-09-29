@@ -36,6 +36,7 @@ class Action_Control(QWidget):
 
         self.des_line_edit = QLineEdit(self)
         self.points_line_edit = QLineEdit(self)
+        self.points_line_edit.setFont(QFont('monospac821 BT', 8))
         self.v_box = QVBoxLayout()
         self.v_box.addWidget(self.des_line_edit)
         self.v_box.addWidget(self.points_line_edit)

@@ -677,13 +677,9 @@ class Ui_MainWindow(QMainWindow):
         info_list = eval(info_str)
         # 如果是添加动作时, 不作操作(只添加动作)
         if add_action_window.add_action_flag is True:
-            if info_list[0] in [uArm_action.uArm_click, uArm_action.uArm_double_click, uArm_action.uArm_long_click]:
-                position_str = str(info_list[1][0]) +','+ str(info_list[1][1])
+            if info_list[0] in [uArm_action.uArm_click, uArm_action.uArm_double_click, uArm_action.uArm_long_click, uArm_action.uArm_slide]:
+                position_str = str(info_list[1])
                 position_tuple = info_list[1]
-            elif info_list[0] == uArm_action.uArm_slide:
-                position_str = str(info_list[1][0]) + ',' + str(info_list[1][1]) + ';' +\
-                               str(info_list[2][0])   + ',' + str(info_list[2][1])
-                position_tuple = info_list[1] + info_list[2]
             else: # 为了不让position_str有警告(无具体意义)
                 position_str = '0,0'
                 position_tuple = (0.0, 0.0)
@@ -694,11 +690,13 @@ class Ui_MainWindow(QMainWindow):
             add_action_window.add_action_flag = False
         # 正常点击时会直接执行动作
         else:
-            if len(info_list) == 2:
+            # 点击动作
+            if len(info_list[1]) == 2:
                 action_type, position = info_list[0], info_list[1]
                 Thread(target=self.uArm_action_execute, args=(action_type, position,)).start()
-            elif len(info_list) == 3:
-                action_type, position, start, end = info_list[0], (0.0, 0.0), info_list[1], info_list[2]
+            # 滑动动作
+            elif len(info_list[1]) == 4:
+                action_type, position, start, end = info_list[0], (0.0, 0.0), info_list[1][:2], info_list[1][2:]
                 Thread(target=self.uArm_action_execute, args=(action_type, position, start, end,)).start()
 
 
@@ -709,25 +707,25 @@ class Ui_MainWindow(QMainWindow):
                     'speed': 150, 'leave': 1, 'time': 1,
                     'position': position, 'pressure_duration': 0}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
-            logger('执行--[单击动作]--坐标: %s' % str(position))
+            logger('执行-->action[click]---------坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_double_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': 150, 'leave': 1, 'time': 2,
                     'position': position, 'pressure_duration': 0}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_double_click, data,)).start()
-            logger('执行--[双击动作]--坐标: %s' % str(position))
+            logger('执行-->action[double_click]--坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_long_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': 150, 'leave': 1, 'time': 1,
                     'position': position, 'pressure_duration': 1000}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
-            logger('执行--[长按动作]--坐标: %s' % str(position))
+            logger('执行-->action[long_click]----坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_slide:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': 150, 'leave': 1,
                     'start': start, 'end': end}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_slide, data,)).start()
-            logger('执行--[滑动动作]--起点: %s, 终点: %s' % (str(start), str(end)))
+            logger('执行-->action[slide]---------坐标: %s' % str(tuple(start+end)))
 
 
     # 进度条刷新
@@ -767,15 +765,15 @@ class Ui_MainWindow(QMainWindow):
         if signal_str.startswith('execute>'):
             signal_dict = json.loads(signal_str.split('>')[1])
             action_type = signal_dict[add_action_window.action_type]
-            position_tuple = signal_dict[add_action_window.points]
+            position_tuple = tuple(signal_dict[add_action_window.points])
             # 有;存在则说明是滑动动作(两个坐标)
             if len(position_tuple) == 2:
                 position = tuple(position_tuple)
                 Thread(target=self.uArm_action_execute, args=(action_type, position,)).start()
             # 没有则说明是点击动作(单个坐标)
             else:
-                start = (position_tuple[0], position_tuple[1])
-                end   = (position_tuple[2], position_tuple[3])
+                start = position_tuple[:2]
+                end   = position_tuple[2:]
                 position = (0.0, 0.0)
                 Thread(target=self.uArm_action_execute, args=(action_type, position, start, end,)).start()
         # 添加action控件时候, 设置动作标志位
@@ -805,7 +803,7 @@ class Ui_MainWindow(QMainWindow):
         self.console.ensureCursorVisible()
         self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.console.setWordWrapMode(QTextOption.NoWrap)
-        # self.console.setFont(QFont(self.font, 12))
+        self.console.setFont(QFont('monospaced', 13))
         # self.console.setStyleSheet('background-color:lightGray')
         self.console_v_layout.addWidget(self.label_output)
         self.console_v_layout.addWidget(self.console)
