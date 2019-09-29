@@ -124,7 +124,7 @@ class Action_Tab(QWidget):
             script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
             filename = QFileDialog.getSaveFileName(self, 'save script', script_path, 'script file(*.xml)')
             if filename[0]:
-                current_path = ''.join(filename[0].split('/')[:-1])
+                current_path = '/'.join(filename[0].split('/')[:-1])
                 if current_path != script_path:
                     profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=current_path)
                 with open(filename[0], 'w', encoding='utf-8') as f:

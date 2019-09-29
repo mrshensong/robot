@@ -37,6 +37,8 @@ class TabWidget(QTabWidget):
         elif signal_str.startswith('save_script_tag>'):
             self.text_tab.setText(signal_str.split('save_script_tag>')[1])
             window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name
+            if self.case_tab.script_path is not None:
+                self.case_tab.connect_import_button(path=self.case_tab.script_path)
         elif signal_str.startswith('execute>'):
             self.signal.emit(signal_str)
         elif signal_str.startswith('case_transform_to_action>'):

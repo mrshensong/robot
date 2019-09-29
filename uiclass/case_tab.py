@@ -25,6 +25,8 @@ class Case_Tab(QWidget):
         self.case_file_list = []
         # 是否全部选中状态(False:没有全部选中, True:全部选中)
         self.select_all_flag = False
+        # 当前打开的脚本路径
+        self.script_path = None
         self.case_tab_init()
 
 
@@ -32,7 +34,7 @@ class Case_Tab(QWidget):
         self.import_button = QToolButton()
         self.import_button.setToolTip('import')
         self.import_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_import + ')}')
-        self.import_button.clicked.connect(self.connect_import_button)
+        self.import_button.clicked.connect(lambda:self.connect_import_button(None))
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('select_all')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
@@ -54,12 +56,25 @@ class Case_Tab(QWidget):
 
 
     # 连接导入case按钮
-    def connect_import_button(self):
-        script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
-        case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', script_path)
-        if case_folder:
-            if case_folder != script_path:
-                profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=case_folder)
+    def connect_import_button(self, path):
+        # 通过选择框导入case
+        if path is None:
+            script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
+            case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', script_path)
+            if case_folder:
+                if case_folder != script_path:
+                    profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=case_folder)
+            else:
+                case_folder = None
+        # 直接通过参数导入case
+        else:
+            case_folder = path
+            if case_folder is None:
+                return
+        # 保存当前case所在路径
+        self.script_path = case_folder
+        # 导入case的具体操作
+        if case_folder is not None:
             self.clear_all_items()
             for home, dirs, files in os.walk(case_folder):
                 for file in files:
