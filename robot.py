@@ -21,6 +21,7 @@ from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
 from uiclass.tab_widget import TabWidget
+from uiclass.controls import Camera_Param_Adjust_Control
 
 
 
@@ -99,6 +100,9 @@ class Ui_MainWindow(QMainWindow):
         self.ui_toolbar = self.addToolBar('ui_toolbar')
         self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
         self.video_play_toolbar = self.addToolBar('video_play_toolbar')
+        # 视频实时流参数设置框
+        self.camera_param_setting_widget = Camera_Param_Adjust_Control(self)
+
         # 网上百度到的说明:其作用是如其名称一样，用来将QObject 里的子孙QObject的某些信号按照其objectName连接到相应的槽上
         # 如 button_hello.setObjectName("hello_button")
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -507,6 +511,12 @@ class Ui_MainWindow(QMainWindow):
         logger('修改保存图片路径为: %s' %self.picture_path)
 
 
+    # 设置相机参数
+    def set_camera_param(self):
+        self.camera_param_setting_widget.show()
+        self.camera_param_setting_widget.exec()
+
+
     def tool_bar(self):
         # ui相关action
         self.setting_action               = QAction(QIcon(icon_path.Icon_ui_setting), 'setting', self)
@@ -519,6 +529,7 @@ class Ui_MainWindow(QMainWindow):
         self.capture_action.triggered.connect(self.screen_shot)
         self.box_screen_action.triggered.connect(self.box_screen)
         self.picture_path_action.triggered.connect(self.get_picture_path)
+        self.setting_action.triggered.connect(self.set_camera_param)
         # robot相关action
         self.click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
         self.double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)

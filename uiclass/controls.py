@@ -199,3 +199,47 @@ class Add_Action_Control(QDialog):
         self.points.setText('')
         self.check_box.setCheckState(Qt.Checked)
         self.close()
+
+
+# 相机参数调节控件
+class Camera_Param_Adjust_Control(QDialog):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(Camera_Param_Adjust_Control, self).__init__(parent)
+        self.parent = parent
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QGridLayout()
+
+        # 设置曝光
+        self.exposure_time_label = QLabel(self)
+        self.exposure_time_label.setText('曝光: ')
+        self.exposure_time_slider = QSlider(Qt.Horizontal, self)
+        # self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
+        self.exposure_time_spinbox = QSpinBox(self)
+        self.exposure_time_spinbox.setRange(1000, 100000)
+        self.general_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
+        self.general_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 3)
+        self.general_layout.addWidget(self.exposure_time_spinbox, 0, 4, 1, 1)
+
+        # 设置增益
+        self.gain_label = QLabel(self)
+        self.gain_label.setText('增益: ')
+        self.gain_slider = QSlider(Qt.Horizontal, self)
+        # self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
+        self.gain_spinbox = QSpinBox(self)
+        self.gain_spinbox.setRange(0, 100)
+        self.general_layout.addWidget(self.gain_label, 1, 0, 1, 1)
+        self.general_layout.addWidget(self.gain_slider, 1, 1, 1, 3)
+        self.general_layout.addWidget(self.gain_spinbox, 1, 4, 1, 1)
+
+        self.setLayout(self.general_layout)
+        # 设置字体
+        QFontDialog.setFont(self, QFont('Times New Roman', 11))
+        # 设置最小尺寸
+        self.setMinimumWidth(400)
+        self.setWindowTitle('摄像头参数')
