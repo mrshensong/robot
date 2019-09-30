@@ -1,6 +1,5 @@
 import time
 from PyQt5.QtCore import *
-from uiclass.signal import Communicate
 
 # 定时器
 class Timer(QThread):

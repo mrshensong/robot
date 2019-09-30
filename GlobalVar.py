@@ -8,6 +8,8 @@ class gloVar():
     save_pic_flag = False
     # 添加动作按钮是否可以点击(需要先框选车机屏幕大小, 之后才能点击)
     add_action_button_flag = False
+    # request请求状态(在可接收信息的时候才可以允许发送请求: ok可以发送请求/其余情况不可以发送请求)
+    request_status = 'ok'
 
 
 class robot_other():

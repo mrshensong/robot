@@ -132,8 +132,8 @@ class Ui_MainWindow(QMainWindow):
         # 视频流&视频尺寸
         self.real_time_video_width = 1280
         self.real_time_video_height = 720
-        # self.real_time_video_width = 1600
-        # self.real_time_video_height = 1000
+        # self.real_time_video_width = 1920
+        # self.real_time_video_height = 1280
         self.offline_video_width = 0
         self.offline_video_height = 0
         # 是否第一次窗口缩放
@@ -195,8 +195,8 @@ class Ui_MainWindow(QMainWindow):
             self.switch_camera_status_action.setIcon(QIcon(icon_path.Icon_ui_close_camera))
             # 设置提示
             self.switch_camera_status_action.setToolTip('close_camera')
-            # time.sleep(2)
             time.sleep(3)
+            # time.sleep(15)
             # 打开视频展示定时器
             self.timer_video.start()
             self.video_status = self.STATUS_PLAYING
@@ -225,9 +225,12 @@ class Ui_MainWindow(QMainWindow):
 
     # 系统摄像头流
     def system_camera_stream(self):
+        # 使用电脑自带摄像头
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.real_time_video_width)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.real_time_video_height)
+        # 使用罗技摄像头
+        # cap = cv2.VideoCapture(1)
         while self.camera_status == self.camera_opened:
             _, frame = cap.read()
             self.image = frame.copy()
@@ -479,18 +482,22 @@ class Ui_MainWindow(QMainWindow):
     def uArm_get_request(self, action):
         try:
             response = requests.get(uArm_param.port_address + str(action))
-            return response.text
+            gloVar.request_status = response.text
         except:
-            return '机械臂服务连接异常'
+            gloVar.request_status = '机械臂服务连接异常'
+        finally:
+            return gloVar.request_status
 
 
     # post请求->机械臂命令(单击/双击/长按/滑动)
     def uArm_post_request(self, action, data_dict):
         try:
             response = requests.post(url=uArm_param.port_address + str(action), data=json.dumps(data_dict))
-            return response.text
+            gloVar.request_status = response.text
         except:
-            return '机械臂服务连接异常'
+            gloVar.request_status = '机械臂服务连接异常'
+        finally:
+            return gloVar.request_status
 
 
     # 获取picture路径
@@ -700,7 +707,7 @@ class Ui_MainWindow(QMainWindow):
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': 150, 'leave': 1, 'time': 2,
                     'position': position, 'pressure_duration': 0}
-            Thread(target=self.uArm_post_request, args=(uArm_action.uArm_double_click, data,)).start()
+            Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[double_click]--坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_long_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),

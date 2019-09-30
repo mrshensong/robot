@@ -52,8 +52,7 @@ class Action_Tab(QWidget):
         self.execute_button = QToolButton()
         self.execute_button.setToolTip('execute')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_execute + ')}')
-        self.execute_button.clicked.connect(self.connect_execute_selected_items)
-
+        self.execute_button.clicked.connect(self.connect_execute_selected_actions)
         self.save_script_tag_button = QToolButton()
         self.save_script_tag_button.setToolTip('save_tag')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_save + ')}')
@@ -75,7 +74,7 @@ class Action_Tab(QWidget):
         # self.tab1.setLayout(v_box)
 
 
-    # 展示添加动作子窗口
+    # 展示添加动作子窗口(add_button)
     def connect_add_action_button(self):
         if gloVar.add_action_button_flag is True:
             add_action_window.add_action_flag = True
@@ -88,7 +87,7 @@ class Action_Tab(QWidget):
             return
 
 
-    # 删除工具栏操作
+    # 删除工具栏操作(delete_button)
     def connect_delete_selected_items(self):
         # 没有item的时候让button无效
         if self.index < 0:
@@ -97,7 +96,7 @@ class Action_Tab(QWidget):
             Thread(target=self.delete_selected_items, args=()).start()
 
 
-    # 选择/不选择(所有)工具栏操作
+    # 选择/不选择(所有)工具栏操作(select_all_button)
     def connect_select_all_items(self):
         # 没有item的时候让button无效
         if self.index < 0:
@@ -106,19 +105,23 @@ class Action_Tab(QWidget):
             Thread(target=self.select_or_un_select_all_items, args=()).start()
 
 
-    # 执行工具栏操作
-    def connect_execute_selected_items(self):
+    # 执行选中actions的具体操作
+    def execute_selected_actions(self):
         index = 0
         for i in range(len(self.list_widget)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
                 # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-                self.signal.emit('execute>' + json.dumps(self.info_list[index]))
+                self.play_action(index)
                 time.sleep(0.03)
             index += 1
 
 
+    # 执行选中的actions(execute_button/单独起线程)
+    def connect_execute_selected_actions(self):
+        Thread(target=self.execute_selected_actions, args=()).start()
 
-    # 保存标签工具栏操作
+
+    # 保存标签工具栏操作(save_button)
     def connect_save_script_tag(self):
         if len(self.list_widget) > 0:
             script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
@@ -141,14 +144,26 @@ class Action_Tab(QWidget):
             logger('[没有要保存的脚本标签!]')
 
 
-    # 播放单个动作
-    def play_item(self, id):
-        # print(self.info_list[id][add_action_window.des_text])
+    # 执行单个动作的具体操作
+    def play_action(self, id):
+        # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
         # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        self.signal.emit('execute>'+json.dumps(self.info_list[id]))
+        while True:
+            if gloVar.request_status == 'ok':
+                gloVar.request_status = None
+                self.signal.emit('execute>'+json.dumps(self.info_list[id]))
+                break
+            else:
+                # 降低cpu负债率
+                time.sleep(0.02)
 
 
-    # 删除单个动作
+    # 执行单个动作(新建线程/控件中的执行按钮)
+    def execute_action(self, id):
+        Thread(target=self.play_action, args=(id,)).start()
+
+
+    # 删除单个动作(控件中的删除按钮)
     def delete_item(self, id):
         # 打印删除信息
         if self.info_list[id][add_action_window.des_text] == '':
@@ -241,18 +256,6 @@ class Action_Tab(QWidget):
             logger('[全不选中]-->所有动作')
 
 
-    # 接收从添加动作子窗口传来的信号
-    def recv_add_action_window_signal(self, signal_str):
-        # 按下确定按钮后, 添加控件
-        if signal_str.startswith('sure>'):
-            info_dict = json.loads(signal_str.split('>')[1])
-            self.add_item(info_dict)
-        elif signal_str.startswith('action>'):
-            self.signal.emit(signal_str)
-        else:
-            pass
-
-
     # 添加动作控件
     def add_item(self, info_dict, flag=True):
         # 给动作设置id
@@ -270,7 +273,7 @@ class Action_Tab(QWidget):
         obj.id = self.index
         obj.des_line_edit.setText(info_dict[add_action_window.des_text])
         obj.points_line_edit.setText(points_text)
-        obj.play_botton.clicked.connect(lambda : self.play_item(obj.id))
+        obj.play_botton.clicked.connect(lambda : self.execute_action(obj.id))
         obj.delete_botton.clicked.connect(lambda : self.delete_item(obj.id))
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
@@ -299,6 +302,18 @@ class Action_Tab(QWidget):
                                                                              info_dict[add_action_window.des_text]))
         else: # 通过case文件打开actions
             robot_other.actions_saved_to_case = True
+
+
+    # 接收从添加动作子窗口传来的信号
+    def recv_add_action_window_signal(self, signal_str):
+        # 按下确定按钮后, 添加控件
+        if signal_str.startswith('sure>'):
+            info_dict = json.loads(signal_str.split('>')[1])
+            self.add_item(info_dict)
+        elif signal_str.startswith('action>'):
+            self.signal.emit(signal_str)
+        else:
+            pass
 
 
     # 添加动作时生成标签
