@@ -373,6 +373,22 @@ class Ui_MainWindow(QMainWindow):
             Thread(target=self.uArm_action_event_thread, args=(action,)).start()
 
 
+    # 正在进行的操作是否需要录入脚本(默认参数为None; 当有参数时, 将record_status的状态传给uArm_action.uArm_with_record)
+    def switch_uArm_with_record_status(self, record_status=None):
+        if record_status is not None:
+            uArm_action.uArm_with_record = bool(1-record_status)
+        if uArm_action.uArm_with_record is False:
+            uArm_action.uArm_with_record = True
+            self.robot_with_record_action.setIcon(QIcon(icon_path.Icon_robot_without_record))
+            self.robot_with_record_action.setToolTip('without_record')
+            logger('<脚本录制打开--以下操作将会被保存为action>')
+        else:
+            uArm_action.uArm_with_record = False
+            self.robot_with_record_action.setIcon(QIcon(icon_path.Icon_robot_with_record))
+            self.robot_with_record_action.setToolTip('with_record')
+            logger('<脚本录制关闭--以下操作将不会被保存为action>')
+
+
     # 离线视频播放
     def play_exist_video(self):
         camera_opened_flag = False # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
@@ -440,6 +456,8 @@ class Ui_MainWindow(QMainWindow):
             self.video_progress_bar.setRange(0, self.frame_count-1)
             # 让tab_widget不可以操作
             self.tab_widget.setEnabled(False)
+            # 强制关闭脚本录制状态
+            self.switch_uArm_with_record_status(record_status=False)
             # 通过离线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
         else:
@@ -538,6 +556,7 @@ class Ui_MainWindow(QMainWindow):
         self.robot_lock_action   = QAction(QIcon(icon_path.Icon_robot_lock), 'lock', self)
         self.robot_unlock_action = QAction(QIcon(icon_path.Icon_robot_unlock), 'unlock', self)
         self.robot_get_position_action = QAction(QIcon(icon_path.Icon_robot_get_position), 'get_position', self)
+        self.robot_with_record_action = QAction(QIcon(icon_path.Icon_robot_with_record), 'with_record', self)
         # 绑定触发函数
         self.click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_click))
         self.double_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_double_click))
@@ -546,6 +565,7 @@ class Ui_MainWindow(QMainWindow):
         self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_lock))
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
         self.robot_get_position_action.triggered.connect(lambda : self.uArm_action_event(uArm_action.uArm_get_position))
+        self.robot_with_record_action.triggered.connect(lambda : self.switch_uArm_with_record_status(record_status=None))
         # 视频播放工具栏
         self.video_play_action = QAction(QIcon(icon_path.Icon_video_play), 'video_play', self)
         self.video_play_action.triggered.connect(self.play_exist_video)
@@ -564,6 +584,7 @@ class Ui_MainWindow(QMainWindow):
         self.robot_operate_toolbar.addAction(self.double_click_action)
         self.robot_operate_toolbar.addAction(self.long_click_action)
         self.robot_operate_toolbar.addAction(self.slide_action)
+        self.robot_operate_toolbar.addAction(self.robot_with_record_action)
         # 存在的视频播放工具栏
         self.video_play_toolbar.addAction(self.video_play_action)
 
@@ -704,6 +725,13 @@ class Ui_MainWindow(QMainWindow):
             elif len(info_list[1]) == 4:
                 action_type, position, start, end = info_list[0], (0.0, 0.0), info_list[1][:2], info_list[1][2:]
                 Thread(target=self.uArm_action_execute, args=(action_type, position, start, end,)).start()
+            # 脚本录制操作
+            if  uArm_action.uArm_with_record is True:
+                info_dict = {add_action_window.des_text : '',
+                             add_action_window.action_type : info_list[0],
+                             add_action_window.points : info_list[1],
+                             add_action_window.take_back : 2}
+                self.tab_widget.action_tab.add_item(info_dict=info_dict)
 
 
     # 机械臂动作执行

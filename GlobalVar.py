@@ -49,14 +49,16 @@ class icon_path():
     Icon_ui_box_screen   = 'config/Icon/other_icon/box_screen.png'
     Icon_ui_folder_go    = 'config/Icon/other_icon/folder_go.png'
     # robot工具栏相关action图标
-    Icon_restart_server     = 'config/Icon/robot_icon/restart_server.png'
-    Icon_robot_click        = 'config/Icon/robot_icon/click.png'
-    Icon_robot_double_click = 'config/Icon/robot_icon/double_click.png'
-    Icon_robot_long_click   = 'config/Icon/robot_icon/long_click.png'
-    Icon_robot_slide        = 'config/Icon/robot_icon/slide.png'
-    Icon_robot_lock         = 'config/Icon/robot_icon/lock.png'
-    Icon_robot_unlock       = 'config/Icon/robot_icon/unlock.png'
-    Icon_robot_get_position = 'config/Icon/robot_icon/get_position.png'
+    Icon_restart_server       = 'config/Icon/robot_icon/restart_server.png'
+    Icon_robot_click          = 'config/Icon/robot_icon/click.png'
+    Icon_robot_double_click   = 'config/Icon/robot_icon/double_click.png'
+    Icon_robot_long_click     = 'config/Icon/robot_icon/long_click.png'
+    Icon_robot_slide          = 'config/Icon/robot_icon/slide.png'
+    Icon_robot_lock           = 'config/Icon/robot_icon/lock.png'
+    Icon_robot_unlock         = 'config/Icon/robot_icon/unlock.png'
+    Icon_robot_get_position   = 'config/Icon/robot_icon/get_position.png'
+    Icon_robot_with_record    = 'config/Icon/robot_icon/with_record.png'
+    Icon_robot_without_record = 'config/Icon/robot_icon/without_record.png'
     # 视频播放工具栏相关图标
     Icon_video_play         = 'config/Icon/other_icon/video_play.png'
     # 自定义控件相关图标
@@ -81,6 +83,8 @@ class uArm_action():
     uArm_get_position = 'get_position'
     uArm_unlock = 'servo_detach'
     uArm_lock = 'servo_attach'
+    # 机械臂是否操作同时脚本录制(False不录制脚本/True录制脚本)
+    uArm_with_record = False
 
 
 # 机械臂操作参数
