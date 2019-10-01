@@ -174,7 +174,7 @@ class Add_Action_Control(QDialog):
 
 
     def connect_sure(self):
-        self.info_dict[add_action_window.des_text] = self.des_text.text()
+        self.info_dict[add_action_window.des_text] = self.des_text.text() if self.des_text.text() != '' else self.com_box.currentText()
         self.info_dict[add_action_window.action_type] = self.com_box.currentText()
         # 坐标信息需要通过主窗口传递过来
         # self.info_dict[add_action_window.points] = None

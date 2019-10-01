@@ -708,7 +708,7 @@ class Ui_MainWindow(QMainWindow):
                 position_str = str(info_list[1])
                 position_tuple = info_list[1]
             else: # 为了不让position_str有警告(无具体意义)
-                position_str = '0,0'
+                position_str = '0, 0'
                 position_tuple = (0.0, 0.0)
             # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
             self.tab_widget.action_tab.add_action_window.points.setText(position_str)
@@ -727,7 +727,7 @@ class Ui_MainWindow(QMainWindow):
                 Thread(target=self.uArm_action_execute, args=(action_type, position, start, end,)).start()
             # 脚本录制操作
             if  uArm_action.uArm_with_record is True:
-                info_dict = {add_action_window.des_text : '',
+                info_dict = {add_action_window.des_text : info_list[0],
                              add_action_window.action_type : info_list[0],
                              add_action_window.points : info_list[1],
                              add_action_window.take_back : 2}

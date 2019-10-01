@@ -186,9 +186,9 @@ class Action_Tab(QWidget):
         # 发送需要显示的脚本标签
         if len(self.tag_list) > 0:
             robot_other.actions_saved_to_case = False
-            self.signal.emit('script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+            self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         else:
-            self.signal.emit('script_tag>')
+            self.signal.emit('save_script_tag>')
             robot_other.actions_saved_to_case = True
         if self.case_file_name == '':  # 空白新建action
             window_status.action_tab_status = '新建case-->>未保存!'
@@ -210,7 +210,7 @@ class Action_Tab(QWidget):
         self.tag_list = []
         self.index = -1
         # 取消脚本页的脚本
-        self.signal.emit('script_tag>')
+        self.signal.emit('save_script_tag>')
         robot_other.actions_saved_to_case = True
         self.case_file_name = ''
         self.case_absolute_name = ''
