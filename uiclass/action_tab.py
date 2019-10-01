@@ -268,7 +268,7 @@ class Action_Tab(QWidget):
         else: # 无实际意义(单纯为了不让代码出现警告)
             points_text = '(0.0, 0.0)'
         item = QListWidgetItem()
-        item.setSizeHint(QSize(330, 80))
+        item.setSizeHint(QSize(330, 120))
         obj = Action_Control(parent=None, id=self.index, type=info_dict[add_action_window.action_type])
         obj.id = self.index
         obj.des_line_edit.setText(info_dict[add_action_window.des_text])

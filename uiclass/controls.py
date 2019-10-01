@@ -4,7 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from GlobalVar import icon_path, uArm_action, add_action_window, logger
 
-# 自定义动作展示控件
+# 自定义动作展示控件(action)
 class Action_Control(QWidget):
 
     signal = pyqtSignal(str)
@@ -19,7 +19,6 @@ class Action_Control(QWidget):
     def initUI(self):
 
         self.check_box = QCheckBox()
-        # self.check_box.stateChanged.connect(self.connect_check_box)
 
         if self.type == uArm_action.uArm_click:
             pix_map = QPixmap(icon_path.Icon_robot_click)
@@ -36,10 +35,12 @@ class Action_Control(QWidget):
 
         self.des_line_edit = QLineEdit(self)
         self.points_line_edit = QLineEdit(self)
-        self.points_line_edit.setFont(QFont('monospac821 BT', 8))
+        self.other_param_edit = QLineEdit(self)
+        self.other_param_edit.setText('速度:150 收回:1 触发:1')
         self.v_box = QVBoxLayout()
         self.v_box.addWidget(self.des_line_edit)
         self.v_box.addWidget(self.points_line_edit)
+        self.v_box.addWidget(self.other_param_edit)
 
         self.play_botton = QToolButton(self)
         self.play_botton.setToolTip('play')
@@ -54,6 +55,7 @@ class Action_Control(QWidget):
         self.h_box.addLayout(self.v_box)
         self.h_box.addWidget(self.play_botton)
         self.h_box.addWidget(self.delete_botton)
+
         self.setLayout(self.h_box)
 
 
@@ -61,7 +63,7 @@ class Action_Control(QWidget):
         print('the id is : ', self.id)
 
 
-# 自定义动作展示控件
+# 自定义动作展示控件(case)
 class Case_Control(QWidget):
 
     signal = pyqtSignal(str)
