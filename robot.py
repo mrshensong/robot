@@ -721,12 +721,12 @@ class Ui_MainWindow(QMainWindow):
             if len(info_list[1]) == 2:
                 action_type, position = info_list[0], info_list[1]
                 # 默认速度150 & 动作执行后离开
-                Thread(target=self.uArm_action_execute, args=(150, 1, action_type, position,)).start()
+                Thread(target=self.uArm_action_execute, args=(150, 1, 0, action_type, position,)).start()
             # 滑动动作
             elif len(info_list[1]) == 4:
                 action_type, position, start, end = info_list[0], (0.0, 0.0), info_list[1][:2], info_list[1][2:]
                 # 默认速度150 & 动作执行后离开
-                Thread(target=self.uArm_action_execute, args=(150, 1, action_type, position, start, end,)).start()
+                Thread(target=self.uArm_action_execute, args=(150, 1, 0, action_type, position, start, end,)).start()
             # 脚本录制操作
             if  uArm_action.uArm_with_record is True:
                 info_dict = {add_action_window.des_text : info_list[0],
@@ -737,28 +737,28 @@ class Ui_MainWindow(QMainWindow):
 
 
     # 机械臂动作执行
-    def uArm_action_execute(self, speed=150, leave=1, action_type=uArm_action.uArm_click, position=(0.0, 0.0), start=(0.0, 0.0), end=(0.0, 0.0)):
+    def uArm_action_execute(self, speed=150, leave=1, trigger=0, action_type=uArm_action.uArm_click, position=(0.0, 0.0), start=(0.0, 0.0), end=(0.0, 0.0)):
         if action_type == uArm_action.uArm_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'time': 1,
+                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
                     'position': position, 'pressure_duration': 0}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[click]---------坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_double_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'time': 2,
+                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 2,
                     'position': position, 'pressure_duration': 0}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[double_click]--坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_long_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'time': 1,
+                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
                     'position': position, 'pressure_duration': 1000}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[long_click]----坐标: %s' % str(position))
         elif action_type == uArm_action.uArm_slide:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave,
+                    'speed': speed, 'leave': leave, 'trigger': trigger,
                     'start': start, 'end': end}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_slide, data,)).start()
             logger('执行-->action[slide]---------坐标: %s' % str(tuple(start+end)))
@@ -802,18 +802,19 @@ class Ui_MainWindow(QMainWindow):
             signal_dict = json.loads(signal_str.split('>')[1])
             speed = int(signal_dict[add_action_window.speed])
             leave = int(signal_dict[add_action_window.leave])
+            trigger = int(signal_dict[add_action_window.trigger])
             action_type = signal_dict[add_action_window.action_type]
             position_tuple = tuple(signal_dict[add_action_window.points])
             # 有;存在则说明是滑动动作(两个坐标)
             if len(position_tuple) == 2:
                 position = tuple(position_tuple)
-                Thread(target=self.uArm_action_execute, args=(speed, leave, action_type, position,)).start()
+                Thread(target=self.uArm_action_execute, args=(speed, leave, trigger, action_type, position,)).start()
             # 没有则说明是点击动作(单个坐标)
             else:
                 start = position_tuple[:2]
                 end   = position_tuple[2:]
                 position = (0.0, 0.0)
-                Thread(target=self.uArm_action_execute, args=(speed, leave, action_type, position, start, end,)).start()
+                Thread(target=self.uArm_action_execute, args=(speed, leave, trigger, action_type, position, start, end,)).start()
         # 添加action控件时候, 设置动作标志位
         elif signal_str.startswith('action>'):
             self.label_video.x1, self.label_video.y1 = self.label_video.x0, self.label_video.y0

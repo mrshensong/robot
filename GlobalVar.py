@@ -102,11 +102,18 @@ class add_action_window():
     # 是否有添加动作
     add_action_flag = False
     # 添加动作子窗口的信息选项名称
+    # 机械臂动作描述
     des_text    = 'des_text'
+    # 机械臂动作类型
     action_type = 'action_type'
+    # 机械臂速度
     speed       = 'speed'
+    # 机械臂操作坐标
     points      = 'points'
+    # 机械臂收回
     leave       = 'leave'
+    # 相机录像触发标记(给视频打标记)
+    trigger     = 'trigger'
 
 
 class window_status():

@@ -56,6 +56,7 @@ class Action_Tab(QWidget):
         self.save_script_tag_button = QToolButton()
         self.save_script_tag_button.setToolTip('save_tag')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_save + ')}')
+        # self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
 
         h_box = QHBoxLayout()
@@ -122,7 +123,7 @@ class Action_Tab(QWidget):
 
 
     # 保存标签工具栏操作(save_button)
-    def connect_save_script_tag(self):
+    def save_script_tag(self):
         if len(self.list_widget) > 0:
             script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
             filename = QFileDialog.getSaveFileName(self, 'save script', script_path, 'script file(*.xml)')
@@ -142,6 +143,11 @@ class Action_Tab(QWidget):
                 logger('[取消保存脚本标签!]')
         else:
             logger('[没有要保存的脚本标签!]')
+
+
+    # 另起线程(保证主线程不受到破坏)
+    def connect_save_script_tag(self):
+        Thread(target=self.save_script_tag, args=()).start()
 
 
     # 执行单个动作的具体操作
@@ -261,6 +267,7 @@ class Action_Tab(QWidget):
         # 给动作设置id
         self.index += 1
         # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
+        other_param = '速度:'+info_dict[add_action_window.speed]+' 收回:'+info_dict[add_action_window.leave]+' 触发:'+info_dict[add_action_window.trigger]
         # 先将坐标元素转为字符串类型
         points = info_dict[add_action_window.points]
         if points:
@@ -273,6 +280,7 @@ class Action_Tab(QWidget):
         obj.id = self.index
         obj.des_line_edit.setText(info_dict[add_action_window.des_text])
         obj.points_line_edit.setText(points_text)
+        obj.other_param_edit.setText(other_param)
         obj.play_botton.clicked.connect(lambda : self.execute_action(obj.id))
         obj.delete_botton.clicked.connect(lambda : self.delete_item(obj.id))
         self.list_widget.addItem(item)
@@ -322,12 +330,14 @@ class Action_Tab(QWidget):
         action_type = info_dict[add_action_window.action_type]
         speed = str(info_dict[add_action_window.speed])
         leave = str(info_dict[add_action_window.leave])
+        trigger = str(info_dict[add_action_window.trigger])
         points =   str(tuple(info_dict[add_action_window.points]))
         tag = '\t<action '+add_action_window.des_text+'="' + des_text + '">\n'+\
               '\t\t' + '<param name="'+add_action_window.action_type+'">' +action_type+ '</param>\n'+\
               '\t\t' + '<param name="'+add_action_window.points+'">' +points+ '</param>\n'+\
               '\t\t' + '<param name="'+add_action_window.speed+'">' +speed+ '</param>\n'+\
               '\t\t' + '<param name="'+add_action_window.leave+'">' +leave+ '</param>\n'+\
+              '\t\t' + '<param name="'+add_action_window.trigger+'">' +trigger+ '</param>\n'+\
               '\t</action>\n'
         return tag
 

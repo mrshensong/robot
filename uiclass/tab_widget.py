@@ -51,13 +51,7 @@ class TabWidget(QTabWidget):
             self.setCurrentWidget(self.action_tab)
             # 如果还有actions未保存(判断是否需要将当前actions保存为case)
             if robot_other.actions_saved_to_case is False:
-                reply = QMessageBox.question(self, 'action_tab页有actions未保存为case', '是否要将当前actions保存为case?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-                if reply == QMessageBox.Yes:
-                    self.action_tab.connect_save_script_tag()
-                    self.recv_case_tab_signal(signal_str)
-                else:
-                    self.action_tab.clear_all_items()
-                    self.recv_case_tab_signal(signal_str)
+                QMessageBox.warning(self, "警告", "action页还有未保存的actions! 请先保存actions后,再次打开case!", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
                 self.action_tab.clear_all_items()
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])

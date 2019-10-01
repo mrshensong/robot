@@ -140,14 +140,18 @@ class Add_Action_Control(QDialog):
         # 坐标
         self.points = QLineEdit(self)
         # 是否收回
-        self.check_box = QCheckBox(self)
-        self.check_box.setCheckState(Qt.Checked)
+        self.leave_check_box = QCheckBox(self)
+        self.leave_check_box.setCheckState(Qt.Checked)
+        # 是否触发相机录像标记
+        self.camera_trigger_check_box = QCheckBox(self)
+        self.camera_trigger_check_box.setCheckState(Qt.Unchecked)
         # 表单布局
         self.from_layout.addRow('描述: ', self.des_text)
         self.from_layout.addRow('动作: ', self.com_box)
         self.from_layout.addRow('速度: ', self.speed_text)
         self.from_layout.addRow('坐标: ', self.points)
-        self.from_layout.addRow('是否收回: ', self.check_box)
+        self.from_layout.addRow('收回: ', self.leave_check_box)
+        self.from_layout.addRow('触发: ', self.camera_trigger_check_box)
 
         # 获取坐标
         self.get_points_button = QPushButton('获取坐标', self)
@@ -186,7 +190,8 @@ class Add_Action_Control(QDialog):
         self.info_dict[add_action_window.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
         # 坐标信息需要通过主窗口传递过来
         # self.info_dict[add_action_window.points] = None
-        self.info_dict[add_action_window.leave] = '1' if self.check_box.checkState()==Qt.Checked else '0'
+        self.info_dict[add_action_window.leave] = '1' if self.leave_check_box.checkState()==Qt.Checked else '0'
+        self.info_dict[add_action_window.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('sure>' + signal)
@@ -207,7 +212,7 @@ class Add_Action_Control(QDialog):
         self.speed_text.setText('')
         self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
         self.points.setText('')
-        self.check_box.setCheckState(Qt.Checked)
+        self.leave_check_box.setCheckState(Qt.Checked)
         self.close()
 
 
