@@ -319,11 +319,15 @@ class Action_Tab(QWidget):
     # 添加动作时生成标签
     def generate_tag(self, info_dict):
         des_text = info_dict[add_action_window.des_text]
-        action_type =   info_dict[add_action_window.action_type]
+        action_type = info_dict[add_action_window.action_type]
+        speed = str(info_dict[add_action_window.speed])
+        leave = str(info_dict[add_action_window.leave])
         points =   str(tuple(info_dict[add_action_window.points]))
         tag = '\t<action '+add_action_window.des_text+'="' + des_text + '">\n'+\
               '\t\t' + '<param name="'+add_action_window.action_type+'">' +action_type+ '</param>\n'+\
               '\t\t' + '<param name="'+add_action_window.points+'">' +points+ '</param>\n'+\
+              '\t\t' + '<param name="'+add_action_window.speed+'">' +speed+ '</param>\n'+\
+              '\t\t' + '<param name="'+add_action_window.leave+'">' +leave+ '</param>\n'+\
               '\t</action>\n'
         return tag
 

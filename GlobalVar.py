@@ -104,8 +104,9 @@ class add_action_window():
     # 添加动作子窗口的信息选项名称
     des_text    = 'des_text'
     action_type = 'action_type'
+    speed       = 'speed'
     points      = 'points'
-    take_back   = 'take_back'
+    leave       = 'leave'
 
 
 class window_status():

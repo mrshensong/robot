@@ -41,11 +41,6 @@ class TabWidget(QTabWidget):
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
         elif signal_str.startswith('execute>'):
             self.signal.emit(signal_str)
-        elif signal_str.startswith('case_transform_to_action>'):
-            dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
-            print(dict_info_list)
-            for id in range(len(dict_info_list)):
-                self.action_tab.add_item(dict_info_list[id])
 
 
     # 接收从case_tab窗口传来的信号

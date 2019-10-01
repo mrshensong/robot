@@ -105,8 +105,9 @@ class Add_Action_Control(QDialog):
         self.parent = parent
         self.info_dict = {add_action_window.des_text    : None,
                           add_action_window.action_type : uArm_action.uArm_click,
+                          add_action_window.speed       : 150,
                           add_action_window.points      : None,
-                          add_action_window.take_back   : 2}
+                          add_action_window.leave       : 1}
         self.initUI()
 
 
@@ -131,6 +132,9 @@ class Add_Action_Control(QDialog):
         self.com_box = QComboBox(self)
         self.com_box.addItems(items)
         self.com_box.currentIndexChanged.connect(self.connect_com_box)
+        # 动作速度
+        self.speed_text = QLineEdit(self)
+        self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
         # 坐标
         self.points = QLineEdit(self)
         # 是否收回
@@ -139,6 +143,7 @@ class Add_Action_Control(QDialog):
         # 表单布局
         self.from_layout.addRow('描述: ', self.des_text)
         self.from_layout.addRow('动作: ', self.com_box)
+        self.from_layout.addRow('速度: ', self.speed_text)
         self.from_layout.addRow('坐标: ', self.points)
         self.from_layout.addRow('是否收回: ', self.check_box)
 
@@ -176,9 +181,10 @@ class Add_Action_Control(QDialog):
     def connect_sure(self):
         self.info_dict[add_action_window.des_text] = self.des_text.text() if self.des_text.text() != '' else self.com_box.currentText()
         self.info_dict[add_action_window.action_type] = self.com_box.currentText()
+        self.info_dict[add_action_window.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
         # 坐标信息需要通过主窗口传递过来
         # self.info_dict[add_action_window.points] = None
-        self.info_dict[add_action_window.take_back] = self.check_box.checkState()
+        self.info_dict[add_action_window.leave] = '1' if self.check_box.checkState()==Qt.Checked else '0'
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('sure>' + signal)
@@ -192,10 +198,12 @@ class Add_Action_Control(QDialog):
         self.info_dict = {add_action_window.des_text    : None,
                           add_action_window.action_type : uArm_action.uArm_click,
                           add_action_window.points      : None,
-                          add_action_window.take_back   : True}
+                          add_action_window.leave       : 1}
         self.des_text.setText('')
         self.des_text.setPlaceholderText('请输入动作描述(可不写)')
         self.com_box.setCurrentText(uArm_action.uArm_click)
+        self.speed_text.setText('')
+        self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
         self.points.setText('')
         self.check_box.setCheckState(Qt.Checked)
         self.close()
