@@ -9,12 +9,12 @@ from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, merge_path, window_status, profile
 from uiclass.controls import Case_Control
 
-class Case_Tab(QWidget):
+class ShowCaseTab(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent):
-        super(Case_Tab, self).__init__(parent)
+        super(ShowCaseTab, self).__init__(parent)
         self.parent = parent
         self.index = -1
         # case控件列表

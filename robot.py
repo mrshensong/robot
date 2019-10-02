@@ -20,7 +20,7 @@ from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
-from uiclass.show_tab_widget import TabWidget
+from uiclass.show_tab_widget import ShowTabWidget
 from uiclass.controls import Camera_Param_Adjust_Control
 
 
@@ -206,8 +206,8 @@ class Ui_MainWindow(QMainWindow):
             self.video_status = self.STATUS_PLAYING
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
             self.status_video_button.setEnabled(True)
-            # 让tab_widget可以操作
-            self.tab_widget.setEnabled(True)
+            # 让show_tab_widget可以操作
+            self.show_tab_widget.setEnabled(True)
             # 通过在线视频尺寸自适应视频播放窗口
             self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
         else:
@@ -454,8 +454,8 @@ class Ui_MainWindow(QMainWindow):
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
             self.video_progress_bar.setRange(0, self.frame_count-1)
-            # 让tab_widget不可以操作
-            self.tab_widget.setEnabled(False)
+            # 让show_tab_widget不可以操作
+            self.show_tab_widget.setEnabled(False)
             # 强制关闭脚本录制状态
             self.switch_uArm_with_record_status(record_status=False)
             # 通过离线视频尺寸自适应视频播放窗口
@@ -711,9 +711,9 @@ class Ui_MainWindow(QMainWindow):
                 position_str = '0, 0'
                 position_tuple = (0.0, 0.0)
             # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
-            self.tab_widget.action_tab.add_action_window.points.setText(position_str)
-            self.tab_widget.action_tab.add_action_window.info_dict[add_action_window.points] = position_tuple
-            self.tab_widget.action_tab.add_action_window.setHidden(False)
+            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.points.setText(position_str)
+            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.info_dict[add_action_window.points] = position_tuple
+            self.show_tab_widget.action_tab.add_action_window.setHidden(False)
             add_action_window.add_action_flag = False
         # 正常点击时会直接执行动作
         else:
@@ -731,9 +731,11 @@ class Ui_MainWindow(QMainWindow):
             if  uArm_action.uArm_with_record is True:
                 info_dict = {add_action_window.des_text : info_list[0],
                              add_action_window.action_type : info_list[0],
+                             add_action_window.speed : 150,
                              add_action_window.points : info_list[1],
-                             add_action_window.leave : 1}
-                self.tab_widget.action_tab.add_item(info_dict=info_dict)
+                             add_action_window.leave : 1,
+                             add_action_window.trigger : 0}
+                self.show_tab_widget.action_tab.add_item(info_dict=info_dict)
 
 
     # 机械臂动作执行
@@ -791,13 +793,14 @@ class Ui_MainWindow(QMainWindow):
 
     # case展示
     def show_case(self):
-        self.tab_widget = TabWidget(self.centralwidget)
-        self.grid.addWidget(self.tab_widget, 0, 8, 3, 2)
-        self.tab_widget.signal[str].connect(self.recv_tab_widget_signal)
+        self.show_tab_widget = ShowTabWidget(self.centralwidget)
+        self.grid.addWidget(self.show_tab_widget, 0, 8, 3, 2)
+        self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
 
 
-    # 接收tab_widget的信号
-    def recv_tab_widget_signal(self, signal_str):
+    # 接收show_tab_widget的信号
+    def recv_show_tab_widget_signal(self, signal_str):
+        # 执行动作
         if signal_str.startswith('execute>'):
             signal_dict = json.loads(signal_str.split('>')[1])
             speed = int(signal_dict[add_action_window.speed])

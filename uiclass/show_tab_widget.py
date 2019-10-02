@@ -1,23 +1,23 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from uiclass.show_action_tab import Action_Tab
-from uiclass.show_case_tab import Case_Tab
+from uiclass.show_action_tab import ShowActionTab
+from uiclass.show_case_tab import ShowCaseTab
 from GlobalVar import robot_other, logger, window_status
 
-class TabWidget(QTabWidget):
+class ShowTabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent, action_tab='action', case_tab='case', text_tab='edit'):
-        super(TabWidget, self).__init__(parent)
+        super(ShowTabWidget, self).__init__(parent)
         self.parent = parent
         self.setTabPosition(self.South)
         # tab1
-        self.action_tab = Action_Tab(self)  # 1
+        self.action_tab = ShowActionTab(self)  # 1
         self.action_tab.signal[str].connect(self.recv_action_tab_signal)
         # tab2
-        self.case_tab = Case_Tab(self)
+        self.case_tab = ShowCaseTab(self)
         self.case_tab.signal[str].connect(self.recv_case_tab_signal)
         # tab3
         self.text_tab   = QTextEdit(self)
@@ -32,13 +32,16 @@ class TabWidget(QTabWidget):
 
     # 接收从action_tab窗口传来的信号
     def recv_action_tab_signal(self, signal_str):
+        # 添加action控件时候, 设置动作标志位
         if signal_str.startswith('action>'):
             self.signal.emit(signal_str)
+        # 保存actions
         elif signal_str.startswith('save_script_tag>'):
             self.text_tab.setText(signal_str.split('save_script_tag>')[1])
             window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
+        # 执行action
         elif signal_str.startswith('execute>'):
             self.signal.emit(signal_str)
 

@@ -6,14 +6,15 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile
-from uiclass.controls import Action_Control, Add_Action_Control
+from uiclass.controls import Action_Control
+from uiclass.add_tab_widget import AddTabWidget
 
-class Action_Tab(QWidget):
+class ShowActionTab(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent):
-        super(Action_Tab, self).__init__(parent)
+        super(ShowActionTab, self).__init__(parent)
         self.parent = parent
         self.index = -1
         # 自定义控件列表
@@ -25,7 +26,7 @@ class Action_Tab(QWidget):
         # 脚本标签
         self.tag_list = []
         # 添加动作窗口
-        self.add_action_window = Add_Action_Control(self)
+        self.add_action_window = AddTabWidget(self)
         self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
         # 是否全部选中状态(False:没有全部选中, True:全部选中)
         self.select_all_flag = False
@@ -267,7 +268,7 @@ class Action_Tab(QWidget):
         # 给动作设置id
         self.index += 1
         # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
-        other_param = '速度:'+info_dict[add_action_window.speed]+' 收回:'+info_dict[add_action_window.leave]+' 触发:'+info_dict[add_action_window.trigger]
+        other_param = '速度:'+str(info_dict[add_action_window.speed])+' 收回:'+str(info_dict[add_action_window.leave])+' 触发:'+str(info_dict[add_action_window.trigger])
         # 先将坐标元素转为字符串类型
         points = info_dict[add_action_window.points]
         if points:
