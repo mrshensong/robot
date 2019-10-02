@@ -64,6 +64,9 @@ class icon_path():
     # 自定义控件相关图标
     Icon_custom_delete            = 'config/Icon/custom_widget_icon/delete.png'
     Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'
+    Icon_custom_video_camera      = 'config/Icon/custom_widget_icon/video_camera.png'
+    Icon_custom_record_start      = 'config/Icon/custom_widget_icon/record_start.png'
+    Icon_custom_record_stop       = 'config/Icon/custom_widget_icon/record_stop.png'
     Icon_tab_widget_add           = 'config/Icon/tab_widget_icon/add.png'
     Icon_tab_widget_delete        = 'config/Icon/tab_widget_icon/delete.png'
     Icon_tab_widget_all_select    = 'config/Icon/tab_widget_icon/all_select.png'
@@ -125,6 +128,12 @@ class window_status():
     action_tab_status = '没有action'
     # case_tab页面
     case_tab_status = '没有打开case目录'
+
+
+# 视频录制相关操作(如开关录像)
+class video_action():
+    video_record_start = 'record_start'
+    video_record_stop  = 'record_stop'
 
 
 # 配置文件的读取和写入

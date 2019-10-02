@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, logger
+from GlobalVar import icon_path, uArm_action, add_action_window, video_action
 
 # 自定义动作展示控件(action)
 class Action_Control(QWidget):
@@ -95,6 +95,46 @@ class Case_Control(QWidget):
     # 当前控件双击事件后(发送信号到父控件, 发送当前id)
     def mouseDoubleClickEvent(self, event):
         self.signal.emit('open_case>'+str(self.id))
+
+
+# 摄像头录制开始和停止动作展示控件(camera_start/camera_stop)
+class Camera_Record_Control(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent, id, type=video_action.video_record_stop):
+        super(Camera_Record_Control, self).__init__(parent)
+        self.parent = parent
+        self.id = id
+        self.type = type
+        self.initUI()
+
+
+    def initUI(self):
+        # 选择框
+        self.check_box = QCheckBox()
+        # 摄像机图标
+        self.video_camera_label = QLabel(self)
+        self.video_camera_label.setPixmap(QPixmap(icon_path.Icon_custom_video_camera))
+        # 摄像机录像开始和停止标签及text标签
+        self.video_camera_status_label = QLabel(self)
+        self.video_camera_status_text = QLabel(self)
+        # 视频开始和停止图标
+        if self.type == video_action.video_record_start:
+            pix_map = QPixmap(icon_path.Icon_custom_record_start)
+            status = 'Start'
+        else:
+            pix_map = QPixmap(icon_path.Icon_custom_record_stop)
+            status = 'Stop'
+        self.video_camera_status_label.setPixmap(pix_map)
+        self.video_camera_status_text.setText(status)
+        # 布局
+        self.h_box = QHBoxLayout()
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.video_camera_label)
+        self.h_box.addWidget(self.video_camera_status_text)
+        self.h_box.addWidget(self.video_camera_status_label)
+        self.setLayout(self.h_box)
 
 
 # 动作添加控件
