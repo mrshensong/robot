@@ -728,7 +728,7 @@ class Ui_MainWindow(QMainWindow):
                 # 默认速度150 & 动作执行后离开
                 Thread(target=self.uArm_action_execute, args=(150, 1, 0, action_type, position, start, end,)).start()
             # 脚本录制操作
-            if  uArm_action.uArm_with_record is True:
+            if uArm_action.uArm_with_record is True:
                 info_dict = {add_action_window.des_text : info_list[0],
                              add_action_window.action_type : info_list[0],
                              add_action_window.speed : 150,
@@ -740,24 +740,28 @@ class Ui_MainWindow(QMainWindow):
 
     # 机械臂动作执行
     def uArm_action_execute(self, speed=150, leave=1, trigger=0, action_type=uArm_action.uArm_click, position=(0.0, 0.0), start=(0.0, 0.0), end=(0.0, 0.0)):
+        # 执行单击动作
         if action_type == uArm_action.uArm_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
                     'position': position, 'pressure_duration': 0}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[click]---------坐标: %s' % str(position))
+        # 执行双击动作
         elif action_type == uArm_action.uArm_double_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 2,
                     'position': position, 'pressure_duration': 0}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[double_click]--坐标: %s' % str(position))
+        # 执行长按动作
         elif action_type == uArm_action.uArm_long_click:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
                     'position': position, 'pressure_duration': 1000}
             Thread(target=self.uArm_post_request, args=(uArm_action.uArm_click, data,)).start()
             logger('执行-->action[long_click]----坐标: %s' % str(position))
+        # 执行滑动动作
         elif action_type == uArm_action.uArm_slide:
             data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
                     'speed': speed, 'leave': leave, 'trigger': trigger,
@@ -819,7 +823,7 @@ class Ui_MainWindow(QMainWindow):
                 position = (0.0, 0.0)
                 Thread(target=self.uArm_action_execute, args=(speed, leave, trigger, action_type, position, start, end,)).start()
         # 添加action控件时候, 设置动作标志位
-        elif signal_str.startswith('action>'):
+        elif signal_str.startswith('action_tab_action>'):
             self.label_video.x1, self.label_video.y1 = self.label_video.x0, self.label_video.y0
             uArm_action.uArm_action_type = signal_str.split('>')[1]
         else:

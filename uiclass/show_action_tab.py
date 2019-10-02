@@ -316,10 +316,10 @@ class ShowActionTab(QWidget):
     # 接收从添加动作子窗口传来的信号
     def recv_add_action_window_signal(self, signal_str):
         # 按下确定按钮后, 添加控件
-        if signal_str.startswith('sure>'):
+        if signal_str.startswith('action_tab_sure>'):
             info_dict = json.loads(signal_str.split('>')[1])
             self.add_item(info_dict)
-        elif signal_str.startswith('action>'):
+        elif signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         else:
             pass

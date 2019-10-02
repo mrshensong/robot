@@ -85,12 +85,12 @@ class AddActionTab(QWidget):
 
 
     def connect_com_box(self):
-        self.signal.emit('action>'+self.com_box.currentText())
+        self.signal.emit('action_tab_action>'+self.com_box.currentText())
 
 
     def connect_get_points(self):
         # 发送获取坐标事件信息(即隐藏控件)
-        self.signal.emit('get_points>')
+        self.signal.emit('action_tab_get_points>')
 
 
     def connect_sure(self):
@@ -103,4 +103,4 @@ class AddActionTab(QWidget):
         self.info_dict[add_action_window.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
-        self.signal.emit('sure>' + signal)
+        self.signal.emit('action_tab_sure>' + signal)

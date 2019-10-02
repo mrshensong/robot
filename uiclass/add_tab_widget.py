@@ -11,7 +11,7 @@ class TabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, action_tab='action', video_tab='video', sleep_tab='other'):
+    def __init__(self, parent, action_tab='action', video_tab='video', sleep_tab='sleep'):
         super(TabWidget, self).__init__(parent)
         self.parent = parent
         self.setTabPosition(self.North)
@@ -44,25 +44,28 @@ class AddTabWidget(QDialog):
     # 接收action_tab传来的信号
     def recv_action_tab_signal(self, signal_str):
         # 按下获取坐标(隐藏当前窗口)
-        if signal_str.startswith('get_points>'):
+        if signal_str.startswith('action_tab_get_points>'):
             self.setHidden(True)
         # 选择动作后需要改变动作标志
-        if signal_str.startswith('action>'):
+        if signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         # 按下确认按钮
-        elif signal_str.startswith('sure>'):
+        elif signal_str.startswith('action_tab_sure>'):
             self.signal.emit(signal_str)
             self.close()
 
 
     # 接收video_tab传来的信号
     def recv_video_tab_signal(self, signal_str):
-        pass
+        if signal_str.startswith('video_tab_sure>'):
+            self.signal.emit(signal_str)
+            self.close()
 
 
     # 接收sleep_tab传来的信号
     def recv_sleep_tab_signal(self, signal_str):
-        pass
+        if signal_str.startswith('sleep_tab_sure>'):
+            self.signal.emit(signal_str)
 
 
     def closeEvent(self, event):

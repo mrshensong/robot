@@ -33,7 +33,7 @@ class ShowTabWidget(QTabWidget):
     # 接收从action_tab窗口传来的信号
     def recv_action_tab_signal(self, signal_str):
         # 添加action控件时候, 设置动作标志位
-        if signal_str.startswith('action>'):
+        if signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         # 保存actions
         elif signal_str.startswith('save_script_tag>'):

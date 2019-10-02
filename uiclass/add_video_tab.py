@@ -32,9 +32,11 @@ class AddVideoTab(QWidget):
         # 是否开始录制视频
         self.start_record_video = QCheckBox(self)
         self.start_record_video.setCheckState(Qt.Unchecked)
+        self.start_record_video.stateChanged.connect(self.connect_start_record_video)
         # 是否停止录制视频
         self.stop_record_video = QCheckBox(self)
         self.stop_record_video.setCheckState(Qt.Unchecked)
+        self.stop_record_video.stateChanged.connect(self.connect_stop_record_video)
         # 表单布局
         self.from_layout.addRow('开始录制视频: ', self.start_record_video)
         self.from_layout.addRow('停止录制视频: ', self.stop_record_video)
@@ -57,45 +59,31 @@ class AddVideoTab(QWidget):
         self.setMinimumWidth(300)
 
 
-    def connect_com_box(self):
-        pass
-        # self.signal.emit('action>'+self.com_box.currentText())
+    def connect_start_record_video(self):
+        if self.start_record_video.checkState() == Qt.Checked:
+            self.stop_record_video.setCheckState(Qt.Unchecked)
+            self.stop_record_video.setEnabled(False)
+        elif self.start_record_video.checkState() == Qt.Unchecked:
+            self.stop_record_video.setCheckState(Qt.Unchecked)
+            self.stop_record_video.setEnabled(True)
 
 
-    def connect_get_points(self):
-        pass
-        # self.setHidden(True)
+    def connect_stop_record_video(self):
+        if self.stop_record_video.checkState() == Qt.Checked:
+            self.start_record_video.setCheckState(Qt.Unchecked)
+            self.start_record_video.setEnabled(False)
+        elif self.stop_record_video.checkState() == Qt.Unchecked:
+            self.start_record_video.setCheckState(Qt.Unchecked)
+            self.start_record_video.setEnabled(True)
 
 
+    # 按下确认按钮
     def connect_sure(self):
-        pass
-        # self.info_dict[add_action_window.des_text] = self.des_text.text() if self.des_text.text() != '' else self.com_box.currentText()
-        # self.info_dict[add_action_window.action_type] = self.com_box.currentText()
-        # self.info_dict[add_action_window.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
-        # # 坐标信息需要通过主窗口传递过来
-        # # self.info_dict[add_action_window.points] = None
-        # self.info_dict[add_action_window.leave] = '1' if self.leave_check_box.checkState()==Qt.Checked else '0'
-        # self.info_dict[add_action_window.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
-        # signal = json.dumps(self.info_dict)
-        # # 发送开头sure标志-->判断是确认按钮按下
-        # self.signal.emit('sure>' + signal)
-        # self.close()
-
-
-    def closeEvent(self, event):
-        pass
-        # # 如果取消则恢复默认
-        # add_action_window.add_action_flag = False
-        # uArm_action.uArm_action_type = None
-        # self.info_dict = {add_action_window.des_text    : None,
-        #                   add_action_window.action_type : uArm_action.uArm_click,
-        #                   add_action_window.points      : None,
-        #                   add_action_window.leave       : 1}
-        # self.des_text.setText('')
-        # self.des_text.setPlaceholderText('请输入动作描述(可不写)')
-        # self.com_box.setCurrentText(uArm_action.uArm_click)
-        # self.speed_text.setText('')
-        # self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
-        # self.points.setText('')
-        # self.leave_check_box.setCheckState(Qt.Checked)
-        # self.close()
+        if self.start_record_video.checkState() == Qt.Checked:
+            signal = 'start_record'
+        elif self.stop_record_video.checkState() == Qt.Checked:
+            signal = 'stop_record'
+        else:
+            signal = 'null'
+        # 发送开头sure标志-->判断是确认按钮按下
+        self.signal.emit('video_tab_sure>' + signal)
