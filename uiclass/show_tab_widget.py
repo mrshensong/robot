@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from uiclass.action_tab import Action_Tab
-from uiclass.case_tab import Case_Tab
+from uiclass.show_action_tab import Action_Tab
+from uiclass.show_case_tab import Case_Tab
 from GlobalVar import robot_other, logger, window_status
 
 class TabWidget(QTabWidget):

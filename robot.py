@@ -20,7 +20,7 @@ from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
-from uiclass.tab_widget import TabWidget
+from uiclass.show_tab_widget import TabWidget
 from uiclass.controls import Camera_Param_Adjust_Control
 
 
