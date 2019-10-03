@@ -1,8 +1,7 @@
-import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, video_action
+from GlobalVar import icon_path, uArm_action, video_action
 
 # 自定义动作展示控件(action)
 class Action_Control(QWidget):
@@ -57,10 +56,6 @@ class Action_Control(QWidget):
         self.h_box.addWidget(self.delete_botton)
 
         self.setLayout(self.h_box)
-
-
-    def connect_check_box(self):
-        print('the id is : ', self.id)
 
 
 # 自定义动作展示控件(case)
@@ -195,9 +190,11 @@ class Camera_Param_Adjust_Control(QDialog):
         self.exposure_time_label = QLabel(self)
         self.exposure_time_label.setText('曝光: ')
         self.exposure_time_slider = QSlider(Qt.Horizontal, self)
-        # self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
+        self.exposure_time_slider.setRange(1000, 100000)
+        self.exposure_time_slider.valueChanged.connect(self.connect_exposure_time_slider)
         self.exposure_time_spinbox = QSpinBox(self)
         self.exposure_time_spinbox.setRange(1000, 100000)
+        self.exposure_time_spinbox.valueChanged.connect(self.connect_exposure_time_spinbox)
         self.general_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
         self.general_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 3)
         self.general_layout.addWidget(self.exposure_time_spinbox, 0, 4, 1, 1)
@@ -206,9 +203,11 @@ class Camera_Param_Adjust_Control(QDialog):
         self.gain_label = QLabel(self)
         self.gain_label.setText('增益: ')
         self.gain_slider = QSlider(Qt.Horizontal, self)
-        # self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
+        self.gain_slider.setRange(0, 100)
+        self.gain_slider.valueChanged.connect(self.connect_gain_slider)
         self.gain_spinbox = QSpinBox(self)
         self.gain_spinbox.setRange(0, 100)
+        self.gain_spinbox.valueChanged.connect(self.connect_gain_spinbox)
         self.general_layout.addWidget(self.gain_label, 1, 0, 1, 1)
         self.general_layout.addWidget(self.gain_slider, 1, 1, 1, 3)
         self.general_layout.addWidget(self.gain_spinbox, 1, 4, 1, 1)
@@ -219,3 +218,23 @@ class Camera_Param_Adjust_Control(QDialog):
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setWindowTitle('摄像头参数')
+
+
+    def connect_exposure_time_slider(self):
+        value = int(self.exposure_time_slider.value())
+        self.exposure_time_spinbox.setValue(value)
+
+
+    def connect_exposure_time_spinbox(self):
+        value = int(self.exposure_time_spinbox.value())
+        self.exposure_time_slider.setValue(value)
+
+
+    def connect_gain_slider(self):
+        value = int(self.gain_slider.value())
+        self.gain_spinbox.setValue(value)
+
+
+    def connect_gain_spinbox(self):
+        value = int(self.gain_spinbox.value())
+        self.gain_slider.setValue(value)

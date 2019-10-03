@@ -1,4 +1,3 @@
-import os
 import json
 import time
 from threading import Thread
@@ -57,7 +56,6 @@ class ShowActionTab(QWidget):
         self.save_script_tag_button = QToolButton()
         self.save_script_tag_button.setToolTip('save_tag')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_save + ')}')
-        # self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
 
         h_box = QHBoxLayout()
@@ -67,13 +65,11 @@ class ShowActionTab(QWidget):
         h_box.addWidget(self.execute_button)
         h_box.addWidget(self.save_script_tag_button)
         h_box.addStretch(1)
-        # self.list_widget = QListWidget(self.tab1)
         self.list_widget = QListWidget()
         v_box = QVBoxLayout()
         v_box.addLayout(h_box)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
-        # self.tab1.setLayout(v_box)
 
 
     # 展示添加动作子窗口(add_button)
