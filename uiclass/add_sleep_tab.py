@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, video_action
+from GlobalVar import icon_path, uArm_action, add_action_window, sleep_action
 
 # 动作添加控件
 class AddSleepTab(QWidget):
@@ -12,11 +12,7 @@ class AddSleepTab(QWidget):
     def __init__(self, parent):
         super(AddSleepTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {add_action_window.des_text    : None,
-                          add_action_window.action_type : uArm_action.uArm_click,
-                          add_action_window.speed       : 150,
-                          add_action_window.points      : None,
-                          add_action_window.leave       : 1}
+        self.info_dict = {sleep_action.sleep_time    : None}
         self.initUI()
 
 
@@ -53,45 +49,8 @@ class AddSleepTab(QWidget):
         self.setMinimumWidth(300)
 
 
-    def connect_com_box(self):
-        pass
-        # self.signal.emit('action>'+self.com_box.currentText())
-
-
-    def connect_get_points(self):
-        pass
-        # self.setHidden(True)
-
-
     def connect_sure(self):
-        pass
-        # self.info_dict[add_action_window.des_text] = self.des_text.text() if self.des_text.text() != '' else self.com_box.currentText()
-        # self.info_dict[add_action_window.action_type] = self.com_box.currentText()
-        # self.info_dict[add_action_window.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
-        # # 坐标信息需要通过主窗口传递过来
-        # # self.info_dict[add_action_window.points] = None
-        # self.info_dict[add_action_window.leave] = '1' if self.leave_check_box.checkState()==Qt.Checked else '0'
-        # self.info_dict[add_action_window.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
-        # signal = json.dumps(self.info_dict)
-        # # 发送开头sure标志-->判断是确认按钮按下
-        # self.signal.emit('sure>' + signal)
-        # self.close()
-
-
-    def closeEvent(self, event):
-        pass
-        # # 如果取消则恢复默认
-        # add_action_window.add_action_flag = False
-        # uArm_action.uArm_action_type = None
-        # self.info_dict = {add_action_window.des_text    : None,
-        #                   add_action_window.action_type : uArm_action.uArm_click,
-        #                   add_action_window.points      : None,
-        #                   add_action_window.leave       : 1}
-        # self.des_text.setText('')
-        # self.des_text.setPlaceholderText('请输入动作描述(可不写)')
-        # self.com_box.setCurrentText(uArm_action.uArm_click)
-        # self.speed_text.setText('')
-        # self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
-        # self.points.setText('')
-        # self.leave_check_box.setCheckState(Qt.Checked)
-        # self.close()
+        self.info_dict[sleep_action.sleep_time] = 1.0 if self.sleep_time_edit.text() == '' else float(self.sleep_time_edit.text())
+        signal = json.dumps(self.info_dict)
+        # 发送开头sure标志-->判断是确认按钮按下
+        self.signal.emit('sleep_tab_sure>' + signal)

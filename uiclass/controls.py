@@ -116,44 +116,66 @@ class Camera_Record_Control(QWidget):
         # 摄像机图标
         self.video_camera_label = QLabel(self)
         self.video_camera_label.setPixmap(QPixmap(icon_path.Icon_custom_video_camera))
-        # 摄像机录像开始和停止标签及text标签
-        self.video_camera_status_label = QLabel(self)
-        self.video_camera_status_text = QLabel(self)
-        # 视频开始和停止图标
+        # 摄像机录像开始和停止text显示
+        self.video_camera_status_text = QLineEdit(self)
+        # 视频开始和停止显示
         if self.type == video_action.video_record_start:
-            pix_map = QPixmap(icon_path.Icon_custom_record_start)
-            status = 'Start'
+            status = 'record: Start'
         else:
-            pix_map = QPixmap(icon_path.Icon_custom_record_stop)
-            status = 'Stop'
-        self.video_camera_status_label.setPixmap(pix_map)
+            status = 'record: Stop'
         self.video_camera_status_text.setText(status)
+        self.play_botton = QToolButton(self)
+        self.play_botton.setToolTip('play')
+        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.delete_botton = QToolButton(self)
+        self.delete_botton.setToolTip('delete')
+        self.delete_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
         # 布局
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
         self.h_box.addWidget(self.video_camera_label)
         self.h_box.addWidget(self.video_camera_status_text)
-        self.h_box.addWidget(self.video_camera_status_label)
+        self.h_box.addWidget(self.play_botton)
+        self.h_box.addWidget(self.delete_botton)
         self.setLayout(self.h_box)
 
+# 延时动作展示控件(sleep)
+class Sleep_Control(QWidget):
 
-    def closeEvent(self, event):
-        # 如果取消则恢复默认
-        add_action_window.add_action_flag = False
-        uArm_action.uArm_action_type = None
-        self.info_dict = {add_action_window.des_text    : None,
-                          add_action_window.action_type : uArm_action.uArm_click,
-                          add_action_window.points      : None,
-                          add_action_window.leave       : 1}
-        self.des_text.setText('')
-        self.des_text.setPlaceholderText('请输入动作描述(可不写)')
-        self.com_box.setCurrentText(uArm_action.uArm_click)
-        self.speed_text.setText('')
-        self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
-        self.points.setText('')
-        self.leave_check_box.setCheckState(Qt.Checked)
-        self.close()
+    signal = pyqtSignal(str)
 
+    def __init__(self, parent, id, sleep_time=0.0):
+        super(Sleep_Control, self).__init__(parent)
+        self.parent = parent
+        self.id = id
+        self.sleep_time = sleep_time
+        self.initUI()
+
+
+    def initUI(self):
+        # 选择框
+        self.check_box = QCheckBox()
+        # 延时图标
+        self.sleep_icon_label = QLabel(self)
+        self.sleep_icon_label.setPixmap(QPixmap(icon_path.Icon_custom_sleep))
+        # 延时text显示
+        status = 'sleep: ' + str(self.sleep_time)
+        self.sleep_des_text = QLineEdit(self)
+        self.sleep_des_text.setText(status)
+        self.play_botton = QToolButton(self)
+        self.play_botton.setToolTip('play')
+        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.delete_botton = QToolButton(self)
+        self.delete_botton.setToolTip('delete')
+        self.delete_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
+        # 布局
+        self.h_box = QHBoxLayout()
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.sleep_icon_label)
+        self.h_box.addWidget(self.sleep_des_text)
+        self.h_box.addWidget(self.play_botton)
+        self.h_box.addWidget(self.delete_botton)
+        self.setLayout(self.h_box)
 
 # 相机参数调节控件
 class Camera_Param_Adjust_Control(QDialog):

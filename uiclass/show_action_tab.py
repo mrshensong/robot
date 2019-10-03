@@ -5,8 +5,8 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile
-from uiclass.controls import Action_Control
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, video_action, sleep_action
+from uiclass.controls import Action_Control, Camera_Record_Control, Sleep_Control
 from uiclass.add_tab_widget import AddTabWidget
 
 class ShowActionTab(QWidget):
@@ -263,8 +263,8 @@ class ShowActionTab(QWidget):
             logger('[全不选中]-->所有动作')
 
 
-    # 添加动作控件
-    def add_item(self, info_dict, flag=True):
+    # 添加action动作控件
+    def add_action_item(self, info_dict, flag=True):
         # 给动作设置id
         self.index += 1
         # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
@@ -289,7 +289,7 @@ class ShowActionTab(QWidget):
         self.item_list.append(obj)
         self.custom_control_list.append(obj)
         self.info_list.append(info_dict)
-        self.tag_list.append(self.generate_tag(info_dict))
+        self.tag_list.append(self.generate_action_tag(info_dict))
         # 发送需要显示的脚本标签
         self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         # 如果确实是添加动作(而非导入case中的动作)
@@ -313,20 +313,89 @@ class ShowActionTab(QWidget):
             robot_other.actions_saved_to_case = True
 
 
+    # 添加video动作控件
+    def add_video_item(self, info_dict, flag=True):
+        # 给video动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = Camera_Record_Control(parent=None, id=self.index, type=info_dict[video_action.video_record_status])
+        obj.id = self.index
+        self.list_widget.addItem(item)
+        self.list_widget.setItemWidget(item, obj)
+        self.item_list.append(obj)
+        self.custom_control_list.append(obj)
+        self.info_list.append(info_dict)
+        self.tag_list.append(self.generate_video_tag(info_dict))
+        # 发送需要显示的脚本标签
+        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        # 如果确实是添加动作(而非导入case中的动作)
+        if flag is True:
+            robot_other.actions_saved_to_case = False
+            if self.case_file_name == '':  # 空白新建action
+                window_status.action_tab_status = '新建case-->>未保存!'
+            else:  # case新增action
+                window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
+            # 打印新建video动作信息
+            logger('新建-->id{:-<5}action{:-<16}录像动作{:-<20}'.format(self.str_decorate(obj.id),
+                                                                                self.str_decorate(video_action.video_record_status),
+                                                                                self.str_decorate(info_dict[video_action.video_record_status])))
+        else:  # 通过case文件打开actions
+            robot_other.actions_saved_to_case = True
+
+    # 添加sleep动作控件
+    def add_sleep_item(self, info_dict, flag=True):
+        # 给video动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = Sleep_Control(parent=None, id=self.index, sleep_time=info_dict[sleep_action.sleep_time])
+        obj.id = self.index
+        self.list_widget.addItem(item)
+        self.list_widget.setItemWidget(item, obj)
+        self.item_list.append(obj)
+        self.custom_control_list.append(obj)
+        self.info_list.append(info_dict)
+        self.tag_list.append(self.generate_sleep_tag(info_dict))
+        # 发送需要显示的脚本标签
+        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        # 如果确实是添加动作(而非导入case中的动作)
+        if flag is True:
+            robot_other.actions_saved_to_case = False
+            if self.case_file_name == '':  # 空白新建action
+                window_status.action_tab_status = '新建case-->>未保存!'
+            else:  # case新增action
+                window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
+            # 打印新建video动作信息
+            logger('新建-->id{:-<5}action{:-<16}延时时间{:-<20}'.format(self.str_decorate(obj.id),
+                                                                  self.str_decorate(sleep_action.sleep_time),
+                                                                  self.str_decorate(info_dict[sleep_action.sleep_time])))
+        else:  # 通过case文件打开actions
+            robot_other.actions_saved_to_case = True
+
+
     # 接收从添加动作子窗口传来的信号
     def recv_add_action_window_signal(self, signal_str):
-        # 按下确定按钮后, 添加控件
+        # 按下action_tab页面确定按钮后, 添加控件
         if signal_str.startswith('action_tab_sure>'):
-            info_dict = json.loads(signal_str.split('>')[1])
-            self.add_item(info_dict)
+            info_dict = json.loads(signal_str.split('action_tab_sure>')[1])
+            self.add_action_item(info_dict)
+        # 按下video_tab页面确认按钮
+        elif signal_str.startswith('video_tab_sure>'):
+            info_dict = json.loads(signal_str.split('video_tab_sure>')[1])
+            self.add_video_item(info_dict)
+        # 按下sleep_tab页面确认按钮
+        elif signal_str.startswith('sleep_tab_sure>'):
+            info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
+            self.add_sleep_item(info_dict)
         elif signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         else:
             pass
 
 
-    # 添加动作时生成标签
-    def generate_tag(self, info_dict):
+    # 添加action动作时生成标签
+    def generate_action_tag(self, info_dict):
         des_text = info_dict[add_action_window.des_text]
         action_type = info_dict[add_action_window.action_type]
         speed = str(info_dict[add_action_window.speed])
@@ -341,6 +410,25 @@ class ShowActionTab(QWidget):
               '\t\t' + '<param name="'+add_action_window.trigger+'">' +trigger+ '</param>\n'+\
               '\t</action>\n'
         return tag
+
+
+    # 添加video动作时生成标签
+    def generate_video_tag(self, info_dict):
+        record_status = info_dict[video_action.video_record_status]
+        tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
+              '\t\t' + '<param name="' + video_action.video_record_status + '">' + record_status + '</param>\n' + \
+              '\t</action>\n'
+        return tag
+
+
+    # 添加sleep动作时生成标签
+    def generate_sleep_tag(self, info_dict):
+        sleep_time = str(info_dict[sleep_action.sleep_time])
+        tag = '\t<action ' + 'sleep' + '="' + 'time/s' + '">\n' + \
+              '\t\t' + '<param name="' + sleep_action.sleep_time + '">' + sleep_time + '</param>\n' + \
+              '\t</action>\n'
+        return tag
+
 
 
     # 将所有action合并成为script

@@ -66,6 +66,7 @@ class AddTabWidget(QDialog):
     def recv_sleep_tab_signal(self, signal_str):
         if signal_str.startswith('sleep_tab_sure>'):
             self.signal.emit(signal_str)
+            self.close()
 
 
     def closeEvent(self, event):
@@ -93,6 +94,7 @@ class AddTabWidget(QDialog):
         # sleep_tab复位
         self.widget.sleep_tab.sleep_time_edit.setText('')
         self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('请输入睡眠时间(单位:ms)')
+        self.widget.setCurrentWidget(self.widget.action_tab)
         self.close()
 
 

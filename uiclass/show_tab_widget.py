@@ -64,5 +64,5 @@ class ShowTabWidget(QTabWidget):
                 for id in range(2, len(dict_info_list)):
                     # 将字典中的'(0, 0)'转为元祖(0, 0)
                     dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                    self.action_tab.add_item(dict_info_list[id], flag=False)
+                    self.action_tab.add_action_item(dict_info_list[id], flag=False)
                 window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name

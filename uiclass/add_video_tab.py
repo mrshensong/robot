@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, video_action
+from GlobalVar import icon_path, uArm_action, add_action_window, video_action, logger
 
 # 动作添加控件
 class AddVideoTab(QWidget):
@@ -12,11 +12,8 @@ class AddVideoTab(QWidget):
     def __init__(self, parent):
         super(AddVideoTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {add_action_window.des_text    : None,
-                          add_action_window.action_type : uArm_action.uArm_click,
-                          add_action_window.speed       : 150,
-                          add_action_window.points      : None,
-                          add_action_window.leave       : 1}
+        # 视频录像状态
+        self.info_dict = {video_action.video_record_status : None}
         self.initUI()
 
 
@@ -80,10 +77,12 @@ class AddVideoTab(QWidget):
     # 按下确认按钮
     def connect_sure(self):
         if self.start_record_video.checkState() == Qt.Checked:
-            signal = 'start_record'
+            self.info_dict[video_action.video_record_status] = video_action.video_record_start
         elif self.stop_record_video.checkState() == Qt.Checked:
-            signal = 'stop_record'
+            self.info_dict[video_action.video_record_status] = video_action.video_record_stop
         else:
-            signal = 'null'
+            logger('[没有选择视频录像状态, 请重新选择!]')
+            return
+        signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('video_tab_sure>' + signal)
