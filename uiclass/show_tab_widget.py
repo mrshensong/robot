@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
-from GlobalVar import robot_other, logger, window_status
+from GlobalVar import robot_other, window_status
 
 class ShowTabWidget(QTabWidget):
 
@@ -42,7 +42,7 @@ class ShowTabWidget(QTabWidget):
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
         # 执行action
-        elif signal_str.startswith('execute>'):
+        elif signal_str.startswith('action_execute_item>'):
             self.signal.emit(signal_str)
 
 

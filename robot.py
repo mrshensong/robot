@@ -805,7 +805,7 @@ class Ui_MainWindow(QMainWindow):
     # 接收show_tab_widget的信号
     def recv_show_tab_widget_signal(self, signal_str):
         # 执行动作
-        if signal_str.startswith('execute>'):
+        if signal_str.startswith('action_execute_item>'):
             signal_dict = json.loads(signal_str.split('>')[1])
             speed = int(signal_dict[add_action_window.speed])
             leave = int(signal_dict[add_action_window.leave])

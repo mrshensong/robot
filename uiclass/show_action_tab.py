@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, video_action, sleep_action
-from uiclass.controls import Action_Control, Camera_Record_Control, Sleep_Control
+from uiclass.controls import Action_Control, Record_Control, Sleep_Control
 from uiclass.add_tab_widget import AddTabWidget
 
 class ShowActionTab(QWidget):
@@ -71,7 +71,7 @@ class ShowActionTab(QWidget):
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
 
-
+    '''以下为五个按钮事件(添加/删除/全选/执行/保存)'''
     # 展示添加动作子窗口(add_button)
     def connect_add_action_button(self):
         if gloVar.add_action_button_flag is True:
@@ -85,6 +85,28 @@ class ShowActionTab(QWidget):
             return
 
 
+    # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
+    def delete_selected_items(self):
+        index = 0
+        while True:
+            if len(self.custom_control_list) < index + 1:
+                # 全部删除后需要复位全部选中按钮的状态
+                self.select_all_flag = False
+                self.select_all_button.setToolTip('select_all')
+                self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+                robot_other.actions_saved_to_case = True
+                self.case_file_name = ''
+                self.case_absolute_name = ''
+                break
+            else:
+                if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
+                    # 模拟点击action中的单独delete按钮
+                    self.custom_control_list[index].delete_botton.click()
+                    time.sleep(0.03)
+                else:
+                    index += 1
+
+
     # 删除工具栏操作(delete_button)
     def connect_delete_selected_items(self):
         # 没有item的时候让button无效
@@ -92,6 +114,26 @@ class ShowActionTab(QWidget):
             pass
         else:
             Thread(target=self.delete_selected_items, args=()).start()
+
+
+    # 全部选中或者全部不选中items
+    def select_or_un_select_all_items(self):
+        if self.select_all_flag is False:
+            for i in range(self.index + 1):
+                self.custom_control_list[i].check_box.setCheckState(Qt.Checked)
+            self.select_all_flag = True
+            self.select_all_button.setToolTip('un_select_all')
+            self.select_all_button.setStyleSheet(
+                'QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
+            logger('[全部选中]-->所有动作')
+        else:
+            for i in range(self.index + 1):
+                self.custom_control_list[i].check_box.setCheckState(Qt.Unchecked)
+            self.select_all_flag = False
+            self.select_all_button.setToolTip('select_all')
+            self.select_all_button.setStyleSheet(
+                'QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+            logger('[全不选中]-->所有动作')
 
 
     # 选择/不选择(所有)工具栏操作(select_all_button)
@@ -147,37 +189,133 @@ class ShowActionTab(QWidget):
         Thread(target=self.save_script_tag, args=()).start()
 
 
-    # 执行单个动作的具体操作
-    def play_action(self, id):
-        # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
-        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        while True:
-            if gloVar.request_status == 'ok':
-                gloVar.request_status = None
-                self.signal.emit('execute>'+json.dumps(self.info_list[id]))
-                break
-            else:
-                # 降低cpu负债率
-                time.sleep(0.02)
+    # 清除所有动作
+    def clear_all_items(self):
+        self.list_widget.clear()
+        self.item_list = []
+        self.custom_control_list = []
+        self.info_list = []
+        self.tag_list = []
+        self.index = -1
+        # 取消脚本页的脚本
+        self.signal.emit('save_script_tag>')
+        robot_other.actions_saved_to_case = True
+        self.case_file_name = ''
+        self.case_absolute_name = ''
 
 
-    # 执行单个动作(新建线程/控件中的执行按钮)
-    def execute_action(self, id):
-        Thread(target=self.play_action, args=(id,)).start()
-
-
-    # 删除单个动作(控件中的删除按钮)
-    def delete_item(self, id):
-        # 打印删除信息
-        if self.info_list[id][add_action_window.des_text] == '':
-            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(id),
-                                                                            self.str_decorate(self.info_list[id][add_action_window.action_type]),
-                                                                            str(self.info_list[id][add_action_window.points])))
+    # 添加item(action/video/sleep可以共用)
+    def add_item(self, item, obj, info_dict, flag, item_type):
+        '''item:条目对象/obj:控件对象/info_dict:传入的字典参数/flag:是否真正的新建控件(而非case导入)'''
+        self.list_widget.addItem(item)
+        self.list_widget.setItemWidget(item, obj)
+        self.item_list.append(obj)
+        self.custom_control_list.append(obj)
+        self.info_list.append(info_dict)
+        if item_type == 'action':
+            self.tag_list.append(self.generate_action_tag(info_dict))
+        elif item_type == 'record':
+            self.tag_list.append(self.generate_record_tag(info_dict))
+        elif item_type == 'sleep':
+            self.tag_list.append(self.generate_sleep_tag(info_dict))
+        # 发送需要显示的脚本标签
+        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        if flag is True:
+            robot_other.actions_saved_to_case = False
+            if self.case_file_name == '':  # 空白新建action
+                window_status.action_tab_status = '新建case-->>未保存!'
+            else:  # case新增action
+                window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
         else:
-            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(id),
-                                                                      self.str_decorate(self.info_list[id][add_action_window.action_type]),
-                                                                      str(self.info_list[id][add_action_window.points]),
-                                                                      self.info_list[id][add_action_window.des_text]))
+            robot_other.actions_saved_to_case = True
+
+
+    # 添加action动作控件
+    def add_action_item(self, info_dict, flag=True):
+        # 给动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 120))
+        obj = Action_Control(parent=None, id=self.index, info_dict=info_dict, flag=flag)
+        obj.signal[str].connect(self.recv_action_control_signal)
+        self.add_item(item, obj, info_dict, flag, item_type='action')
+
+
+    # 添加video动作控件
+    def add_record_item(self, info_dict, flag=True):
+        # 给video动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = Record_Control(parent=None, id=self.index, info_dict=info_dict, flag=flag)
+        obj.signal[str].connect(self.recv_record_control_signal)
+        self.add_item(item, obj, info_dict, flag, item_type='record')
+
+
+    # 添加sleep动作控件
+    def add_sleep_item(self, info_dict, flag=True):
+        # 给video动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = Sleep_Control(parent=None, id=self.index, info_dict=info_dict, flag=flag)
+        obj.signal[str].connect(self.recv_sleep_control_signal)
+        self.add_item(item, obj, info_dict, flag, item_type='sleep')
+
+
+    # 接收action控件传来的删除和执行信号
+    def recv_action_control_signal(self, signal_str):
+        if signal_str.startswith('action_delete_item>'):
+            id = int(signal_str.split('action_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('action_execute_item>'):
+            id = int(signal_str.split('action_execute_item>')[1])
+            self.signal.emit('action_execute_item>'+json.dumps(self.info_list[id]))
+
+
+    # 接收record控件传来的删除和执行信号
+    def recv_record_control_signal(self, signal_str):
+        if signal_str.startswith('record_delete_item>'):
+            id = int(signal_str.split('record_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('record_execute_item>'):
+            id = int(signal_str.split('record_execute_item>')[1])
+            # self.signal.emit('action_execute_item>' + json.dumps(self.info_list[id]))
+
+
+    # 接收sleep控件传来的删除和执行信号
+    def recv_sleep_control_signal(self, signal_str):
+        if signal_str.startswith('sleep_delete_item>'):
+            id = int(signal_str.split('sleep_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('sleep_execute_item>'):
+            id = int(signal_str.split('sleep_execute_item>')[1])
+            # self.signal.emit('action_execute_item>' + json.dumps(self.info_list[id]))
+
+
+
+    # 接收从添加动作子窗口传来的信号
+    def recv_add_action_window_signal(self, signal_str):
+        # 按下action_tab页面确定按钮后, 添加控件
+        if signal_str.startswith('action_tab_sure>'):
+            info_dict = json.loads(signal_str.split('action_tab_sure>')[1])
+            self.add_action_item(info_dict)
+        # 按下video_tab页面确认按钮
+        elif signal_str.startswith('record_tab_sure>'):
+            info_dict = json.loads(signal_str.split('record_tab_sure>')[1])
+            self.add_record_item(info_dict)
+        # 按下sleep_tab页面确认按钮
+        elif signal_str.startswith('sleep_tab_sure>'):
+            info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
+            self.add_sleep_item(info_dict)
+        elif signal_str.startswith('action_tab_action>'):
+            self.signal.emit(signal_str)
+        else:
+            pass
+
+
+    # 删除item
+    def delete_item(self, id):
         self.list_widget.takeItem(id)
         self.item_list.pop(id)
         self.custom_control_list.pop(id)
@@ -196,198 +334,12 @@ class ShowActionTab(QWidget):
         if self.case_file_name == '':  # 空白新建action
             window_status.action_tab_status = '新建case-->>未保存!'
         else:  # case新增action
-            window_status.action_tab_status = '%s有改动-->>未保存!'%self.case_absolute_name
+            window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
     def str_decorate(self, origin_str, decorate_str='[]'):
         return str(origin_str).join(decorate_str)
-
-
-    # 清除所有动作
-    def clear_all_items(self):
-        self.list_widget.clear()
-        self.item_list = []
-        self.custom_control_list = []
-        self.info_list = []
-        self.tag_list = []
-        self.index = -1
-        # 取消脚本页的脚本
-        self.signal.emit('save_script_tag>')
-        robot_other.actions_saved_to_case = True
-        self.case_file_name = ''
-        self.case_absolute_name = ''
-
-
-    # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
-    def delete_selected_items(self):
-        index = 0
-        while True:
-            if len(self.custom_control_list) < index+1:
-                # 全部删除后需要复位全部选中按钮的状态
-                self.select_all_flag = False
-                self.select_all_button.setToolTip('select_all')
-                self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
-                robot_other.actions_saved_to_case = True
-                self.case_file_name = ''
-                self.case_absolute_name = ''
-                break
-            else:
-                if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
-                    # 模拟点击action中的单独delete按钮
-                    self.custom_control_list[index].delete_botton.click()
-                    time.sleep(0.03)
-                else:
-                    index += 1
-
-
-    # 全部选中或者全部不选中items
-    def select_or_un_select_all_items(self):
-        if self.select_all_flag is False:
-            for i in range(self.index + 1):
-                self.custom_control_list[i].check_box.setCheckState(Qt.Checked)
-            self.select_all_flag = True
-            self.select_all_button.setToolTip('un_select_all')
-            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
-            logger('[全部选中]-->所有动作')
-        else:
-            for i in range(self.index + 1):
-                self.custom_control_list[i].check_box.setCheckState(Qt.Unchecked)
-            self.select_all_flag = False
-            self.select_all_button.setToolTip('select_all')
-            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
-            logger('[全不选中]-->所有动作')
-
-
-    # 添加action动作控件
-    def add_action_item(self, info_dict, flag=True):
-        # 给动作设置id
-        self.index += 1
-        # 通过字典中的坐标信息, 来设置需要在控件中显示的坐标信息(字符串类型)
-        other_param = '速度:'+str(info_dict[add_action_window.speed])+' 收回:'+str(info_dict[add_action_window.leave])+' 触发:'+str(info_dict[add_action_window.trigger])
-        # 先将坐标元素转为字符串类型
-        points = info_dict[add_action_window.points]
-        if points:
-            points_text = str(tuple(points))
-        else: # 无实际意义(单纯为了不让代码出现警告)
-            points_text = '(0.0, 0.0)'
-        item = QListWidgetItem()
-        item.setSizeHint(QSize(330, 120))
-        obj = Action_Control(parent=None, id=self.index, type=info_dict[add_action_window.action_type])
-        obj.id = self.index
-        obj.des_line_edit.setText(info_dict[add_action_window.des_text])
-        obj.points_line_edit.setText(points_text)
-        obj.other_param_edit.setText(other_param)
-        obj.play_botton.clicked.connect(lambda : self.execute_action(obj.id))
-        obj.delete_botton.clicked.connect(lambda : self.delete_item(obj.id))
-        self.list_widget.addItem(item)
-        self.list_widget.setItemWidget(item, obj)
-        self.item_list.append(obj)
-        self.custom_control_list.append(obj)
-        self.info_list.append(info_dict)
-        self.tag_list.append(self.generate_action_tag(info_dict))
-        # 发送需要显示的脚本标签
-        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
-        # 如果确实是添加动作(而非导入case中的动作)
-        if flag is True:
-            robot_other.actions_saved_to_case = False
-            if self.case_file_name == '': # 空白新建action
-                window_status.action_tab_status = '新建case-->>未保存!'
-            else: # case新增action
-                window_status.action_tab_status = '%s有改动-->>未保存!'%self.case_absolute_name
-            # 打印新建动作信息
-            if info_dict[add_action_window.des_text] == '':
-                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(obj.id),
-                                                                                self.str_decorate(info_dict[add_action_window.action_type]),
-                                                                                points_text))
-            else:
-                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(obj.id),
-                                                                             self.str_decorate(info_dict[add_action_window.action_type]),
-                                                                             points_text,
-                                                                             info_dict[add_action_window.des_text]))
-        else: # 通过case文件打开actions
-            robot_other.actions_saved_to_case = True
-
-
-    # 添加video动作控件
-    def add_video_item(self, info_dict, flag=True):
-        # 给video动作设置id
-        self.index += 1
-        item = QListWidgetItem()
-        item.setSizeHint(QSize(330, 60))
-        obj = Camera_Record_Control(parent=None, id=self.index, type=info_dict[video_action.video_record_status])
-        obj.id = self.index
-        self.list_widget.addItem(item)
-        self.list_widget.setItemWidget(item, obj)
-        self.item_list.append(obj)
-        self.custom_control_list.append(obj)
-        self.info_list.append(info_dict)
-        self.tag_list.append(self.generate_video_tag(info_dict))
-        # 发送需要显示的脚本标签
-        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
-        # 如果确实是添加动作(而非导入case中的动作)
-        if flag is True:
-            robot_other.actions_saved_to_case = False
-            if self.case_file_name == '':  # 空白新建action
-                window_status.action_tab_status = '新建case-->>未保存!'
-            else:  # case新增action
-                window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
-            # 打印新建video动作信息
-            logger('新建-->id{:-<5}action{:-<16}录像动作{:-<20}'.format(self.str_decorate(obj.id),
-                                                                                self.str_decorate(video_action.video_record_status),
-                                                                                self.str_decorate(info_dict[video_action.video_record_status])))
-        else:  # 通过case文件打开actions
-            robot_other.actions_saved_to_case = True
-
-    # 添加sleep动作控件
-    def add_sleep_item(self, info_dict, flag=True):
-        # 给video动作设置id
-        self.index += 1
-        item = QListWidgetItem()
-        item.setSizeHint(QSize(330, 60))
-        obj = Sleep_Control(parent=None, id=self.index, sleep_time=info_dict[sleep_action.sleep_time])
-        obj.id = self.index
-        self.list_widget.addItem(item)
-        self.list_widget.setItemWidget(item, obj)
-        self.item_list.append(obj)
-        self.custom_control_list.append(obj)
-        self.info_list.append(info_dict)
-        self.tag_list.append(self.generate_sleep_tag(info_dict))
-        # 发送需要显示的脚本标签
-        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
-        # 如果确实是添加动作(而非导入case中的动作)
-        if flag is True:
-            robot_other.actions_saved_to_case = False
-            if self.case_file_name == '':  # 空白新建action
-                window_status.action_tab_status = '新建case-->>未保存!'
-            else:  # case新增action
-                window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
-            # 打印新建video动作信息
-            logger('新建-->id{:-<5}action{:-<16}延时时间{:-<20}'.format(self.str_decorate(obj.id),
-                                                                  self.str_decorate(sleep_action.sleep_time),
-                                                                  self.str_decorate(info_dict[sleep_action.sleep_time])))
-        else:  # 通过case文件打开actions
-            robot_other.actions_saved_to_case = True
-
-
-    # 接收从添加动作子窗口传来的信号
-    def recv_add_action_window_signal(self, signal_str):
-        # 按下action_tab页面确定按钮后, 添加控件
-        if signal_str.startswith('action_tab_sure>'):
-            info_dict = json.loads(signal_str.split('action_tab_sure>')[1])
-            self.add_action_item(info_dict)
-        # 按下video_tab页面确认按钮
-        elif signal_str.startswith('video_tab_sure>'):
-            info_dict = json.loads(signal_str.split('video_tab_sure>')[1])
-            self.add_video_item(info_dict)
-        # 按下sleep_tab页面确认按钮
-        elif signal_str.startswith('sleep_tab_sure>'):
-            info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
-            self.add_sleep_item(info_dict)
-        elif signal_str.startswith('action_tab_action>'):
-            self.signal.emit(signal_str)
-        else:
-            pass
 
 
     # 添加action动作时生成标签
@@ -409,7 +361,7 @@ class ShowActionTab(QWidget):
 
 
     # 添加video动作时生成标签
-    def generate_video_tag(self, info_dict):
+    def generate_record_tag(self, info_dict):
         record_status = info_dict[video_action.video_record_status]
         tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
               '\t\t' + '<param name="' + video_action.video_record_status + '">' + record_status + '</param>\n' + \

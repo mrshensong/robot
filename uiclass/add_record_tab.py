@@ -2,15 +2,15 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, video_action, logger
+from GlobalVar import video_action, logger
 
 # 动作添加控件
-class AddVideoTab(QWidget):
+class AddRecordTab(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent):
-        super(AddVideoTab, self).__init__(parent)
+        super(AddRecordTab, self).__init__(parent)
         self.parent = parent
         # 视频录像状态
         self.info_dict = {video_action.video_record_status : None}
@@ -85,4 +85,4 @@ class AddVideoTab(QWidget):
             return
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
-        self.signal.emit('video_tab_sure>' + signal)
+        self.signal.emit('record_tab_sure>' + signal)

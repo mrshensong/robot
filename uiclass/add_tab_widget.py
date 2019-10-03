@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab
-from uiclass.add_video_tab import AddVideoTab
+from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
 from GlobalVar import icon_path, uArm_action, add_action_window, video_action
 
@@ -16,10 +16,10 @@ class TabWidget(QTabWidget):
         self.parent = parent
         self.setTabPosition(self.North)
         self.action_tab = AddActionTab(self)
-        self.video_tab = AddVideoTab(self)
+        self.record_tab = AddRecordTab(self)
         self.sleep_tab = AddSleepTab(self)
         self.addTab(self.action_tab, action_tab)
-        self.addTab(self.video_tab, video_tab)
+        self.addTab(self.record_tab, video_tab)
         self.addTab(self.sleep_tab, sleep_tab)
         # 设置字体
         QFontDialog.setFont(self, QFont('Times New Roman', 11))
@@ -37,7 +37,7 @@ class AddTabWidget(QDialog):
         self.setLayout(self.general_layout)
         self.setWindowTitle('动作设置')
         self.widget.action_tab.signal[str].connect(self.recv_action_tab_signal)
-        self.widget.video_tab.signal[str].connect(self.recv_video_tab_signal)
+        self.widget.record_tab.signal[str].connect(self.recv_record_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
 
 
@@ -56,8 +56,8 @@ class AddTabWidget(QDialog):
 
 
     # 接收video_tab传来的信号
-    def recv_video_tab_signal(self, signal_str):
-        if signal_str.startswith('video_tab_sure>'):
+    def recv_record_tab_signal(self, signal_str):
+        if signal_str.startswith('record_tab_sure>'):
             self.signal.emit(signal_str)
             self.close()
 
@@ -89,8 +89,8 @@ class AddTabWidget(QDialog):
         self.widget.action_tab.leave_check_box.setCheckState(Qt.Checked)
         self.widget.action_tab.camera_trigger_check_box.setCheckState(Qt.Unchecked)
         # video_tab复位
-        self.widget.video_tab.start_record_video.setCheckState(Qt.Unchecked)
-        self.widget.video_tab.stop_record_video.setCheckState(Qt.Unchecked)
+        self.widget.record_tab.start_record_video.setCheckState(Qt.Unchecked)
+        self.widget.record_tab.stop_record_video.setCheckState(Qt.Unchecked)
         # sleep_tab复位
         self.widget.sleep_tab.sleep_time_edit.setText('')
         self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('请输入睡眠时间(单位:ms)')
