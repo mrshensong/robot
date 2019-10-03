@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab
 from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
-from GlobalVar import icon_path, uArm_action, add_action_window, video_action
+from GlobalVar import uArm_action, add_action_window, record_action
 
 class TabWidget(QTabWidget):
 

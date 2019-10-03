@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import video_action, logger
+from GlobalVar import record_action, logger
 
 # 动作添加控件
 class AddRecordTab(QWidget):
@@ -13,7 +13,7 @@ class AddRecordTab(QWidget):
         super(AddRecordTab, self).__init__(parent)
         self.parent = parent
         # 视频录像状态
-        self.info_dict = {video_action.video_record_status : None}
+        self.info_dict = {record_action.record_status : None}
         self.initUI()
 
 
@@ -77,9 +77,9 @@ class AddRecordTab(QWidget):
     # 按下确认按钮
     def connect_sure(self):
         if self.start_record_video.checkState() == Qt.Checked:
-            self.info_dict[video_action.video_record_status] = video_action.video_record_start
+            self.info_dict[record_action.record_status] = record_action.record_start
         elif self.stop_record_video.checkState() == Qt.Checked:
-            self.info_dict[video_action.video_record_status] = video_action.video_record_stop
+            self.info_dict[record_action.record_status] = record_action.record_stop
         else:
             logger('[没有选择视频录像状态, 请重新选择!]')
             return

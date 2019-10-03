@@ -4,7 +4,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, video_action, sleep_action
+from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, record_action, sleep_action
 from uiclass.controls import Action_Control, Record_Control, Sleep_Control
 from uiclass.add_tab_widget import AddTabWidget
 
@@ -362,9 +362,9 @@ class ShowActionTab(QWidget):
 
     # 添加video动作时生成标签
     def generate_record_tag(self, info_dict):
-        record_status = info_dict[video_action.video_record_status]
+        record_status = info_dict[record_action.record_status]
         tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
-              '\t\t' + '<param name="' + video_action.video_record_status + '">' + record_status + '</param>\n' + \
+              '\t\t' + '<param name="' + record_action.record_status + '">' + record_status + '</param>\n' + \
               '\t</action>\n'
         return tag
 

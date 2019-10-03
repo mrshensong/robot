@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
-from GlobalVar import robot_other, window_status
+from GlobalVar import robot_other, window_status, record_action, sleep_action
 
 class ShowTabWidget(QTabWidget):
 
@@ -39,6 +39,7 @@ class ShowTabWidget(QTabWidget):
         elif signal_str.startswith('save_script_tag>'):
             self.text_tab.setText(signal_str.split('save_script_tag>')[1])
             window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name
+            # 保存完脚本后(重新导入当前case目录下的脚本)
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
         # 执行action
@@ -62,7 +63,18 @@ class ShowTabWidget(QTabWidget):
                 self.action_tab.case_file_name = dict_info_list[0]
                 self.action_tab.case_absolute_name = dict_info_list[1]
                 for id in range(2, len(dict_info_list)):
-                    # 将字典中的'(0, 0)'转为元祖(0, 0)
-                    dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                    self.action_tab.add_action_item(dict_info_list[id], flag=False)
+                    # 判断是action/record/sleep控件
+                    if len(dict_info_list[id]) > 2:
+                        # info_dict长度大于2为action控件
+                        # 将字典中的'(0, 0)'转为元祖(0, 0)
+                        dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
+                        self.action_tab.add_action_item(dict_info_list[id], flag=False)
+                    # 为record或者sleep控件
+                    else:
+                        # 为record控件
+                        if record_action.record_status in dict_info_list[id]:
+                            self.action_tab.add_record_item(dict_info_list[id], flag=False)
+                        # 为sleep控件
+                        elif sleep_action.sleep_time in dict_info_list[id]:
+                            self.action_tab.add_sleep_item(dict_info_list[id], flag=False)
                 window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name

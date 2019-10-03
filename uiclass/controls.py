@@ -3,7 +3,7 @@ from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import gloVar, icon_path, uArm_action, video_action, logger, add_action_window, robot_other, window_status, sleep_action
+from GlobalVar import gloVar, icon_path, uArm_action, record_action, logger, add_action_window, sleep_action
 
 # 自定义动作展示控件(action)
 class Action_Control(QWidget):
@@ -145,7 +145,7 @@ class Record_Control(QWidget):
         self.id = id
         # 判断是真的新建record还是通过脚本导入的case(flag:True新建, False导入)
         self.flag = flag
-        self.record_type = info_dict[video_action.video_record_status]
+        self.record_type = info_dict[record_action.record_status]
         self.initUI()
         self.descript_record()
 
@@ -159,7 +159,7 @@ class Record_Control(QWidget):
         # 摄像机录像开始和停止text显示
         self.video_camera_status_text = QLineEdit(self)
         # 视频开始和停止显示
-        if self.record_type == video_action.video_record_start:
+        if self.record_type == record_action.record_start:
             status = 'record: Start'
         else:
             status = 'record: Stop'
@@ -211,7 +211,7 @@ class Record_Control(QWidget):
     def record_delete_item(self):
         # 打印删除信息
         logger('删除-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
-                                                                        self.str_decorate(video_action.video_record_status),
+                                                                        self.str_decorate(record_action.record_status),
                                                                         self.str_decorate(self.record_type)))
         self.signal.emit('record_delete_item>' + str(self.id))
 
@@ -220,7 +220,7 @@ class Record_Control(QWidget):
         if self.flag is True:
             # 打印新建video动作信息
             logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
-                                                                      self.str_decorate(video_action.video_record_status),
+                                                                      self.str_decorate(record_action.record_status),
                                                                       self.str_decorate(self.record_type)))
 
 # 延时动作展示控件(sleep)

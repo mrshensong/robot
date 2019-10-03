@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, video_action
+from GlobalVar import uArm_action, add_action_window
 
 # 动作添加控件
 class AddActionTab(QWidget):

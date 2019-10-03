@@ -130,10 +130,10 @@ class window_status():
 
 
 # 视频录制相关操作(如开关录像)
-class video_action():
-    video_record_status= 'record_status'
-    video_record_start = 'record_start'
-    video_record_stop  = 'record_stop'
+class record_action():
+    record_status= 'record_status'
+    record_start = 'record_start'
+    record_stop  = 'record_stop'
 
 # 延时相关操作
 class sleep_action():
