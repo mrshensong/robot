@@ -849,6 +849,8 @@ class Ui_MainWindow(QMainWindow):
         self.label_output.setAlignment(Qt.AlignLeft)
         self.label_output.setFont(QFont(self.font, 12))
         self.console = QTextEdit(self.frame_of_console_output)
+        self.console.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
+        self.console.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
         self.console.setReadOnly(True)
         self.console.ensureCursorVisible()
         self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)

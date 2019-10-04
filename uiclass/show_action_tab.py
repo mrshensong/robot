@@ -66,6 +66,13 @@ class ShowActionTab(QWidget):
         h_box.addWidget(self.save_script_tag_button)
         h_box.addStretch(1)
         self.list_widget = QListWidget()
+        # 将滚动条变细
+        self.list_widget.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
+        self.list_widget.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
+        # # 取消横向滚动条
+        # self.list_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # # 取消竖向滚动条
+        # self.list_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         v_box = QVBoxLayout()
         v_box.addLayout(h_box)
         v_box.addWidget(self.list_widget)
@@ -237,6 +244,8 @@ class ShowActionTab(QWidget):
                 window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
         else:
             robot_other.actions_saved_to_case = True
+        # 滚动条滚动到当前item
+        self.list_widget.scrollToItem(item)
 
 
     # 添加action动作控件
