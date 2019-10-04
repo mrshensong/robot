@@ -45,6 +45,12 @@ class ShowTabWidget(QTabWidget):
         # 执行action
         elif signal_str.startswith('action_execute_item>'):
             self.signal.emit(signal_str)
+        # 执行action
+        elif signal_str.startswith('record_execute_item>'):
+            self.signal.emit(signal_str)
+        # 执行action
+        elif signal_str.startswith('sleep_execute_item>'):
+            self.signal.emit(signal_str)
 
 
     # 接收从case_tab窗口传来的信号

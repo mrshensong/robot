@@ -96,7 +96,7 @@ class uArm_param():
     base_z_point = 0.0
     actual_screen_width  = 226
     actual_screen_height = 127
-    port_address = 'http://localhost:8000/uArm/'
+    port_address = 'http://localhost:8000/'
 
 
 # 添加动作子窗口

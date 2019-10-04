@@ -189,17 +189,16 @@ class Record_Control(QWidget):
 
     # 执行单个动作的具体操作
     def play_record_item(self):
-        pass
-        # # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
-        # # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        # while True:
-        #     if gloVar.request_status == 'ok':
-        #         gloVar.request_status = None
-        #         self.signal.emit('action_execute_item>' + str(self.id))
-        #         break
-        #     else:
-        #         # 降低cpu负债(使线程更加稳定)
-        #         time.sleep(0.02)
+        # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
+        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+        while True:
+            if gloVar.request_status == 'ok':
+                gloVar.request_status = None
+                self.signal.emit('record_execute_item>' + str(self.id))
+                break
+            else:
+                # 降低cpu负债(使线程更加稳定)
+                time.sleep(0.02)
 
 
     # 执行单个动作(新建线程/控件中的执行按钮)
@@ -271,23 +270,25 @@ class Sleep_Control(QWidget):
     def str_decorate(self, origin_str, decorate_str='[]'):
         return str(origin_str).join(decorate_str)
 
+
     # 执行单个动作的具体操作
     def play_sleep_item(self):
-        pass
-        # # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
-        # # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        # while True:
-        #     if gloVar.request_status == 'ok':
-        #         gloVar.request_status = None
-        #         self.signal.emit('action_execute_item>' + str(self.id))
-        #         break
-        #     else:
-        #         # 降低cpu负债(使线程更加稳定)
-        #         time.sleep(0.02)
+        # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
+        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+        while True:
+            if gloVar.request_status == 'ok':
+                gloVar.request_status = None
+                self.signal.emit('sleep_execute_item>' + str(self.id))
+                break
+            else:
+                # 降低cpu负债(使线程更加稳定)
+                time.sleep(0.02)
+
 
     # 执行单个动作(新建线程/控件中的执行按钮)
     def sleep_execute_item(self):
         Thread(target=self.play_sleep_item, args=()).start()
+
 
     # 删除单个动作(控件中的删除按钮)
     def sleep_delete_item(self):

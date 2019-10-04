@@ -174,3 +174,29 @@ def set_position_(x=None, y=None, z=None, speed=speed_opt, cmd="G0"):
     logger.info("set position: {},{},{} speed={} cmd={}".format(x, y, z, speed, cmd))
     swift.set_position(x, y, z, speed, cmd=cmd)
     swift.flush_cmd()
+
+
+# 执行视频录制相关动作
+def execute_record_action(request):
+    if request.method == 'GET':
+        return HttpResponse("please use post")
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        # data.setdefault('port', None)
+        # data.setdefault('speed', None)
+        record_status = data['record_status']
+        print(record_status)
+        return HttpResponse("ok")
+
+
+# 执行延时相关动作
+def execute_sleep_action(request):
+    if request.method == 'GET':
+        return HttpResponse("please use post")
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        # data.setdefault('port', None)
+        # data.setdefault('speed', None)
+        sleep_time = data['sleep_time']
+        time.sleep(sleep_time)
+        return HttpResponse("ok")

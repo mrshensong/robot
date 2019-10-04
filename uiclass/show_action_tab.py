@@ -150,9 +150,18 @@ class ShowActionTab(QWidget):
         index = 0
         for i in range(len(self.list_widget)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
-                # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-                self.play_action(index)
-                time.sleep(0.03)
+                # 判断是action/record/sleep控件
+                if len(self.info_list[index]) > 2:
+                    self.custom_control_list[index].play_action_item()
+                # 为record或者sleep控件
+                else:
+                    # 为record控件
+                    if record_action.record_status in self.info_list[index]:
+                        self.custom_control_list[index].play_record_item()
+                    # 为sleep控件
+                    elif sleep_action.sleep_time in self.info_list[index]:
+                        self.custom_control_list[index].play_sleep_item()
+                time.sleep(0.02)
             index += 1
 
 
@@ -280,7 +289,7 @@ class ShowActionTab(QWidget):
             self.delete_item(id)
         elif signal_str.startswith('record_execute_item>'):
             id = int(signal_str.split('record_execute_item>')[1])
-            # self.signal.emit('action_execute_item>' + json.dumps(self.info_list[id]))
+            self.signal.emit('record_execute_item>' + json.dumps(self.info_list[id]))
 
 
     # 接收sleep控件传来的删除和执行信号
@@ -290,7 +299,7 @@ class ShowActionTab(QWidget):
             self.delete_item(id)
         elif signal_str.startswith('sleep_execute_item>'):
             id = int(signal_str.split('sleep_execute_item>')[1])
-            # self.signal.emit('action_execute_item>' + json.dumps(self.info_list[id]))
+            self.signal.emit('sleep_execute_item>' + json.dumps(self.info_list[id]))
 
 
 
