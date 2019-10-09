@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, record_action, sleep_action
 from uiclass.controls import Action_Control, Record_Control, Sleep_Control
 from uiclass.add_tab_widget import AddTabWidget
+from uiclass.list_widget import ListWidget
 
 class ShowActionTab(QWidget):
 
@@ -65,7 +66,13 @@ class ShowActionTab(QWidget):
         h_box.addWidget(self.execute_button)
         h_box.addWidget(self.save_script_tag_button)
         h_box.addStretch(1)
+        # 原生QListWidget
         self.list_widget = QListWidget()
+        # 自定义QListWidget & 接收位置交换信号
+        # self.list_widget = ListWidget(None)
+        # self.list_widget.signal[str].connect(self.item_position_exchange)
+        # self.list_widget.setMovement(QListWidget.Free)
+        # self.list_widget.setDragEnabled(True)
         # 将滚动条变细
         self.list_widget.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
         self.list_widget.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
@@ -77,6 +84,7 @@ class ShowActionTab(QWidget):
         v_box.addLayout(h_box)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
+
 
     '''以下为五个按钮事件(添加/删除/全选/执行/保存)'''
     # 展示添加动作子窗口(add_button)
@@ -225,7 +233,7 @@ class ShowActionTab(QWidget):
         '''item:条目对象/obj:控件对象/info_dict:传入的字典参数/flag:是否真正的新建控件(而非case导入)'''
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
-        self.item_list.append(obj)
+        self.item_list.append(item)
         self.custom_control_list.append(obj)
         self.info_list.append(info_dict)
         if item_type == 'action':
