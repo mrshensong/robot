@@ -1199,10 +1199,10 @@ class Ui_MainWindow(QMainWindow):
         self.label_video.y_unit = float(video_height / self.video_label_size_height)
         # 重新计算框选的车机屏幕大小(可以适应不同大小屏幕)
         if sum(self.label_video.box_screen_size) > 0:
-            self.label_video.box_screen_size[0] = int(self.label_video.size().width()   * self.label_video.box_screen_scale[0])
-            self.label_video.box_screen_size[1] = int(self.label_video.size().height()  * self.label_video.box_screen_scale[1])
-            self.label_video.box_screen_size[2] = int(self.label_video.size().width() *(self.label_video.box_screen_scale[2]-self.label_video.box_screen_scale[0]))
-            self.label_video.box_screen_size[3] = int(self.label_video.size().height()*(self.label_video.box_screen_scale[3]-self.label_video.box_screen_scale[1]))
+            self.label_video.box_screen_size[0] = int(self.label_video.size().width()  * self.label_video.box_screen_scale[0])
+            self.label_video.box_screen_size[1] = int(self.label_video.size().height() * self.label_video.box_screen_scale[1])
+            self.label_video.box_screen_size[2] = int(self.label_video.size().width()  * (self.label_video.box_screen_scale[2]-self.label_video.box_screen_scale[0]))
+            self.label_video.box_screen_size[3] = int(self.label_video.size().height() * (self.label_video.box_screen_scale[3]-self.label_video.box_screen_scale[1]))
 
 
     # 重写窗口关闭时间

@@ -163,7 +163,7 @@ class ShowActionTab(QWidget):
     # 执行选中actions的具体操作
     def execute_selected_actions(self):
         index = 0
-        for i in range(len(self.list_widget)):
+        for i in range(len(self.item_list)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
                 # 判断是action/record/sleep控件
                 if len(self.info_list[index]) > 2:

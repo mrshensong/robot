@@ -68,6 +68,8 @@ class icon_path():
     Icon_custom_sleep             = 'config/Icon/custom_widget_icon/sleep.png'
     Icon_tab_widget_add           = 'config/Icon/tab_widget_icon/add.png'
     Icon_tab_widget_delete        = 'config/Icon/tab_widget_icon/delete.png'
+    Icon_tab_widget_up            = 'config/Icon/tab_widget_icon/up.png'
+    Icon_tab_widget_down          = 'config/Icon/tab_widget_icon/down.png'
     Icon_tab_widget_all_select    = 'config/Icon/tab_widget_icon/all_select.png'
     Icon_tab_widget_all_un_select = 'config/Icon/tab_widget_icon/all_un_select.png'
     Icon_tab_widget_execute       = 'config/Icon/tab_widget_icon/execute.png'
