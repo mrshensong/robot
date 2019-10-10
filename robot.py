@@ -3,10 +3,8 @@ import sys
 import cv2
 import time
 import json
-import ctypes
 import requests
 import datetime
-import configparser
 import gxipy as gx
 import numpy as np
 from threading import Thread
@@ -73,7 +71,7 @@ class Ui_MainWindow(QMainWindow):
         # self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setObjectName('grid')
         ## 定义UI 字体 和 字号大小
-        QFontDialog.setFont(self, QFont(self.font, 13))
+        self.setFont(QFont(self.font, 13))
         # 设置UI背景颜色为灰色
         # self.centralwidget.setStyleSheet('background-color:lightgrey')
 
@@ -168,7 +166,7 @@ class Ui_MainWindow(QMainWindow):
 
     # 视频流
     def video_stream(self):
-        if self.use_system_camera == True:
+        if self.use_system_camera is True:
             Thread(target=self.system_camera_stream, args=()).start()
         else:
             Thread(target=self.extern_camera_stream, args=()).start()
@@ -502,24 +500,22 @@ class Ui_MainWindow(QMainWindow):
 
     # get请求->机械臂相关操作函数(解锁/上锁/获取坐标)
     def uArm_get_request(self, action):
-        try:
-            response = requests.get(uArm_param.port_address + 'uArm/' + str(action))
+        response = requests.get(uArm_param.port_address + 'uArm/' + str(action))
+        if response.text:
             gloVar.request_status = response.text
-        except:
+        else:
             gloVar.request_status = '机械臂服务连接异常'
-        finally:
-            return gloVar.request_status
+        return gloVar.request_status
 
 
     # post请求->机械臂命令(单击/双击/长按/滑动)
     def uArm_post_request(self, type, action, data_dict):
-        try:
-            response = requests.post(url=uArm_param.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
+        response = requests.post(url=uArm_param.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
+        if response.text:
             gloVar.request_status = response.text
-        except:
+        else:
             gloVar.request_status = '机械臂服务连接异常'
-        finally:
-            return gloVar.request_status
+        return gloVar.request_status
 
 
     # 获取picture路径
@@ -564,8 +560,8 @@ class Ui_MainWindow(QMainWindow):
         self.slide_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_slide))
         self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_lock))
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
-        self.robot_get_position_action.triggered.connect(lambda : self.uArm_action_event(uArm_action.uArm_get_position))
-        self.robot_with_record_action.triggered.connect(lambda : self.switch_uArm_with_record_status(record_status=None))
+        self.robot_get_position_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_get_position))
+        self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
         # 视频播放工具栏
         self.video_play_action = QAction(QIcon(icon_path.Icon_video_play), 'video_play', self)
         self.video_play_action.triggered.connect(self.play_exist_video)
@@ -798,7 +794,7 @@ class Ui_MainWindow(QMainWindow):
                         self.video_status = self.STATUS_PAUSE
                         self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             except Exception as e:
-                pass
+                logger('[视频进度条出现异常] : %s' % e)
             self.slider_flag = False
 
 
@@ -868,7 +864,7 @@ class Ui_MainWindow(QMainWindow):
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
             self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
-            if gloVar.save_pic_flag == True:
+            if gloVar.save_pic_flag is True:
                 cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
                 gloVar.save_pic_flag = False
         # 录播模式(可以数帧)
@@ -916,11 +912,11 @@ class Ui_MainWindow(QMainWindow):
         robot_other.image = self.image
         # # 数据处理调用
         # if robot_other.data_process_flag is True:
-        #     maskImage_path = os.path.join(self.get_path, 'mask')
+        #     mask_image_path = os.path.join(self.get_path, 'mask')
         # else:
-        #     maskImage_path = None
-        maskImage_path = self.picture_path
-        robot_other.mask_path = maskImage_path
+        #     mask_image_path = None
+        mask_image_path = self.picture_path
+        robot_other.mask_path = mask_image_path
 
 
     # 空格键 播放/暂停/重播
@@ -1223,7 +1219,7 @@ class Ui_MainWindow(QMainWindow):
         if self.video_play_flag is False:
             self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
         else:
-            self.video_label_adaptive(self.offline_video_width  , self.offline_video_height)
+            self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
 
 
 if __name__ == "__main__":

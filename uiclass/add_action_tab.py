@@ -24,10 +24,10 @@ class AddActionTab(QWidget):
     # 初始化
     def initUI(self):
         self.general_layout = QVBoxLayout()
-        #创建一个表单布局
+        # 创建一个表单布局
         self.from_layout = QFormLayout()
         self.button_layout = QHBoxLayout()
-        #设置标签右对齐, 不设置是默认左对齐
+        # 设置标签右对齐, 不设置是默认左对齐
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
         items = [uArm_action.uArm_click,
                  uArm_action.uArm_double_click,
@@ -79,7 +79,7 @@ class AddActionTab(QWidget):
 
         self.setLayout(self.general_layout)
         # 设置字体
-        QFontDialog.setFont(self, QFont('Times New Roman', 11))
+        self.setFont(QFont('Times New Roman', 11))
         # 设置最小尺寸
         self.setMinimumWidth(300)
 
