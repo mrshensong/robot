@@ -153,7 +153,7 @@ class Ui_MainWindow(QMainWindow):
         self.videos_path = profile(type='read', file=gloVar.config_file_path, section='param', option='videos_path').path
         # 窗口状态栏显示的固定格式
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]'\
-                                  %(window_status.robot_connect_status, window_status.video_frame_rate,
+                                  % (window_status.robot_connect_status, window_status.video_frame_rate,
                                     window_status.action_tab_status, window_status.case_tab_status)
 
 
@@ -500,22 +500,24 @@ class Ui_MainWindow(QMainWindow):
 
     # get请求->机械臂相关操作函数(解锁/上锁/获取坐标)
     def uArm_get_request(self, action):
-        response = requests.get(uArm_param.port_address + 'uArm/' + str(action))
-        if response.text:
+        try:
+            response = requests.get(uArm_param.port_address + 'uArm/' + str(action))
             gloVar.request_status = response.text
-        else:
+        except TimeoutError:
             gloVar.request_status = '机械臂服务连接异常'
-        return gloVar.request_status
+        finally:
+            return gloVar.request_status
 
 
     # post请求->机械臂命令(单击/双击/长按/滑动)
     def uArm_post_request(self, type, action, data_dict):
-        response = requests.post(url=uArm_param.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
-        if response.text:
+        try:
+            response = requests.post(url=uArm_param.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
             gloVar.request_status = response.text
-        else:
+        except TimeoutError:
             gloVar.request_status = '机械臂服务连接异常'
-        return gloVar.request_status
+        finally:
+            return gloVar.request_status
 
 
     # 获取picture路径

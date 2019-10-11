@@ -19,7 +19,7 @@ class Video_Label(QLabel):
     # 框选的屏幕起点和终点所占label_video比例
     box_screen_scale  = [0.0, 0.0, 0.0, 0.0]
     # 框选的屏幕大小
-    box_screen_size   = [0, 0, 0 ,0]
+    box_screen_size   = [0, 0, 0 , 0]
     # False直播/True录播
     video_play_flag = False
     # 自定义信号
@@ -32,15 +32,15 @@ class Video_Label(QLabel):
         self.parent = parent
 
 
-    #鼠标点击事件
-    def mousePressEvent(self,event):
+    # 鼠标点击事件
+    def mousePressEvent(self, event):
         self.mouse_press_flag = True
         self.x0 = event.x()
         self.y0 = event.y()
         self.x0 = self.x0
         self.y1 = self.y0
 
-    #鼠标释放事件
+    # 鼠标释放事件
     def mouseReleaseEvent(self, event):
         if self.mouse_move_flag is True:
             # 如果框选屏幕大小(返回框选的尺寸信息)
@@ -87,8 +87,8 @@ class Video_Label(QLabel):
         self.mouse_move_flag = False
 
 
-    #鼠标移动事件
-    def mouseMoveEvent(self,event):
+    # 鼠标移动事件
+    def mouseMoveEvent(self, event):
         if self.mouse_press_flag is True:
             self.mouse_move_flag = True
             self.x1 = event.x()
@@ -96,7 +96,7 @@ class Video_Label(QLabel):
             self.update()
 
 
-    #绘制事件
+    # 绘制事件
     def paintEvent(self, event):
         super().paintEvent(event)
         # 滑动动作直线显示
@@ -123,7 +123,7 @@ class Video_Label(QLabel):
             painter.drawRect(rect)
             if self.video_play_flag is False:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],self.box_screen_size[3]))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
         # 其余情况(不绘制图, 一个小点,几乎不能看到)
         else:
             point = [QPoint(self.x0, self.y0)]

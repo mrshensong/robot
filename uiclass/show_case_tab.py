@@ -1,12 +1,11 @@
 import os
 import json
-import time
 import xml.etree.cElementTree as ET
 from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, merge_path, window_status, profile
+from GlobalVar import icon_path, logger, gloVar, merge_path, window_status, profile
 from uiclass.controls import Case_Control
 
 class ShowCaseTab(QWidget):
@@ -34,7 +33,7 @@ class ShowCaseTab(QWidget):
         self.import_button = QToolButton()
         self.import_button.setToolTip('import')
         self.import_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_import + ')}')
-        self.import_button.clicked.connect(lambda:self.connect_import_button(None))
+        self.import_button.clicked.connect(lambda: self.connect_import_button(None))
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('select_all')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
@@ -85,7 +84,7 @@ class ShowCaseTab(QWidget):
                         case_file = merge_path([home, file]).merged_path
                         # 将文件名传入
                         self.add_item(case_file)
-            window_status.case_tab_status = 'case所在文件夹-->>%s!'%case_folder
+            window_status.case_tab_status = 'case所在文件夹-->>%s!' % case_folder
         else:
             logger('没有选择case所在文件夹')
 
@@ -99,13 +98,10 @@ class ShowCaseTab(QWidget):
 
 
     def connect_execute_selected_items(self):
-        pass
-
-
-    # 播放单个case
-    def play_item(self, id):
-        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
-        self.signal.emit('execute>'+json.dumps(self.info_list[id]))
+        for i in range(self.index+1):
+            if self.case_control_list[i].check_box.checkState() == Qt.Checked:
+                # 执行动作
+                pass
 
 
     # 接受case控件发送的信号
@@ -114,7 +110,13 @@ class ShowCaseTab(QWidget):
         if signal_str.startswith('open_case>'):
             id = int(signal_str.split('>')[1])
             case_info_list = self.read_script_tag(id)
+            logger('[打开的case路径为]: %s' % self.case_file_list[id])
             self.signal.emit('case_transform_to_action>'+str(case_info_list))
+        # 执行单个case
+        elif signal_str.startswith('play_single_case>'):
+            id = int(signal_str.split('>')[1])
+            case_info_list = self.read_script_tag(id)
+            self.signal.emit('play_single_case>' + str(case_info_list))
         else:
             pass
 
@@ -123,7 +125,6 @@ class ShowCaseTab(QWidget):
     # 返回list为每个action的信息(字典形式)>>list第一个参数为case文件名, 后面参数为每个action的信息存储字典
     def read_script_tag(self, id):
         case_file = self.case_file_list[id]
-        logger('[打开的case路径为]: %s' %case_file)
         tree = ET.ElementTree(file=case_file)
         root = tree.getroot()
         dict_list, new_dict_info = [], []
@@ -175,16 +176,11 @@ class ShowCaseTab(QWidget):
 
     # 添加动作控件
     def add_item(self, case_file):
-        # case名
-        case_name = case_file.split('/')[-1]
         # 给动作设置id
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 70))
-        obj = Case_Control(parent=None, id=self.index)
-        obj.id = self.index
-        obj.case_name_edit.setText(case_name)
-        obj.play_botton.clicked.connect(lambda : self.play_item(obj.id))
+        obj = Case_Control(parent=None, id=self.index, case_file=case_file)
         obj.signal[str].connect(self.recv_case_control_signal)
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)

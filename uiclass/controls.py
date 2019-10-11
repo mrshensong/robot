@@ -31,7 +31,7 @@ class Action_Control(QWidget):
         # 判断是真的新建action还是通过脚本导入的case(flag:True新建, False导入)
         self.flag = flag
         self.initUI()
-        self.descript_action()
+        self.describe_action()
 
     def initUI(self):
 
@@ -120,7 +120,7 @@ class Action_Control(QWidget):
 
 
     # 描述action
-    def descript_action(self):
+    def describe_action(self):
         # 如果确实是添加动作(而非导入case中的动作)
         if self.flag is True:
             # 打印新建动作信息
@@ -147,7 +147,7 @@ class Record_Control(QWidget):
         self.flag = flag
         self.record_type = info_dict[record_action.record_status]
         self.initUI()
-        self.descript_record()
+        self.describe_record()
 
 
     def initUI(self):
@@ -164,21 +164,21 @@ class Record_Control(QWidget):
         else:
             status = 'record: Stop'
         self.video_camera_status_text.setText(status)
-        self.play_botton = QToolButton(self)
-        self.play_botton.setToolTip('play')
-        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
-        self.play_botton.clicked.connect(self.record_execute_item)
-        self.delete_botton = QToolButton(self)
-        self.delete_botton.setToolTip('delete')
-        self.delete_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
-        self.delete_botton.clicked.connect(self.record_delete_item)
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.record_execute_item)
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.record_delete_item)
         # 布局
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
         self.h_box.addWidget(self.video_camera_label)
         self.h_box.addWidget(self.video_camera_status_text)
-        self.h_box.addWidget(self.play_botton)
-        self.h_box.addWidget(self.delete_botton)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
         self.setLayout(self.h_box)
 
 
@@ -215,7 +215,7 @@ class Record_Control(QWidget):
         self.signal.emit('record_delete_item>' + str(self.id))
 
 
-    def descript_record(self):
+    def describe_record(self):
         if self.flag is True:
             # 打印新建video动作信息
             logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
@@ -235,7 +235,7 @@ class Sleep_Control(QWidget):
         self.flag = flag
         self.sleep_time = info_dict[sleep_action.sleep_time]
         self.initUI()
-        self.descript_sleep()
+        self.describe_sleep()
 
 
     def initUI(self):
@@ -248,21 +248,21 @@ class Sleep_Control(QWidget):
         status = 'sleep: ' + str(self.sleep_time)
         self.sleep_des_text = QLineEdit(self)
         self.sleep_des_text.setText(status)
-        self.play_botton = QToolButton(self)
-        self.play_botton.setToolTip('play')
-        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
-        self.play_botton.clicked.connect(self.sleep_execute_item)
-        self.delete_botton = QToolButton(self)
-        self.delete_botton.setToolTip('delete')
-        self.delete_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
-        self.delete_botton.clicked.connect(self.sleep_delete_item)
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.sleep_execute_item)
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.sleep_delete_item)
         # 布局
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
         self.h_box.addWidget(self.sleep_icon_label)
         self.h_box.addWidget(self.sleep_des_text)
-        self.h_box.addWidget(self.play_botton)
-        self.h_box.addWidget(self.delete_botton)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
         self.setLayout(self.h_box)
 
 
@@ -299,7 +299,7 @@ class Sleep_Control(QWidget):
         self.signal.emit('sleep_delete_item>' + str(self.id))
 
 
-    def descript_sleep(self):
+    def describe_sleep(self):
         if self.flag is True:
             # 打印新建video动作信息
             logger('新建-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id),
@@ -311,10 +311,11 @@ class Case_Control(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, id):
+    def __init__(self, parent, id, case_file):
         super(Case_Control, self).__init__(parent)
         self.parent = parent
         self.id = id
+        self.case_file = case_file
         self.initUI()
 
 
@@ -322,22 +323,36 @@ class Case_Control(QWidget):
         # 选择框
         self.check_box = QCheckBox()
         # case名
+        case_name = self.case_file.split('/')[-1]
         self.case_name_edit = QLineEdit(self)
+        self.case_name_edit.setText(case_name)
         # 播放按钮
-        self.play_botton = QToolButton(self)
-        self.play_botton.setToolTip('play')
-        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.play_single_case)
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
-        self.h_box.addWidget(self.play_botton)
+        self.h_box.addWidget(self.play_button)
         self.h_box.addWidget(self.case_name_edit)
         self.setLayout(self.h_box)
 
 
     # 当前控件双击事件后(发送信号到父控件, 发送当前id)
     def mouseDoubleClickEvent(self, event):
-        self.signal.emit('open_case>'+str(self.id))
+        self.signal.emit('open_case>' + str(self.id))
+
+
+    # 执行单个case
+    def play_single_case(self):
+        if gloVar.case_execute_finished_flag is True:
+            logger('[执行的case为] : %s' % self.case_file)
+            gloVar.case_execute_finished_flag = False
+            self.signal.emit('play_single_case>' + str(self.id))
+        else:
+            logger('[有case正在执行中, 不能执行当前case]')
+
 
 # 相机参数调节控件
 class Camera_Param_Adjust_Control(QDialog):

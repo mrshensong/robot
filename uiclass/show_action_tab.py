@@ -138,16 +138,14 @@ class ShowActionTab(QWidget):
                 self.custom_control_list[i].check_box.setCheckState(Qt.Checked)
             self.select_all_flag = True
             self.select_all_button.setToolTip('un_select_all')
-            self.select_all_button.setStyleSheet(
-                'QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
             logger('[全部选中]-->所有动作')
         else:
             for i in range(self.index + 1):
                 self.custom_control_list[i].check_box.setCheckState(Qt.Unchecked)
             self.select_all_flag = False
             self.select_all_button.setToolTip('select_all')
-            self.select_all_button.setStyleSheet(
-                'QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
             logger('[全不选中]-->所有动作')
 
 

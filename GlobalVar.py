@@ -10,6 +10,8 @@ class gloVar():
     add_action_button_flag = False
     # request请求状态(在可接收信息的时候才可以允许发送请求: ok可以发送请求/其余情况不可以发送请求)
     request_status = 'ok'
+    # 一条case是否执行完了(当前case执行完后才会允许第二条case执行)
+    case_execute_finished_flag = True
 
 
 class robot_other():
