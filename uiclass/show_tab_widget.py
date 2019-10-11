@@ -93,6 +93,10 @@ class ShowTabWidget(QTabWidget):
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
             dict_info_list = eval(signal_str.split('play_single_case>')[1])
+            # list中第一个参数为case文件名, 第二个参数为完整路径, 后面的为动作信息
+            # self.action_tab.case_file_name = dict_info_list[0]
+            # self.action_tab.case_absolute_name = dict_info_list[1]
+            logger('[正在执行的case为] : %s' % dict_info_list[1])
             Thread(target=self.play_single_case, args=(dict_info_list,)).start()
 
 

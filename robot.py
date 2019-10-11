@@ -1,4 +1,4 @@
-import os
+import os, signal
 import sys
 import cv2
 import time
@@ -111,6 +111,10 @@ class Ui_MainWindow(QMainWindow):
         self.menu_bar_show()
         # 工具栏
         self.tool_bar()
+        # 打开python_service
+        Thread(target=self.open_python_server, args=()).start()
+        # 获取python_server的pid
+        Thread(target=self.get_python_server_pid, args=()).start()
 
 
     # 所有参数初始化
@@ -155,6 +159,24 @@ class Ui_MainWindow(QMainWindow):
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]'\
                                   % (window_status.robot_connect_status, window_status.video_frame_rate,
                                     window_status.action_tab_status, window_status.case_tab_status)
+        # python_server的pid
+        self.python_server_pid = None
+
+
+    # 打开python服务
+    def open_python_server(self):
+        os.system('python pythonservice/manage.py runserver')
+
+
+    # 获取8000端口pid
+    def get_python_server_pid(self):
+        while True:
+            result = os.popen('netstat -aon | findstr 8000').read()
+            if result:
+                self.python_server_pid = result.split('LISTENING')[1].split('\n')[0].strip()
+                break
+            else:
+                time.sleep(0.5)
 
 
     # 展示窗口状态栏
@@ -1208,6 +1230,9 @@ class Ui_MainWindow(QMainWindow):
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '本程序', '是否要退出程序?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            # 杀死python_server
+            if self.python_server_pid is not None:
+                os.system('taskkill -f -pid %s' % self.python_server_pid)
             # 关闭摄像头
             self.camera_status = self.camera_closed
             self.timer_window_status.stop()

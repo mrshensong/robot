@@ -61,21 +61,21 @@ class Action_Control(QWidget):
         self.v_box.addWidget(self.points_line_edit)
         self.v_box.addWidget(self.other_param_edit)
 
-        self.play_botton = QToolButton(self)
-        self.play_botton.setToolTip('play')
-        self.play_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
-        self.play_botton.clicked.connect(self.action_execute_item)
-        self.delete_botton = QToolButton(self)
-        self.delete_botton.setToolTip('delete')
-        self.delete_botton.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
-        self.delete_botton.clicked.connect(self.action_delete_item)
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.action_execute_item)
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.action_delete_item)
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
         self.h_box.addWidget(self.type_label)
         self.h_box.addLayout(self.v_box)
-        self.h_box.addWidget(self.play_botton)
-        self.h_box.addWidget(self.delete_botton)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
 
         self.setLayout(self.h_box)
 
@@ -347,7 +347,6 @@ class Case_Control(QWidget):
     # 执行单个case
     def play_single_case(self):
         if gloVar.case_execute_finished_flag is True:
-            logger('[执行的case为] : %s' % self.case_file)
             gloVar.case_execute_finished_flag = False
             self.signal.emit('play_single_case>' + str(self.id))
         else:

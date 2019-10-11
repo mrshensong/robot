@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import xml.etree.cElementTree as ET
 from threading import Thread
 from PyQt5.QtWidgets import *
@@ -98,11 +99,22 @@ class ShowCaseTab(QWidget):
             Thread(target=self.select_or_un_select_all_items, args=()).start()
 
 
+    # 执行选中的case
+    def execute_selected_items(self):
+        if gloVar.case_execute_finished_flag is True:
+            for i in range(self.index+1):
+                if self.case_control_list[i].check_box.checkState() == Qt.Checked:
+                    gloVar.case_execute_finished_flag = False
+                    case_info_list = self.read_script_tag(i)
+                    self.signal.emit('play_single_case>' + str(case_info_list))
+                    # 等待上一case执行完成后才允许下一个case
+                    while gloVar.case_execute_finished_flag is False:
+                        time.sleep(0.02)
+
+
+    # 线程中执行选中的case
     def connect_execute_selected_items(self):
-        for i in range(self.index+1):
-            if self.case_control_list[i].check_box.checkState() == Qt.Checked:
-                # 执行动作
-                pass
+        Thread(target=self.execute_selected_items, args=()).start()
 
 
     # 接受case控件发送的信号

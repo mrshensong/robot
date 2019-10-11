@@ -116,7 +116,7 @@ class ShowActionTab(QWidget):
             else:
                 if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
                     # 模拟点击action中的单独delete按钮
-                    self.custom_control_list[index].delete_botton.click()
+                    self.custom_control_list[index].delete_button.click()
                     time.sleep(0.03)
                 else:
                     index += 1
