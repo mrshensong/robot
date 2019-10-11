@@ -53,7 +53,7 @@ class Ui_MainWindow(QMainWindow):
         # 视频进度条
         self.slider_thread = Timer(frequent=4)
         self.slider_thread.timeSignal[str].connect(self.slider_refresh)
-        # 使用pyqt定时器
+        # 使用自带定时器
         # self.timer_video = QTimer(self)
         # self.timer_video.timeout.connect(self.show_video)
         # self.timer_video.start(1)
@@ -64,16 +64,16 @@ class Ui_MainWindow(QMainWindow):
         self.setWindowTitle("Auto Robot")
         self.setWindowIcon(QIcon(self.icon_file))
 
-        self.centralwidget = QWidget(self)
+        self.central_widget = QWidget(self)
 
-        self.centralwidget.setObjectName("centralwidget")
-        self.grid = QtWidgets.QGridLayout(self.centralwidget)
+        self.central_widget.setObjectName("central_widget")
+        self.grid = QtWidgets.QGridLayout(self.central_widget)
         # self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setObjectName('grid')
         ## 定义UI 字体 和 字号大小
         self.setFont(QFont(self.font, 13))
         # 设置UI背景颜色为灰色
-        # self.centralwidget.setStyleSheet('background-color:lightgrey')
+        # self.central_widget.setStyleSheet('background-color:lightgrey')
 
         # 视频播放框架
         self.video_play_frame()
@@ -82,18 +82,18 @@ class Ui_MainWindow(QMainWindow):
         # 控制台输出框架
         self.output_text()
 
-        self.setCentralWidget(self.centralwidget)
+        self.setCentralWidget(self.central_widget)
         # 菜单栏
-        self.menubar = QtWidgets.QMenuBar(self)
-        self.menubar.setObjectName("menubar")
-        self.setMenuBar(self.menubar)
+        self.menu_bar = QtWidgets.QMenuBar(self)
+        self.menu_bar.setObjectName('menu_bar')
+        self.setMenuBar(self.menu_bar)
         # 状态栏 & 状态栏显示
-        self.statusbar = QtWidgets.QStatusBar(self)
-        self.statusbar.setObjectName("statusbar")
-        self.setStatusBar(self.statusbar)
-        self.statusbar.showMessage(self.window_status_text)
-        self.statusbar.setStyleSheet('color:green')
-        self.statusbar.setFont(QFont(self.font, 13))
+        self.status_bar = QtWidgets.QStatusBar(self)
+        self.status_bar.setObjectName('status_bar')
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage(self.window_status_text)
+        self.status_bar.setStyleSheet('color:green')
+        self.status_bar.setFont(QFont(self.font, 13))
         # 工具栏
         self.ui_toolbar = self.addToolBar('ui_toolbar')
         self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
@@ -108,7 +108,7 @@ class Ui_MainWindow(QMainWindow):
         sys.stdout = Stream(newText=self.update_text)
         sys.stderr = Stream(newText=self.update_text)
         # 菜单栏
-        self.menu_bar()
+        self.menu_bar_show()
         # 工具栏
         self.tool_bar()
 
@@ -161,7 +161,7 @@ class Ui_MainWindow(QMainWindow):
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
                                   % (window_status.robot_connect_status, window_status.video_frame_rate,
                                      window_status.action_tab_status, window_status.case_tab_status)
-        self.statusbar.showMessage(self.window_status_text)
+        self.status_bar.showMessage(self.window_status_text)
 
 
     # 视频流
@@ -169,7 +169,7 @@ class Ui_MainWindow(QMainWindow):
         if self.use_system_camera is True:
             Thread(target=self.system_camera_stream, args=()).start()
         else:
-            Thread(target=self.extern_camera_stream, args=()).start()
+            Thread(target=self.external_camera_stream, args=()).start()
 
 
     # 切换摄像头状态
@@ -240,7 +240,7 @@ class Ui_MainWindow(QMainWindow):
 
 
     # 外接摄像头
-    def extern_camera_stream(self):
+    def external_camera_stream(self):
         # create a device manager
         device_manager = gx.DeviceManager()
         dev_num, dev_info_list = device_manager.update_device_list()
@@ -355,11 +355,11 @@ class Ui_MainWindow(QMainWindow):
 
 
     # 菜单栏
-    def menu_bar(self):
+    def menu_bar_show(self):
         # 菜单栏显示
         self.test_action = QAction('exit', self)
-        self.filebar = self.menubar.addMenu('File')
-        self.filebar.addAction(self.test_action)
+        self.file_bar = self.menu_bar.addMenu('File')
+        self.file_bar.addAction(self.test_action)
 
 
     # 机械臂动作事件
@@ -493,9 +493,9 @@ class Ui_MainWindow(QMainWindow):
             uArm_param.base_x_point = float(response.split(',')[0])
             uArm_param.base_y_point = float(response.split(',')[1])
             uArm_param.base_z_point = float(response.split(',')[2])
-            logger('当前位置为: %s' %response)
+            logger('当前位置为: %s' % response)
         else:
-            logger('当前不支持[%s]这个动作' %action)
+            logger('当前不支持[%s]这个动作' % action)
 
 
     # get请求->机械臂相关操作函数(解锁/上锁/获取坐标)
@@ -522,9 +522,9 @@ class Ui_MainWindow(QMainWindow):
 
     # 获取picture路径
     def get_picture_path(self):
-        self.picture_path = QtWidgets.QFileDialog.getExistingDirectory(self.centralwidget, "浏览", self.picture_path)
+        self.picture_path = QtWidgets.QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
         self.set_config_value(gloVar.config_file_path, 'param', 'picture_path', self.picture_path)
-        logger('修改保存图片路径为: %s' %self.picture_path)
+        logger('修改保存图片路径为: %s' % self.picture_path)
 
 
     # 设置相机参数
@@ -589,7 +589,7 @@ class Ui_MainWindow(QMainWindow):
 
     # 视频播放框架
     def video_play_frame(self):
-        self.video_frame = QFrame(self.centralwidget)
+        self.video_frame = QFrame(self.central_widget)
         self.grid.addWidget(self.video_frame, 0, 0, 5, 8)
         self.video_frame.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.video_frame_h_layout = QHBoxLayout(self.video_frame)
@@ -802,7 +802,7 @@ class Ui_MainWindow(QMainWindow):
 
     # case展示
     def show_case(self):
-        self.show_tab_widget = ShowTabWidget(self.centralwidget)
+        self.show_tab_widget = ShowTabWidget(self.central_widget)
         self.grid.addWidget(self.show_tab_widget, 0, 8, 3, 2)
         self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
 
@@ -834,7 +834,7 @@ class Ui_MainWindow(QMainWindow):
 
     # 控制台输出
     def output_text(self):
-        self.frame_of_console_output = QtWidgets.QFrame(self.centralwidget)
+        self.frame_of_console_output = QtWidgets.QFrame(self.central_widget)
         self.frame_of_console_output.setFrameShape(QtWidgets.QFrame.Box)
         self.frame_of_console_output.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_of_console_output.setObjectName("frame_of_console_output")
@@ -1172,10 +1172,10 @@ class Ui_MainWindow(QMainWindow):
         if self.first_window_zoom_flag is True:
             self.first_window_zoom_flag = False
             # 通过中心widget计算初始视频标签的大小(同时减去的50代表widget的边界部分)
-            # video_label高度和self.centralwidget的高度大致相同
-            # video_label宽度为self.centralwidget的宽度大3/4, 通过栅格布局可知
-            self.video_label_size_width = int((self.centralwidget.size().width() - 50) * 0.75)
-            self.video_label_size_height = int((self.centralwidget.size().height() - 50) * 1.00)
+            # video_label高度和self.central_widget的高度大致相同
+            # video_label宽度为self.central_widget的宽度大3/4, 通过栅格布局可知
+            self.video_label_size_width = int((self.central_widget.size().width() - 50) * 0.75)
+            self.video_label_size_height = int((self.central_widget.size().height() - 50) * 1.00)
         else:  # (距离边框还有30左右)
             self.video_label_size_width = self.video_frame.size().width() - 50
             self.video_label_size_height = self.video_frame.size().height() - 50
