@@ -111,7 +111,6 @@ class ShowCaseTab(QWidget):
         if signal_str.startswith('open_case>'):
             id = int(signal_str.split('>')[1])
             case_info_list = self.read_script_tag(id)
-            logger('[打开的case路径为]: %s' % self.case_file_list[id])
             self.signal.emit('case_transform_to_action>'+str(case_info_list))
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
