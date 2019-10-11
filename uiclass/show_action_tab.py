@@ -197,7 +197,7 @@ class ShowActionTab(QWidget):
                     self.case_file_name = filename[0].split('/')[-1]
                     script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
-                    logger('[保存的脚本标签名为]: %s' %filename[0])
+                    logger('[保存的脚本标签名为]: %s' % filename[0])
                     self.signal.emit('save_script_tag>' + script_tag)
                     robot_other.actions_saved_to_case = True
             else:
