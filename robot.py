@@ -157,6 +157,7 @@ class Ui_MainWindow(QMainWindow):
                                     window_status.action_tab_status, window_status.case_tab_status)
 
 
+    # 展示窗口状态栏
     def show_window_status(self):
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
                                   % (window_status.robot_connect_status, window_status.video_frame_rate,
@@ -796,7 +797,7 @@ class Ui_MainWindow(QMainWindow):
                         self.video_status = self.STATUS_PAUSE
                         self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             except Exception as e:
-                logger('[视频进度条出现异常] : %s' % e)
+                logger('[当前视频播放完毕]')
             self.slider_flag = False
 
 

@@ -197,6 +197,6 @@ def execute_sleep_action(request):
         data = json.loads(request.body)
         # data.setdefault('port', None)
         # data.setdefault('speed', None)
-        sleep_time = data['sleep_time']
+        sleep_time = float(data['sleep_time'])
         time.sleep(sleep_time)
         return HttpResponse("ok")
