@@ -1,8 +1,10 @@
+import time
+from threading import Thread
 from django.http import HttpResponse
 from rest_framework.utils import json
-from uarm import SwiftAPI
-import time
-from python_service.utils import logger
+from pythonservice.uarm import SwiftAPI
+from pythonservice.python_service.utils import logger
+from pythonservice.python_service.video import Video
 
 speed_opt = 150
 
@@ -19,6 +21,9 @@ swift.set_mode(0)
 time.sleep(1)
 swift.set_position(50, 100, 40, 20, cmd="G0")
 swift.flush_cmd()
+# 视频线程
+video = Video(video_path='D:\\Work\\MindVision\\DemoPy\\')
+Thread(target=video.recording, args=()).start()
 
 
 def set_position(request):
@@ -185,7 +190,13 @@ def execute_record_action(request):
         # data.setdefault('port', None)
         # data.setdefault('speed', None)
         record_status = data['record_status']
-        print(record_status)
+        if record_status == 'record_start':
+            video.start_record_video(case_type='test', case_name='666')
+        elif record_status == 'record_stop':
+            video.stop_record_video()
+            while video.re_start_record_flag is False:
+                time.sleep(0.02)
+        # print(record_status)
         return HttpResponse("ok")
 
 

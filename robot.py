@@ -171,9 +171,12 @@ class UiMainWindow(QMainWindow):
     # 获取8000端口pid
     def get_python_server_pid(self):
         while True:
-            result = os.popen('netstat -aon | findstr 8000').read()
-            if result:
-                self.python_server_pid = result.split('LISTENING')[1].split('\n')[0].strip()
+            result = os.popen('netstat -aon | findstr 8000').readlines()
+            if '127.0.0.1:8000' in ''.join(result):
+                for line in result:
+                    if '127.0.0.1:8000' in line:
+                        self.python_server_pid = line.split('LISTENING')[1].split('\n')[0].strip()
+                        break
                 break
             else:
                 time.sleep(0.5)
@@ -795,7 +798,7 @@ class UiMainWindow(QMainWindow):
                     'speed': speed, 'leave': leave, 'trigger': trigger,
                     'start': start, 'end': end}
             Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_slide, data,)).start()
-            logger('执行-->action[slide]---------坐标: %s' % str(tuple(start+end)))
+            logger('执行-->action[slide]---------坐标: %s' % str(tuple(start + end)))
 
 
     # 进度条刷新

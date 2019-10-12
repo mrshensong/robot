@@ -4,6 +4,7 @@ import time
 import gxipy as gx
 import numpy as np
 from threading import Thread
+from pythonservice.python_service.utils import logger
 
 class Video:
 
@@ -29,20 +30,11 @@ class Video:
 
     # 视频流线程
     def video_stream_1(self):
-        # print the demo information
-        print("")
-        print("-------------------------------------------------------------")
-        print("Sample to show how to acquire color image continuously and show acquired image.")
-        print("-------------------------------------------------------------")
-        print("")
-        print("Initializing......")
-        print("")
-
         # create a device manager
         device_manager = gx.DeviceManager()
         dev_num, dev_info_list = device_manager.update_device_list()
         if dev_num is 0:
-            print("Number of enumerated devices is 0")
+            logger.warning('Number of enumerated devices is 0')
             return
 
         # open device by serial number
@@ -50,7 +42,7 @@ class Video:
 
         # if camera is mono
         if cam.PixelColorFilter.is_implemented() is False:
-            print("This sample does not support mono camera.")
+            logger.warning('This sample does not support mono camera.')
             cam.close_device()
             return
 
@@ -96,7 +88,7 @@ class Video:
             # get raw image
             raw_image = cam.data_stream[0].get_image()
             if raw_image is None:
-                print("Getting image failed.")
+                logger.error('Getting image failed.')
                 continue
             # get RGB image from raw image
             rgb_image = raw_image.convert("RGB")
@@ -134,9 +126,9 @@ class Video:
             cv2.waitKey(10)
             if self.record_flag is True:
                 self.video_frames_list.append(frame.copy())
-                cv2.imshow('frame', frame.copy())
-            else:
-                cv2.destroyAllWindows()
+            #     cv2.imshow('frame', frame.copy())
+            # else:
+            #     cv2.destroyAllWindows()
         cap.release()
 
 
@@ -153,7 +145,7 @@ class Video:
                     # 此时不能录制视频(需要先保存完上一视频)
                     self.re_start_record_flag = False
                     if count == 0:
-                        print('[开始保存视频]')
+                        logger.info('开始保存视频')
                         flag_out = True
                         video_file_path = os.path.join(self.video_path, self.case_type, self.case_name + '.mp4')
                         # out = cv2.VideoWriter(video_file_path, fourcc, 240.0, (self.video_width, self.video_height), True)
@@ -166,13 +158,14 @@ class Video:
                         self.video_frames_list.pop(0)
                     count = 1
                 if flag_out:
-                    print('[视频保存完毕]')
+                    logger.info('视频保存完毕')
                     out.release()
                     time.sleep(3)
                     # 此时可以录制视频
                     self.re_start_record_flag = True
                 time.sleep(0.2)
         except Exception as e:
+            logger.error('save video thread error!')
             raise Exception('save video thread error!', e)
 
 
@@ -191,24 +184,24 @@ class Video:
         if os.path.exists(video_path) is False:
             os.makedirs(video_path)
         if self.re_start_record_flag is False:
-            print('[上一个视频还未保存完成, 请稍等...]')
+            logger.warning('上一个视频还未保存完成, 请稍等...')
         while self.re_start_record_flag is False:
             time.sleep(0.02)
         self.record_flag = True
-        print('[开始录像]')
+        logger.info('开始录像')
 
 
     # 停止录制视频
     def stop_record_video(self):
         self.record_flag = False
-        print('[停止录像]')
+        logger.info('停止录像')
 
     # 结束录像线程
     def stop_record_thread(self):
         while self.re_start_record_flag is False:
             time.sleep(0.02)
         self.record_thread_flag = False
-        print('[停止录像线程]')
+        logger.info('停止录像线程')
 
 
 if __name__=='__main__':
