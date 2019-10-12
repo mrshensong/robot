@@ -159,6 +159,10 @@ class UiMainWindow(QMainWindow):
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]'\
                                   % (window_status.robot_connect_status, window_status.video_frame_rate,
                                     window_status.action_tab_status, window_status.case_tab_status)
+        # 今天的日期(用作文件夹名)
+        self.today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        # 获取当前路径(连接符标准化为正斜杠模式)
+        self.project_path = merge_path(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
         # python_server的pid
         self.python_server_pid = None
 
