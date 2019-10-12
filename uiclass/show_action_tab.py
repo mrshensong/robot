@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, record_action, sleep_action
-from uiclass.controls import Action_Control, Record_Control, Sleep_Control
+from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 from uiclass.list_widget import ListWidget
 
@@ -260,7 +260,7 @@ class ShowActionTab(QWidget):
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 120))
-        obj = Action_Control(parent=None, id=self.index, info_dict=info_dict, flag=flag)
+        obj = ActionControl(parent=None, id=self.index, info_dict=info_dict, flag=flag)
         obj.signal[str].connect(self.recv_action_control_signal)
         self.add_item(item, obj, info_dict, flag, item_type='action')
 
@@ -271,7 +271,7 @@ class ShowActionTab(QWidget):
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 60))
-        obj = Record_Control(parent=None, id=self.index, info_dict=info_dict, flag=flag)
+        obj = RecordControl(parent=None, id=self.index, info_dict=info_dict, flag=flag)
         obj.signal[str].connect(self.recv_record_control_signal)
         self.add_item(item, obj, info_dict, flag, item_type='record')
 
@@ -282,7 +282,7 @@ class ShowActionTab(QWidget):
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 60))
-        obj = Sleep_Control(parent=None, id=self.index, info_dict=info_dict, flag=flag)
+        obj = SleepControl(parent=None, id=self.index, info_dict=info_dict, flag=flag)
         obj.signal[str].connect(self.recv_sleep_control_signal)
         self.add_item(item, obj, info_dict, flag, item_type='sleep')
 

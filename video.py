@@ -100,10 +100,10 @@ class VideoProcess(object):
         cam.stream_on()
 
         # acquisition image: num is the image number
-        while True:
+        while self.record_thread_flag:  # 只要标志为True, 摄像头一直工作
             # 关闭摄像头
-            if self.close_camera_flag is True:
-                break
+            # if self.close_camera_flag is True:
+            #     break
             # get raw image
             raw_image = cam.data_stream[0].get_image()
             if raw_image is None:
@@ -121,11 +121,12 @@ class VideoProcess(object):
                 continue
             # 将图片格式转换为cv模式
             numpy_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
-            # 将摄像头产生的frame放到容器中
-            self.frame_collection.append(numpy_image.copy())
-
-            # print height, width, and frame ID of the acquisition image
-            print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
+            # 当录像标志打开时, 将frame存起来
+            if self.record_flag is True:
+                # 将摄像头产生的frame放到容器中
+                self.frame_collection.append(numpy_image.copy())
+                # print height, width, and frame ID of the acquisition image
+                print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
 
         # stop data acquisition
         cam.stream_off()
@@ -133,6 +134,7 @@ class VideoProcess(object):
         cam.close_device()
 
 
+    # 获取视频帧
     def get_frame(self):
         if len(self.frame_collection) > 0:
             frame = self.frame_collection[0]
@@ -174,8 +176,6 @@ class VideoProcess(object):
                 while FFF:
                     self.start_time = time.time()
                     FFF = False
-                # self.stop_save_flag = True
-                # self.flag = True
                 try:
                     frame = self.get_frame()
                     self.enqueue_frame(frame.copy())
@@ -185,7 +185,8 @@ class VideoProcess(object):
                     break
             time.sleep(0.2)
         # 视频线程结束(关闭相机)
-        self.camera_stop()
+        # self.camera_stop()
+        self.close_camera_flag = True
         print('[总帧数为]', frames)
 
     '''保存视频相关'''

@@ -1,4 +1,4 @@
-import os, signal
+import os
 import sys
 import cv2
 import time
@@ -19,11 +19,11 @@ from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
 from uiclass.show_tab_widget import ShowTabWidget
-from uiclass.controls import Camera_Param_Adjust_Control
+from uiclass.controls import CameraParamAdjustControl
 
 
 
-class Ui_MainWindow(QMainWindow):
+class UiMainWindow(QMainWindow):
     # 视频状态(初始化/播放中/暂停/播放完毕)
     STATUS_INIT = 0
     STATUS_PLAYING = 1
@@ -99,7 +99,7 @@ class Ui_MainWindow(QMainWindow):
         self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
         self.video_play_toolbar = self.addToolBar('video_play_toolbar')
         # 视频实时流参数设置框
-        self.camera_param_setting_widget = Camera_Param_Adjust_Control(self)
+        self.camera_param_setting_widget = CameraParamAdjustControl(self)
 
         # 网上百度到的说明:其作用是如其名称一样，用来将QObject 里的子孙QObject的某些信号按照其objectName连接到相应的槽上
         # 如 button_hello.setObjectName("hello_button")
@@ -1252,7 +1252,7 @@ class Ui_MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    gui = Ui_MainWindow()
+    gui = UiMainWindow()
     gui.setupUi()
     gui.show()
     sys.exit(app.exec_())

@@ -6,12 +6,12 @@ from PyQt5.QtCore import *
 from GlobalVar import gloVar, icon_path, uArm_action, record_action, logger, add_action_window, sleep_action
 
 # 自定义动作展示控件(action)
-class Action_Control(QWidget):
+class ActionControl(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent, id, info_dict, flag=True):
-        super(Action_Control, self).__init__(parent)
+        super(ActionControl, self).__init__(parent)
         self.parent = parent
         self.id = id
         # 动作类型
@@ -135,12 +135,12 @@ class Action_Control(QWidget):
                                                                              self.des_text))
 
 # 摄像头录制开始和停止动作展示控件(camera_start/camera_stop)
-class Record_Control(QWidget):
+class RecordControl(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent, id, info_dict, flag=True):
-        super(Record_Control, self).__init__(parent)
+        super(RecordControl, self).__init__(parent)
         self.parent = parent
         self.id = id
         # 判断是真的新建record还是通过脚本导入的case(flag:True新建, False导入)
@@ -223,12 +223,12 @@ class Record_Control(QWidget):
                                                                       self.str_decorate(self.record_type)))
 
 # 延时动作展示控件(sleep)
-class Sleep_Control(QWidget):
+class SleepControl(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent, id, info_dict, flag=True):
-        super(Sleep_Control, self).__init__(parent)
+        super(SleepControl, self).__init__(parent)
         self.parent = parent
         self.id = id
         # 判断是真的新建record还是通过脚本导入的case(flag:True新建, False导入)
@@ -307,12 +307,12 @@ class Sleep_Control(QWidget):
                                                                   self.str_decorate(self.sleep_time)))
 
 # 自定义动作展示控件(case)
-class Case_Control(QWidget):
+class CaseControl(QWidget):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent, id, case_file):
-        super(Case_Control, self).__init__(parent)
+        super(CaseControl, self).__init__(parent)
         self.parent = parent
         self.id = id
         self.case_file = case_file
@@ -354,12 +354,12 @@ class Case_Control(QWidget):
 
 
 # 相机参数调节控件
-class Camera_Param_Adjust_Control(QDialog):
+class CameraParamAdjustControl(QDialog):
 
     signal = pyqtSignal(str)
 
     def __init__(self, parent):
-        super(Camera_Param_Adjust_Control, self).__init__(parent)
+        super(CameraParamAdjustControl, self).__init__(parent)
         self.parent = parent
         self.initUI()
 

@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, logger, gloVar, merge_path, window_status, profile
-from uiclass.controls import Case_Control
+from uiclass.controls import CaseControl
 
 class ShowCaseTab(QWidget):
 
@@ -192,7 +192,7 @@ class ShowCaseTab(QWidget):
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 70))
-        obj = Case_Control(parent=None, id=self.index, case_file=case_file)
+        obj = CaseControl(parent=None, id=self.index, case_file=case_file)
         obj.signal[str].connect(self.recv_case_control_signal)
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
