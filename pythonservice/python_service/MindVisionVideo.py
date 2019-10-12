@@ -3,17 +3,21 @@ import os
 import cv2
 import time
 import numpy as np
-import gxipy as gx
+from mindvision import mvsdk
 import threading
+from ctypes import *
 
 class VideoProcess(object):
     def __init__(self, video_path):
-        # 视频路径
         self.video_path = video_path
-        # 收集摄像头产生的frame
-        self.frame_collection = []
-        # 关闭摄像头标志位(为True时关闭摄像头)
-        self.close_camera_flag = False
+        # 相机对象
+        self.hCamera = None
+        # 相机特征描述
+        self.cap = None
+        # 相机黑白or彩色(True:黑白, False:彩色)
+        self.monoCamera = None
+        # 备注：从相机传输到PC端的是RAW数据，在PC端通过软件ISP转为RGB数据（如果是黑白相机就不需要转换格式，但是ISP还有其它处理，所以也需要分配这个buffer）
+        self.pFrameBuffer = None
         '''保存视频需要用到的参数'''
         # 保存视频帧列表
         self.video_frames_list = []
@@ -38,110 +42,78 @@ class VideoProcess(object):
         self.start_time = None
         self.end_time = None
 
-
-    def daheng(self):
-        # print the demo information
-        print("")
-        print("-------------------------------------------------------------")
-        print("Sample to show how to acquire color image continuously and show acquired image.")
-        print("-------------------------------------------------------------")
-        print("")
-        print("Initializing......")
-        print("")
-
-        # create a device manager
-        device_manager = gx.DeviceManager()
-        dev_num, dev_info_list = device_manager.update_device_list()
-        if dev_num is 0:
-            print("Number of enumerated devices is 0")
+    # 初始化相机
+    def camera_init(self):
+        # 枚举相机
+        DevList = mvsdk.CameraEnumerateDevice()
+        nDev = len(DevList)
+        if nDev < 1:
+            print("No camera was found!")
             return
 
-        # open device by serial number
-        cam = device_manager.open_device_by_sn(dev_info_list[0].get("sn"))
+        for i, DevInfo in enumerate(DevList):
+            print("{}: {} {}".format(i, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
+        i = 0 if nDev == 1 else int(input("Select camera: "))
+        DevInfo = DevList[i]
+        print(DevInfo)
+        return DevInfo
 
-        # if camera is mono
-        if cam.PixelColorFilter.is_implemented() is False:
-            print("This sample does not support mono camera.")
-            cam.close_device()
+    # 打开相机
+    def camera_open(self):
+        # 打开相机
+        hCamera = 0
+        DevInfo = self.camera_init()
+        try:
+            hCamera = mvsdk.CameraInit(DevInfo, -1, -1)
+            self.hCamera = hCamera
+        except mvsdk.CameraException as e:
+            print("CameraInit Failed({}): {}".format(e.error_code, e.message))
             return
 
-        # set continuous acquisition
-        cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
-
-        # set exposure(曝光)
-        cam.ExposureTime.set(10000.0)
-
-        # set gain(增益)
-        cam.Gain.set(10.0)
-
-        # set roi(ROI)
-        cam.Width.set(1600)
-        cam.Height.set(1000)
-        cam.OffsetX.set(100)
-        cam.OffsetY.set(160)
-
-        #
-        cam.BalanceWhiteAuto.set(True)
-
-        # set param of improving image quality
-        if cam.GammaParam.is_readable():
-            gamma_value = cam.GammaParam.get()
-            gamma_lut = gx.Utility.get_gamma_lut(gamma_value)
+    # 设置相机并开始启动相机
+    def camera_setting(self):
+        # 获取相机特性描述
+        self.cap = mvsdk.CameraGetCapability(self.hCamera)
+        # 判断是黑白相机还是彩色相机
+        self.monoCamera = (self.cap.sIspCapacity.bMonoSensor != 0)
+        # 黑白相机让ISP直接输出MONO数据，而不是扩展成R=G=B的24位灰度
+        if self.monoCamera:
+            mvsdk.CameraSetIspOutFormat(self.hCamera, mvsdk.CAMERA_MEDIA_TYPE_MONO8)
         else:
-            gamma_lut = None
-        if cam.ContrastParam.is_readable():
-            contrast_value = cam.ContrastParam.get()
-            contrast_lut = gx.Utility.get_contrast_lut(contrast_value)
-        else:
-            contrast_lut = None
-        color_correction_param = cam.ColorCorrectionParam.get()
+            mvsdk.CameraSetIspOutFormat(self.hCamera, mvsdk.CAMERA_MEDIA_TYPE_BGR8)
+        # 设置分辨率
+        mvsdk.CameraSetImageResolutionEx(self.hCamera, iIndex=0XFF, Mode=0, ModeSize=0, x=0, y=0, width=1280, height=720, ZoomWidth=0, ZoomHeight=0)
+        # 相机模式切换成连续采集
+        mvsdk.CameraSetTriggerMode(self.hCamera, 0)
+        # 手动曝光，曝光时间30ms
+        # 曝光时间4.1995, 增益为3.175
+        mvsdk.CameraSetAeState(self.hCamera, 0)
+        # mvsdk.CameraSetExposureTime(self.hCamera, 30 * 1000)
+        mvsdk.CameraSetExposureTime(self.hCamera, 4.1529 * 1000) # 4.1529/240fps
+        # mvsdk.CameraSetExposureTime(self.hCamera, 5.5242 * 1000) # 5.5242/180fps
+        # mvsdk.CameraSetExposureTime(self.hCamera, 6.6150 * 1000) # 6.6150/150fps
+        # mvsdk.CameraSetExposureTime(self.hCamera, 8.2668 * 1000) # 8.2668/120fps
+        # 设置模拟增益值(4.094/传入的参数为:增益值/0.125)
+        mvsdk.CameraSetAnalogGain(self.hCamera, c_int(32))
+        # 让SDK内部取图线程开始工作
+        mvsdk.CameraPlay(self.hCamera)
+        # 计算RGB buffer所需的大小，这里直接按照相机的最大分辨率来分配
+        FrameBufferSize = self.cap.sResolutionRange.iWidthMax * self.cap.sResolutionRange.iHeightMax * (1 if self.monoCamera else 3)
+        # 分配RGB buffer，用来存放ISP输出的图像
+        # 备注：从相机传输到PC端的是RAW数据，在PC端通过软件ISP转为RGB数据（如果是黑白相机就不需要转换格式，但是ISP还有其它处理，所以也需要分配这个buffer）
+        self.pFrameBuffer = mvsdk.CameraAlignMalloc(FrameBufferSize, 16)
 
-        # start data acquisition
-        cam.stream_on()
-
-        # acquisition image: num is the image number
-        while self.record_thread_flag:  # 只要标志为True, 摄像头一直工作
-            # 关闭摄像头
-            # if self.close_camera_flag is True:
-            #     break
-            # get raw image
-            raw_image = cam.data_stream[0].get_image()
-            if raw_image is None:
-                print("Getting image failed.")
-                continue
-            # get RGB image from raw image
-            rgb_image = raw_image.convert("RGB")
-            if rgb_image is None:
-                continue
-            # improve image quality
-            rgb_image.image_improvement(color_correction_param, contrast_lut, gamma_lut)
-            # create numpy array with data from raw image
-            numpy_image = rgb_image.get_numpy_array()
-            if numpy_image is None:
-                continue
-            # 将图片格式转换为cv模式
-            numpy_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
-            # 当录像标志打开时, 将frame存起来
-            if self.record_flag is True:
-                # 将摄像头产生的frame放到容器中
-                self.frame_collection.append(numpy_image.copy())
-                # print height, width, and frame ID of the acquisition image
-                print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
-
-        # stop data acquisition
-        cam.stream_off()
-        # close device
-        cam.close_device()
-
-
-    # 获取视频帧
+    # 输出frame
     def get_frame(self):
-        if len(self.frame_collection) > 0:
-            frame = self.frame_collection[0]
-            self.frame_collection.pop(0)
-        else:
-            pass
-        # return frame
+        pRawData, FrameHead = mvsdk.CameraGetImageBuffer(self.hCamera, 200)
+        mvsdk.CameraImageProcess(self.hCamera, pRawData, self.pFrameBuffer, FrameHead)
+        mvsdk.CameraReleaseImageBuffer(self.hCamera, pRawData)
+        # 此时图片已经存储在pFrameBuffer中，对于彩色相机pFrameBuffer=RGB数据，黑白相机pFrameBuffer=8位灰度数据
+        # 把pFrameBuffer转换成opencv的图像格式以进行后续算法处理
+        frame_data = (mvsdk.c_ubyte * FrameHead.uBytes).from_address(self.pFrameBuffer)
+        frame = np.frombuffer(frame_data, dtype=np.uint8)
+        frame = frame.reshape((FrameHead.iHeight, FrameHead.iWidth, 1 if FrameHead.uiMediaType == mvsdk.CAMERA_MEDIA_TYPE_MONO8 else 3))
+        return frame
 
 
     # 此处获取视频流
@@ -152,20 +124,45 @@ class VideoProcess(object):
                 frame = self.get_frame()
                 # frame = cv2.resize(frame, (1280, 1024), interpolation=cv2.INTER_LINEAR)
                 cv2.imshow("Press q to end", frame)
-            except Exception as e:
-                print('[读取视频错误] : %s' % e)
+            except mvsdk.CameraException as e:
+                if e.error_code != mvsdk.CAMERA_STATUS_TIME_OUT:
+                    print("CameraGetImageBuffer failed({}): {}".format(e.error_code, e.message))
+
+    # 相机停止工作
+    def camera_stop(self):
+        # 关闭相机
+        mvsdk.CameraUnInit(self.hCamera)
+        # 释放帧缓存
+        mvsdk.CameraAlignFree(self.pFrameBuffer)
 
     # 视频流(cv_展示)
     def video_stream_cv(self):
         try:
+            # 相机初始化
+            self.camera_init()
+            # 打开相机
+            self.camera_open()
+            # 设置相机并开始启动相机
+            self.camera_setting()
             # 读取视频帧并展示
             self.camera_running()
+            # 相继停止工作并关闭相机
+            self.camera_stop()
         finally:
             cv2.destroyAllWindows()
 
     # 视频流(帧入栈)
     def video_stream_enqueue(self):
         frames = 0
+        # try:
+        #     # 相机初始化
+        #     self.camera_init()
+        #     # 打开相机
+        #     self.camera_open()
+        #     # 设置相机并开始启动相机
+        #     self.camera_setting()
+        # except Exception as e:
+        #     print('[camera open error]:', e)
         FFF = True
         # 获取视频帧
         while self.record_thread_flag:
@@ -176,6 +173,8 @@ class VideoProcess(object):
                 while FFF:
                     self.start_time = time.time()
                     FFF = False
+                # self.stop_save_flag = True
+                # self.flag = True
                 try:
                     frame = self.get_frame()
                     self.enqueue_frame(frame.copy())
@@ -185,8 +184,7 @@ class VideoProcess(object):
                     break
             time.sleep(0.2)
         # 视频线程结束(关闭相机)
-        # self.camera_stop()
-        self.close_camera_flag = True
+        self.camera_stop()
         print('[总帧数为]', frames)
 
     '''保存视频相关'''
