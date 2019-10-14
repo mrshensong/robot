@@ -7,7 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
-from GlobalVar import robot_other, window_status, record_action, sleep_action, logger
+from GlobalVar import robot_other, window_status, record_action, sleep_action, logger, add_action_window, merge_path
 
 class ShowTabWidget(QTabWidget):
 
@@ -70,14 +70,17 @@ class ShowTabWidget(QTabWidget):
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
                 self.action_tab.clear_all_items()
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
-                # list中第一个参数为case文件名, 后面的为动作信息
+                # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息
                 self.action_tab.case_file_name = dict_info_list[0]
                 self.action_tab.case_absolute_name = dict_info_list[1]
                 logger('[打开的case路径为]: %s' % dict_info_list[1])
+                # 用来计算当前xml脚本中出现的视频次数编号-从零开始(根据序号来命名)
+                video_numbers = -1
+                # 遍历case中的action
                 for id in range(2, len(dict_info_list)):
                     # 判断是action/record/sleep控件
-                    if len(dict_info_list[id]) > 2:
-                        # info_dict长度大于2为action控件
+                    if  add_action_window.points in dict_info_list[id]:
+                        # 有points元素为action控件
                         # 将字典中的'(0, 0)'转为元祖(0, 0)
                         dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
                         self.action_tab.add_action_item(dict_info_list[id], flag=False)
@@ -102,7 +105,7 @@ class ShowTabWidget(QTabWidget):
 
     # 执行单个case
     def play_single_case(self, dict_info_list):
-        # list中第一个参数为case文件名, 后面的为动作信息(action展示需要用到)
+        # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息(action展示需要用到)
         # self.action_tab.case_file_name = dict_info_list[0]
         # self.action_tab.case_absolute_name = dict_info_list[1]
         for id in range(2, len(dict_info_list)):

@@ -1,3 +1,4 @@
+import os
 import time
 from threading import Thread
 from PyQt5.QtWidgets import *
@@ -119,7 +120,7 @@ class ActionControl(QWidget):
         self.signal.emit('action_delete_item>' + str(self.id))
 
 
-    # 描述action
+    # 打印控件信息
     def describe_action(self):
         # 如果确实是添加动作(而非导入case中的动作)
         if self.flag is True:
@@ -145,6 +146,11 @@ class RecordControl(QWidget):
         self.id = id
         # 判断是真的新建record还是通过脚本导入的case(flag:True新建, False导入)
         self.flag = flag
+        # 视频绝对路径
+        self.video_type = info_dict[record_action.video_type]
+        # 视频名称
+        self.video_name = info_dict[record_action.video_name]
+        # 录像类型(record_start/record_stop)
         self.record_type = info_dict[record_action.record_status]
         self.initUI()
         self.describe_record()
@@ -156,6 +162,12 @@ class RecordControl(QWidget):
         # 摄像机图标
         self.video_camera_label = QLabel(self)
         self.video_camera_label.setPixmap(QPixmap(icon_path.Icon_custom_video_camera))
+        # 显示视频名称
+        self.video_name_text = QLineEdit(self)
+        self.video_name_text.setText(self.video_name)
+        # 显示视频类型
+        self.video_type_text = QLineEdit(self)
+        self.video_type_text.setText(self.video_type)
         # 摄像机录像开始和停止text显示
         self.video_camera_status_text = QLineEdit(self)
         # 视频开始和停止显示
@@ -172,11 +184,16 @@ class RecordControl(QWidget):
         self.delete_button.setToolTip('delete')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_custom_delete + ')}')
         self.delete_button.clicked.connect(self.record_delete_item)
-        # 布局
+        # 竖向布局
+        self.v_box = QVBoxLayout()
+        self.v_box.addWidget(self.video_type_text)
+        self.v_box.addWidget(self.video_name_text)
+        self.v_box.addWidget(self.video_camera_status_text)
+        # 横向布局
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
         self.h_box.addWidget(self.video_camera_label)
-        self.h_box.addWidget(self.video_camera_status_text)
+        self.h_box.addLayout(self.v_box)
         self.h_box.addWidget(self.play_button)
         self.h_box.addWidget(self.delete_button)
         self.setLayout(self.h_box)
@@ -215,6 +232,7 @@ class RecordControl(QWidget):
         self.signal.emit('record_delete_item>' + str(self.id))
 
 
+    # 打印控件信息
     def describe_record(self):
         if self.flag is True:
             # 打印新建video动作信息
@@ -299,6 +317,7 @@ class SleepControl(QWidget):
         self.signal.emit('sleep_delete_item>' + str(self.id))
 
 
+    # 打印控件信息
     def describe_sleep(self):
         if self.flag is True:
             # 打印新建video动作信息

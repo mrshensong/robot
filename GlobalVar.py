@@ -2,6 +2,10 @@
 class gloVar:
     # 配置文件路径
     config_file_path = 'config/config.ini'
+    # 当前工程根目录
+    project_path = None
+    # 当前工程产生视频目录
+    project_video_path = None
     # 框选屏幕大小标志
     box_screen_flag = False
     # 保存图片标志(是否需要保存图片,用来实时监测目标位置)
@@ -103,6 +107,17 @@ class uArm_param:
     port_address = 'http://localhost:8000/'
 
 
+class window_status:
+    # 机械臂('机械臂连接成功!' / '机械臂连接失败!')
+    robot_connect_status = '机械臂未连接!'
+    # 视频帧率
+    video_frame_rate = '120fps'
+    # action_tab页面
+    action_tab_status = '没有action'
+    # case_tab页面
+    case_tab_status = '没有打开case目录'
+
+
 # 添加动作子窗口
 class add_action_window:
     # 是否有添加动作
@@ -122,22 +137,13 @@ class add_action_window:
     trigger     = 'trigger'
 
 
-class window_status:
-    # 机械臂('机械臂连接成功!' / '机械臂连接失败!')
-    robot_connect_status = '机械臂未连接!'
-    # 视频帧率
-    video_frame_rate = '120fps'
-    # action_tab页面
-    action_tab_status = '没有action'
-    # case_tab页面
-    case_tab_status = '没有打开case目录'
-
-
 # 视频录制相关操作(如开关录像)
 class record_action:
     record_status= 'record_status'
     record_start = 'record_start'
     record_stop  = 'record_stop'
+    video_type   = 'video_type'
+    video_name   = 'video_name'
 
 # 延时相关操作
 class sleep_action:

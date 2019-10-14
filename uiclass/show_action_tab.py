@@ -270,7 +270,7 @@ class ShowActionTab(QWidget):
         # 给video动作设置id
         self.index += 1
         item = QListWidgetItem()
-        item.setSizeHint(QSize(330, 60))
+        item.setSizeHint(QSize(330, 120))
         obj = RecordControl(parent=None, id=self.index, info_dict=info_dict, flag=flag)
         obj.signal[str].connect(self.recv_record_control_signal)
         self.add_item(item, obj, info_dict, flag, item_type='record')
@@ -387,8 +387,12 @@ class ShowActionTab(QWidget):
     # 添加video动作时生成标签
     def generate_record_tag(self, info_dict):
         record_status = info_dict[record_action.record_status]
+        video_type    = info_dict[record_action.video_type]
+        video_name    = info_dict[record_action.video_name]
         tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
               '\t\t' + '<param name="' + record_action.record_status + '">' + record_status + '</param>\n' + \
+              '\t\t' + '<param name="' + record_action.video_type + '">' + video_type + '</param>\n' + \
+              '\t\t' + '<param name="' + record_action.video_name + '">' + video_name + '</param>\n' + \
               '\t</action>\n'
         return tag
 

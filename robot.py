@@ -112,9 +112,9 @@ class UiMainWindow(QMainWindow):
         # 工具栏
         self.tool_bar()
         # 打开python_service
-        Thread(target=self.open_python_server, args=()).start()
+        # Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
-        Thread(target=self.get_python_server_pid, args=()).start()
+        # Thread(target=self.get_python_server_pid, args=()).start()
 
 
     # 所有参数初始化
@@ -162,7 +162,8 @@ class UiMainWindow(QMainWindow):
         # 今天的日期(用作文件夹名)
         self.today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
         # 获取当前路径(连接符标准化为正斜杠模式)
-        self.project_path = merge_path(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
+        gloVar.project_path = merge_path(section_path=[os.path.abspath(os.getcwd())]).merged_path
+        gloVar.project_video_path = merge_path(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
         # python_server的pid
         self.python_server_pid = None
 
