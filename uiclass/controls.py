@@ -139,7 +139,7 @@ class RecordControl(QWidget):
         # 视频绝对路径
         self.video_type = info_dict[record_action.video_type]
         # 视频名称
-        self.video_name = info_dict[record_action.video_name]
+        self.video_name = info_dict[record_action.video_name] + '.mp4'
         # 录像类型(record_start/record_stop)
         self.record_type = info_dict[record_action.record_status]
         self.initUI()

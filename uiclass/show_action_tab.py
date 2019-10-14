@@ -33,6 +33,16 @@ class ShowActionTab(QWidget):
         # 当前所有action需要保存的文件名(或者打开case时现实的case文件名)
         self.case_file_name = ''
         self.case_absolute_name = ''
+        """
+        1.用来解决在一个list_widget中出现多次视频的问题(视频名后以序号区分)
+        2.需要保存record_start的视频类型和名字(最近的record_stop需要共用同一个类型和名字)
+        """
+        # 用来计算当前list_widget中出现的视频次数编号-从零开始(根据序号来命名)
+        self.video_numbers = -1
+        # 当前action的视频类型
+        self.current_video_type = 'test'
+        # 当前action的视频名字
+        self.current_video_name = 'test.mp4'
         # tab初始化
         self.action_tab_init()
 
@@ -195,7 +205,12 @@ class ShowActionTab(QWidget):
                 with open(filename[0], 'w', encoding='utf-8') as f:
                     self.case_absolute_name = filename[0]
                     self.case_file_name = filename[0].split('/')[-1]
-                    script_tag = self.merge_to_script(''.join(self.tag_list))
+                    # 将脚本中的类型改为当前目录的倒数第二级作为类型
+                    new_script = ''.join(self.tag_list).replace('<param name="video_type">test', '<param name="video_type">'+self.case_absolute_name.split('/')[-2:-1][0])
+                    # 将脚本中的name参数改为当前文件名
+                    new_script = new_script.replace('<param name="video_name">test', '<param name="video_name">'+self.case_file_name.split('.')[0])
+                    # script_tag = self.merge_to_script(''.join(self.tag_list))
+                    script_tag = self.merge_to_script(new_script)
                     f.write(script_tag)
                     logger('[保存的脚本标签名为]: %s' % filename[0])
                     self.signal.emit('save_script_tag>' + script_tag)
@@ -267,6 +282,20 @@ class ShowActionTab(QWidget):
 
     # 添加video动作控件
     def add_record_item(self, info_dict, flag=True):
+        # 只有record_start的时候才证明新增record动作
+        if info_dict[record_action.record_status] == record_action.record_start:
+            self.video_numbers += 1
+            # 属于新建action
+            if self.case_file_name == '' and self.case_absolute_name == '':
+                self.current_video_type = info_dict[record_action.video_type]
+                self.current_video_name = info_dict[record_action.video_name] + '-' + str(self.video_numbers)
+            # 属于导入action(如从case中导入)
+            else:
+                self.current_video_type = self.case_absolute_name.split('/')[-2:-1][0]
+                self.current_video_name = self.case_file_name.split('.')[0] + '-' + str(self.video_numbers)
+        # 重置视频type和name
+        info_dict[record_action.video_type] = self.current_video_type
+        info_dict[record_action.video_name] = self.current_video_name
         # 给video动作设置id
         self.index += 1
         item = QListWidgetItem()

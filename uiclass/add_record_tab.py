@@ -91,12 +91,12 @@ class AddRecordTab(QWidget):
         else:
             self.info_dict[record_action.video_type] = self.video_type_edit.text()
         if self.video_name_edit.text() is '':
-            self.info_dict[record_action.video_name] = 'test.mp4'
+            self.info_dict[record_action.video_name] = 'test'
         else:
             if self.video_name_edit.text().endswith('.mp4') or self.video_name_edit.text().endswith('.MP4'):
-                self.info_dict[record_action.video_name] = self.video_name_edit.text().split('.')[0] + '.mp4'
+                self.info_dict[record_action.video_name] = self.video_name_edit.text().split('.')[0]
             else:
-                self.info_dict[record_action.video_name] = self.video_name_edit.text() + '.mp4'
+                self.info_dict[record_action.video_name] = self.video_name_edit.text()
         if self.start_record_video.checkState() == Qt.Checked:
             self.info_dict[record_action.record_status] = record_action.record_start
         elif self.stop_record_video.checkState() == Qt.Checked:

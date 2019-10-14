@@ -69,13 +69,12 @@ class ShowTabWidget(QTabWidget):
                 logger('[当前有未保存的actions, 不能打开case!]')
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
                 self.action_tab.clear_all_items()
+                self.action_tab.video_numbers = -1
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
                 # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息
                 self.action_tab.case_file_name = dict_info_list[0]
                 self.action_tab.case_absolute_name = dict_info_list[1]
                 logger('[打开的case路径为]: %s' % dict_info_list[1])
-                # 用来计算当前xml脚本中出现的视频次数编号-从零开始(根据序号来命名)
-                video_numbers = -1
                 # 遍历case中的action
                 for id in range(2, len(dict_info_list)):
                     # 判断是action/record/sleep控件
