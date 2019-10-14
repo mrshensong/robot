@@ -14,13 +14,12 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status, profile, record_action, sleep_action
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
 from uiclass.show_tab_widget import ShowTabWidget
 from uiclass.controls import CameraParamAdjustControl
-
+from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status, profile, record_action, sleep_action
 
 
 class UiMainWindow(QMainWindow):
@@ -112,9 +111,9 @@ class UiMainWindow(QMainWindow):
         # 工具栏
         self.tool_bar()
         # 打开python_service
-        Thread(target=self.open_python_server, args=()).start()
+        # Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
-        Thread(target=self.get_python_server_pid, args=()).start()
+        # Thread(target=self.get_python_server_pid, args=()).start()
 
 
     # 所有参数初始化
