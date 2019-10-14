@@ -205,12 +205,7 @@ class ShowActionTab(QWidget):
                 with open(filename[0], 'w', encoding='utf-8') as f:
                     self.case_absolute_name = filename[0]
                     self.case_file_name = filename[0].split('/')[-1]
-                    # 将脚本中的类型改为当前目录的倒数第二级作为类型
-                    new_script = ''.join(self.tag_list).replace('<param name="video_type">test', '<param name="video_type">'+self.case_absolute_name.split('/')[-2:-1][0])
-                    # 将脚本中的name参数改为当前文件名
-                    new_script = new_script.replace('<param name="video_name">test', '<param name="video_name">'+self.case_file_name.split('.')[0])
-                    # script_tag = self.merge_to_script(''.join(self.tag_list))
-                    script_tag = self.merge_to_script(new_script)
+                    script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
                     logger('[保存的脚本标签名为]: %s' % filename[0])
                     self.signal.emit('save_script_tag>' + script_tag)
@@ -284,15 +279,8 @@ class ShowActionTab(QWidget):
     def add_record_item(self, info_dict, flag=True):
         # 只有record_start的时候才证明新增record动作
         if info_dict[record_action.record_status] == record_action.record_start:
-            self.video_numbers += 1
-            # 属于新建action
-            if self.case_file_name == '' and self.case_absolute_name == '':
                 self.current_video_type = info_dict[record_action.video_type]
-                self.current_video_name = info_dict[record_action.video_name] + '-' + str(self.video_numbers)
-            # 属于导入action(如从case中导入)
-            else:
-                self.current_video_type = self.case_absolute_name.split('/')[-2:-1][0]
-                self.current_video_name = self.case_file_name.split('.')[0] + '-' + str(self.video_numbers)
+                self.current_video_name = info_dict[record_action.video_name]
         # 重置视频type和name
         info_dict[record_action.video_type] = self.current_video_type
         info_dict[record_action.video_name] = self.current_video_name

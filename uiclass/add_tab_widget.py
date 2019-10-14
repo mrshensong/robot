@@ -92,6 +92,10 @@ class AddTabWidget(QDialog):
         # video_tab复位
         self.widget.record_tab.start_record_video.setCheckState(Qt.Unchecked)
         self.widget.record_tab.stop_record_video.setCheckState(Qt.Unchecked)
+        self.widget.record_tab.video_type_edit.setText('')
+        self.widget.record_tab.video_type_edit.setPlaceholderText('默认test')
+        self.widget.record_tab.video_name_edit.setText('')
+        self.widget.record_tab.video_name_edit.setPlaceholderText('默认test.mp4(后缀可无)')
         # sleep_tab复位
         self.widget.sleep_tab.sleep_time_edit.setText('')
         self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('请输入睡眠时间(单位:ms)')
