@@ -189,12 +189,14 @@ class Video:
             time.sleep(0.02)
         self.record_flag = True
         logger.info('开始录像')
+        # logger.info(time.time())
 
 
     # 停止录制视频
     def stop_record_video(self):
         self.record_flag = False
         logger.info('停止录像')
+        # logger.info(time.time())
 
     # 结束录像线程
     def stop_record_thread(self):

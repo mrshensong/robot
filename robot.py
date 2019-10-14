@@ -111,9 +111,9 @@ class UiMainWindow(QMainWindow):
         # 工具栏
         self.tool_bar()
         # 打开python_service
-        # Thread(target=self.open_python_server, args=()).start()
+        Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
-        # Thread(target=self.get_python_server_pid, args=()).start()
+        Thread(target=self.get_python_server_pid, args=()).start()
 
 
     # 所有参数初始化

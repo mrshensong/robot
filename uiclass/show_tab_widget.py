@@ -111,7 +111,7 @@ class ShowTabWidget(QTabWidget):
                 if gloVar.request_status == 'ok':
                     gloVar.request_status = None
                     # 判断是action/record/sleep控件
-                    if len(dict_info_list[id]) > 2:
+                    if add_action_window.points in dict_info_list[id]:
                         # info_dict长度大于2为action控件
                         # 将字典中的'(0, 0)'转为元祖(0, 0)
                         dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
