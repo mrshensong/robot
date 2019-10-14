@@ -22,7 +22,7 @@ class TabWidget(QTabWidget):
         self.addTab(self.record_tab, video_tab)
         self.addTab(self.sleep_tab, sleep_tab)
         # 设置字体
-        QFontDialog.setFont(self, QFont('Times New Roman', 11))
+        self.setFont(QFont('Times New Roman', 11))
 
 class AddTabWidget(QDialog):
 
@@ -39,6 +39,7 @@ class AddTabWidget(QDialog):
         self.widget.action_tab.signal[str].connect(self.recv_action_tab_signal)
         self.widget.record_tab.signal[str].connect(self.recv_record_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
+        self.setFixedWidth(330)
 
 
     # 接收action_tab传来的信号

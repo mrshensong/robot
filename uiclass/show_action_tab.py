@@ -228,7 +228,7 @@ class ShowActionTab(QWidget):
 
     # 添加item(action/video/sleep可以共用)
     def add_item(self, item, obj, info_dict, flag, item_type):
-        '''item:条目对象/obj:控件对象/info_dict:传入的字典参数/flag:是否真正的新建控件(而非case导入)'''
+        # item:条目对象/obj:控件对象/info_dict:传入的字典参数/flag:是否真正的新建控件(而非case导入)
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
         self.item_list.append(item)

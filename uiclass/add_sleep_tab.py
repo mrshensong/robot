@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import icon_path, uArm_action, add_action_window, sleep_action
+from GlobalVar import sleep_action
 
 # 动作添加控件
 class AddSleepTab(QWidget):
@@ -12,17 +12,17 @@ class AddSleepTab(QWidget):
     def __init__(self, parent):
         super(AddSleepTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {sleep_action.sleep_time    : None}
+        self.info_dict = {sleep_action.sleep_time    : 1.0}
         self.initUI()
 
 
     # 初始化
     def initUI(self):
         self.general_layout = QVBoxLayout()
-        #创建一个表单布局
+        # 创建一个表单布局
         self.from_layout = QFormLayout()
         self.button_layout = QHBoxLayout()
-        #设置标签右对齐, 不设置是默认左对齐
+        # 设置标签右对齐, 不设置是默认左对齐
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
         # 设置表单内容
         # 睡眠时间设置
@@ -44,7 +44,7 @@ class AddSleepTab(QWidget):
 
         self.setLayout(self.general_layout)
         # 设置字体
-        QFontDialog.setFont(self, QFont('Times New Roman', 11))
+        self.setFont(QFont('Times New Roman', 11))
         # 设置最小尺寸
         self.setMinimumWidth(300)
 

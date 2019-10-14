@@ -7,7 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
-from GlobalVar import robot_other, window_status, record_action, sleep_action, logger, add_action_window, merge_path
+from GlobalVar import robot_other, window_status, record_action, sleep_action, logger, add_action_window
 
 class ShowTabWidget(QTabWidget):
 
@@ -42,7 +42,7 @@ class ShowTabWidget(QTabWidget):
         # 保存actions
         elif signal_str.startswith('save_script_tag>'):
             self.text_tab.setText(signal_str.split('save_script_tag>')[1])
-            window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name
+            window_status.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
             # 保存完脚本后(重新导入当前case目录下的脚本)
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
@@ -79,7 +79,7 @@ class ShowTabWidget(QTabWidget):
                 # 遍历case中的action
                 for id in range(2, len(dict_info_list)):
                     # 判断是action/record/sleep控件
-                    if  add_action_window.points in dict_info_list[id]:
+                    if add_action_window.points in dict_info_list[id]:
                         # 有points元素为action控件
                         # 将字典中的'(0, 0)'转为元祖(0, 0)
                         dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
@@ -92,7 +92,7 @@ class ShowTabWidget(QTabWidget):
                         # 为sleep控件
                         elif sleep_action.sleep_time in dict_info_list[id]:
                             self.action_tab.add_sleep_item(dict_info_list[id], flag=False)
-                window_status.action_tab_status = '%s未改动-->>已保存!'%self.action_tab.case_absolute_name
+                window_status.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
             dict_info_list = eval(signal_str.split('play_single_case>')[1])

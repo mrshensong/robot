@@ -109,14 +109,9 @@ class ActionControl(QWidget):
     def action_delete_item(self):
         # 打印删除信息
         if self.des_line_edit.text() == '':
-            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(self.id),
-                                                                            self.str_decorate(self.action_type),
-                                                                            str(self.points_text)))
+            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), str(self.points_text)))
         else:
-            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(self.id),
-                                                                             self.str_decorate(self.action_type),
-                                                                             str(self.points_text),
-                                                                             self.des_line_edit.text()))
+            logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), str(self.points_text), self.des_line_edit.text()))
         self.signal.emit('action_delete_item>' + str(self.id))
 
 
@@ -126,14 +121,9 @@ class ActionControl(QWidget):
         if self.flag is True:
             # 打印新建动作信息
             if self.des_text == '':
-                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(self.id),
-                                                                                self.str_decorate(self.action_type),
-                                                                                self.points_text))
+                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), self.points_text))
             else:
-                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(self.id),
-                                                                             self.str_decorate(self.action_type),
-                                                                             self.points_text,
-                                                                             self.des_text))
+                logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), self.points_text, self.des_text))
 
 # 摄像头录制开始和停止动作展示控件(camera_start/camera_stop)
 class RecordControl(QWidget):
@@ -226,9 +216,7 @@ class RecordControl(QWidget):
     # 删除单个动作(控件中的删除按钮)
     def record_delete_item(self):
         # 打印删除信息
-        logger('删除-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
-                                                                        self.str_decorate(record_action.record_status),
-                                                                        self.str_decorate(self.record_type)))
+        logger('删除-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(record_action.record_status), self.str_decorate(self.record_type)))
         self.signal.emit('record_delete_item>' + str(self.id))
 
 
@@ -236,9 +224,7 @@ class RecordControl(QWidget):
     def describe_record(self):
         if self.flag is True:
             # 打印新建video动作信息
-            logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
-                                                                      self.str_decorate(record_action.record_status),
-                                                                      self.str_decorate(self.record_type)))
+            logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(record_action.record_status), self.str_decorate(self.record_type)))
 
 # 延时动作展示控件(sleep)
 class SleepControl(QWidget):
@@ -311,9 +297,7 @@ class SleepControl(QWidget):
     # 删除单个动作(控件中的删除按钮)
     def sleep_delete_item(self):
         # 打印删除信息
-        logger('删除-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id),
-                                                              self.str_decorate(sleep_action.sleep_time),
-                                                              self.str_decorate(self.sleep_time)))
+        logger('删除-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id), self.str_decorate(sleep_action.sleep_time), self.str_decorate(self.sleep_time)))
         self.signal.emit('sleep_delete_item>' + str(self.id))
 
 
@@ -321,9 +305,7 @@ class SleepControl(QWidget):
     def describe_sleep(self):
         if self.flag is True:
             # 打印新建video动作信息
-            logger('新建-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id),
-                                                                  self.str_decorate(sleep_action.sleep_time),
-                                                                  self.str_decorate(self.sleep_time)))
+            logger('新建-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id), self.str_decorate(sleep_action.sleep_time), self.str_decorate(self.sleep_time)))
 
 # 自定义动作展示控件(case)
 class CaseControl(QWidget):
@@ -414,7 +396,7 @@ class CameraParamAdjustControl(QDialog):
 
         self.setLayout(self.general_layout)
         # 设置字体
-        QFontDialog.setFont(self, QFont('Times New Roman', 11))
+        self.setFont(QFont('Times New Roman', 11))
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setWindowTitle('摄像头参数')

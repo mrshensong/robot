@@ -1,5 +1,4 @@
 import os
-import json
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
