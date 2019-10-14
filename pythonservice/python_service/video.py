@@ -147,7 +147,7 @@ class Video:
                     if count == 0:
                         logger.info('开始保存视频')
                         flag_out = True
-                        video_file_path = os.path.join(self.video_path, self.case_type, self.case_name + '.mp4')
+                        video_file_path = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
                         # out = cv2.VideoWriter(video_file_path, fourcc, 240.0, (self.video_width, self.video_height), True)
                         while True:
                             if self.video_height is not None and self.video_width is not None:
@@ -180,7 +180,7 @@ class Video:
     def start_record_video(self, case_type='test', case_name='test'):
         self.case_type = case_type
         self.case_name = case_name
-        video_path = os.path.join(self.video_path, self.case_type)
+        video_path = self.video_path + '/' + self.case_type
         if os.path.exists(video_path) is False:
             os.makedirs(video_path)
         if self.re_start_record_flag is False:
@@ -205,7 +205,7 @@ class Video:
 
 
 if __name__=='__main__':
-    path = 'D:\\Work\\MindVision\\DemoPy\\'
+    path = 'D:/Work/MindVision/DemoPy/'
     video = Video(path)
 
 

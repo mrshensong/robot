@@ -112,9 +112,9 @@ class UiMainWindow(QMainWindow):
         # 工具栏
         self.tool_bar()
         # 打开python_service
-        # Thread(target=self.open_python_server, args=()).start()
+        Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
-        # Thread(target=self.get_python_server_pid, args=()).start()
+        Thread(target=self.get_python_server_pid, args=()).start()
 
 
     # 所有参数初始化
@@ -847,6 +847,8 @@ class UiMainWindow(QMainWindow):
         # 执行record动作
         elif signal_str.startswith('record_execute_item>'):
             signal_dict = json.loads(signal_str.split('>')[1])
+            # 添加视频存放根目录
+            signal_dict['video_path'] = gloVar.project_video_path
             Thread(target=self.uArm_post_request, args=('record', 'record_status', signal_dict)).start()
             logger('执行-->action[%s]----status[%s]' %(record_action.record_status, signal_dict[record_action.record_status]))
         # 执行sleep动作

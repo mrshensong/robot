@@ -174,7 +174,7 @@ class ShowActionTab(QWidget):
         for i in range(len(self.item_list)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
                 # 判断是action/record/sleep控件
-                if len(self.info_list[index]) > 2:
+                if add_action_window.points in self.info_list[index]:
                     self.custom_control_list[index].play_action_item()
                 # 为record或者sleep控件
                 else:

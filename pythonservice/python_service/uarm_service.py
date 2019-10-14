@@ -22,7 +22,7 @@ time.sleep(1)
 swift.set_position(50, 100, 40, 20, cmd="G0")
 swift.flush_cmd()
 # 视频线程
-video = Video(video_path='D:\\Work\\MindVision\\DemoPy\\')
+video = Video(video_path='D:/Work/MindVision/DemoPy/')
 Thread(target=video.recording, args=()).start()
 
 
@@ -189,9 +189,14 @@ def execute_record_action(request):
         data = json.loads(request.body)
         # data.setdefault('port', None)
         # data.setdefault('speed', None)
+        video_path    = data['video_path']
         record_status = data['record_status']
+        video_type    = data['video_type']
+        video_name    = data['video_name']
+        # 重置video对象中的video_path
+        video.video_path = video_path
         if record_status == 'record_start':
-            video.start_record_video(case_type='test', case_name='666')
+            video.start_record_video(case_type=video_type, case_name=video_name)
         elif record_status == 'record_stop':
             video.stop_record_video()
             while video.re_start_record_flag is False:
