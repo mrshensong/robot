@@ -111,9 +111,9 @@ class UiMainWindow(QMainWindow):
         # 工具栏
         self.tool_bar()
         # 打开python_service
-        Thread(target=self.open_python_server, args=()).start()
+        # Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
-        Thread(target=self.get_python_server_pid, args=()).start()
+        # Thread(target=self.get_python_server_pid, args=()).start()
 
 
     # 所有参数初始化
@@ -442,13 +442,8 @@ class UiMainWindow(QMainWindow):
                     if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
                         # 文件名列表, 包含完整路径
                         file = merge_path([home, file]).merged_path
-                        # 视频title(显示路径分割后的最后两段)/路径太短的话(全部显示)
-                        if len(file.split('/')) > 3:
-                            file_name = merge_path(file.split('/')[-2:]).merged_path
-                        else:
-                            file_name = file
                         self.videos.append(file)
-                        self.videos_title.append(file_name)
+                        self.videos_title.append(file)
             # 加载离线视频对象
             self.video_cap = cv2.VideoCapture(self.videos[0]) # 重新加载这个视频
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
