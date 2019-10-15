@@ -18,7 +18,7 @@ from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.video_label import Video_Label
 from uiclass.show_tab_widget import ShowTabWidget
-from uiclass.controls import CameraParamAdjustControl
+from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status, profile, record_action, sleep_action
 
 
@@ -58,8 +58,9 @@ class UiMainWindow(QMainWindow):
         # self.timer_video.start(1)
 
         self.setObjectName("MainWindow")
-        self.setGeometry(0, 0, 1000, 600)
-        self.setMinimumSize(QtCore.QSize(1000, 600))
+        self.setGeometry(260, 70, 1400, 900)
+        # self.resize(1400, 900)
+        self.setMinimumSize(QtCore.QSize(1200, 700))
         self.setWindowTitle("Auto Robot")
         self.setWindowIcon(QIcon(self.icon_file))
 
@@ -99,10 +100,9 @@ class UiMainWindow(QMainWindow):
         self.video_play_toolbar = self.addToolBar('video_play_toolbar')
         # 视频实时流参数设置框
         self.camera_param_setting_widget = CameraParamAdjustControl(self)
-
-        # 网上百度到的说明:其作用是如其名称一样，用来将QObject 里的子孙QObject的某些信号按照其objectName连接到相应的槽上
-        # 如 button_hello.setObjectName("hello_button")
-        QtCore.QMetaObject.connectSlotsByName(self)
+        # 离线视频帧率调节
+        self.frame_rate_adjust_widget = FrameRateAdjustControl(self)
+        self.frame_rate_adjust_widget.signal[str].connect(self.recv_frame_rate_adjust_widget)
         # 接收进程打印的信息
         sys.stdout = Stream(newText=self.update_text)
         sys.stderr = Stream(newText=self.update_text)
@@ -204,6 +204,8 @@ class UiMainWindow(QMainWindow):
 
     # 切换摄像头状态
     def switch_camera_status(self):
+        # 实时流保证30fps/s即可
+        self.timer_video.frequent = 30
         self.label_video.setCursor(Qt.ArrowCursor)
         self.last_video_button.setEnabled(False)
         self.next_video_button.setEnabled(False)
@@ -217,6 +219,7 @@ class UiMainWindow(QMainWindow):
             self.video_progress_bar.setValue(0)
             self.label_frame_show.setText('')
             self.video_progress_bar.setEnabled(False)
+            self.video_play_setting_action.setEnabled(False)
             robot_other.select_template_flag = False
             # 离线视频进度条关闭
             self.slider_thread.stop()
@@ -253,6 +256,7 @@ class UiMainWindow(QMainWindow):
             self.switch_camera_status_action.setToolTip('open_camera')
             self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
             self.status_video_button.setEnabled(False)
+            self.video_play_setting_action.setEnabled(True)
 
 
     # 系统摄像头流
@@ -558,8 +562,18 @@ class UiMainWindow(QMainWindow):
         self.camera_param_setting_widget.exec()
 
 
+    # 设置离线视频帧率
+    def set_frame_rate(self):
+        self.frame_rate_adjust_widget.show()
+        self.frame_rate_adjust_widget.exec()
+
+
     def tool_bar(self):
         # ui相关action
+        self.ui_toolbar_label             = QLabel(self)
+        self.ui_toolbar_label.setText('实时流:')
+        self.ui_toolbar_label.setStyleSheet('color:blue')
+        self.ui_toolbar_label.setFont(QFont(self.font, 13))
         self.setting_action               = QAction(QIcon(icon_path.Icon_ui_setting), 'setting', self)
         self.switch_camera_status_action  = QAction(QIcon(icon_path.Icon_ui_open_camera), 'open_camera', self)
         self.capture_action               = QAction(QIcon(icon_path.Icon_ui_capture), 'capture', self)
@@ -572,6 +586,10 @@ class UiMainWindow(QMainWindow):
         self.picture_path_action.triggered.connect(self.get_picture_path)
         self.setting_action.triggered.connect(self.set_camera_param)
         # robot相关action
+        self.robot_operate_toolbar_label = QLabel(self)
+        self.robot_operate_toolbar_label.setText('机械臂:')
+        self.robot_operate_toolbar_label.setStyleSheet('color:blue')
+        self.robot_operate_toolbar_label.setFont(QFont(self.font, 13))
         self.click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
         self.double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)
         self.long_click_action   = QAction(QIcon(icon_path.Icon_robot_long_click), 'long_click', self)
@@ -590,9 +608,16 @@ class UiMainWindow(QMainWindow):
         self.robot_get_position_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_get_position))
         self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
         # 视频播放工具栏
+        self.video_play_toolbar_label = QLabel(self)
+        self.video_play_toolbar_label.setText('离线视频:')
+        self.video_play_toolbar_label.setStyleSheet('color:blue')
+        self.video_play_toolbar_label.setFont(QFont(self.font, 13))
         self.video_play_action = QAction(QIcon(icon_path.Icon_video_play), 'video_play', self)
         self.video_play_action.triggered.connect(self.play_exist_video)
+        self.video_play_setting_action = QAction(QIcon(icon_path.Icon_ui_setting), 'setting', self)
+        self.video_play_setting_action.triggered.connect(self.set_frame_rate)
         # ui工具栏
+        self.ui_toolbar.addWidget(self.ui_toolbar_label)
         self.ui_toolbar.addAction(self.switch_camera_status_action)
         self.ui_toolbar.addAction(self.capture_action)
         self.ui_toolbar.addAction(self.box_screen_action)
@@ -600,6 +625,7 @@ class UiMainWindow(QMainWindow):
         self.ui_toolbar.addAction(self.setting_action)
         self.ui_toolbar.addSeparator()
         # robot工具栏
+        self.robot_operate_toolbar.addWidget(self.robot_operate_toolbar_label)
         self.robot_operate_toolbar.addAction(self.robot_lock_action)
         self.robot_operate_toolbar.addAction(self.robot_unlock_action)
         self.robot_operate_toolbar.addAction(self.robot_get_position_action)
@@ -609,7 +635,9 @@ class UiMainWindow(QMainWindow):
         self.robot_operate_toolbar.addAction(self.slide_action)
         self.robot_operate_toolbar.addAction(self.robot_with_record_action)
         # 存在的视频播放工具栏
+        self.video_play_toolbar.addWidget(self.video_play_toolbar_label)
         self.video_play_toolbar.addAction(self.video_play_action)
+        self.video_play_toolbar.addAction(self.video_play_setting_action)
 
 
     # 视频播放框架
@@ -857,6 +885,13 @@ class UiMainWindow(QMainWindow):
             uArm_action.uArm_action_type = signal_str.split('>')[1]
         else:
             pass
+
+
+    # 接收离线视频帧率调整的信号
+    def recv_frame_rate_adjust_widget(self, signal_str):
+        if signal_str.startswith('frame_rate_adjust>'):
+            frame_rate = int(signal_str.split('frame_rate_adjust>')[1])
+            self.timer_video.frequent = frame_rate
 
 
     # 控制台输出

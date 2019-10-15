@@ -420,3 +420,77 @@ class CameraParamAdjustControl(QDialog):
     def connect_gain_spinbox(self):
         value = int(self.gain_spinbox.value())
         self.gain_slider.setValue(value)
+
+
+# 离线视频帧率调节
+class FrameRateAdjustControl(QDialog):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(FrameRateAdjustControl, self).__init__(parent)
+        self.parent = parent
+        self.stable_value = 30
+        self.unstable_value = 30
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QVBoxLayout(self)
+
+        # 设置帧率
+        self.frame_rate_label = QLabel(self)
+        self.frame_rate_label.setText('帧率: ')
+        self.frame_rate_slider = QSlider(Qt.Horizontal, self)
+        self.frame_rate_slider.setRange(30, 180)
+        self.frame_rate_slider.valueChanged.connect(self.connect_frame_rate_slider)
+        self.frame_rate_spinbox = QSpinBox(self)
+        self.frame_rate_spinbox.setRange(30, 180)
+        self.frame_rate_spinbox.valueChanged.connect(self.connect_frame_rate_spinbox)
+        # 帧率调节横向布局
+        self.frame_rate_h_layout = QHBoxLayout(self)
+        self.frame_rate_h_layout.addWidget(self.frame_rate_label)
+        self.frame_rate_h_layout.addWidget(self.frame_rate_slider)
+        self.frame_rate_h_layout.addWidget(self.frame_rate_spinbox)
+        # 确定按钮横向调节
+        self.sure_button = QPushButton('确定', self)
+        self.sure_button.clicked.connect(self.connect_sure_button)
+        self.sure_button_h_layout = QHBoxLayout(self)
+        self.sure_button_h_layout.addStretch(1)
+        self.sure_button_h_layout.addWidget(self.sure_button)
+        self.sure_button_h_layout.addStretch(1)
+        # 全局布局
+        self.general_layout.addLayout(self.frame_rate_h_layout)
+        self.general_layout.addLayout(self.sure_button_h_layout)
+
+        self.setLayout(self.general_layout)
+        # 设置字体
+        self.setFont(QFont('Times New Roman', 11))
+        # 设置最小尺寸
+        self.setMinimumWidth(400)
+        self.setWindowTitle('离线视频帧率参数')
+
+
+    def connect_frame_rate_slider(self):
+        self.unstable_value = int(self.frame_rate_slider.value())
+        self.frame_rate_spinbox.setValue(self.unstable_value)
+
+
+    def connect_frame_rate_spinbox(self):
+        self.unstable_value = int(self.frame_rate_spinbox.value())
+        self.frame_rate_slider.setValue(self.unstable_value)
+
+
+    def connect_sure_button(self):
+        self.stable_value = self.unstable_value
+        self.frame_rate_spinbox.setValue(self.stable_value)
+        self.frame_rate_slider.setValue(self.stable_value)
+        self.signal.emit('frame_rate_adjust>' + str(self.stable_value))
+        self.close()
+
+
+    # 重写关闭窗口时间
+    def closeEvent(self, event):
+        self.frame_rate_spinbox.setValue(self.stable_value)
+        self.frame_rate_slider.setValue(self.stable_value)
+        self.close()
