@@ -142,11 +142,19 @@ class Video_Label(QLabel):
             x_unit, y_unit = self.x_unit, self.y_unit
             x0, y0, x1, y1 = int(self.x0 * x_unit), int(self.y0 * y_unit), int(self.x1 * x_unit), int(self.y1 * y_unit)
             cut_img = robot_other.image[y0:y1, x0:x1]
-            # 接收模板路径
-            mask_path = robot_other.mask_path
+            # 直播状态
+            if self.video_play_flag is False:
+                # 接收模板路径
+                mask_path = robot_other.mask_path
+                default_name = '应用'
+            # 离线视频播放
+            else:
+                mask_path = os.path.split(robot_other.mask_path)[0]
+                default_name = os.path.splitext(os.path.split(robot_other.mask_path)[1])[0]
             # 如果模板路径为None(说明不允许框选模板)
             if mask_path is not None:
-                value, ok = QInputDialog.getText(self, '标注输入框', '请输入文本', QLineEdit.Normal, '应用')
+                # value, ok = QInputDialog.getText(self, '标注输入框', '请输入文本', QLineEdit.Normal, '应用')
+                value, ok = QInputDialog.getText(self, '标注输入框', '请输入文本', QLineEdit.Normal, default_name)
                 # 如果输入有效值
                 if ok:
                     # 如果是数据处理(需要对图像特殊处理)
@@ -169,29 +177,41 @@ class Video_Label(QLabel):
                     # 非数据处理情况
                     else:
                         if '-' in value:
-                            folder_layer_count = len(value.split('-')) - 1
-                            if folder_layer_count == 1:
-                                mask_path = merge_path([mask_path, value.split('-')[0]]).merged_path
-                            elif folder_layer_count == 2:
-                                mask_path = merge_path([mask_path, value.split('-')[0], value.split('-')[1]]).merged_path
+                            # 直播时的情况
+                            if self.video_play_flag is False:
+                                folder_layer_count = len(value.split('-')) - 1
+                                if folder_layer_count == 1:
+                                    mask_path = merge_path([mask_path, value.split('-')[0]]).merged_path
+                                elif folder_layer_count == 2:
+                                    mask_path = merge_path([mask_path, value.split('-')[0], value.split('-')[1]]).merged_path
+                                else:
+                                    logger('[输入的模板名称错误!]')
+                                    return
+                                if os.path.exists(mask_path) is False:
+                                    os.makedirs(mask_path)
+                                # windows文件名大小写一样,此处需要区分(大写如A1.jpg, 小写如a.jpg)
+                                if len(value.split('-')[1])==1 and value.split('-')[1].isupper():
+                                    template_name = merge_path([mask_path, value.split('-')[-1] + '1.jpg']).merged_path
+                                    cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                                else:
+                                    template_name = merge_path([mask_path, value.split('-')[-1] + '.jpg']).merged_path
+                                    cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                            # 离线播放的情况下
                             else:
+                                template_name = 'null'
                                 logger('[输入的模板名称错误!]')
-                                return
-                            if os.path.exists(mask_path) is False:
-                                os.makedirs(mask_path)
-                            if len(value.split('-')[1])==1 and value.split('-')[1].isupper(): # windows文件名大小写一样,此处需要区分(大写如A1.jpg, 小写如a.jpg)
-                                template_name = merge_path([mask_path, value.split('-')[-1] + '1.jpg']).merged_path
-                                cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
-                            else:
-                                template_name = merge_path([mask_path, value.split('-')[-1] + '.jpg']).merged_path
-                                cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                         else:
-                            mask_path = merge_path([mask_path, '其他']).merged_path
+                            # 直播
+                            if self.video_play_flag is False:
+                                mask_path = merge_path([mask_path, '其他']).merged_path
+                            # 离线播放
+                            else:
+                                mask_path = mask_path
                             if os.path.exists(mask_path) is False:
                                 os.makedirs(mask_path)
                             template_name = merge_path([mask_path, value + '.jpg']).merged_path
                             cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
-                    logger('[框选的模板保存路径为]: %s' %template_name)
+                    logger('[框选的模板保存路径为]: %s' % template_name)
                 else:
                     logger('[框选动作取消!]')
             # 保存完图片后, 让红色框消失

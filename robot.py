@@ -463,7 +463,7 @@ class UiMainWindow(QMainWindow):
             self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             # 设置视频title
-            self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
+            self.label_video_title.setText('[' + str(self.current_video + 1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:white')
             # 获取第一帧
             _, self.image = self.video_cap.read()
@@ -471,7 +471,7 @@ class UiMainWindow(QMainWindow):
             show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
             self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
             # 设置帧数显示
-            self.label_frame_show.setText(str(self.current_frame+1) + 'F/' + str(self.frame_count))
+            self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
             # 使能视频(播放/暂停/重播)按钮和视频进度条
             self.status_video_button.setEnabled(True)
@@ -551,7 +551,7 @@ class UiMainWindow(QMainWindow):
 
     # 获取picture路径
     def get_picture_path(self):
-        self.picture_path = QtWidgets.QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
+        self.picture_path = QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
         self.set_config_value(gloVar.config_file_path, 'param', 'picture_path', self.picture_path)
         logger('修改保存图片路径为: %s' % self.picture_path)
 
@@ -979,8 +979,14 @@ class UiMainWindow(QMainWindow):
         #     mask_image_path = os.path.join(self.get_path, 'mask')
         # else:
         #     mask_image_path = None
-        mask_image_path = self.picture_path
-        robot_other.mask_path = mask_image_path
+        # 实时流
+        if self.video_play_flag is False:
+            mask_image_path = self.picture_path
+            robot_other.mask_path = mask_image_path
+        # 离线直播(框选模板名称默认和视频名相同>路径只是将video替换为picture即可)
+        else:
+            mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
+            robot_other.mask_path = mask_image_path
 
 
     # 空格键 播放/暂停/重播
