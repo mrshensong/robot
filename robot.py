@@ -481,6 +481,8 @@ class UiMainWindow(QMainWindow):
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
             self.video_progress_bar.setRange(0, self.frame_count-1)
+            # self.video_progress_bar.setValue(self.current_frame)
+            self.slider_thread.start()
             # 让show_tab_widget不可以操作
             self.show_tab_widget.setEnabled(False)
             # 强制关闭脚本录制状态
@@ -931,7 +933,7 @@ class UiMainWindow(QMainWindow):
             if gloVar.save_pic_flag is True:
                 cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
                 gloVar.save_pic_flag = False
-        # 录播模式(可以数帧)
+        # 离线视频播放模式(可以数帧)
         else:
             if self.current_frame < self.frame_count:
                 self.current_frame += 1
@@ -949,6 +951,8 @@ class UiMainWindow(QMainWindow):
                     self.timer_video.stop()
                     self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
                     self.video_progress_bar.setValue(self.frame_count-1)
+                    # 因为已经读取视频停止, 故而帧数并没有增加(所以需要回退一帧)
+                    # self.current_frame = self.frame_count-1
                     self.last_video_button.setEnabled(True)
                     self.next_video_button.setEnabled(True)
                     self.last_frame_button.setEnabled(True)
@@ -1066,7 +1070,7 @@ class UiMainWindow(QMainWindow):
                 show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
                 self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
                 self.label_video_title.setStyleSheet('color:white')
-                self.label_frame_show.setText(str(self.current_frame+1)+'F/'+str(self.frame_count))
+                self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                 self.label_frame_show.setStyleSheet('color:white')
                 # 开启视频流
                 self.timer_video.start()
@@ -1114,7 +1118,7 @@ class UiMainWindow(QMainWindow):
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
             # 设置视频title
-            self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
+            self.label_video_title.setText('[' + str(self.current_video + 1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:white')
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
@@ -1214,7 +1218,7 @@ class UiMainWindow(QMainWindow):
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
             self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
-            self.label_frame_show.setText(str(self.current_frame+1)+'F/'+str(self.frame_count))
+            self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
         else:
