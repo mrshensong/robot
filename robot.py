@@ -950,9 +950,8 @@ class UiMainWindow(QMainWindow):
                     self.video_status = self.STATUS_STOP
                     self.timer_video.stop()
                     self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
+                    # 因为已经读取视频停止, 故而帧数并没有增加(所以显示的也是最后一帧)
                     self.video_progress_bar.setValue(self.frame_count-1)
-                    # 因为已经读取视频停止, 故而帧数并没有增加(所以需要回退一帧)
-                    # self.current_frame = self.frame_count-1
                     self.last_video_button.setEnabled(True)
                     self.next_video_button.setEnabled(True)
                     self.last_frame_button.setEnabled(True)
@@ -1203,16 +1202,19 @@ class UiMainWindow(QMainWindow):
             self.timer_video.stop()
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_replay + ')')
             self.video_progress_bar.setValue(self.frame_count-1)
+            # 再重新加载视频(有可能视频播放完毕后, 需要往前进一帧)
+            self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
         # self.last_frame_button.setEnabled(True)
 
 
     # 切换到下一帧(不能防抖, 如果防抖的话就不能左右键快速播帧)
     def next_frame(self):
         # self.next_frame_button.setEnabled(False)
-        if self.current_frame < self.frame_count - 1:
+        if self.current_frame < self.frame_count:
             self.current_frame = self.current_frame + 1
         else:
             self.current_frame = self.frame_count - 1
+        self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
         flag, self.image = self.video_cap.read()
         if flag is True:
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
