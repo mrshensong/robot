@@ -88,6 +88,7 @@ def slide(request):
         data.setdefault('speed', None)
         port = data['port']
         speed = speed_opt if data['speed'] is None else data['speed']
+        trigger = int(data['trigger'])
         base_position = data['base']
         start = data['start']
         end = data['end']
@@ -105,6 +106,9 @@ def slide(request):
         swift.flush_cmd()
         swift.set_position(z=z_l, speed=speed)
         swift.flush_cmd()
+        # 此处为视频中的当前帧插入标记
+        if trigger == 1:
+            video.robot_start_flag = True
         swift.set_position(x_e, y_e, speed=speed, cmd=cmd_g1)
         swift.flush_cmd()
         swift.set_position(z=z_h, speed=speed)
@@ -130,6 +134,7 @@ def click(request):
         data.setdefault('speed', None)
         port = data['port']
         speed = speed_opt if data['speed'] is None else data['speed']
+        trigger = int(data['trigger'])
         base_position = data['base']
         position = data['position']
         times = data['time']
@@ -147,6 +152,9 @@ def click(request):
             set_position_(x, y, z_l, speed)
             time.sleep(pressure_duration / 1000)
             set_position_(x, y, z_h, speed)
+            # 此处为视频中的当前帧插入标记
+            if trigger == 1:
+                video.robot_start_flag = True
         data.setdefault('leave', 0)
         leave = data['leave']
         if leave == 1:
