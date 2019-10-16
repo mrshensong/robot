@@ -990,10 +990,12 @@ class UiMainWindow(QMainWindow):
                 # 模板图片不存在
                 if os.path.exists(template_path) is False:
                     self.videos_without_template.append(video)
+            # 设置不可框选模板&鼠标变为标准鼠标
+            self.label_video.setCursor(Qt.ArrowCursor)
+            robot_other.select_template_flag = False
             if len(self.videos_without_template) > 0:
                 # 将self.videos_without_template作为self.videos
                 self.videos = self.videos_title = self.videos_without_template
-                '''---------暂时用不上---------'''
                 # 加载本地视频对象
                 self.video_cap = cv2.VideoCapture(self.videos[0])  # 重新加载这个视频
                 self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -1039,9 +1041,9 @@ class UiMainWindow(QMainWindow):
                 logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
                 # 关闭视频展示定时器
                 self.timer_video.stop()
+                # 本地视频播放标志关闭, 视频状态为STATUS_INIT
+                self.label_video.video_play_flag = self.video_play_flag = False
                 self.video_status = self.STATUS_INIT
-                robot_other.select_template_flag = False
-                self.video_play_flag = False
                 # 进度条关闭
                 self.slider_thread.stop()
                 # 将video界面复位
