@@ -68,7 +68,7 @@ class UiMainWindow(QMainWindow):
         self.central_widget.setObjectName("central_widget")
         self.setCentralWidget(self.central_widget)
         # 界面全局栅格布局
-        self.grid = QtWidgets.QGridLayout(self.central_widget)
+        self.grid = QGridLayout(self.central_widget)
         # self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setObjectName('grid')
         ## 定义UI 字体 和 字号大小
@@ -82,11 +82,11 @@ class UiMainWindow(QMainWindow):
         # 控制台输出框架
         self.output_text()
         # 菜单栏
-        self.menu_bar = QtWidgets.QMenuBar(self)
+        self.menu_bar = QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')
         self.setMenuBar(self.menu_bar)
         # 状态栏 & 状态栏显示
-        self.status_bar = QtWidgets.QStatusBar(self)
+        self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage(self.window_status_text)
@@ -123,13 +123,21 @@ class UiMainWindow(QMainWindow):
         self.videos = []
         # 保存的视频中case类型和视频名字
         self.videos_title = []
-        # 录播相关参数
-        self.video_cap = None # 当前视频对象
-        self.get_path = None # 获取到的视频根目录
-        self.video_play_flag = False  # False直播/True录播
-        self.current_video = 0  # 当前视频所在序列号(第0个视频)
-        self.current_frame = 0  # 当前帧数
-        self.frame_count = 0  # 总帧数
+        # 数据处理时, 保存没有对应视频模板的视频文件
+        self.videos_without_template = []
+        # --录播相关参数--
+        # 当前视频对象
+        self.video_cap = None
+        # 获取到的视频根目录
+        self.get_path = None
+        # False直播/True录播
+        self.video_play_flag = False
+        # 当前视频所在序列号(第0个视频)
+        self.current_video = 0
+        # 当前帧数
+        self.current_frame = 0
+        # 当前视频总帧数
+        self.frame_count = 0
         # 滑动条标志位(如果有滑动动作标志为True, 否则为False)
         self.slider_flag = False
         # 放置视频标签的尺寸
@@ -293,7 +301,7 @@ class UiMainWindow(QMainWindow):
         # button水平布局
         self.button_h_layout = QHBoxLayout(self.label_video)
         # 暂停按钮/空格键
-        self.status_video_button = QtWidgets.QPushButton(self.label_video)
+        self.status_video_button = QPushButton(self.label_video)
         self.status_video_button.setObjectName('status_video_button')
         self.status_video_button.setFixedSize(48, 48)
         # 图片铺满按钮背景
@@ -302,7 +310,7 @@ class UiMainWindow(QMainWindow):
         self.status_video_button.clicked.connect(self.switch_video)
         self.status_video_button.setEnabled(False)
         # 上一个视频
-        self.last_video_button = QtWidgets.QPushButton(self.label_video)
+        self.last_video_button = QPushButton(self.label_video)
         self.last_video_button.setObjectName('last_video_button')
         self.last_video_button.setFixedSize(48, 48)
         self.last_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_last_video + ')')
@@ -310,7 +318,7 @@ class UiMainWindow(QMainWindow):
         self.last_video_button.clicked.connect(self.last_video)
         self.last_video_button.setEnabled(True)
         # 下一个视频
-        self.next_video_button = QtWidgets.QPushButton(self.label_video)
+        self.next_video_button = QPushButton(self.label_video)
         self.next_video_button.setObjectName('next_video_button')
         self.next_video_button.setFixedSize(48, 48)
         self.next_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_next_video + ')')
@@ -318,7 +326,7 @@ class UiMainWindow(QMainWindow):
         self.next_video_button.clicked.connect(self.next_video)
         self.next_video_button.setEnabled(False)
         # 上一帧
-        self.last_frame_button = QtWidgets.QPushButton(self.label_video)
+        self.last_frame_button = QPushButton(self.label_video)
         self.last_frame_button.setObjectName('last_frame_button')
         self.last_frame_button.setFixedSize(48, 48)
         self.last_frame_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_last_frame + ')')
@@ -326,7 +334,7 @@ class UiMainWindow(QMainWindow):
         self.last_frame_button.clicked.connect(self.last_frame)
         self.last_frame_button.setEnabled(False)
         # 下一帧
-        self.next_frame_button = QtWidgets.QPushButton(self.label_video)
+        self.next_frame_button = QPushButton(self.label_video)
         self.next_frame_button.setObjectName('next_frame_button')
         self.next_frame_button.setFixedSize(48, 48)
         self.next_frame_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_next_frame + ')')
@@ -334,7 +342,7 @@ class UiMainWindow(QMainWindow):
         self.next_frame_button.clicked.connect(self.next_frame)
         self.next_frame_button.setEnabled(False)
         # 帧数显示
-        self.label_frame_show = QtWidgets.QLabel(self.label_video)
+        self.label_frame_show = QLabel(self.label_video)
         self.label_frame_show.setObjectName("label_frame_show")
         self.label_frame_show.setAlignment(Qt.AlignCenter)
         self.label_frame_show.setText('')
@@ -342,9 +350,10 @@ class UiMainWindow(QMainWindow):
         self.label_frame_show.setAlignment(Qt.AlignCenter)
         self.label_frame_show.setStyleSheet('color:black')
         # 显示视频名字
-        self.label_video_title = QtWidgets.QLabel(self.label_video)
+        self.label_video_title = QLabel(self.label_video)
         self.label_video_title.setObjectName("label_video_title")
         self.label_video_title.setAlignment(Qt.AlignCenter)
+        self.label_video_title.setStyleSheet('color:black')
         self.label_video_title.setText('[实时视频流]')
         self.label_video_title.setFont(QFont(self.font, 15))
         # 视频进度条
@@ -379,14 +388,14 @@ class UiMainWindow(QMainWindow):
 
     # 控制台输出
     def output_text(self):
-        self.frame_of_console_output = QtWidgets.QFrame(self.central_widget)
-        self.frame_of_console_output.setFrameShape(QtWidgets.QFrame.Box)
-        self.frame_of_console_output.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_of_console_output = QFrame(self.central_widget)
+        self.frame_of_console_output.setFrameShape(QFrame.Box)
+        self.frame_of_console_output.setFrameShadow(QFrame.Raised)
         self.frame_of_console_output.setObjectName("frame_of_console_output")
         self.frame_of_console_output.setMinimumWidth(80)
         self.grid.addWidget(self.frame_of_console_output, 3, 8, 2, 2)
         self.console_v_layout = QVBoxLayout(self.frame_of_console_output)
-        self.label_output = QtWidgets.QLabel(self.frame_of_console_output)
+        self.label_output = QLabel(self.frame_of_console_output)
         self.label_output.setObjectName("label_output")
         self.label_output.setText('[Console输出]')
         self.label_output.setAlignment(Qt.AlignLeft)
@@ -850,18 +859,22 @@ class UiMainWindow(QMainWindow):
 
     # 正在进行的操作是否需要录入脚本(默认参数为None; 当有参数时, 将record_status的状态传给uArm_action.uArm_with_record)
     def switch_uArm_with_record_status(self, record_status=None):
+        # 视频流状态下, 按下录制脚本按钮(脚本录制状态切换)
         if record_status is not None:
-            uArm_action.uArm_with_record = bool(1-record_status)
+            # 状态反转
+            uArm_action.uArm_with_record = bool(1 - record_status)
         if uArm_action.uArm_with_record is False:
             uArm_action.uArm_with_record = True
             self.robot_with_record_action.setIcon(QIcon(icon_path.Icon_robot_without_record))
             self.robot_with_record_action.setToolTip('without_record')
-            logger('<脚本录制打开--以下操作将会被保存为action>')
+            if self.video_play_flag is False:
+                logger('<脚本录制打开--以下操作将会被保存为action>')
         else:
             uArm_action.uArm_with_record = False
             self.robot_with_record_action.setIcon(QIcon(icon_path.Icon_robot_with_record))
             self.robot_with_record_action.setToolTip('with_record')
-            logger('<脚本录制关闭--以下操作将不会被保存为action>')
+            if self.video_play_flag is False:
+                logger('<脚本录制关闭--以下操作将不会被保存为action>')
 
 
     '''本地视频播放工具栏相关操作'''
@@ -925,7 +938,7 @@ class UiMainWindow(QMainWindow):
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
             self.video_progress_bar.setRange(0, self.frame_count-1)
-            # self.video_progress_bar.setValue(self.current_frame)
+            self.video_progress_bar.setValue(self.current_frame)
             self.slider_thread.start()
             # 让show_tab_widget不可以操作
             self.show_tab_widget.setEnabled(False)
@@ -947,7 +960,121 @@ class UiMainWindow(QMainWindow):
 
     # 本地视频数据处理
     def local_video_data_process(self):
-        pass
+        camera_opened_flag = False  # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
+        # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
+        # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
+        if self.camera_status == self.camera_opened:
+            camera_opened_flag = True
+            self.switch_camera_status()
+        # 获取需要处理的视频所在路径
+        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
+        if self.get_path:
+            if self.videos_path != self.get_path:
+                # 保存此次打开的路径(路径默认上一次)
+                self.videos_path = self.get_path
+                profile(type='write', file=gloVar.config_file_path, section='param', option='videos_path', value=self.get_path)
+            uArm_action.uArm_action_type = None
+            self.label_video.x0, self.label_video.y0 = self.label_video.x1, self.label_video.y1
+            self.videos, self.videos_title, self.videos_without_template = [], [], []
+            self.current_frame, self.current_video, self.frame_count = 0, 0, 0
+            for home, dirs, files in os.walk(self.get_path):
+                for file in files:
+                    # 判断视频文件(通过后缀名)
+                    (file_text, extension) = os.path.splitext(file)
+                    if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
+                        # 文件名列表, 包含完整路径
+                        file = merge_path([home, file]).merged_path
+                        self.videos.append(file)
+                        self.videos_title.append(file)
+            # 遍历出来没有对应模板的视频文件
+            for video in self.videos:
+                template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+                # 模板图片不存在
+                if os.path.exists(template_path) is False:
+                    self.videos_without_template.append(video)
+            if len(self.videos_without_template) > 0:
+                # 将self.videos_without_template作为self.videos
+                self.videos = self.videos_title = self.videos_without_template
+                '''---------暂时用不上---------'''
+                # 加载本地视频对象
+                self.video_cap = cv2.VideoCapture(self.videos[0])  # 重新加载这个视频
+                self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                # 需要获取视频尺寸
+                self.local_video_width = int(self.video_cap.get(3))
+                self.local_video_height = int(self.video_cap.get(4))
+                # 获取视频总帧数
+                self.frame_count = int(self.video_cap.get(7))
+                # 更换视频标签背景
+                self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+                # 本地视频播放标志打开, 视频状态为STATUS_INIT
+                self.label_video.video_play_flag = self.video_play_flag = True
+                self.video_status = self.STATUS_INIT
+                self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
+                # 设置视频title
+                self.label_video_title.setText('[' + str(self.current_video + 1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
+                self.label_video_title.setStyleSheet('color:white')
+                # 获取第一帧
+                _, self.image = self.video_cap.read()
+                show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+                show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+                self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                # 设置帧数显示
+                self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
+                self.label_frame_show.setStyleSheet('color:white')
+                # 使能视频(播放/暂停/重播)按钮和视频进度条
+                self.status_video_button.setEnabled(True)
+                self.video_progress_bar.setEnabled(True)
+                self.last_video_button.setEnabled(True)
+                self.next_video_button.setEnabled(True)
+                self.last_frame_button.setEnabled(True)
+                self.next_frame_button.setEnabled(True)
+                self.video_progress_bar.setRange(0, self.frame_count - 1)
+                self.video_progress_bar.setValue(self.current_frame)
+                self.slider_thread.start()
+                # 让show_tab_widget不可以操作
+                self.show_tab_widget.setEnabled(False)
+                # 强制关闭脚本录制状态
+                self.switch_uArm_with_record_status(record_status=False)
+                # 通过本地视频尺寸自适应视频播放窗口
+                self.video_label_adaptive(self.local_video_width, self.local_video_height)
+            else:
+                logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
+                # 关闭视频展示定时器
+                self.timer_video.stop()
+                self.video_status = self.STATUS_INIT
+                robot_other.select_template_flag = False
+                self.video_play_flag = False
+                # 进度条关闭
+                self.slider_thread.stop()
+                # 将video界面复位
+                self.videos = self.videos_title = self.videos_without_template = []
+                self.current_frame = self.current_video = self.frame_count = 0
+                # 实时流保证30fps/s即可
+                self.timer_video.frequent = 30
+                self.label_video.setCursor(Qt.ArrowCursor)
+                self.last_video_button.setEnabled(False)
+                self.next_video_button.setEnabled(False)
+                self.status_video_button.setEnabled(False)
+                self.last_frame_button.setEnabled(False)
+                self.next_frame_button.setEnabled(False)
+                # 进度条设置
+                self.video_progress_bar.setValue(0)
+                self.label_frame_show.setText('')
+                self.video_progress_bar.setEnabled(False)
+                # 实时流title
+                self.label_video_title.setStyleSheet('color:black')
+                self.label_video_title.setText('[实时视频流]')
+                # 复位背景图
+                self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
+                self.camera_status = self.camera_closed
+                self.live_video_switch_camera_status_action.setIcon(QIcon(icon_path.Icon_live_video_open_camera))
+                self.live_video_switch_camera_status_action.setToolTip('open_camera')
+                self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+                self.local_video_setting_action.setEnabled(True)
+        else:
+            logger('没有选择视频路径, 数据处理取消!')
+            if camera_opened_flag is True:
+                self.switch_camera_status()
 
 
     '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''
