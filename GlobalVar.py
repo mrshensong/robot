@@ -67,6 +67,7 @@ class icon_path:
     # 视频播放工具栏相关图标
     Icon_local_video_play         = 'config/Icon/local_video_toolbar_icon/video_play.png'
     Icon_local_video_setting      = 'config/Icon/local_video_toolbar_icon/setting.png'
+    Icon_local_video_data_process = 'config/Icon/local_video_toolbar_icon/data_process.png'
     # 自定义控件相关图标
     Icon_custom_delete            = 'config/Icon/custom_widget_icon/delete.png'
     Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'

@@ -169,6 +169,353 @@ class UiMainWindow(QMainWindow):
         self.python_server_pid = None
 
 
+    '''以下部分为界面各个控件信息'''
+    # 菜单栏
+    def menu_bar_show(self):
+        # 菜单栏显示
+        self.test_action = QAction('exit', self)
+        self.file_bar = self.menu_bar.addMenu('File')
+        self.file_bar.addAction(self.test_action)
+
+
+    # 工具栏
+    def tool_bar(self):
+        # 实时流相关action
+        self.live_video_toolbar_label = QLabel(self)
+        self.live_video_toolbar_label.setText('实时流:')
+        self.live_video_toolbar_label.setStyleSheet('color:blue')
+        self.live_video_toolbar_label.setFont(QFont(self.font, 13))
+        self.live_video_setting_action               = QAction(QIcon(icon_path.Icon_live_video_setting), 'setting', self)
+        self.live_video_switch_camera_status_action  = QAction(QIcon(icon_path.Icon_live_video_open_camera), 'open_camera', self)
+        self.live_video_capture_action               = QAction(QIcon(icon_path.Icon_live_video_capture), 'capture', self)
+        self.live_video_box_screen_action            = QAction(QIcon(icon_path.Icon_live_video_box_screen), 'box_screen', self)
+        self.live_video_picture_path_action          = QAction(QIcon(icon_path.Icon_live_video_folder_go), 'picture_path', self)
+        # 绑定触发函数
+        self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
+        self.live_video_capture_action.triggered.connect(self.screen_shot)
+        self.live_video_box_screen_action.triggered.connect(self.box_screen)
+        self.live_video_picture_path_action.triggered.connect(self.get_picture_path)
+        self.live_video_setting_action.triggered.connect(self.set_camera_param)
+        # robot相关action
+        self.robot_toolbar_label = QLabel(self)
+        self.robot_toolbar_label.setText('机械臂:')
+        self.robot_toolbar_label.setStyleSheet('color:blue')
+        self.robot_toolbar_label.setFont(QFont(self.font, 13))
+        self.robot_click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
+        self.robot_double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)
+        self.robot_long_click_action   = QAction(QIcon(icon_path.Icon_robot_long_click), 'long_click', self)
+        self.robot_slide_action        = QAction(QIcon(icon_path.Icon_robot_slide), 'slide', self)
+        self.robot_lock_action         = QAction(QIcon(icon_path.Icon_robot_lock), 'lock', self)
+        self.robot_unlock_action       = QAction(QIcon(icon_path.Icon_robot_unlock), 'unlock', self)
+        self.robot_get_position_action = QAction(QIcon(icon_path.Icon_robot_get_position), 'get_position', self)
+        self.robot_with_record_action  = QAction(QIcon(icon_path.Icon_robot_with_record), 'with_record', self)
+        # 绑定触发函数
+        self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_click))
+        self.robot_double_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_double_click))
+        self.robot_long_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_long_click))
+        self.robot_slide_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_slide))
+        self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_lock))
+        self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
+        self.robot_get_position_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_get_position))
+        self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
+        # 视频播放工具栏
+        self.local_video_toolbar_label = QLabel(self)
+        self.local_video_toolbar_label.setText('本地视频:')
+        self.local_video_toolbar_label.setStyleSheet('color:blue')
+        self.local_video_toolbar_label.setFont(QFont(self.font, 13))
+        self.local_video_play_action         = QAction(QIcon(icon_path.Icon_local_video_play), 'import_video', self)
+        self.local_video_setting_action      = QAction(QIcon(icon_path.Icon_local_video_setting), 'setting', self)
+        self.local_video_data_process_action = QAction(QIcon(icon_path.Icon_local_video_data_process), 'data_process', self)
+        # 绑定函数
+        self.local_video_play_action.triggered.connect(self.play_exist_video)
+        self.local_video_setting_action.triggered.connect(self.set_frame_rate)
+        self.local_video_data_process_action.triggered.connect(self.local_video_data_process)
+        # 实时流工具栏
+        self.live_video_toolbar.addWidget(self.live_video_toolbar_label)
+        self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
+        self.live_video_toolbar.addAction(self.live_video_capture_action)
+        self.live_video_toolbar.addAction(self.live_video_box_screen_action)
+        self.live_video_toolbar.addAction(self.live_video_picture_path_action)
+        self.live_video_toolbar.addAction(self.live_video_setting_action)
+        self.live_video_toolbar.addSeparator()
+        # robot工具栏
+        self.robot_toolbar.addWidget(self.robot_toolbar_label)
+        self.robot_toolbar.addAction(self.robot_lock_action)
+        self.robot_toolbar.addAction(self.robot_unlock_action)
+        self.robot_toolbar.addAction(self.robot_get_position_action)
+        self.robot_toolbar.addAction(self.robot_click_action)
+        self.robot_toolbar.addAction(self.robot_double_click_action)
+        self.robot_toolbar.addAction(self.robot_long_click_action)
+        self.robot_toolbar.addAction(self.robot_slide_action)
+        self.robot_toolbar.addAction(self.robot_with_record_action)
+        # 存在的视频播放工具栏
+        self.local_video_toolbar.addWidget(self.local_video_toolbar_label)
+        self.local_video_toolbar.addAction(self.local_video_play_action)
+        self.local_video_toolbar.addAction(self.local_video_setting_action)
+        self.local_video_toolbar.addAction(self.local_video_data_process_action)
+
+
+    # 展示窗口状态栏
+    def show_window_status(self):
+        self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
+                                  % (window_status.robot_connect_status, window_status.video_frame_rate,
+                                     window_status.action_tab_status, window_status.case_tab_status)
+        self.status_bar.showMessage(self.window_status_text)
+
+
+    # 视频播放框架
+    def video_play_frame(self):
+        self.video_frame = QFrame(self.central_widget)
+        self.grid.addWidget(self.video_frame, 0, 0, 5, 8)
+        self.video_frame.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.video_frame_h_layout = QHBoxLayout(self.video_frame)
+        # 视频标签
+        self.label_video = Video_Label(self.video_frame)
+        self.label_video.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.label_video.setObjectName('label_video')
+        self.label_video.signal[str].connect(self.recv_video_label_signal)
+        # 填充背景图片
+        self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+        # 自动填充满label
+        self.label_video.setScaledContents(True)
+        # 标准光标
+        self.label_video.setCursor(Qt.ArrowCursor)
+        # 十字光标
+        # self.label_video.setCursor(Qt.CrossCursor)
+
+        # 单独布局视频label
+        self.video_frame_h_layout.addStretch(1)
+        self.video_frame_h_layout.addWidget(self.label_video)
+        self.video_frame_h_layout.addStretch(1)
+
+        # label垂直布局
+        self.label_v_layout = QVBoxLayout(self.label_video)
+        # button水平布局
+        self.button_h_layout = QHBoxLayout(self.label_video)
+        # 暂停按钮/空格键
+        self.status_video_button = QtWidgets.QPushButton(self.label_video)
+        self.status_video_button.setObjectName('status_video_button')
+        self.status_video_button.setFixedSize(48, 48)
+        # 图片铺满按钮背景
+        self.status_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_play + ')')
+        self.status_video_button.setShortcut(Qt.Key_Space)
+        self.status_video_button.clicked.connect(self.switch_video)
+        self.status_video_button.setEnabled(False)
+        # 上一个视频
+        self.last_video_button = QtWidgets.QPushButton(self.label_video)
+        self.last_video_button.setObjectName('last_video_button')
+        self.last_video_button.setFixedSize(48, 48)
+        self.last_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_last_video + ')')
+        self.last_video_button.setShortcut(Qt.Key_Up)
+        self.last_video_button.clicked.connect(self.last_video)
+        self.last_video_button.setEnabled(True)
+        # 下一个视频
+        self.next_video_button = QtWidgets.QPushButton(self.label_video)
+        self.next_video_button.setObjectName('next_video_button')
+        self.next_video_button.setFixedSize(48, 48)
+        self.next_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_next_video + ')')
+        self.next_video_button.setShortcut(Qt.Key_Down)
+        self.next_video_button.clicked.connect(self.next_video)
+        self.next_video_button.setEnabled(False)
+        # 上一帧
+        self.last_frame_button = QtWidgets.QPushButton(self.label_video)
+        self.last_frame_button.setObjectName('last_frame_button')
+        self.last_frame_button.setFixedSize(48, 48)
+        self.last_frame_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_last_frame + ')')
+        self.last_frame_button.setShortcut(Qt.Key_Left)
+        self.last_frame_button.clicked.connect(self.last_frame)
+        self.last_frame_button.setEnabled(False)
+        # 下一帧
+        self.next_frame_button = QtWidgets.QPushButton(self.label_video)
+        self.next_frame_button.setObjectName('next_frame_button')
+        self.next_frame_button.setFixedSize(48, 48)
+        self.next_frame_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_next_frame + ')')
+        self.next_frame_button.setShortcut(Qt.Key_Right)
+        self.next_frame_button.clicked.connect(self.next_frame)
+        self.next_frame_button.setEnabled(False)
+        # 帧数显示
+        self.label_frame_show = QtWidgets.QLabel(self.label_video)
+        self.label_frame_show.setObjectName("label_frame_show")
+        self.label_frame_show.setAlignment(Qt.AlignCenter)
+        self.label_frame_show.setText('')
+        self.label_frame_show.setFont(QFont(self.font, 12))
+        self.label_frame_show.setAlignment(Qt.AlignCenter)
+        self.label_frame_show.setStyleSheet('color:black')
+        # 显示视频名字
+        self.label_video_title = QtWidgets.QLabel(self.label_video)
+        self.label_video_title.setObjectName("label_video_title")
+        self.label_video_title.setAlignment(Qt.AlignCenter)
+        self.label_video_title.setText('[实时视频流]')
+        self.label_video_title.setFont(QFont(self.font, 15))
+        # 视频进度条
+        self.video_progress_bar = QSlider(Qt.Horizontal, self.label_video)
+        self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
+        # button布局管理
+        self.button_h_layout.addStretch(1)
+        self.button_h_layout.addWidget(self.last_frame_button)
+        self.button_h_layout.addSpacing(30)
+        self.button_h_layout.addWidget(self.last_video_button)
+        self.button_h_layout.addSpacing(30)
+        self.button_h_layout.addWidget(self.status_video_button)
+        self.button_h_layout.addSpacing(30)
+        self.button_h_layout.addWidget(self.next_video_button)
+        self.button_h_layout.addSpacing(30)
+        self.button_h_layout.addWidget(self.next_frame_button)
+        self.button_h_layout.addStretch(1)
+        # label布局管理
+        self.label_v_layout.addWidget(self.label_video_title)
+        self.label_v_layout.addStretch(1)
+        self.label_v_layout.addWidget(self.label_frame_show)
+        self.label_v_layout.addWidget(self.video_progress_bar)
+        self.label_v_layout.addLayout(self.button_h_layout)
+
+
+    # case展示
+    def show_case(self):
+        self.show_tab_widget = ShowTabWidget(self.central_widget)
+        self.grid.addWidget(self.show_tab_widget, 0, 8, 3, 2)
+        self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
+
+
+    # 控制台输出
+    def output_text(self):
+        self.frame_of_console_output = QtWidgets.QFrame(self.central_widget)
+        self.frame_of_console_output.setFrameShape(QtWidgets.QFrame.Box)
+        self.frame_of_console_output.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_of_console_output.setObjectName("frame_of_console_output")
+        self.frame_of_console_output.setMinimumWidth(80)
+        self.grid.addWidget(self.frame_of_console_output, 3, 8, 2, 2)
+        self.console_v_layout = QVBoxLayout(self.frame_of_console_output)
+        self.label_output = QtWidgets.QLabel(self.frame_of_console_output)
+        self.label_output.setObjectName("label_output")
+        self.label_output.setText('[Console输出]')
+        self.label_output.setAlignment(Qt.AlignLeft)
+        self.label_output.setFont(QFont(self.font, 12))
+        self.console = QTextEdit(self.frame_of_console_output)
+        self.console.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
+        self.console.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
+        self.console.setReadOnly(True)
+        self.console.ensureCursorVisible()
+        self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)
+        self.console.setWordWrapMode(QTextOption.NoWrap)
+        self.console.setFont(QFont('monospaced', 13))
+        # self.console.setStyleSheet('background-color:lightGray')
+        self.console_v_layout.addWidget(self.label_output)
+        self.console_v_layout.addWidget(self.console)
+
+
+    # 更新控制台内容
+    def update_text(self, text):
+        cursor = self.console.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        cursor.insertText(text)
+        self.console.setTextCursor(cursor)
+        self.console.ensureCursorVisible()
+
+
+    # 接收本地视频帧率调整的信号
+    def recv_frame_rate_adjust_widget(self, signal_str):
+        if signal_str.startswith('frame_rate_adjust>'):
+            frame_rate = int(signal_str.split('frame_rate_adjust>')[1])
+            self.timer_video.frequent = frame_rate
+
+
+    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    def recv_video_label_signal(self, info_str):
+        # 先将字符串转化为list
+        # 当list为两个元素时 : 第一个为点击动作类型, 第二个为点击动作坐标
+        # 当list为三个元素时 : 第一个为滑动动作类型, 第二个为起点坐标, 第三个为终止点坐标
+        info_list = eval(info_str)
+        # 如果是添加动作时, 不作操作(只添加动作)
+        if add_action_window.add_action_flag is True:
+            if info_list[0] in [uArm_action.uArm_click, uArm_action.uArm_double_click, uArm_action.uArm_long_click, uArm_action.uArm_slide]:
+                position_str = str(info_list[1])
+                position_tuple = info_list[1]
+            else: # 为了不让position_str有警告(无具体意义)
+                position_str = '0, 0'
+                position_tuple = (0.0, 0.0)
+            # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
+            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.points.setText(position_str)
+            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.info_dict[add_action_window.points] = position_tuple
+            self.show_tab_widget.action_tab.add_action_window.setHidden(False)
+            add_action_window.add_action_flag = False
+        # 正常点击时会直接执行动作
+        else:
+            # 根据返回值形成info_dict字典
+            info_dict = {add_action_window.des_text: info_list[0],
+                         add_action_window.action_type: info_list[0],
+                         add_action_window.speed: 150,
+                         add_action_window.points: info_list[1],
+                         add_action_window.leave: 1,
+                         add_action_window.trigger: 0}
+            # 默认速度150 & 动作执行后离开
+            Thread(target=self.uArm_action_execute, args=(info_dict,)).start()
+            # 脚本录制操作
+            if uArm_action.uArm_with_record is True:
+                self.show_tab_widget.action_tab.add_action_item(info_dict=info_dict)
+
+
+    # 接收show_tab_widget的信号
+    def recv_show_tab_widget_signal(self, signal_str):
+        # 执行action动作
+        if signal_str.startswith('action_execute_item>'):
+            signal_dict = json.loads(signal_str.split('>')[1])
+            Thread(target=self.uArm_action_execute, args=(signal_dict,)).start()
+        # 执行record动作
+        elif signal_str.startswith('record_execute_item>'):
+            signal_dict = json.loads(signal_str.split('>')[1])
+            # 添加视频存放根目录
+            signal_dict['video_path'] = gloVar.project_video_path
+            Thread(target=self.uArm_post_request, args=('record', 'record_status', signal_dict)).start()
+            logger('执行-->action[%s]----status[%s]' %(record_action.record_status, signal_dict[record_action.record_status]))
+        # 执行sleep动作
+        elif signal_str.startswith('sleep_execute_item>'):
+            signal_dict = json.loads(signal_str.split('>')[1])
+            Thread(target=self.uArm_post_request, args=('sleep', 'sleep_time', signal_dict)).start()
+            logger('执行-->action[%s]----status[%s]' %(sleep_action.sleep_time, str(signal_dict[sleep_action.sleep_time])))
+        # 添加action控件时候, 设置动作标志位
+        elif signal_str.startswith('action_tab_action>'):
+            # 消除留在视频界面的印记
+            self.label_video.x1, self.label_video.y1 = self.label_video.x0, self.label_video.y0
+            uArm_action.uArm_action_type = signal_str.split('>')[1]
+        else:
+            pass
+
+
+    # 连接到刷新视频进度栏
+    def connect_video_progress_bar(self):
+        self.current_frame = self.video_progress_bar.value()
+        self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
+        self.label_frame_show.setStyleSheet('color:white')
+        self.slider_flag = True
+
+
+    # 本地视频进度条刷新
+    def slider_refresh(self):
+        if self.video_play_flag is True and self.slider_flag is True:
+            try:
+                if self.video_status == self.STATUS_PLAYING:
+                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                    flag, self.image = self.video_cap.read()
+                else:
+                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                    flag, self.image = self.video_cap.read()
+                    show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+                    show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+                    self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                    self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
+                    self.label_frame_show.setStyleSheet('color:white')
+                    self.video_progress_bar.setValue(self.current_frame)
+                    # 当遇到当前视频播放完毕时, 需要将进度条往回拉动的时候
+                    if self.video_status == self.STATUS_STOP:
+                        self.video_status = self.STATUS_PAUSE
+                        self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
+            except Exception as e:
+                logger('[当前视频播放完毕]')
+            self.slider_flag = False
+
+
+    '''以下内容为python_service相关操作函数'''
     # 打开python服务
     def open_python_server(self):
         os.system('python pythonservice/manage.py runserver')
@@ -188,18 +535,13 @@ class UiMainWindow(QMainWindow):
                 time.sleep(0.5)
 
 
-    # 展示窗口状态栏
-    def show_window_status(self):
-        self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
-                                  % (window_status.robot_connect_status, window_status.video_frame_rate,
-                                     window_status.action_tab_status, window_status.case_tab_status)
-        self.status_bar.showMessage(self.window_status_text)
-
-
+    '''以下内容为实时流工具栏相关操作'''
     # 视频流
     def video_stream(self):
+        # 使用电脑自带摄像头
         if self.use_system_camera is True:
             Thread(target=self.system_camera_stream, args=()).start()
+        # 使用外接工业摄像头
         else:
             Thread(target=self.external_camera_stream, args=()).start()
 
@@ -381,24 +723,123 @@ class UiMainWindow(QMainWindow):
                 uArm_action.uArm_action_type = None
 
 
-    # 更新控制台内容
-    def update_text(self, text):
-        cursor = self.console.textCursor()
-        cursor.movePosition(QTextCursor.End)
-        cursor.insertText(text)
-        self.console.setTextCursor(cursor)
-        self.console.ensureCursorVisible()
+    # 获取picture路径(重新设置picture路径)
+    def get_picture_path(self):
+        self.picture_path = QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
+        profile(type='write', file=gloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)
+        logger('修改保存图片路径为: %s' % self.picture_path)
 
 
-    # 菜单栏
-    def menu_bar_show(self):
-        # 菜单栏显示
-        self.test_action = QAction('exit', self)
-        self.file_bar = self.menu_bar.addMenu('File')
-        self.file_bar.addAction(self.test_action)
+    # 设置实时流相机参数
+    def set_camera_param(self):
+        self.camera_param_setting_widget.show()
+        self.camera_param_setting_widget.exec()
 
 
-    # 机械臂动作事件
+    '''以下为机械臂工具栏相关操作'''
+    # get请求->机械臂相关操作函数(解锁/上锁/获取坐标)
+    def uArm_get_request(self, action):
+        try:
+            response = requests.get(uArm_param.port_address + 'uArm/' + str(action))
+            gloVar.request_status = response.text
+        except TimeoutError:
+            gloVar.request_status = '机械臂服务连接异常'
+        finally:
+            return gloVar.request_status
+
+
+    # post请求->机械臂命令(单击/双击/长按/滑动)
+    def uArm_post_request(self, type, action, data_dict):
+        try:
+            response = requests.post(url=uArm_param.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
+            gloVar.request_status = response.text
+        except TimeoutError:
+            gloVar.request_status = '机械臂服务连接异常'
+        finally:
+            return gloVar.request_status
+
+
+    # 机械臂动作线程
+    def uArm_action_event_thread(self, action):
+        if action == uArm_action.uArm_click:
+            # 单击标志
+            uArm_action.uArm_action_type = uArm_action.uArm_click
+        elif action == uArm_action.uArm_double_click:
+            # 双击标志
+            uArm_action.uArm_action_type = uArm_action.uArm_double_click
+        elif action == uArm_action.uArm_long_click:
+            # 长按标志
+            uArm_action.uArm_action_type = uArm_action.uArm_long_click
+        elif action == uArm_action.uArm_slide:
+            # 滑动标志(避免出现乱画直线的情况)
+            self.label_video.x1, self.label_video.y1 = self.label_video.x0, self.label_video.y0
+            uArm_action.uArm_action_type = uArm_action.uArm_slide
+        elif action == uArm_action.uArm_lock:
+            # 机械臂锁定
+            response = self.uArm_get_request(uArm_action.uArm_lock)
+            logger(response)
+        elif action == uArm_action.uArm_unlock:
+            # 机械臂解锁
+            response = self.uArm_get_request(uArm_action.uArm_unlock)
+            logger(response)
+        elif action == uArm_action.uArm_get_position:
+            # 获取机械臂当前坐标
+            response = self.uArm_get_request(uArm_action.uArm_get_position)
+            uArm_param.base_x_point = float(response.split(',')[0])
+            uArm_param.base_y_point = float(response.split(',')[1])
+            uArm_param.base_z_point = float(response.split(',')[2])
+            logger('当前位置为: %s' % response)
+        else:
+            logger('当前不支持[%s]这个动作' % action)
+
+
+    # 机械臂动作执行
+    def uArm_action_execute(self, info_dict):
+        # 从字典中获取键值
+        speed = int(info_dict[add_action_window.speed])
+        leave = int(info_dict[add_action_window.leave])
+        trigger = int(info_dict[add_action_window.trigger])
+        action_type = info_dict[add_action_window.action_type]
+        position_tuple = tuple(info_dict[add_action_window.points])
+        # 有;存在则说明是滑动动作(两个坐标)
+        if len(position_tuple) == 2:
+            position = tuple(position_tuple)
+            start, end = (0.0, 0.0), (0.0, 0.0)
+        # 没有则说明是点击动作(单个坐标)
+        else:
+            position = (0.0, 0.0)
+            start, end = position_tuple[:2], position_tuple[2:]
+        # 执行单击动作
+        if action_type == uArm_action.uArm_click:
+            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
+                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
+                    'position': position, 'pressure_duration': 0}
+            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_click, data,)).start()
+            logger('执行-->action[click]---------坐标: %s' % str(position))
+        # 执行双击动作
+        elif action_type == uArm_action.uArm_double_click:
+            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
+                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 2,
+                    'position': position, 'pressure_duration': 0}
+            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_click, data,)).start()
+            logger('执行-->action[double_click]--坐标: %s' % str(position))
+        # 执行长按动作
+        elif action_type == uArm_action.uArm_long_click:
+            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
+                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
+                    'position': position, 'pressure_duration': 1000}
+            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_click, data,)).start()
+            logger('执行-->action[long_click]----坐标: %s' % str(position))
+        # 执行滑动动作
+        elif action_type == uArm_action.uArm_slide:
+            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
+                    'speed': speed, 'leave': leave, 'trigger': trigger,
+                    'start': start, 'end': end}
+            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_slide, data,)).start()
+            logger('执行-->action[slide]---------坐标: %s' % str(tuple(start + end)))
+
+
+    # 机械臂动作事件(需要先框选屏幕大小)
     def uArm_action_event(self, action):
         if sum(self.label_video.box_screen_size) == 0:
             QMessageBox.about(self, "提示", "请先框选屏幕大小")
@@ -423,6 +864,7 @@ class UiMainWindow(QMainWindow):
             logger('<脚本录制关闭--以下操作将不会被保存为action>')
 
 
+    '''本地视频播放工具栏相关操作'''
     # 本地视频播放
     def play_exist_video(self):
         camera_opened_flag = False # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
@@ -497,435 +939,18 @@ class UiMainWindow(QMainWindow):
                 self.switch_camera_status()
 
 
-    # 机械臂动作线程
-    def uArm_action_event_thread(self, action):
-        if action == uArm_action.uArm_click:
-            # 单击标志
-            uArm_action.uArm_action_type = uArm_action.uArm_click
-        elif action == uArm_action.uArm_double_click:
-            # 双击标志
-            uArm_action.uArm_action_type = uArm_action.uArm_double_click
-        elif action == uArm_action.uArm_long_click:
-            # 长按标志
-            uArm_action.uArm_action_type = uArm_action.uArm_long_click
-        elif action == uArm_action.uArm_slide:
-            # 滑动标志(避免出现乱画直线的情况)
-            self.label_video.x1, self.label_video.y1 = self.label_video.x0, self.label_video.y0
-            uArm_action.uArm_action_type = uArm_action.uArm_slide
-        elif action == uArm_action.uArm_lock:
-            # 机械臂锁定
-            response = self.uArm_get_request(uArm_action.uArm_lock)
-            logger(response)
-        elif action == uArm_action.uArm_unlock:
-            # 机械臂解锁
-            response = self.uArm_get_request(uArm_action.uArm_unlock)
-            logger(response)
-        elif action == uArm_action.uArm_get_position:
-            # 获取机械臂当前坐标
-            response = self.uArm_get_request(uArm_action.uArm_get_position)
-            uArm_param.base_x_point = float(response.split(',')[0])
-            uArm_param.base_y_point = float(response.split(',')[1])
-            uArm_param.base_z_point = float(response.split(',')[2])
-            logger('当前位置为: %s' % response)
-        else:
-            logger('当前不支持[%s]这个动作' % action)
-
-
-    # get请求->机械臂相关操作函数(解锁/上锁/获取坐标)
-    def uArm_get_request(self, action):
-        try:
-            response = requests.get(uArm_param.port_address + 'uArm/' + str(action))
-            gloVar.request_status = response.text
-        except TimeoutError:
-            gloVar.request_status = '机械臂服务连接异常'
-        finally:
-            return gloVar.request_status
-
-
-    # post请求->机械臂命令(单击/双击/长按/滑动)
-    def uArm_post_request(self, type, action, data_dict):
-        try:
-            response = requests.post(url=uArm_param.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
-            gloVar.request_status = response.text
-        except TimeoutError:
-            gloVar.request_status = '机械臂服务连接异常'
-        finally:
-            return gloVar.request_status
-
-
-    # 获取picture路径
-    def get_picture_path(self):
-        self.picture_path = QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
-        self.set_config_value(gloVar.config_file_path, 'param', 'picture_path', self.picture_path)
-        logger('修改保存图片路径为: %s' % self.picture_path)
-
-
-    # 设置相机参数
-    def set_camera_param(self):
-        self.camera_param_setting_widget.show()
-        self.camera_param_setting_widget.exec()
-
-
     # 设置本地视频帧率
     def set_frame_rate(self):
         self.frame_rate_adjust_widget.show()
         self.frame_rate_adjust_widget.exec()
 
 
-    def tool_bar(self):
-        # 实时流相关action
-        self.live_video_toolbar_label = QLabel(self)
-        self.live_video_toolbar_label.setText('实时流:')
-        self.live_video_toolbar_label.setStyleSheet('color:blue')
-        self.live_video_toolbar_label.setFont(QFont(self.font, 13))
-        self.live_video_setting_action               = QAction(QIcon(icon_path.Icon_live_video_setting), 'setting', self)
-        self.live_video_switch_camera_status_action  = QAction(QIcon(icon_path.Icon_live_video_open_camera), 'open_camera', self)
-        self.live_video_capture_action               = QAction(QIcon(icon_path.Icon_live_video_capture), 'capture', self)
-        self.live_video_box_screen_action            = QAction(QIcon(icon_path.Icon_live_video_box_screen), 'box_screen', self)
-        self.live_video_picture_path_action          = QAction(QIcon(icon_path.Icon_live_video_folder_go), 'picture_path', self)
-        # 绑定触发函数
-        self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
-        self.live_video_capture_action.triggered.connect(self.screen_shot)
-        self.live_video_box_screen_action.triggered.connect(self.box_screen)
-        self.live_video_picture_path_action.triggered.connect(self.get_picture_path)
-        self.live_video_setting_action.triggered.connect(self.set_camera_param)
-        # robot相关action
-        self.robot_toolbar_label = QLabel(self)
-        self.robot_toolbar_label.setText('机械臂:')
-        self.robot_toolbar_label.setStyleSheet('color:blue')
-        self.robot_toolbar_label.setFont(QFont(self.font, 13))
-        self.robot_click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
-        self.robot_double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)
-        self.robot_long_click_action   = QAction(QIcon(icon_path.Icon_robot_long_click), 'long_click', self)
-        self.robot_slide_action        = QAction(QIcon(icon_path.Icon_robot_slide), 'slide', self)
-        self.robot_lock_action         = QAction(QIcon(icon_path.Icon_robot_lock), 'lock', self)
-        self.robot_unlock_action       = QAction(QIcon(icon_path.Icon_robot_unlock), 'unlock', self)
-        self.robot_get_position_action = QAction(QIcon(icon_path.Icon_robot_get_position), 'get_position', self)
-        self.robot_with_record_action  = QAction(QIcon(icon_path.Icon_robot_with_record), 'with_record', self)
-        # 绑定触发函数
-        self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_click))
-        self.robot_double_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_double_click))
-        self.robot_long_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_long_click))
-        self.robot_slide_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_slide))
-        self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_lock))
-        self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
-        self.robot_get_position_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_get_position))
-        self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
-        # 视频播放工具栏
-        self.local_video_toolbar_label = QLabel(self)
-        self.local_video_toolbar_label.setText('本地视频:')
-        self.local_video_toolbar_label.setStyleSheet('color:blue')
-        self.local_video_toolbar_label.setFont(QFont(self.font, 13))
-        self.local_video_play_action    = QAction(QIcon(icon_path.Icon_local_video_play), 'video_play', self)
-        self.local_video_setting_action = QAction(QIcon(icon_path.Icon_local_video_setting), 'setting', self)
-        # 绑定函数
-        self.local_video_play_action.triggered.connect(self.play_exist_video)
-        self.local_video_setting_action.triggered.connect(self.set_frame_rate)
-        # 实时流工具栏
-        self.live_video_toolbar.addWidget(self.live_video_toolbar_label)
-        self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
-        self.live_video_toolbar.addAction(self.live_video_capture_action)
-        self.live_video_toolbar.addAction(self.live_video_box_screen_action)
-        self.live_video_toolbar.addAction(self.live_video_picture_path_action)
-        self.live_video_toolbar.addAction(self.live_video_setting_action)
-        self.live_video_toolbar.addSeparator()
-        # robot工具栏
-        self.robot_toolbar.addWidget(self.robot_toolbar_label)
-        self.robot_toolbar.addAction(self.robot_lock_action)
-        self.robot_toolbar.addAction(self.robot_unlock_action)
-        self.robot_toolbar.addAction(self.robot_get_position_action)
-        self.robot_toolbar.addAction(self.robot_click_action)
-        self.robot_toolbar.addAction(self.robot_double_click_action)
-        self.robot_toolbar.addAction(self.robot_long_click_action)
-        self.robot_toolbar.addAction(self.robot_slide_action)
-        self.robot_toolbar.addAction(self.robot_with_record_action)
-        # 存在的视频播放工具栏
-        self.local_video_toolbar.addWidget(self.local_video_toolbar_label)
-        self.local_video_toolbar.addAction(self.local_video_play_action)
-        self.local_video_toolbar.addAction(self.local_video_setting_action)
+    # 本地视频数据处理
+    def local_video_data_process(self):
+        pass
 
 
-    # 视频播放框架
-    def video_play_frame(self):
-        self.video_frame = QFrame(self.central_widget)
-        self.grid.addWidget(self.video_frame, 0, 0, 5, 8)
-        self.video_frame.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.video_frame_h_layout = QHBoxLayout(self.video_frame)
-        # 视频标签
-        self.label_video = Video_Label(self.video_frame)
-        self.label_video.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.label_video.setObjectName('label_video')
-        self.label_video.signal[str].connect(self.recv_video_label_signal)
-        # 填充背景图片
-        self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
-        # 自动填充满label
-        self.label_video.setScaledContents(True)
-        # 标准光标
-        self.label_video.setCursor(Qt.ArrowCursor)
-        # 十字光标
-        # self.label_video.setCursor(Qt.CrossCursor)
-
-        # 单独布局视频label
-        self.video_frame_h_layout.addStretch(1)
-        self.video_frame_h_layout.addWidget(self.label_video)
-        self.video_frame_h_layout.addStretch(1)
-
-        # label垂直布局
-        self.label_v_layout = QVBoxLayout(self.label_video)
-        # button水平布局
-        self.button_h_layout = QHBoxLayout(self.label_video)
-        # 暂停按钮/空格键
-        self.status_video_button = QtWidgets.QPushButton(self.label_video)
-        self.status_video_button.setObjectName('status_video_button')
-        self.status_video_button.setFixedSize(48, 48)
-        # 图片铺满按钮背景
-        self.status_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_play + ')')
-        self.status_video_button.setShortcut(Qt.Key_Space)
-        self.status_video_button.clicked.connect(self.switch_video)
-        self.status_video_button.setEnabled(False)
-        # 上一个视频
-        self.last_video_button = QtWidgets.QPushButton(self.label_video)
-        self.last_video_button.setObjectName('last_video_button')
-        self.last_video_button.setFixedSize(48, 48)
-        self.last_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_last_video + ')')
-        self.last_video_button.setShortcut(Qt.Key_Up)
-        self.last_video_button.clicked.connect(self.last_video)
-        self.last_video_button.setEnabled(True)
-        # 下一个视频
-        self.next_video_button = QtWidgets.QPushButton(self.label_video)
-        self.next_video_button.setObjectName('next_video_button')
-        self.next_video_button.setFixedSize(48, 48)
-        self.next_video_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_next_video + ')')
-        self.next_video_button.setShortcut(Qt.Key_Down)
-        self.next_video_button.clicked.connect(self.next_video)
-        self.next_video_button.setEnabled(False)
-        # 上一帧
-        self.last_frame_button = QtWidgets.QPushButton(self.label_video)
-        self.last_frame_button.setObjectName('last_frame_button')
-        self.last_frame_button.setFixedSize(48, 48)
-        self.last_frame_button.setStyleSheet('border-image: url('+ icon_path.Icon_player_last_frame + ')')
-        self.last_frame_button.setShortcut(Qt.Key_Left)
-        self.last_frame_button.clicked.connect(self.last_frame)
-        self.last_frame_button.setEnabled(False)
-        # 下一帧
-        self.next_frame_button = QtWidgets.QPushButton(self.label_video)
-        self.next_frame_button.setObjectName('next_frame_button')
-        self.next_frame_button.setFixedSize(48, 48)
-        self.next_frame_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_next_frame + ')')
-        self.next_frame_button.setShortcut(Qt.Key_Right)
-        self.next_frame_button.clicked.connect(self.next_frame)
-        self.next_frame_button.setEnabled(False)
-        # 帧数显示
-        self.label_frame_show = QtWidgets.QLabel(self.label_video)
-        self.label_frame_show.setObjectName("label_frame_show")
-        self.label_frame_show.setAlignment(Qt.AlignCenter)
-        self.label_frame_show.setText('')
-        self.label_frame_show.setFont(QFont(self.font, 12))
-        self.label_frame_show.setAlignment(Qt.AlignCenter)
-        self.label_frame_show.setStyleSheet('color:black')
-        # 显示视频名字
-        self.label_video_title = QtWidgets.QLabel(self.label_video)
-        self.label_video_title.setObjectName("label_video_title")
-        self.label_video_title.setAlignment(Qt.AlignCenter)
-        self.label_video_title.setText('[实时视频流]')
-        self.label_video_title.setFont(QFont(self.font, 15))
-        # 视频进度条
-        self.video_progress_bar = QSlider(Qt.Horizontal, self.label_video)
-        self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
-        # button布局管理
-        self.button_h_layout.addStretch(1)
-        self.button_h_layout.addWidget(self.last_frame_button)
-        self.button_h_layout.addSpacing(30)
-        self.button_h_layout.addWidget(self.last_video_button)
-        self.button_h_layout.addSpacing(30)
-        self.button_h_layout.addWidget(self.status_video_button)
-        self.button_h_layout.addSpacing(30)
-        self.button_h_layout.addWidget(self.next_video_button)
-        self.button_h_layout.addSpacing(30)
-        self.button_h_layout.addWidget(self.next_frame_button)
-        self.button_h_layout.addStretch(1)
-        # label布局管理
-        self.label_v_layout.addWidget(self.label_video_title)
-        self.label_v_layout.addStretch(1)
-        self.label_v_layout.addWidget(self.label_frame_show)
-        self.label_v_layout.addWidget(self.video_progress_bar)
-        self.label_v_layout.addLayout(self.button_h_layout)
-
-
-    # 视频标签控件接收函数(接收到信息后需要进行的操作)
-    def recv_video_label_signal(self, info_str):
-        # 先将字符串转化为list
-        # 当list为两个元素时 : 第一个为点击动作类型, 第二个为点击动作坐标
-        # 当list为三个元素时 : 第一个为滑动动作类型, 第二个为起点坐标, 第三个为终止点坐标
-        info_list = eval(info_str)
-        # 如果是添加动作时, 不作操作(只添加动作)
-        if add_action_window.add_action_flag is True:
-            if info_list[0] in [uArm_action.uArm_click, uArm_action.uArm_double_click, uArm_action.uArm_long_click, uArm_action.uArm_slide]:
-                position_str = str(info_list[1])
-                position_tuple = info_list[1]
-            else: # 为了不让position_str有警告(无具体意义)
-                position_str = '0, 0'
-                position_tuple = (0.0, 0.0)
-            # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
-            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.points.setText(position_str)
-            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.info_dict[add_action_window.points] = position_tuple
-            self.show_tab_widget.action_tab.add_action_window.setHidden(False)
-            add_action_window.add_action_flag = False
-        # 正常点击时会直接执行动作
-        else:
-            # 根据返回值形成info_dict字典
-            info_dict = {add_action_window.des_text: info_list[0],
-                         add_action_window.action_type: info_list[0],
-                         add_action_window.speed: 150,
-                         add_action_window.points: info_list[1],
-                         add_action_window.leave: 1,
-                         add_action_window.trigger: 0}
-            # 默认速度150 & 动作执行后离开
-            Thread(target=self.uArm_action_execute, args=(info_dict,)).start()
-            # 脚本录制操作
-            if uArm_action.uArm_with_record is True:
-                self.show_tab_widget.action_tab.add_action_item(info_dict=info_dict)
-
-
-    # 机械臂动作执行
-    def uArm_action_execute(self, info_dict):
-        # 从字典中获取键值
-        speed = int(info_dict[add_action_window.speed])
-        leave = int(info_dict[add_action_window.leave])
-        trigger = int(info_dict[add_action_window.trigger])
-        action_type = info_dict[add_action_window.action_type]
-        position_tuple = tuple(info_dict[add_action_window.points])
-        # 有;存在则说明是滑动动作(两个坐标)
-        if len(position_tuple) == 2:
-            position = tuple(position_tuple)
-            start, end = (0.0, 0.0), (0.0, 0.0)
-        # 没有则说明是点击动作(单个坐标)
-        else:
-            position = (0.0, 0.0)
-            start, end = position_tuple[:2], position_tuple[2:]
-        # 执行单击动作
-        if action_type == uArm_action.uArm_click:
-            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
-                    'position': position, 'pressure_duration': 0}
-            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_click, data,)).start()
-            logger('执行-->action[click]---------坐标: %s' % str(position))
-        # 执行双击动作
-        elif action_type == uArm_action.uArm_double_click:
-            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 2,
-                    'position': position, 'pressure_duration': 0}
-            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_click, data,)).start()
-            logger('执行-->action[double_click]--坐标: %s' % str(position))
-        # 执行长按动作
-        elif action_type == uArm_action.uArm_long_click:
-            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
-                    'position': position, 'pressure_duration': 1000}
-            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_click, data,)).start()
-            logger('执行-->action[long_click]----坐标: %s' % str(position))
-        # 执行滑动动作
-        elif action_type == uArm_action.uArm_slide:
-            data = {'base': (uArm_param.base_x_point, uArm_param.base_y_point, uArm_param.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger,
-                    'start': start, 'end': end}
-            Thread(target=self.uArm_post_request, args=('uArm', uArm_action.uArm_slide, data,)).start()
-            logger('执行-->action[slide]---------坐标: %s' % str(tuple(start + end)))
-
-
-    # 进度条刷新
-    def slider_refresh(self):
-        if self.video_play_flag is True and self.slider_flag is True:
-            try:
-                if self.video_status == self.STATUS_PLAYING:
-                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
-                    flag, self.image = self.video_cap.read()
-                else:
-                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
-                    flag, self.image = self.video_cap.read()
-                    show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-                    show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-                    self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
-                    self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
-                    self.label_frame_show.setStyleSheet('color:white')
-                    self.video_progress_bar.setValue(self.current_frame)
-                    # 当遇到当前视频播放完毕时, 需要将进度条往回拉动的时候
-                    if self.video_status == self.STATUS_STOP:
-                        self.video_status = self.STATUS_PAUSE
-                        self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
-            except Exception as e:
-                logger('[当前视频播放完毕]')
-            self.slider_flag = False
-
-
-    # case展示
-    def show_case(self):
-        self.show_tab_widget = ShowTabWidget(self.central_widget)
-        self.grid.addWidget(self.show_tab_widget, 0, 8, 3, 2)
-        self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
-
-
-    # 接收show_tab_widget的信号
-    def recv_show_tab_widget_signal(self, signal_str):
-        # 执行action动作
-        if signal_str.startswith('action_execute_item>'):
-            signal_dict = json.loads(signal_str.split('>')[1])
-            Thread(target=self.uArm_action_execute, args=(signal_dict,)).start()
-        # 执行record动作
-        elif signal_str.startswith('record_execute_item>'):
-            signal_dict = json.loads(signal_str.split('>')[1])
-            # 添加视频存放根目录
-            signal_dict['video_path'] = gloVar.project_video_path
-            Thread(target=self.uArm_post_request, args=('record', 'record_status', signal_dict)).start()
-            logger('执行-->action[%s]----status[%s]' %(record_action.record_status, signal_dict[record_action.record_status]))
-        # 执行sleep动作
-        elif signal_str.startswith('sleep_execute_item>'):
-            signal_dict = json.loads(signal_str.split('>')[1])
-            Thread(target=self.uArm_post_request, args=('sleep', 'sleep_time', signal_dict)).start()
-            logger('执行-->action[%s]----status[%s]' %(sleep_action.sleep_time, str(signal_dict[sleep_action.sleep_time])))
-        # 添加action控件时候, 设置动作标志位
-        elif signal_str.startswith('action_tab_action>'):
-            # 消除留在视频界面的印记
-            self.label_video.x1, self.label_video.y1 = self.label_video.x0, self.label_video.y0
-            uArm_action.uArm_action_type = signal_str.split('>')[1]
-        else:
-            pass
-
-
-    # 接收本地视频帧率调整的信号
-    def recv_frame_rate_adjust_widget(self, signal_str):
-        if signal_str.startswith('frame_rate_adjust>'):
-            frame_rate = int(signal_str.split('frame_rate_adjust>')[1])
-            self.timer_video.frequent = frame_rate
-
-
-    # 控制台输出
-    def output_text(self):
-        self.frame_of_console_output = QtWidgets.QFrame(self.central_widget)
-        self.frame_of_console_output.setFrameShape(QtWidgets.QFrame.Box)
-        self.frame_of_console_output.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_of_console_output.setObjectName("frame_of_console_output")
-        self.frame_of_console_output.setMinimumWidth(80)
-        self.grid.addWidget(self.frame_of_console_output, 3, 8, 2, 2)
-        self.console_v_layout = QVBoxLayout(self.frame_of_console_output)
-        self.label_output = QtWidgets.QLabel(self.frame_of_console_output)
-        self.label_output.setObjectName("label_output")
-        self.label_output.setText('[Console输出]')
-        self.label_output.setAlignment(Qt.AlignLeft)
-        self.label_output.setFont(QFont(self.font, 12))
-        self.console = QTextEdit(self.frame_of_console_output)
-        self.console.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
-        self.console.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
-        self.console.setReadOnly(True)
-        self.console.ensureCursorVisible()
-        self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)
-        self.console.setWordWrapMode(QTextOption.NoWrap)
-        self.console.setFont(QFont('monospaced', 13))
-        # self.console.setStyleSheet('background-color:lightGray')
-        self.console_v_layout.addWidget(self.label_output)
-        self.console_v_layout.addWidget(self.console)
-
-
+    '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''
     # 展示视频函数
     def show_video(self):
         # 实时模式
@@ -974,7 +999,7 @@ class UiMainWindow(QMainWindow):
         # QApplication.processEvents() # 界面刷新
 
 
-# 暂停视频
+    # 暂停视频
     def template_label(self):
         time.sleep(0.3)
         # 暂停后不允许机械臂动作操作
@@ -1235,14 +1260,7 @@ class UiMainWindow(QMainWindow):
         # self.next_frame_button.setEnabled(True)
 
 
-    # 连接到视频进度栏
-    def connect_video_progress_bar(self):
-        self.current_frame = self.video_progress_bar.value()
-        self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
-        self.label_frame_show.setStyleSheet('color:white')
-        self.slider_flag = True
-
-
+    '''以下为处理视频标签适应窗体大小问题'''
     # 视频标签自适应
     def video_label_adaptive(self, video_width, video_height):
         # 第一次触发实在窗口生成的时候, 没有意义
@@ -1280,6 +1298,7 @@ class UiMainWindow(QMainWindow):
             self.label_video.box_screen_size[3] = int(self.label_video.size().height() * (self.label_video.box_screen_scale[3]-self.label_video.box_screen_scale[1]))
 
 
+    '''以下重写窗口事件'''
     # 重写窗口关闭时间
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '本程序', '是否要退出程序?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
