@@ -93,12 +93,15 @@ class UiMainWindow(QMainWindow):
         self.status_bar.setStyleSheet('color:green')
         self.status_bar.setFont(QFont(self.font, 13))
         # 工具栏
-        self.ui_toolbar = self.addToolBar('ui_toolbar')
-        self.robot_operate_toolbar = self.addToolBar('operate_toolbar')
-        self.video_play_toolbar = self.addToolBar('video_play_toolbar')
+        # 实时流工具栏
+        self.live_video_toolbar = self.addToolBar('live_video_toolbar')
+        # 机械臂工具栏
+        self.robot_toolbar = self.addToolBar('robot_toolbar')
+        # 本地视频工具栏
+        self.local_video_toolbar = self.addToolBar('local_video_toolbar')
         # 视频实时流参数设置框
         self.camera_param_setting_widget = CameraParamAdjustControl(self)
-        # 离线视频帧率调节
+        # 本地视频帧率调节
         self.frame_rate_adjust_widget = FrameRateAdjustControl(self)
         self.frame_rate_adjust_widget.signal[str].connect(self.recv_frame_rate_adjust_widget)
         # 接收进程打印的信息
@@ -137,8 +140,8 @@ class UiMainWindow(QMainWindow):
         self.real_time_video_height = 720
         # self.real_time_video_width = 1920
         # self.real_time_video_height = 1280
-        self.offline_video_width = 0
-        self.offline_video_height = 0
+        self.local_video_width = 0
+        self.local_video_height = 0
         # 是否第一次窗口缩放
         self.first_window_zoom_flag = True
         # 是否使用电脑自带摄像头
@@ -211,24 +214,24 @@ class UiMainWindow(QMainWindow):
         self.last_frame_button.setEnabled(False)
         self.next_frame_button.setEnabled(False)
         if self.camera_status == self.camera_closed:
-            # 不管离线视频是否正在播放(先关掉视频, 再切换到直播)
+            # 不管本地视频是否正在播放(先关掉视频, 再切换到直播)
             self.timer_video.stop()
             self.label_video.video_play_flag = self.video_play_flag = False
             self.label_video_title.setText('[实时视频流]')
             self.video_progress_bar.setValue(0)
             self.label_frame_show.setText('')
             self.video_progress_bar.setEnabled(False)
-            self.video_play_setting_action.setEnabled(False)
+            self.local_video_setting_action.setEnabled(False)
             robot_other.select_template_flag = False
-            # 离线视频进度条关闭
+            # 本地视频进度条关闭
             self.slider_thread.stop()
             # 打开实时流视频并播放
             logger('<打开摄像头>')
             self.camera_status = self.camera_opened
             self.video_stream()
-            self.switch_camera_status_action.setIcon(QIcon(icon_path.Icon_ui_close_camera))
+            self.live_video_switch_camera_status_action.setIcon(QIcon(icon_path.Icon_live_video_close_camera))
             # 设置提示
-            self.switch_camera_status_action.setToolTip('close_camera')
+            self.live_video_switch_camera_status_action.setToolTip('close_camera')
             time.sleep(3)
             # time.sleep(15)
             # 打开视频展示定时器
@@ -246,16 +249,16 @@ class UiMainWindow(QMainWindow):
             self.timer_video.stop()
             self.video_status = self.STATUS_INIT
             robot_other.select_template_flag = False
-            # 离线视频进度条打开
+            # 本地视频进度条打开
             self.slider_thread.start()
             self.label_video.setCursor(Qt.ArrowCursor)
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
             self.camera_status = self.camera_closed
-            self.switch_camera_status_action.setIcon(QIcon(icon_path.Icon_ui_open_camera))
-            self.switch_camera_status_action.setToolTip('open_camera')
+            self.live_video_switch_camera_status_action.setIcon(QIcon(icon_path.Icon_live_video_open_camera))
+            self.live_video_switch_camera_status_action.setToolTip('open_camera')
             self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
             self.status_video_button.setEnabled(False)
-            self.video_play_setting_action.setEnabled(True)
+            self.local_video_setting_action.setEnabled(True)
 
 
     # 系统摄像头流
@@ -420,7 +423,7 @@ class UiMainWindow(QMainWindow):
             logger('<脚本录制关闭--以下操作将不会被保存为action>')
 
 
-    # 离线视频播放
+    # 本地视频播放
     def play_exist_video(self):
         camera_opened_flag = False # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
         # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
@@ -447,17 +450,17 @@ class UiMainWindow(QMainWindow):
                         file = merge_path([home, file]).merged_path
                         self.videos.append(file)
                         self.videos_title.append(file)
-            # 加载离线视频对象
+            # 加载本地视频对象
             self.video_cap = cv2.VideoCapture(self.videos[0]) # 重新加载这个视频
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             # 需要获取视频尺寸
-            self.offline_video_width  = int(self.video_cap.get(3))
-            self.offline_video_height = int(self.video_cap.get(4))
+            self.local_video_width  = int(self.video_cap.get(3))
+            self.local_video_height = int(self.video_cap.get(4))
             # 获取视频总帧数
             self.frame_count          = int(self.video_cap.get(7))
             # 更换视频标签背景
             self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
-            # 离线视频播放标志打开, 视频状态为STATUS_INIT
+            # 本地视频播放标志打开, 视频状态为STATUS_INIT
             self.label_video.video_play_flag = self.video_play_flag = True
             self.video_status = self.STATUS_INIT
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
@@ -486,8 +489,8 @@ class UiMainWindow(QMainWindow):
             self.show_tab_widget.setEnabled(False)
             # 强制关闭脚本录制状态
             self.switch_uArm_with_record_status(record_status=False)
-            # 通过离线视频尺寸自适应视频播放窗口
-            self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
+            # 通过本地视频尺寸自适应视频播放窗口
+            self.video_label_adaptive(self.local_video_width, self.local_video_height)
         else:
             logger('没有选择视频路径!')
             if camera_opened_flag is True:
@@ -563,82 +566,83 @@ class UiMainWindow(QMainWindow):
         self.camera_param_setting_widget.exec()
 
 
-    # 设置离线视频帧率
+    # 设置本地视频帧率
     def set_frame_rate(self):
         self.frame_rate_adjust_widget.show()
         self.frame_rate_adjust_widget.exec()
 
 
     def tool_bar(self):
-        # ui相关action
-        self.ui_toolbar_label             = QLabel(self)
-        self.ui_toolbar_label.setText('实时流:')
-        self.ui_toolbar_label.setStyleSheet('color:blue')
-        self.ui_toolbar_label.setFont(QFont(self.font, 13))
-        self.setting_action               = QAction(QIcon(icon_path.Icon_ui_setting), 'setting', self)
-        self.switch_camera_status_action  = QAction(QIcon(icon_path.Icon_ui_open_camera), 'open_camera', self)
-        self.capture_action               = QAction(QIcon(icon_path.Icon_ui_capture), 'capture', self)
-        self.box_screen_action            = QAction(QIcon(icon_path.Icon_ui_box_screen), 'box_screen', self)
-        self.picture_path_action          = QAction(QIcon(icon_path.Icon_ui_folder_go), 'picture_path', self)
+        # 实时流相关action
+        self.live_video_toolbar_label = QLabel(self)
+        self.live_video_toolbar_label.setText('实时流:')
+        self.live_video_toolbar_label.setStyleSheet('color:blue')
+        self.live_video_toolbar_label.setFont(QFont(self.font, 13))
+        self.live_video_setting_action               = QAction(QIcon(icon_path.Icon_live_video_setting), 'setting', self)
+        self.live_video_switch_camera_status_action  = QAction(QIcon(icon_path.Icon_live_video_open_camera), 'open_camera', self)
+        self.live_video_capture_action               = QAction(QIcon(icon_path.Icon_live_video_capture), 'capture', self)
+        self.live_video_box_screen_action            = QAction(QIcon(icon_path.Icon_live_video_box_screen), 'box_screen', self)
+        self.live_video_picture_path_action          = QAction(QIcon(icon_path.Icon_live_video_folder_go), 'picture_path', self)
         # 绑定触发函数
-        self.switch_camera_status_action.triggered.connect(self.switch_camera_status)
-        self.capture_action.triggered.connect(self.screen_shot)
-        self.box_screen_action.triggered.connect(self.box_screen)
-        self.picture_path_action.triggered.connect(self.get_picture_path)
-        self.setting_action.triggered.connect(self.set_camera_param)
+        self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
+        self.live_video_capture_action.triggered.connect(self.screen_shot)
+        self.live_video_box_screen_action.triggered.connect(self.box_screen)
+        self.live_video_picture_path_action.triggered.connect(self.get_picture_path)
+        self.live_video_setting_action.triggered.connect(self.set_camera_param)
         # robot相关action
-        self.robot_operate_toolbar_label = QLabel(self)
-        self.robot_operate_toolbar_label.setText('机械臂:')
-        self.robot_operate_toolbar_label.setStyleSheet('color:blue')
-        self.robot_operate_toolbar_label.setFont(QFont(self.font, 13))
-        self.click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
-        self.double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)
-        self.long_click_action   = QAction(QIcon(icon_path.Icon_robot_long_click), 'long_click', self)
-        self.slide_action        = QAction(QIcon(icon_path.Icon_robot_slide), 'slide', self)
-        self.robot_lock_action   = QAction(QIcon(icon_path.Icon_robot_lock), 'lock', self)
-        self.robot_unlock_action = QAction(QIcon(icon_path.Icon_robot_unlock), 'unlock', self)
+        self.robot_toolbar_label = QLabel(self)
+        self.robot_toolbar_label.setText('机械臂:')
+        self.robot_toolbar_label.setStyleSheet('color:blue')
+        self.robot_toolbar_label.setFont(QFont(self.font, 13))
+        self.robot_click_action        = QAction(QIcon(icon_path.Icon_robot_click), 'click', self)
+        self.robot_double_click_action = QAction(QIcon(icon_path.Icon_robot_double_click), 'double_click', self)
+        self.robot_long_click_action   = QAction(QIcon(icon_path.Icon_robot_long_click), 'long_click', self)
+        self.robot_slide_action        = QAction(QIcon(icon_path.Icon_robot_slide), 'slide', self)
+        self.robot_lock_action         = QAction(QIcon(icon_path.Icon_robot_lock), 'lock', self)
+        self.robot_unlock_action       = QAction(QIcon(icon_path.Icon_robot_unlock), 'unlock', self)
         self.robot_get_position_action = QAction(QIcon(icon_path.Icon_robot_get_position), 'get_position', self)
-        self.robot_with_record_action = QAction(QIcon(icon_path.Icon_robot_with_record), 'with_record', self)
+        self.robot_with_record_action  = QAction(QIcon(icon_path.Icon_robot_with_record), 'with_record', self)
         # 绑定触发函数
-        self.click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_click))
-        self.double_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_double_click))
-        self.long_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_long_click))
-        self.slide_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_slide))
+        self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_click))
+        self.robot_double_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_double_click))
+        self.robot_long_click_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_long_click))
+        self.robot_slide_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_slide))
         self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_lock))
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_unlock))
         self.robot_get_position_action.triggered.connect(lambda: self.uArm_action_event(uArm_action.uArm_get_position))
         self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
         # 视频播放工具栏
-        self.video_play_toolbar_label = QLabel(self)
-        self.video_play_toolbar_label.setText('离线视频:')
-        self.video_play_toolbar_label.setStyleSheet('color:blue')
-        self.video_play_toolbar_label.setFont(QFont(self.font, 13))
-        self.video_play_action = QAction(QIcon(icon_path.Icon_video_play), 'video_play', self)
-        self.video_play_action.triggered.connect(self.play_exist_video)
-        self.video_play_setting_action = QAction(QIcon(icon_path.Icon_ui_setting), 'setting', self)
-        self.video_play_setting_action.triggered.connect(self.set_frame_rate)
-        # ui工具栏
-        self.ui_toolbar.addWidget(self.ui_toolbar_label)
-        self.ui_toolbar.addAction(self.switch_camera_status_action)
-        self.ui_toolbar.addAction(self.capture_action)
-        self.ui_toolbar.addAction(self.box_screen_action)
-        self.ui_toolbar.addAction(self.picture_path_action)
-        self.ui_toolbar.addAction(self.setting_action)
-        self.ui_toolbar.addSeparator()
+        self.local_video_toolbar_label = QLabel(self)
+        self.local_video_toolbar_label.setText('本地视频:')
+        self.local_video_toolbar_label.setStyleSheet('color:blue')
+        self.local_video_toolbar_label.setFont(QFont(self.font, 13))
+        self.local_video_play_action    = QAction(QIcon(icon_path.Icon_local_video_play), 'video_play', self)
+        self.local_video_setting_action = QAction(QIcon(icon_path.Icon_local_video_setting), 'setting', self)
+        # 绑定函数
+        self.local_video_play_action.triggered.connect(self.play_exist_video)
+        self.local_video_setting_action.triggered.connect(self.set_frame_rate)
+        # 实时流工具栏
+        self.live_video_toolbar.addWidget(self.live_video_toolbar_label)
+        self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
+        self.live_video_toolbar.addAction(self.live_video_capture_action)
+        self.live_video_toolbar.addAction(self.live_video_box_screen_action)
+        self.live_video_toolbar.addAction(self.live_video_picture_path_action)
+        self.live_video_toolbar.addAction(self.live_video_setting_action)
+        self.live_video_toolbar.addSeparator()
         # robot工具栏
-        self.robot_operate_toolbar.addWidget(self.robot_operate_toolbar_label)
-        self.robot_operate_toolbar.addAction(self.robot_lock_action)
-        self.robot_operate_toolbar.addAction(self.robot_unlock_action)
-        self.robot_operate_toolbar.addAction(self.robot_get_position_action)
-        self.robot_operate_toolbar.addAction(self.click_action)
-        self.robot_operate_toolbar.addAction(self.double_click_action)
-        self.robot_operate_toolbar.addAction(self.long_click_action)
-        self.robot_operate_toolbar.addAction(self.slide_action)
-        self.robot_operate_toolbar.addAction(self.robot_with_record_action)
+        self.robot_toolbar.addWidget(self.robot_toolbar_label)
+        self.robot_toolbar.addAction(self.robot_lock_action)
+        self.robot_toolbar.addAction(self.robot_unlock_action)
+        self.robot_toolbar.addAction(self.robot_get_position_action)
+        self.robot_toolbar.addAction(self.robot_click_action)
+        self.robot_toolbar.addAction(self.robot_double_click_action)
+        self.robot_toolbar.addAction(self.robot_long_click_action)
+        self.robot_toolbar.addAction(self.robot_slide_action)
+        self.robot_toolbar.addAction(self.robot_with_record_action)
         # 存在的视频播放工具栏
-        self.video_play_toolbar.addWidget(self.video_play_toolbar_label)
-        self.video_play_toolbar.addAction(self.video_play_action)
-        self.video_play_toolbar.addAction(self.video_play_setting_action)
+        self.local_video_toolbar.addWidget(self.local_video_toolbar_label)
+        self.local_video_toolbar.addAction(self.local_video_play_action)
+        self.local_video_toolbar.addAction(self.local_video_setting_action)
 
 
     # 视频播放框架
@@ -888,7 +892,7 @@ class UiMainWindow(QMainWindow):
             pass
 
 
-    # 接收离线视频帧率调整的信号
+    # 接收本地视频帧率调整的信号
     def recv_frame_rate_adjust_widget(self, signal_str):
         if signal_str.startswith('frame_rate_adjust>'):
             frame_rate = int(signal_str.split('frame_rate_adjust>')[1])
@@ -932,7 +936,7 @@ class UiMainWindow(QMainWindow):
             if gloVar.save_pic_flag is True:
                 cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
                 gloVar.save_pic_flag = False
-        # 离线视频播放模式(可以数帧)
+        # 本地视频播放模式(可以数帧)
         else:
             if self.current_frame < self.frame_count:
                 self.current_frame += 1
@@ -985,7 +989,7 @@ class UiMainWindow(QMainWindow):
         if self.video_play_flag is False:
             mask_image_path = self.picture_path
             robot_other.mask_path = mask_image_path
-        # 离线直播(框选模板名称默认和视频名相同>路径只是将video替换为picture即可)
+        # 本地视频(框选模板名称默认和视频名相同>路径只是将video替换为picture即可)
         else:
             mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
             robot_other.mask_path = mask_image_path
@@ -1095,13 +1099,13 @@ class UiMainWindow(QMainWindow):
                 self.current_video = self.current_video - 1
             else:
                 self.current_video = len(self.videos) - 1
-            # 加载离线视频
+            # 加载本地视频
             self.current_frame = 0
             self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
             # 需要获取视频尺寸
-            self.offline_video_width = int(self.video_cap.get(3))
-            self.offline_video_height = int(self.video_cap.get(4))
+            self.local_video_width = int(self.video_cap.get(3))
+            self.local_video_height = int(self.video_cap.get(4))
             # 获取视频总帧数
             self.frame_count = int(self.video_cap.get(7))
             # 设置视频进度滑动条范围
@@ -1124,8 +1128,8 @@ class UiMainWindow(QMainWindow):
         self.next_video_button.setEnabled(True)
         self.status_video_button.setEnabled(True)
         self.label_video.setCursor(Qt.ArrowCursor)
-        # 通过离线视频尺寸自适应视频播放窗口
-        self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
+        # 通过本地视频尺寸自适应视频播放窗口
+        self.video_label_adaptive(self.local_video_width, self.local_video_height)
         self.last_video_button.setEnabled(True)
 
 
@@ -1141,13 +1145,13 @@ class UiMainWindow(QMainWindow):
                 self.current_video = self.current_video + 1
             else:
                 self.current_video = 0
-            # 加载离线视频
+            # 加载本地视频
             self.current_frame = 0
             self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
             # 需要获取视频尺寸
-            self.offline_video_width = int(self.video_cap.get(3))
-            self.offline_video_height = int(self.video_cap.get(4))
+            self.local_video_width = int(self.video_cap.get(3))
+            self.local_video_height = int(self.video_cap.get(4))
             # 获取视频总帧数
             self.frame_count = int(self.video_cap.get(7))
             # 设置视频进度滑动条范围
@@ -1170,8 +1174,8 @@ class UiMainWindow(QMainWindow):
         self.next_video_button.setEnabled(True)
         self.status_video_button.setEnabled(True)
         self.label_video.setCursor(Qt.ArrowCursor)
-        # 通过离线视频尺寸自适应视频播放窗口
-        self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
+        # 通过本地视频尺寸自适应视频播放窗口
+        self.video_label_adaptive(self.local_video_width, self.local_video_height)
         self.next_video_button.setEnabled(True)
 
 
@@ -1297,7 +1301,7 @@ class UiMainWindow(QMainWindow):
         if self.video_play_flag is False:
             self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
         else:
-            self.video_label_adaptive(self.offline_video_width, self.offline_video_height)
+            self.video_label_adaptive(self.local_video_width, self.local_video_height)
 
 
 if __name__ == "__main__":

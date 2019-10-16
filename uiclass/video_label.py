@@ -147,7 +147,7 @@ class Video_Label(QLabel):
                 # 接收模板路径
                 mask_path = robot_other.mask_path
                 default_name = '应用'
-            # 离线视频播放
+            # 本地视频播放
             else:
                 mask_path = os.path.split(robot_other.mask_path)[0]
                 default_name = os.path.splitext(os.path.split(robot_other.mask_path)[1])[0]
@@ -196,7 +196,7 @@ class Video_Label(QLabel):
                                 else:
                                     template_name = merge_path([mask_path, value.split('-')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
-                            # 离线播放的情况下
+                            # 本地视频播放的情况下
                             else:
                                 template_name = 'null'
                                 logger('[输入的模板名称错误!]')
@@ -204,7 +204,7 @@ class Video_Label(QLabel):
                             # 直播
                             if self.video_play_flag is False:
                                 mask_path = merge_path([mask_path, '其他']).merged_path
-                            # 离线播放
+                            # 本地视频播放
                             else:
                                 mask_path = mask_path
                             if os.path.exists(mask_path) is False:
