@@ -63,10 +63,11 @@ class UiMainWindow(QMainWindow):
         self.setMinimumSize(QtCore.QSize(1200, 700))
         self.setWindowTitle("Auto Robot")
         self.setWindowIcon(QIcon(self.icon_file))
-
+        # 中间widget区域
         self.central_widget = QWidget(self)
-
         self.central_widget.setObjectName("central_widget")
+        self.setCentralWidget(self.central_widget)
+        # 界面全局栅格布局
         self.grid = QtWidgets.QGridLayout(self.central_widget)
         # self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setObjectName('grid')
@@ -74,15 +75,12 @@ class UiMainWindow(QMainWindow):
         self.setFont(QFont(self.font, 13))
         # 设置UI背景颜色为灰色
         # self.central_widget.setStyleSheet('background-color:lightgrey')
-
         # 视频播放框架
         self.video_play_frame()
         # case展示
         self.show_case()
         # 控制台输出框架
         self.output_text()
-
-        self.setCentralWidget(self.central_widget)
         # 菜单栏
         self.menu_bar = QtWidgets.QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')
@@ -160,8 +158,9 @@ class UiMainWindow(QMainWindow):
                                     window_status.action_tab_status, window_status.case_tab_status)
         # 今天的日期(用作文件夹名)
         self.today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-        # 获取当前路径(连接符标准化为正斜杠模式)
+        # 获取当前工程路径(连接符标准化为正斜杠模式)
         gloVar.project_path = merge_path(section_path=[os.path.abspath(os.getcwd())]).merged_path
+        # 获取工程视频保存路径
         gloVar.project_video_path = merge_path(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
         # python_server的pid
         self.python_server_pid = None
@@ -942,7 +941,7 @@ class UiMainWindow(QMainWindow):
                     show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
                     show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
                     self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
-                    self.label_frame_show.setText(str(self.current_frame+1)+'F/'+str(self.frame_count))
+                    self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                     self.label_frame_show.setStyleSheet('color:white')
                     self.video_progress_bar.setValue(self.current_frame)
                 else:
@@ -1163,7 +1162,7 @@ class UiMainWindow(QMainWindow):
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
             # 设置视频title
-            self.label_video_title.setText('['+str(self.current_video+1)+'/'+str(len(self.videos))+']'+self.videos_title[self.current_video])
+            self.label_video_title.setText('[' + str(self.current_video+1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
             self.label_video_title.setStyleSheet('color:white')
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
@@ -1189,7 +1188,7 @@ class UiMainWindow(QMainWindow):
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
             self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
-            self.label_frame_show.setText(str(self.current_frame+1)+'F/'+str(self.frame_count))
+            self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
             # 当遇到当前视频播放完毕时, 需要回退帧的时候
