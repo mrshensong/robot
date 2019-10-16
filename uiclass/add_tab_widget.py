@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QDialog, QApplication
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab

@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 
 class ListWidget(QListWidget):
 

@@ -1,5 +1,5 @@
 import json
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from GlobalVar import uArm_action, add_action_window

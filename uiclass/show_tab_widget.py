@@ -2,7 +2,7 @@ import time
 import json
 from threading import Thread
 from GlobalVar import gloVar
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab

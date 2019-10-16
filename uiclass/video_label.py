@@ -2,11 +2,11 @@ import os
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QLabel, QInputDialog, QLineEdit
 from GlobalVar import gloVar, uArm_action, uArm_param, logger, robot_other, merge_path
 
 # 视频展示标签
-class Video_Label(QLabel):
+class VideoLabel(QLabel):
 
     x0, y0, x1, y1 = 0, 0, 0, 0
     # 鼠标是否按下标志
@@ -28,7 +28,7 @@ class Video_Label(QLabel):
 
     # 初始化
     def __init__(self, parent):
-        super(Video_Label, self).__init__(parent)
+        super(VideoLabel, self).__init__(parent)
         self.parent = parent
 
 
@@ -160,13 +160,13 @@ class Video_Label(QLabel):
                     # 如果是数据处理(需要对图像特殊处理)
                     if robot_other.data_process_flag is True:
                         # 将模板灰度化/并在模板起始位置打标记
-                        rectImage = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
+                        rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
                         # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
-                        rectImage[0][0] = y0 // 10
-                        rectImage[0][1] = y1 // 10
-                        rectImage[0][2] = x0 // 10
-                        rectImage[0][3] = x1 // 10
-                        cut_img = rectImage
+                        rect_image[0][0] = y0 // 10
+                        rect_image[0][1] = y1 // 10
+                        rect_image[0][2] = x0 // 10
+                        rect_image[0][3] = x1 // 10
+                        cut_img = rect_image
                         # 模板存放位置
                         mask_path = mask_path
                         if os.path.exists(mask_path) is False:
@@ -221,7 +221,7 @@ class Video_Label(QLabel):
     # 计算传入机械臂的坐标
     def calculating_point(self, x, y):
         i = x - self.box_screen_size[0]
-        uArm_Y_offset = round((i / self.box_screen_size[2] * uArm_param.actual_screen_width), 3)
+        robot_y_offset = round((i / self.box_screen_size[2] * uArm_param.actual_screen_width), 3)
         j = y - (self.box_screen_size[1] + self.box_screen_size[3])
-        uArm_X_offset = round((j / self.box_screen_size[3] * uArm_param.actual_screen_height), 3)
-        return (uArm_X_offset, uArm_Y_offset)
+        robot_x_offset = round((j / self.box_screen_size[3] * uArm_param.actual_screen_height), 3)
+        return robot_x_offset, robot_y_offset

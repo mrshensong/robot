@@ -8,18 +8,15 @@ import datetime
 import gxipy as gx
 import numpy as np
 from threading import Thread
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 from uiclass.stream import Stream
 from uiclass.timer import Timer
-from uiclass.video_label import Video_Label
+from uiclass.video_label import VideoLabel
 from uiclass.show_tab_widget import ShowTabWidget
 from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from GlobalVar import gloVar, icon_path, uArm_action, uArm_param, logger, robot_other, add_action_window, merge_path, window_status, profile, record_action, sleep_action
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QGridLayout, QHBoxLayout, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QFrame, QLabel, QTextEdit, QSlider, QAction, QPushButton, QApplication
 
 
 class UiMainWindow(QMainWindow):
@@ -60,7 +57,7 @@ class UiMainWindow(QMainWindow):
         self.setObjectName("MainWindow")
         self.setGeometry(260, 70, 1400, 900)
         # self.resize(1400, 900)
-        self.setMinimumSize(QtCore.QSize(1200, 700))
+        self.setMinimumSize(QSize(1200, 700))
         self.setWindowTitle("Auto Robot")
         self.setWindowIcon(QIcon(self.icon_file))
         # 中间widget区域
@@ -68,6 +65,7 @@ class UiMainWindow(QMainWindow):
         self.central_widget.setObjectName("central_widget")
         self.setCentralWidget(self.central_widget)
         # 界面全局栅格布局
+        # self.grid = QGridLayout(self.central_widget)
         self.grid = QGridLayout(self.central_widget)
         # self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setObjectName('grid')
@@ -278,12 +276,12 @@ class UiMainWindow(QMainWindow):
         self.video_frame.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.video_frame_h_layout = QHBoxLayout(self.video_frame)
         # 视频标签
-        self.label_video = Video_Label(self.video_frame)
+        self.label_video = VideoLabel(self.video_frame)
         self.label_video.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.label_video.setObjectName('label_video')
         self.label_video.signal[str].connect(self.recv_video_label_signal)
         # 填充背景图片
-        self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+        self.label_video.setPixmap(QPixmap(self.background_file))
         # 自动填充满label
         self.label_video.setScaledContents(True)
         # 标准光标
@@ -510,8 +508,8 @@ class UiMainWindow(QMainWindow):
                     self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
                     flag, self.image = self.video_cap.read()
                     show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-                    show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-                    self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                    show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+                    self.label_video.setPixmap(QPixmap.fromImage(show_image))
                     self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                     self.label_frame_show.setStyleSheet('color:white')
                     self.video_progress_bar.setValue(self.current_frame)
@@ -607,7 +605,7 @@ class UiMainWindow(QMainWindow):
             self.camera_status = self.camera_closed
             self.live_video_switch_camera_status_action.setIcon(QIcon(icon_path.Icon_live_video_open_camera))
             self.live_video_switch_camera_status_action.setToolTip('open_camera')
-            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+            self.label_video.setPixmap(QPixmap(self.background_file))
             self.status_video_button.setEnabled(False)
             self.local_video_setting_action.setEnabled(True)
 
@@ -914,7 +912,7 @@ class UiMainWindow(QMainWindow):
             # 获取视频总帧数
             self.frame_count          = int(self.video_cap.get(7))
             # 更换视频标签背景
-            self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+            self.label_video.setPixmap(QPixmap(self.background_file))
             # 本地视频播放标志打开, 视频状态为STATUS_INIT
             self.label_video.video_play_flag = self.video_play_flag = True
             self.video_status = self.STATUS_INIT
@@ -925,8 +923,8 @@ class UiMainWindow(QMainWindow):
             # 获取第一帧
             _, self.image = self.video_cap.read()
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+            self.label_video.setPixmap(QPixmap.fromImage(show_image))
             # 设置帧数显示
             self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
@@ -1005,7 +1003,7 @@ class UiMainWindow(QMainWindow):
                 # 获取视频总帧数
                 self.frame_count = int(self.video_cap.get(7))
                 # 更换视频标签背景
-                self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+                self.label_video.setPixmap(QPixmap(self.background_file))
                 # 本地视频播放标志打开, 视频状态为STATUS_INIT
                 self.label_video.video_play_flag = self.video_play_flag = True
                 self.video_status = self.STATUS_INIT
@@ -1016,8 +1014,8 @@ class UiMainWindow(QMainWindow):
                 # 获取第一帧
                 _, self.image = self.video_cap.read()
                 show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-                show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-                self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+                self.label_video.setPixmap(QPixmap.fromImage(show_image))
                 # 设置帧数显示
                 self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                 self.label_frame_show.setStyleSheet('color:white')
@@ -1069,7 +1067,7 @@ class UiMainWindow(QMainWindow):
                 self.camera_status = self.camera_closed
                 self.live_video_switch_camera_status_action.setIcon(QIcon(icon_path.Icon_live_video_open_camera))
                 self.live_video_switch_camera_status_action.setToolTip('open_camera')
-                self.label_video.setPixmap(QtGui.QPixmap(self.background_file))
+                self.label_video.setPixmap(QPixmap(self.background_file))
                 self.local_video_setting_action.setEnabled(True)
         else:
             logger('没有选择视频路径, 数据处理取消!')
@@ -1083,8 +1081,8 @@ class UiMainWindow(QMainWindow):
         # 实时模式
         if self.video_play_flag is False:
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+            self.label_video.setPixmap(QPixmap.fromImage(show_image))
             if gloVar.save_pic_flag is True:
                 cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
                 gloVar.save_pic_flag = False
@@ -1095,8 +1093,8 @@ class UiMainWindow(QMainWindow):
                 flag, self.image = self.video_cap.read()
                 if flag is True:
                     show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-                    show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-                    self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                    show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+                    self.label_video.setPixmap(QPixmap.fromImage(show_image))
                     self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                     self.label_frame_show.setStyleSheet('color:white')
                     self.video_progress_bar.setValue(self.current_frame)
@@ -1221,8 +1219,8 @@ class UiMainWindow(QMainWindow):
                 self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
                 _, self.image = self.video_cap.read()
                 show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-                show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-                self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+                show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+                self.label_video.setPixmap(QPixmap.fromImage(show_image))
                 self.label_video_title.setStyleSheet('color:white')
                 self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
                 self.label_frame_show.setStyleSheet('color:white')
@@ -1265,8 +1263,8 @@ class UiMainWindow(QMainWindow):
             # 获取第一帧
             _, self.image = self.video_cap.read()
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+            self.label_video.setPixmap(QPixmap.fromImage(show_image))
             # 设置帧数显示
             self.label_frame_show.setText(str(self.current_frame+1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
@@ -1311,8 +1309,8 @@ class UiMainWindow(QMainWindow):
             # 获取第一帧
             _, self.image = self.video_cap.read()
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+            self.label_video.setPixmap(QPixmap.fromImage(show_image))
             # 设置帧数显示
             self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
@@ -1342,8 +1340,8 @@ class UiMainWindow(QMainWindow):
         flag, self.image = self.video_cap.read()
         if flag is True:
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+            self.label_video.setPixmap(QPixmap.fromImage(show_image))
             self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)
@@ -1373,8 +1371,8 @@ class UiMainWindow(QMainWindow):
         flag, self.image = self.video_cap.read()
         if flag is True:
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            show_image = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-            self.label_video.setPixmap(QtGui.QPixmap.fromImage(show_image))
+            show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+            self.label_video.setPixmap(QPixmap.fromImage(show_image))
             self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
             self.label_frame_show.setStyleSheet('color:white')
             self.video_progress_bar.setValue(self.current_frame)

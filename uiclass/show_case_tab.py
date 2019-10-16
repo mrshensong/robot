@@ -2,7 +2,7 @@ import os
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, logger, gloVar, merge_path, window_status, profile

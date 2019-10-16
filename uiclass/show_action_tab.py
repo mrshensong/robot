@@ -1,7 +1,7 @@
 import json
 import time
 from threading import Thread
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, record_action, sleep_action
@@ -279,8 +279,8 @@ class ShowActionTab(QWidget):
     def add_record_item(self, info_dict, flag=True):
         # 只有record_start的时候才证明新增record动作
         if info_dict[record_action.record_status] == record_action.record_start:
-                self.current_video_type = info_dict[record_action.video_type]
-                self.current_video_name = info_dict[record_action.video_name]
+            self.current_video_type = info_dict[record_action.video_type]
+            self.current_video_name = info_dict[record_action.video_name]
         # 重置视频type和name
         info_dict[record_action.video_type] = self.current_video_type
         info_dict[record_action.video_name] = self.current_video_name
