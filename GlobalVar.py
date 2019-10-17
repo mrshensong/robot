@@ -39,6 +39,10 @@ class icon_path:
     Icon_file       = 'config/Icon/other_icon/Icon.jpg'
     # 视频栏背景图标
     background_file = 'config/Icon/other_icon/background.jpg'
+    # 数据准备好的背景图
+    data_is_ready_file = 'config/Icon/other_icon/data_is_ready.jpg'
+    # 正在进行数据处理的时候的背景图片(688*500)
+    data_processing_file = 'config/Icon/other_icon/data_processing.gif'
     # 视频栏播放器图标
     Icon_player_play       = 'config/Icon/video_label_icon/play.png'
     Icon_player_replay     = 'config/Icon/video_label_icon/replay.png'
