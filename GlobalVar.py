@@ -64,10 +64,13 @@ class icon_path:
     Icon_robot_get_position   = 'config/Icon/robot_toolbar_icon/get_position.png'
     Icon_robot_with_record    = 'config/Icon/robot_toolbar_icon/with_record.png'
     Icon_robot_without_record = 'config/Icon/robot_toolbar_icon/without_record.png'
-    # 视频播放工具栏相关图标
-    Icon_local_video_play         = 'config/Icon/local_video_toolbar_icon/video_play.png'
+    # 本地视频播放工具栏相关图标
+    Icon_local_import_video       = 'config/Icon/local_video_toolbar_icon/import_video.png'
     Icon_local_video_setting      = 'config/Icon/local_video_toolbar_icon/setting.png'
-    Icon_local_video_data_process = 'config/Icon/local_video_toolbar_icon/data_process.png'
+    # 视频处理工具栏相关图标
+    Icon_data_process_import_video= 'config/Icon/data_process_toolbar_icon/import_video.png'
+    Icon_data_process_setting     = 'config/Icon/data_process_toolbar_icon/setting.png'
+    Icon_data_process_execute     = 'config/Icon/data_process_toolbar_icon/data_process_execute.png'
     # 自定义控件相关图标
     Icon_custom_delete            = 'config/Icon/custom_widget_icon/delete.png'
     Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'

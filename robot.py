@@ -97,6 +97,8 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar = self.addToolBar('robot_toolbar')
         # 本地视频工具栏
         self.local_video_toolbar = self.addToolBar('local_video_toolbar')
+        # 数据处理工具栏
+        self.data_process_toolbar = self.addToolBar('data_process_toolbar')
         # 视频实时流参数设置框
         self.camera_param_setting_widget = CameraParamAdjustControl(self)
         # 本地视频帧率调节
@@ -229,18 +231,28 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar_label.setText('本地视频:')
         self.local_video_toolbar_label.setStyleSheet('color:blue')
         self.local_video_toolbar_label.setFont(QFont(self.font, 13))
-        self.local_video_play_action         = QAction(QIcon(icon_path.Icon_local_video_play), 'import_video', self)
+        self.local_video_import_video_action = QAction(QIcon(icon_path.Icon_local_import_video), 'import_video', self)
         self.local_video_setting_action      = QAction(QIcon(icon_path.Icon_local_video_setting), 'setting', self)
-        self.local_video_data_process_action = QAction(QIcon(icon_path.Icon_local_video_data_process), 'data_process', self)
         # 绑定函数
-        self.local_video_play_action.triggered.connect(self.play_exist_video)
+        self.local_video_import_video_action.triggered.connect(self.play_exist_video)
         self.local_video_setting_action.triggered.connect(self.set_frame_rate)
-        self.local_video_data_process_action.triggered.connect(self.local_video_data_process)
+        # 数据处理工具栏
+        self.data_process_toolbar_label = QLabel(self)
+        self.data_process_toolbar_label.setText('数据处理:')
+        self.data_process_toolbar_label.setStyleSheet('color:blue')
+        self.data_process_toolbar_label.setFont(QFont(self.font, 13))
+        self.data_process_import_video_action = QAction(QIcon(icon_path.Icon_data_process_import_video), 'import_video', self)
+        self.data_process_setting_action      = QAction(QIcon(icon_path.Icon_data_process_setting), 'setting', self)
+        self.data_process_execute_action      = QAction(QIcon(icon_path.Icon_data_process_execute), 'execute', self)
+        # 绑定函数
+        self.data_process_import_video_action.triggered.connect(self.data_process_import_video)
+        self.data_process_setting_action.triggered.connect(self.set_frame_rate)
+        self.data_process_execute_action.triggered.connect(self.data_process_execute)
         # 实时流工具栏
         self.live_video_toolbar.addWidget(self.live_video_toolbar_label)
         self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
-        self.live_video_toolbar.addAction(self.live_video_capture_action)
         self.live_video_toolbar.addAction(self.live_video_box_screen_action)
+        self.live_video_toolbar.addAction(self.live_video_capture_action)
         self.live_video_toolbar.addAction(self.live_video_picture_path_action)
         self.live_video_toolbar.addAction(self.live_video_setting_action)
         self.live_video_toolbar.addSeparator()
@@ -254,11 +266,15 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar.addAction(self.robot_long_click_action)
         self.robot_toolbar.addAction(self.robot_slide_action)
         self.robot_toolbar.addAction(self.robot_with_record_action)
-        # 存在的视频播放工具栏
+        # 本地视频播放工具栏
         self.local_video_toolbar.addWidget(self.local_video_toolbar_label)
-        self.local_video_toolbar.addAction(self.local_video_play_action)
+        self.local_video_toolbar.addAction(self.local_video_import_video_action)
         self.local_video_toolbar.addAction(self.local_video_setting_action)
-        self.local_video_toolbar.addAction(self.local_video_data_process_action)
+        # 数据处理工具栏
+        self.data_process_toolbar.addWidget(self.data_process_toolbar_label)
+        self.data_process_toolbar.addAction(self.data_process_import_video_action)
+        self.data_process_toolbar.addAction(self.data_process_setting_action)
+        self.data_process_toolbar.addAction(self.data_process_execute_action)
 
 
     # 展示窗口状态栏
@@ -956,8 +972,9 @@ class UiMainWindow(QMainWindow):
         self.frame_rate_adjust_widget.exec()
 
 
-    # 本地视频数据处理
-    def local_video_data_process(self):
+    '''数据处理相关操作'''
+    # 数据处理导入视频
+    def data_process_import_video(self):
         camera_opened_flag = False  # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
         # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
         # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
@@ -1041,8 +1058,9 @@ class UiMainWindow(QMainWindow):
                 logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
                 # 关闭视频展示定时器
                 self.timer_video.stop()
-                # 本地视频播放标志关闭, 视频状态为STATUS_INIT
-                self.label_video.video_play_flag = self.video_play_flag = False
+                # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
+                self.label_video.video_play_flag = self.video_play_flag = True
+                # 复位视频状态为STATUS_INIT
                 self.video_status = self.STATUS_INIT
                 # 进度条关闭
                 self.slider_thread.stop()
@@ -1075,6 +1093,11 @@ class UiMainWindow(QMainWindow):
             logger('没有选择视频路径, 数据处理取消!')
             if camera_opened_flag is True:
                 self.switch_camera_status()
+
+
+    # 数据处理执行函数
+    def data_process_execute(self):
+        pass
 
 
     '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''
