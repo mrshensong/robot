@@ -174,9 +174,8 @@ class VideoLabel(QLabel):
                         mask_path = mask_path
                         if os.path.exists(mask_path) is False:
                             os.makedirs(mask_path)
-                        cut_name = merge_path([mask_path, value]).merged_path
-                        template_name = cut_name
-                        cv2.imencode('.jpg', cut_img)[1].tofile(cut_name)
+                        template_name = merge_path([mask_path, value + '.jpg']).merged_path
+                        cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                     # 非数据处理情况
                     else:
                         # 如果输入的参数中带有'-'代表需要分级保存, 并需要新建文件夹

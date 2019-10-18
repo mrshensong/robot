@@ -606,6 +606,8 @@ class UiMainWindow(QMainWindow):
         self.data_process_execute_action.setEnabled(False)
         # 是否需要进行数据检测的标志位复位
         self.need_detect_data_flag = False
+        # 关掉数据处理标志位
+        robot_other.data_process_flag = False
         # 复位本地视频相关参数
         self.videos, self.videos_title = [], []
         self.current_frame, self.current_video, self.frame_count = 0, 0, 0
@@ -995,6 +997,8 @@ class UiMainWindow(QMainWindow):
             self.data_process_setting_action.setEnabled(False)
             # 是否需要进行数据检测的标志位复位
             self.need_detect_data_flag = False
+            # 关掉数据处理标志位
+            robot_other.data_process_flag = False
             # 强制关闭脚本录制状态
             self.switch_uArm_with_record_status(record_status=False)
             # 通过本地视频尺寸自适应视频播放窗口
@@ -1107,13 +1111,17 @@ class UiMainWindow(QMainWindow):
                 self.video_label_adaptive(self.local_video_width, self.local_video_height)
                 # 同时启动模板检测
                 self.need_detect_data_flag = True
+                # 打开数据处理标志位
+                robot_other.data_process_flag = True
                 Thread(target=self.detect_data_is_ready, args=()).start()
             else:
                 logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
                 # 关闭视频展示定时器
                 self.timer_video.stop()
-                # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
+                # 此时什么都不播放(状态为None)
                 self.label_video.video_play_flag = self.video_play_flag = None
+                # 关掉数据处理标志位
+                robot_other.data_process_flag = False
                 # 复位视频状态为STATUS_INIT
                 self.video_status = self.STATUS_INIT
                 # 进度条关闭
@@ -1162,12 +1170,14 @@ class UiMainWindow(QMainWindow):
     def data_process_execute(self):
         # 先关掉正在播放的视频
         self.timer_video.stop()
-        # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
+        # 此时什么都不播放(状态为None)
         self.label_video.video_play_flag = self.video_play_flag = None
         # 复位视频状态为STATUS_INIT
         self.video_status = self.STATUS_INIT
         # 进度条关闭
         self.slider_thread.stop()
+        # 关掉数据处理标志位
+        robot_other.data_process_flag = False
         # 实时流保证30fps/s即可
         self.timer_video.frequent = 30
         self.label_video.setCursor(Qt.ArrowCursor)
@@ -1196,6 +1206,7 @@ class UiMainWindow(QMainWindow):
         # 播放正在进行数据处理的gif图
         self.label_video.setMovie(self.data_processing_gif)
         self.data_processing_gif.start()
+        # 此处调用数据处理函数
 
 
     # 检测数据有没有准备(准备好就可以开始执行数据处理)
@@ -1223,7 +1234,7 @@ class UiMainWindow(QMainWindow):
             logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
             # 关闭视频展示定时器
             self.timer_video.stop()
-            # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
+            # 此时什么都不播放(状态为None)
             self.label_video.video_play_flag = self.video_play_flag = None
             # 进度条设置
             self.video_progress_bar.setValue(0)
@@ -1233,6 +1244,8 @@ class UiMainWindow(QMainWindow):
             self.video_status = self.STATUS_INIT
             # 实时流保证30fps/s即可
             self.timer_video.frequent = 30
+            # 关掉数据处理标志位
+            robot_other.data_process_flag = False
             self.label_video.setCursor(Qt.ArrowCursor)
             self.status_video_button.setEnabled(False)
             self.last_video_button.setEnabled(False)
@@ -1317,7 +1330,7 @@ class UiMainWindow(QMainWindow):
         # QApplication.processEvents() # 界面刷新
 
 
-    # 暂停视频
+    # 暂停视频后的模板框选准备
     def template_label(self):
         time.sleep(0.3)
         # 暂停后不允许机械臂动作操作
