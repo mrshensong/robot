@@ -171,6 +171,8 @@ class UiMainWindow(QMainWindow):
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]'\
                                   % (window_status.robot_connect_status, window_status.video_frame_rate,
                                     window_status.action_tab_status, window_status.case_tab_status)
+        # 如果需要检测, 数据处理需要用到的模板, 是否准备完成(True:确认需要检测/False:退出检测)
+        self.need_detect_data_flag = False
         # 今天的日期(用作文件夹名)
         self.today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
         # 获取当前工程路径(连接符标准化为正斜杠模式)
@@ -602,6 +604,8 @@ class UiMainWindow(QMainWindow):
         self.local_video_setting_action.setEnabled(False)
         self.data_process_setting_action.setEnabled(False)
         self.data_process_execute_action.setEnabled(False)
+        # 是否需要进行数据检测的标志位复位
+        self.need_detect_data_flag = False
         # 复位本地视频相关参数
         self.videos, self.videos_title = [], []
         self.current_frame, self.current_video, self.frame_count = 0, 0, 0
@@ -989,6 +993,8 @@ class UiMainWindow(QMainWindow):
             # 此时可以非使能设置按钮和执行数据处理按钮
             self.data_process_execute_action.setEnabled(False)
             self.data_process_setting_action.setEnabled(False)
+            # 是否需要进行数据检测的标志位复位
+            self.need_detect_data_flag = False
             # 强制关闭脚本录制状态
             self.switch_uArm_with_record_status(record_status=False)
             # 通过本地视频尺寸自适应视频播放窗口
@@ -1055,6 +1061,8 @@ class UiMainWindow(QMainWindow):
             # 关闭此时不能打开的控件
             self.enable_controls_status(status=False)
             self.local_video_setting_action.setEnabled(False)
+            # 是否需要进行数据检测的标志位复位
+            self.need_detect_data_flag = False
             if len(self.videos_without_template) > 0:
                 # 将self.videos_without_template作为self.videos
                 self.videos = self.videos_title = self.videos_without_template
@@ -1098,6 +1106,7 @@ class UiMainWindow(QMainWindow):
                 # 通过本地视频尺寸自适应视频播放窗口
                 self.video_label_adaptive(self.local_video_width, self.local_video_height)
                 # 同时启动模板检测
+                self.need_detect_data_flag = True
                 Thread(target=self.detect_data_is_ready, args=()).start()
             else:
                 logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
@@ -1193,7 +1202,7 @@ class UiMainWindow(QMainWindow):
     def detect_data_is_ready(self):
         # 用来判断数据是否准备完毕(也就是视频对应的模板图片是否全部存在)
         flag = False
-        while True:
+        while self.need_detect_data_flag is True:
             # 没有相应模板的视频文件列表(用来判断是否可以进行数据处理)
             videos_without_template = []
             # 遍历出来没有对应模板的视频文件
@@ -1207,17 +1216,19 @@ class UiMainWindow(QMainWindow):
             else:
                 flag = True
                 break
+        # 是否需要进行数据检测的标志位复位
+        self.need_detect_data_flag = False
         if flag is True:
             # 跳出后(显示数据已经准备好)
             logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
             # 关闭视频展示定时器
             self.timer_video.stop()
-            # 进度条关闭
-            self.slider_thread.stop()
             # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
             self.label_video.video_play_flag = self.video_play_flag = None
-            # 延时一小会儿再显示背景图
-            time.sleep(0.5)
+            # 进度条设置
+            self.video_progress_bar.setValue(0)
+            self.slider_thread.stop()
+            time.sleep(0.3)
             # 复位视频状态为STATUS_INIT
             self.video_status = self.STATUS_INIT
             # 实时流保证30fps/s即可
@@ -1232,8 +1243,6 @@ class UiMainWindow(QMainWindow):
             # 此时可以使能执行数据处理按钮
             self.data_process_execute_action.setEnabled(True)
             self.data_process_setting_action.setEnabled(False)
-            # 进度条设置
-            self.video_progress_bar.setValue(0)
             # /这块显示有问题--需要接着看/
             # 复位背景图
             self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
