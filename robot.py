@@ -133,8 +133,8 @@ class UiMainWindow(QMainWindow):
         self.video_cap = None
         # 获取到的视频根目录
         self.get_path = None
-        # False直播/True录播
-        self.video_play_flag = False
+        # False直播/True录播/None为不播放状态
+        self.video_play_flag = None
         # 当前视频所在序列号(第0个视频)
         self.current_video = 0
         # 当前帧数
@@ -151,8 +151,9 @@ class UiMainWindow(QMainWindow):
         self.real_time_video_height = 720
         # self.real_time_video_width = 1920
         # self.real_time_video_height = 1280
-        self.local_video_width = 0
-        self.local_video_height = 0
+        # 默认将实时流尺寸和本地视频尺寸置位一样
+        self.local_video_width = self.real_time_video_width
+        self.local_video_height = self.real_time_video_height
         # 是否第一次窗口缩放
         self.first_window_zoom_flag = True
         # 是否使用电脑自带摄像头
@@ -601,6 +602,9 @@ class UiMainWindow(QMainWindow):
         self.local_video_setting_action.setEnabled(False)
         self.data_process_setting_action.setEnabled(False)
         self.data_process_execute_action.setEnabled(False)
+        # 复位本地视频相关参数
+        self.videos, self.videos_title = [], []
+        self.current_frame, self.current_video, self.frame_count = 0, 0, 0
         if self.camera_status == self.camera_closed:
             # 不管本地视频是否正在播放(先关掉视频, 再切换到直播)
             self.timer_video.stop()
@@ -918,7 +922,10 @@ class UiMainWindow(QMainWindow):
     '''本地视频播放工具栏相关操作'''
     # 本地视频播放
     def import_local_video(self):
-        camera_opened_flag = False # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
+        # 先停掉视频
+        self.timer_video.stop()
+        # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
+        camera_opened_flag = False
         # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
         # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
         if self.camera_status == self.camera_opened:
@@ -926,8 +933,6 @@ class UiMainWindow(QMainWindow):
             self.switch_camera_status()
         self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
         if self.get_path:
-            # 有导入动作后-->先关掉正在播放的视频
-            self.timer_video.stop()
             if self.videos_path != self.get_path:
                 # 保存此次打开的路径(路径默认上一次)
                 self.videos_path = self.get_path
@@ -990,8 +995,12 @@ class UiMainWindow(QMainWindow):
             self.video_label_adaptive(self.local_video_width, self.local_video_height)
         else:
             logger('没有选择视频路径!')
+            # 如果没有选择路径, 实时视频流恢复之前状态
             if camera_opened_flag is True:
                 self.switch_camera_status()
+            # 如果没有选择路径, 定时器恢复之前状态
+            if self.video_status == self.STATUS_PLAYING:
+                self.timer_video.start()
 
 
     # 设置本地视频帧率
@@ -1003,7 +1012,10 @@ class UiMainWindow(QMainWindow):
     '''数据处理相关操作'''
     # 数据处理导入视频
     def data_process_import_video(self):
-        camera_opened_flag = False  # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
+        # 先停掉视频
+        self.timer_video.stop()
+        # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
+        camera_opened_flag = False
         # 按下选择视频按钮, 判断当前视频流是否开启, 若开启着, 则先停止视频流/再判断是否有选择目录(没有选择目录的话, 再次恢复开启实时流状态)
         # 停止视频流, 并切换视频流按钮(打开/关闭视频流)状态
         if self.camera_status == self.camera_opened:
@@ -1085,12 +1097,14 @@ class UiMainWindow(QMainWindow):
                 self.switch_uArm_with_record_status(record_status=False)
                 # 通过本地视频尺寸自适应视频播放窗口
                 self.video_label_adaptive(self.local_video_width, self.local_video_height)
+                # 同时启动模板检测
+                Thread(target=self.detect_data_is_ready, args=()).start()
             else:
                 logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
                 # 关闭视频展示定时器
                 self.timer_video.stop()
                 # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
-                self.label_video.video_play_flag = self.video_play_flag = True
+                self.label_video.video_play_flag = self.video_play_flag = None
                 # 复位视频状态为STATUS_INIT
                 self.video_status = self.STATUS_INIT
                 # 进度条关闭
@@ -1127,8 +1141,12 @@ class UiMainWindow(QMainWindow):
                 self.label_video.setPixmap(QPixmap(icon_path.data_is_ready_file))
         else:
             logger('没有选择视频路径, 数据处理取消!')
+            # 如果没有选择路径, 实时视频流恢复之前状态
             if camera_opened_flag is True:
                 self.switch_camera_status()
+            # 如果没有选择路径, 定时器恢复之前状态
+            if self.video_status == self.STATUS_PLAYING:
+                self.timer_video.start()
 
 
     # 数据处理执行函数
@@ -1136,7 +1154,7 @@ class UiMainWindow(QMainWindow):
         # 先关掉正在播放的视频
         self.timer_video.stop()
         # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
-        self.label_video.video_play_flag = self.video_play_flag = True
+        self.label_video.video_play_flag = self.video_play_flag = None
         # 复位视频状态为STATUS_INIT
         self.video_status = self.STATUS_INIT
         # 进度条关闭
@@ -1171,6 +1189,70 @@ class UiMainWindow(QMainWindow):
         self.data_processing_gif.start()
 
 
+    # 检测数据有没有准备(准备好就可以开始执行数据处理)
+    def detect_data_is_ready(self):
+        # 用来判断数据是否准备完毕(也就是视频对应的模板图片是否全部存在)
+        flag = False
+        while True:
+            # 没有相应模板的视频文件列表(用来判断是否可以进行数据处理)
+            videos_without_template = []
+            # 遍历出来没有对应模板的视频文件
+            for video in self.videos:
+                template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+                # 模板图片不存在
+                if os.path.exists(template_path) is False:
+                    videos_without_template.append(video)
+            if len(videos_without_template) > 0:
+                time.sleep(0.2)
+            else:
+                flag = True
+                break
+        if flag is True:
+            # 跳出后(显示数据已经准备好)
+            logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
+            # 关闭视频展示定时器
+            self.timer_video.stop()
+            # 进度条关闭
+            self.slider_thread.stop()
+            # 虽然没有要播放的本地视频, 但是因为要去掉界面可能出现的红色屏幕框选线, 故而需要打开本地视频播放标志以此来消除可能出现的空色屏幕框选线
+            self.label_video.video_play_flag = self.video_play_flag = None
+            # 延时一小会儿再显示背景图
+            time.sleep(0.5)
+            # 复位视频状态为STATUS_INIT
+            self.video_status = self.STATUS_INIT
+            # 实时流保证30fps/s即可
+            self.timer_video.frequent = 30
+            self.label_video.setCursor(Qt.ArrowCursor)
+            self.status_video_button.setEnabled(False)
+            self.last_video_button.setEnabled(False)
+            self.next_video_button.setEnabled(False)
+            self.last_frame_button.setEnabled(False)
+            self.next_frame_button.setEnabled(False)
+            self.video_progress_bar.setEnabled(False)
+            # 此时可以使能执行数据处理按钮
+            self.data_process_execute_action.setEnabled(True)
+            self.data_process_setting_action.setEnabled(False)
+            # 进度条设置
+            self.video_progress_bar.setValue(0)
+            # /这块显示有问题--需要接着看/
+            # 复位背景图
+            self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_play + ')')
+            self.camera_status = self.camera_closed
+            self.live_video_switch_camera_status_action.setIcon(QIcon(icon_path.Icon_live_video_open_camera))
+            self.live_video_switch_camera_status_action.setToolTip('open_camera')
+            # 需要获取gif图的尺寸
+            self.local_video_width = self.data_process_background_size[0]
+            self.local_video_height = self.data_process_background_size[1]
+            # 通过本地视频尺寸自适应视频播放窗口
+            self.video_label_adaptive(self.local_video_width, self.local_video_height)
+            # 铺设背景图
+            self.label_video.setPixmap(QPixmap(icon_path.data_is_ready_file))
+            # 帧率显示置空
+            self.label_frame_show.setText('')
+            # 去掉视频title
+            self.label_video_title.setText('')
+
+
     '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''
     # 展示视频函数
     def show_video(self):
@@ -1183,7 +1265,7 @@ class UiMainWindow(QMainWindow):
                 cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
                 gloVar.save_pic_flag = False
         # 本地视频播放模式(可以数帧)
-        else:
+        elif self.video_play_flag is True:
             if self.current_frame < self.frame_count:
                 self.current_frame += 1
                 flag, self.image = self.video_cap.read()
@@ -1217,6 +1299,12 @@ class UiMainWindow(QMainWindow):
                 self.next_frame_button.setEnabled(True)
                 # 再重新加载视频(有可能视频播放完毕后, 需要往前进一帧)
                 self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
+        # 其余模式(不播放视频)
+        else:
+            # 帧率显示置空
+            self.label_frame_show.setText('')
+            # 去掉视频title
+            self.label_video_title.setText('')
         # QApplication.processEvents() # 界面刷新
 
 
@@ -1271,7 +1359,8 @@ class UiMainWindow(QMainWindow):
                 self.label_video.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + icon_path.Icon_player_pause + ')')
                 logger('<打开视频流>')
-        else: # 如果是录播模式
+        # 如果是播放本地视频
+        elif self.video_play_flag is True:
             if self.video_status is self.STATUS_INIT:
                 self.timer_video.start()
                 self.last_frame_button.setEnabled(False)
@@ -1538,8 +1627,13 @@ class UiMainWindow(QMainWindow):
 
     # 监听窗口缩放事件
     def resizeEvent(self, event):
+        # 实时流窗口缩放
         if self.video_play_flag is False:
             self.video_label_adaptive(self.real_time_video_width, self.real_time_video_height)
+        # 本地视频窗口缩放
+        elif self.video_play_flag is True:
+            self.video_label_adaptive(self.local_video_width, self.local_video_height)
+        # 和gif图缩放
         else:
             self.video_label_adaptive(self.local_video_width, self.local_video_height)
 

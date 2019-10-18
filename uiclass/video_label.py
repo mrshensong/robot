@@ -148,9 +148,12 @@ class VideoLabel(QLabel):
                 mask_path = robot_other.mask_path
                 default_name = '应用'
             # 本地视频播放
-            else:
+            elif self.video_play_flag is True:
                 mask_path = os.path.split(robot_other.mask_path)[0]
                 default_name = os.path.splitext(os.path.split(robot_other.mask_path)[1])[0]
+            else:
+                logger('[当前状态不允许保存模板!]')
+                return
             # 如果模板路径为None(说明不允许框选模板)
             if mask_path is not None:
                 # value, ok = QInputDialog.getText(self, '标注输入框', '请输入文本', QLineEdit.Normal, '应用')
@@ -176,6 +179,7 @@ class VideoLabel(QLabel):
                         cv2.imencode('.jpg', cut_img)[1].tofile(cut_name)
                     # 非数据处理情况
                     else:
+                        # 如果输入的参数中带有'-'代表需要分级保存, 并需要新建文件夹
                         if '-' in value:
                             # 直播时的情况
                             if self.video_play_flag is False:
@@ -197,14 +201,22 @@ class VideoLabel(QLabel):
                                     template_name = merge_path([mask_path, value.split('-')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                             # 本地视频播放的情况下
-                            else:
+                            elif self.video_play_flag is True:
                                 template_name = 'null'
                                 logger('[输入的模板名称错误!]')
+                            # 其余情况(不播放视频)
+                            else:
+                                template_name = 'null'
+                                logger('[此时状态不应该有模板输入!]')
+                        # 如果输入的参数中不带有'-', 则图片正常保存即可
                         else:
                             # 直播
                             if self.video_play_flag is False:
                                 mask_path = merge_path([mask_path, '其他']).merged_path
                             # 本地视频播放
+                            elif self.video_play_flag is True:
+                                mask_path = mask_path
+                            # 其余情况(不播放视频)
                             else:
                                 mask_path = mask_path
                             if os.path.exists(mask_path) is False:
