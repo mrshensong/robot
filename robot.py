@@ -81,7 +81,9 @@ class UiMainWindow(QMainWindow):
         self.output_text()
         # 数据处理gif动图
         self.data_processing_gif = QMovie(icon_path.data_processing_file)
-        self.data_process_background_size = (688, 500)
+        # 取出来图片的尺寸(shape有三个元素(height/width/通道数)-->我们只需要前两个height和width)
+        # 因为读取出来的顺序为(height, width), 故而需要进行反装变为(height, width)
+        self.data_process_background_size = tuple(reversed(cv2.imread(icon_path.data_is_ready_file).shape[:2]))
         # 菜单栏
         self.menu_bar = QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')

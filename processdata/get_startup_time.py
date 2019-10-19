@@ -153,12 +153,28 @@ class GetStartupTime:
                     frame_serial_number = i
                     frame_threshold = match_threshold_expected_list[i]
                     break
+        # 对目前找到的这个帧进行再判断(从此帧往后找到匹配率最大的帧停止>这一段的帧就是可能出现的所有帧)-->求出这段匹配率平均数
+        average_threshold = match_threshold_expected_list[frame_serial_number]
+        for frame_id in range(frame_serial_number, len(match_threshold_expected_list)-10):
+            if match_threshold_expected_list[frame_id+1] > match_threshold_expected_list[frame_id]:
+                before_sum = average_threshold * (frame_id - frame_serial_number + 1)
+                average_threshold = (before_sum + match_threshold_expected_list[frame_id + 1]) / (frame_id - frame_serial_number + 2)
+            else:
+                break
+        # 在此处判断(当前帧匹配率大于平均匹配率就行)
+        for i in range(frame_serial_number, len(match_threshold_expected_list)):
+            if match_threshold_expected_list[i] > average_threshold:
+                frame_serial_number = i
+                frame_threshold = match_threshold_expected_list[i]
+                break
         return frame_serial_number, frame_threshold
 
 
 if __name__=='__main__':
-    video_path = 'D:/Code/Robot/robot/video/2019-10-15/启动/测试1.mp4'
-    end_mask   = 'D:/Code/Robot/robot/picture/2019-10-15/启动/测试1.jpg'
+    # video_path = 'D:/Code/Robot/robot/video/2019-10-15/启动/测试1.mp4'
+    # end_mask   = 'D:/Code/Robot/robot/picture/2019-10-15/启动/测试1.jpg'
+    video_path = 'D:/Code/Robot/robot/video/2019-10-15/启动/测试2.mp4'
+    end_mask = 'D:/Code/Robot/robot/picture/2019-10-15/启动/测试2.jpg'
     test = GetStartupTime(video_path=video_path, frame_rate=240)
     start_threshold_list, end_threshold_list = test.get_start_and_end_match_threshold(end_mask=end_mask, video_file=video_path)
     print('起始', test.detect_start_point(start_threshold_list))
