@@ -785,8 +785,9 @@ class UiMainWindow(QMainWindow):
     # 获取picture路径(重新设置picture路径)
     def get_picture_path(self):
         self.picture_path = QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
-        profile(type='write', file=gloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)
-        logger('修改保存图片路径为: %s' % self.picture_path)
+        if self.picture_path:
+            profile(type='write', file=gloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)
+            logger('修改保存图片路径为: %s' % self.picture_path)
 
 
     # 设置实时流相机参数
