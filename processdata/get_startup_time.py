@@ -94,7 +94,7 @@ class GetStartupTime:
     def detect_start_point(self, start_threshold_list):
         """
         计算起点(返回可能是起点的所有帧序号, 以及当前帧匹配率)
-        :param start_threshold_list: 传入开始点匹配率列表
+        :param start_threshold_list: 开始点匹配率列表
         :return: 返回是起点的帧序号以及当前帧匹配率
         """
         frame_serial_number = 0
@@ -111,8 +111,8 @@ class GetStartupTime:
     def detect_end_point(self, end_threshold_list):
         """
         计算终点(返回可能是终点的所有帧序号, 以及当前帧匹配率)
-        :param vslist:
-        :return:
+        :param end_threshold_list: 稳定点匹配率列表
+        :return: 返回是终点的帧序号以及当前帧匹配率
         """
         # 找出所有大于match_threshold的帧匹配率
         match_threshold_expected_list = []
@@ -149,7 +149,7 @@ class GetStartupTime:
                     for k in range(10):
                         temp_list2.append(match_threshold_expected_list[i])
                 # 当前帧的往前十帧中匹配率为0的次数多余5次&往后十帧中匹配率为0的次数小于5次(判定为有更大可能为终点)
-                if temp_list1.count(0) > 5 and temp_list2.count(0) < 5:
+                if temp_list1.count(0) > 5 > temp_list2.count(0):
                     frame_serial_number = i
                     frame_threshold = match_threshold_expected_list[i]
                     break
