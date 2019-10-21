@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from GlobalVar import MergePath, Logger
+from GlobalVar import MergePath, Logger, RobotOther
 
 class GetStartupTime:
 
@@ -196,6 +196,7 @@ class GetStartupTime:
             start_threshold_list, end_threshold_list = self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=video)
             Logger('%s-->起始 ' % video + str(self.detect_start_point(start_threshold_list)))
             Logger('%s-->终点 ' % video + str(self.detect_end_point(end_threshold_list)))
+        RobotOther.data_process_finished_flag = True
         Logger('finished!')
 
 

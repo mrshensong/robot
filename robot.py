@@ -1201,7 +1201,6 @@ class UiMainWindow(QMainWindow):
         self.camera_status = self.camera_closed
         self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
         self.live_video_switch_camera_status_action.setToolTip('open_camera')
-        self.local_video_setting_action.setEnabled(True)
         # 需要获取gif图的尺寸
         self.local_video_width = self.data_process_background_size[0]
         self.local_video_height = self.data_process_background_size[1]
@@ -1214,6 +1213,7 @@ class UiMainWindow(QMainWindow):
         video_path = self.get_path
         test = GetStartupTime(video_path=video_path)
         Thread(target=test.get_all_video_start_and_end_points, args=()).start()
+        Thread(target=self.data_process_finished, args=()).start()
 
 
     # 检测数据有没有准备(准备好就可以开始执行数据处理)
@@ -1276,6 +1276,59 @@ class UiMainWindow(QMainWindow):
             self.video_label_adaptive(self.local_video_width, self.local_video_height)
             # 铺设背景图
             self.label_video.setPixmap(QPixmap(IconPath.data_is_ready_file))
+            # 帧率显示置空
+            self.label_frame_show.setText('')
+            # 去掉视频title
+            self.label_video_title.setText('')
+
+
+    # 数据处理结束
+    def data_process_finished(self):
+        while True:
+            if RobotOther.data_process_finished_flag is True:
+                flag = True
+                RobotOther.data_process_finished_flag = False
+                break
+            else:
+                time.sleep(0.2)
+        if flag is True:
+            # 关闭视频展示定时器
+            self.timer_video.stop()
+            # 此时什么都不播放(状态为None)
+            self.label_video.video_play_flag = self.video_play_flag = None
+            # 进度条设置
+            self.video_progress_bar.setValue(0)
+            self.slider_thread.stop()
+            time.sleep(0.3)
+            # 复位视频状态为STATUS_INIT
+            self.video_status = self.STATUS_INIT
+            # 实时流保证30fps/s即可
+            self.timer_video.frequent = 30
+            # 关掉数据处理标志位
+            RobotOther.data_process_flag = False
+            self.label_video.setCursor(Qt.ArrowCursor)
+            self.status_video_button.setEnabled(False)
+            self.last_video_button.setEnabled(False)
+            self.next_video_button.setEnabled(False)
+            self.last_frame_button.setEnabled(False)
+            self.next_frame_button.setEnabled(False)
+            self.video_progress_bar.setEnabled(False)
+            # 此时可以使能执行数据处理按钮
+            self.data_process_execute_action.setEnabled(False)
+            self.data_process_setting_action.setEnabled(False)
+            # /这块显示有问题--需要接着看/
+            # 复位背景图
+            self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_play + ')')
+            self.camera_status = self.camera_closed
+            self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
+            self.live_video_switch_camera_status_action.setToolTip('open_camera')
+            # 需要获取gif图的尺寸
+            self.local_video_width = self.data_process_background_size[0]
+            self.local_video_height = self.data_process_background_size[1]
+            # 通过本地视频尺寸自适应视频播放窗口
+            self.video_label_adaptive(self.local_video_width, self.local_video_height)
+            # 铺设背景图
+            self.label_video.setPixmap(QPixmap(IconPath.data_process_finished_file))
             # 帧率显示置空
             self.label_frame_show.setText('')
             # 去掉视频title

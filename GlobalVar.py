@@ -34,6 +34,8 @@ class RobotOther:
     data_process_flag = False
     # 判断当前action是否已经保存成为case标志
     actions_saved_to_case = True
+    # 数据处理完成标志
+    data_process_finished_flag = False
 
 
 # Icon路径
