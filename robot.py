@@ -107,6 +107,7 @@ class UiMainWindow(QMainWindow):
         self.data_process_toolbar = self.addToolBar('data_process_toolbar')
         # 视频实时流参数设置框
         self.camera_param_setting_widget = CameraParamAdjustControl(self)
+        self.camera_param_setting_widget.signal[str].connect(self.recv_camera_param_setting_widget)
         # 本地视频帧率调节
         self.frame_rate_adjust_widget = FrameRateAdjustControl(self)
         self.frame_rate_adjust_widget.signal[str].connect(self.recv_frame_rate_adjust_widget)
@@ -206,12 +207,10 @@ class UiMainWindow(QMainWindow):
         self.live_video_switch_camera_status_action  = QAction(QIcon(IconPath.Icon_live_video_open_camera), 'open_camera', self)
         self.live_video_capture_action               = QAction(QIcon(IconPath.Icon_live_video_capture), 'capture', self)
         self.live_video_box_screen_action            = QAction(QIcon(IconPath.Icon_live_video_box_screen), 'box_screen', self)
-        self.live_video_picture_path_action          = QAction(QIcon(IconPath.Icon_live_video_folder_go), 'picture_path', self)
         # 绑定触发函数
         self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
         self.live_video_capture_action.triggered.connect(self.screen_shot)
         self.live_video_box_screen_action.triggered.connect(self.box_screen)
-        self.live_video_picture_path_action.triggered.connect(self.get_picture_path)
         self.live_video_setting_action.triggered.connect(self.set_camera_param)
         # robot相关action
         self.robot_toolbar_label = QLabel(self)
@@ -265,7 +264,6 @@ class UiMainWindow(QMainWindow):
         self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
         self.live_video_toolbar.addAction(self.live_video_box_screen_action)
         self.live_video_toolbar.addAction(self.live_video_capture_action)
-        self.live_video_toolbar.addAction(self.live_video_picture_path_action)
         self.live_video_toolbar.addAction(self.live_video_setting_action)
         self.live_video_toolbar.addSeparator()
         # robot工具栏
@@ -450,6 +448,16 @@ class UiMainWindow(QMainWindow):
         self.console.ensureCursorVisible()
 
 
+    # 接收实时流的相关参数调整
+    def recv_camera_param_setting_widget(self, signal_str):
+        if signal_str.startswith('exposure_time>'):
+            pass
+        elif signal_str.startswith('gain>'):
+            pass
+        elif signal_str.startswith('picture_path>'):
+            self.picture_path = signal_str.split('>')[1]
+
+
     # 接收本地视频帧率调整的信号
     def recv_frame_rate_adjust_widget(self, signal_str):
         if signal_str.startswith('frame_rate_adjust>'):
@@ -557,7 +565,6 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar.setEnabled(status)
         self.live_video_box_screen_action.setEnabled(status)
         self.live_video_capture_action.setEnabled(status)
-        self.live_video_picture_path_action.setEnabled(status)
         self.live_video_setting_action.setEnabled(status)
         # 侧边case框
         self.show_tab_widget.setEnabled(status)
@@ -781,14 +788,6 @@ class UiMainWindow(QMainWindow):
                 RobotOther.select_template_flag = True
                 GloVar.box_screen_flag = True
                 RobotArmAction.uArm_action_type = None
-
-
-    # 获取picture路径(重新设置picture路径)
-    def get_picture_path(self):
-        self.picture_path = QFileDialog.getExistingDirectory(self.central_widget, "浏览", self.picture_path)
-        if self.picture_path:
-            Profile(type='write', file=GloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)
-            Logger('修改保存图片路径为: %s' % self.picture_path)
 
 
     # 设置实时流相机参数

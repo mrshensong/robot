@@ -1,9 +1,9 @@
 import time
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton
+from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton, QFileDialog
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction
+from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile
 
 # 自定义动作展示控件(action)
 class ActionControl(QWidget):
@@ -361,11 +361,19 @@ class CameraParamAdjustControl(QDialog):
     def __init__(self, parent):
         super(CameraParamAdjustControl, self).__init__(parent)
         self.parent = parent
+        self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').path
+        self.exposure_time_value = 1000
+        self.gain_value = 0
         self.initUI()
 
 
     def initUI(self):
-        self.general_layout = QGridLayout()
+        # 控件总布局
+        self.general_layout = QVBoxLayout()
+        # 曝光增益使用栅格布局
+        self.grid_layout = QGridLayout()
+        # 确认button布局
+        self.sure_button_layout = QHBoxLayout()
 
         # 设置曝光
         self.exposure_time_label = QLabel(self)
@@ -376,10 +384,9 @@ class CameraParamAdjustControl(QDialog):
         self.exposure_time_spinbox = QSpinBox(self)
         self.exposure_time_spinbox.setRange(1000, 100000)
         self.exposure_time_spinbox.valueChanged.connect(self.connect_exposure_time_spinbox)
-        self.general_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
-        self.general_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 3)
-        self.general_layout.addWidget(self.exposure_time_spinbox, 0, 4, 1, 1)
-
+        self.grid_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
+        self.grid_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 4)
+        self.grid_layout.addWidget(self.exposure_time_spinbox, 0, 5, 1, 1)
         # 设置增益
         self.gain_label = QLabel(self)
         self.gain_label.setText('增益: ')
@@ -389,36 +396,78 @@ class CameraParamAdjustControl(QDialog):
         self.gain_spinbox = QSpinBox(self)
         self.gain_spinbox.setRange(0, 100)
         self.gain_spinbox.valueChanged.connect(self.connect_gain_spinbox)
-        self.general_layout.addWidget(self.gain_label, 1, 0, 1, 1)
-        self.general_layout.addWidget(self.gain_slider, 1, 1, 1, 3)
-        self.general_layout.addWidget(self.gain_spinbox, 1, 4, 1, 1)
+        self.grid_layout.addWidget(self.gain_label, 1, 0, 1, 1)
+        self.grid_layout.addWidget(self.gain_slider, 1, 1, 1, 4)
+        self.grid_layout.addWidget(self.gain_spinbox, 1, 5, 1, 1)
+        # 设置图片路径
+        self.picture_path_show_label = QLabel(self)
+        self.picture_path_show_label.setText('图片路径: ')
+        self.picture_path_show_edit = QLineEdit(self)
+        self.picture_path_show_edit.setText(self.picture_path)
+        self.picture_path_change_button = QPushButton('更改')
+        self.picture_path_change_button.clicked.connect(self.connect_change_picture_path)
+        self.grid_layout.addWidget(self.picture_path_show_label, 2, 0, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_edit, 2, 1, 1, 4)
+        self.grid_layout.addWidget(self.picture_path_change_button, 2, 5, 1, 1)
+        # 确定按钮
+        self.sure_button = QPushButton('确定')
+        self.sure_button.clicked.connect(self.connect_sure_button)
+        self.sure_button_layout.addStretch(1)
+        self.sure_button_layout.addWidget(self.sure_button)
+        self.sure_button_layout.addStretch(1)
 
+        self.general_layout.addLayout(self.grid_layout)
+        self.general_layout.addSpacing(40)
+        self.general_layout.addLayout(self.sure_button_layout)
         self.setLayout(self.general_layout)
         # 设置字体
         self.setFont(QFont('Times New Roman', 11))
         # 设置最小尺寸
         self.setMinimumWidth(400)
+        self.setFixedWidth(500)
         self.setWindowTitle('摄像头参数')
 
 
     def connect_exposure_time_slider(self):
-        value = int(self.exposure_time_slider.value())
-        self.exposure_time_spinbox.setValue(value)
+        self.exposure_time_value = int(self.exposure_time_slider.value())
+        self.exposure_time_spinbox.setValue(self.exposure_time_value)
+        self.signal.emit('exposure_time>' + str(self.exposure_time_value))
 
 
     def connect_exposure_time_spinbox(self):
-        value = int(self.exposure_time_spinbox.value())
-        self.exposure_time_slider.setValue(value)
+        self.exposure_time_value = int(self.exposure_time_spinbox.value())
+        self.exposure_time_slider.setValue(self.exposure_time_value)
 
 
     def connect_gain_slider(self):
-        value = int(self.gain_slider.value())
-        self.gain_spinbox.setValue(value)
+        self.gain_value = int(self.gain_slider.value())
+        self.gain_spinbox.setValue(self.gain_value)
+        self.signal.emit('gain>' + str(self.gain_value))
 
 
     def connect_gain_spinbox(self):
-        value = int(self.gain_spinbox.value())
-        self.gain_slider.setValue(value)
+        self.gain_value = int(self.gain_spinbox.value())
+        self.gain_slider.setValue(self.gain_value)
+
+
+    def connect_change_picture_path(self):
+        # 如果取消为''值
+        self.picture_path = QFileDialog.getExistingDirectory(self, "浏览", self.picture_path)
+        if self.picture_path:
+            self.picture_path_show_edit.setText(self.picture_path)
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)
+            Logger('修改保存图片路径为: %s' % self.picture_path)
+            self.signal.emit('picture_path>' + self.picture_path)
+
+
+    # 确认按钮按下触发事件
+    def connect_sure_button(self):
+        self.close()
+
+
+    # 重写窗口关闭事件
+    def closeEvent(self, event):
+        self.close()
 
 
 # 离线视频帧率调节
@@ -430,7 +479,6 @@ class FrameRateAdjustControl(QDialog):
         super(FrameRateAdjustControl, self).__init__(parent)
         self.parent = parent
         self.stable_value = 30
-        self.unstable_value = 30
         self.initUI()
 
 
@@ -471,25 +519,20 @@ class FrameRateAdjustControl(QDialog):
 
 
     def connect_frame_rate_slider(self):
-        self.unstable_value = int(self.frame_rate_slider.value())
-        self.frame_rate_spinbox.setValue(self.unstable_value)
+        self.stable_value = int(self.frame_rate_slider.value())
+        self.frame_rate_spinbox.setValue(self.stable_value)
+        self.signal.emit('frame_rate_adjust>' + str(self.stable_value))
 
 
     def connect_frame_rate_spinbox(self):
-        self.unstable_value = int(self.frame_rate_spinbox.value())
-        self.frame_rate_slider.setValue(self.unstable_value)
+        self.stable_value = int(self.frame_rate_spinbox.value())
+        self.frame_rate_slider.setValue(self.stable_value)
 
 
     def connect_sure_button(self):
-        self.stable_value = self.unstable_value
-        self.frame_rate_spinbox.setValue(self.stable_value)
-        self.frame_rate_slider.setValue(self.stable_value)
-        self.signal.emit('frame_rate_adjust>' + str(self.stable_value))
         self.close()
 
 
     # 重写关闭窗口时间
     def closeEvent(self, event):
-        self.frame_rate_spinbox.setValue(self.stable_value)
-        self.frame_rate_slider.setValue(self.stable_value)
         self.close()
