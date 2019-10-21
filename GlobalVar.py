@@ -1,5 +1,8 @@
+import time
+import configparser
+
 # 文件之间参数传递
-class gloVar:
+class GloVar:
     # 配置文件路径
     config_file_path = 'config/config.ini'
     # 当前工程根目录
@@ -18,7 +21,7 @@ class gloVar:
     case_execute_finished_flag = True
 
 
-class robot_other:
+class RobotOther:
     # 机械臂起点标志
     robot_start_flag = False
     # 需要进行框选动作时, 打开此标志
@@ -34,7 +37,7 @@ class robot_other:
 
 
 # Icon路径
-class icon_path:
+class IconPath:
     # 应用窗口图标
     Icon_file       = 'config/Icon/other_icon/Icon.jpg'
     # 视频栏背景图标
@@ -43,6 +46,8 @@ class icon_path:
     data_is_ready_file = 'config/Icon/other_icon/data_is_ready.jpg'
     # 正在进行数据处理的时候的背景图片(688*500)
     data_processing_file = 'config/Icon/other_icon/data_processing.gif'
+    # 数据处理结束
+    data_process_finished_file = 'config/Icon/other_icon/data_process_finished.jpg'
     # 视频栏播放器图标
     Icon_player_play       = 'config/Icon/video_label_icon/play.png'
     Icon_player_replay     = 'config/Icon/video_label_icon/replay.png'
@@ -91,7 +96,7 @@ class icon_path:
     Icon_tab_widget_save          = 'config/Icon/tab_widget_icon/save.png'
 
 
-class uArm_action:
+class RobotArmAction:
     # 机械臂动作类型(点击/双击/长按/滑动)
     uArm_action_type = None
     uArm_click = 'click'
@@ -106,7 +111,7 @@ class uArm_action:
 
 
 # 机械臂操作参数
-class uArm_param:
+class RobotArmParam:
     base_x_point = 0.0
     base_y_point = 0.0
     base_z_point = 0.0
@@ -115,7 +120,7 @@ class uArm_param:
     port_address = 'http://localhost:8000/'
 
 
-class window_status:
+class WindowStatus:
     # 机械臂('机械臂连接成功!' / '机械臂连接失败!')
     robot_connect_status = '机械臂未连接!'
     # 视频帧率
@@ -126,8 +131,8 @@ class window_status:
     case_tab_status = '没有打开case目录'
 
 
-# 添加动作子窗口
-class add_action_window:
+# action相关操作
+class MotionAction:
     # 是否有添加动作
     add_action_flag = False
     # 添加动作子窗口的信息选项名称
@@ -146,7 +151,7 @@ class add_action_window:
 
 
 # 视频录制相关操作(如开关录像)
-class record_action:
+class RecordAction:
     record_status= 'record_status'
     record_start = 'record_start'
     record_stop  = 'record_stop'
@@ -154,13 +159,12 @@ class record_action:
     video_name   = 'video_name'
 
 # 延时相关操作
-class sleep_action:
+class SleepAction:
     sleep_time = 'sleep_time'
 
 
 # 配置文件的读取和写入
-import configparser
-class profile:
+class Profile:
     def __init__(self, type='read', file=None, section=None, option=None, value=None):
         if type == 'read':
             self.path = self.get_config_value(file=file, section=section, option=option)
@@ -187,14 +191,13 @@ class profile:
 
 
 # 自定义log对象
-import time
-class logger:
+class Logger:
     def __init__(self, string):
         print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + ' >> -- ' + str(string))
 
 
 # 合并路径(传入要合并的几个部分)
-class merge_path:
+class MergePath:
     merged_path = None
     def __init__(self, section_path):
         path_list = []

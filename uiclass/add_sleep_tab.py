@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import sleep_action
+from GlobalVar import SleepAction
 
 # 动作添加控件
 class AddSleepTab(QWidget):
@@ -12,7 +12,7 @@ class AddSleepTab(QWidget):
     def __init__(self, parent):
         super(AddSleepTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {sleep_action.sleep_time    : 1.0}
+        self.info_dict = {SleepAction.sleep_time    : 1.0}
         self.initUI()
 
 
@@ -50,7 +50,7 @@ class AddSleepTab(QWidget):
 
 
     def connect_sure(self):
-        self.info_dict[sleep_action.sleep_time] = 1.0 if self.sleep_time_edit.text() == '' else float(self.sleep_time_edit.text())
+        self.info_dict[SleepAction.sleep_time] = 1.0 if self.sleep_time_edit.text() == '' else float(self.sleep_time_edit.text())
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('sleep_tab_sure>' + signal)

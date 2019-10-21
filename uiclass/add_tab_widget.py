@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab
 from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
-from GlobalVar import uArm_action, add_action_window
+from GlobalVar import RobotArmAction, MotionAction
 
 class TabWidget(QTabWidget):
 
@@ -72,18 +72,18 @@ class AddTabWidget(QDialog):
 
     def closeEvent(self, event):
         # 如果取消则恢复默认
-        add_action_window.add_action_flag = False
-        uArm_action.uArm_action_type = None
-        self.widget.action_tab.info_dict = {add_action_window.des_text    : None,
-                          add_action_window.action_type : uArm_action.uArm_click,
-                          add_action_window.speed       : 150,
-                          add_action_window.points      : None,
-                          add_action_window.leave       : 1,
-                          add_action_window.trigger     : 1}
+        MotionAction.add_action_flag = False
+        RobotArmAction.uArm_action_type = None
+        self.widget.action_tab.info_dict = {MotionAction.des_text    : None,
+                          MotionAction.action_type : RobotArmAction.uArm_click,
+                          MotionAction.speed       : 150,
+                          MotionAction.points      : None,
+                          MotionAction.leave       : 1,
+                          MotionAction.trigger     : 1}
         # action_tab复位
         self.widget.action_tab.des_text.setText('')
         self.widget.action_tab.des_text.setPlaceholderText('请输入动作描述(可不写)')
-        self.widget.action_tab.com_box.setCurrentText(uArm_action.uArm_click)
+        self.widget.action_tab.com_box.setCurrentText(RobotArmAction.uArm_click)
         self.widget.action_tab.speed_text.setText('')
         self.widget.action_tab.speed_text.setPlaceholderText('请输入动作速度(可不写)')
         self.widget.action_tab.points.setText('')

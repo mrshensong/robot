@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import uArm_action, add_action_window
+from GlobalVar import RobotArmAction, MotionAction
 
 # 动作添加控件
 class AddActionTab(QWidget):
@@ -12,12 +12,12 @@ class AddActionTab(QWidget):
     def __init__(self, parent):
         super(AddActionTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {add_action_window.des_text    : None,
-                          add_action_window.action_type : uArm_action.uArm_click,
-                          add_action_window.speed       : 150,
-                          add_action_window.points      : None,
-                          add_action_window.leave       : 1,
-                          add_action_window.trigger     : 0}
+        self.info_dict = {MotionAction.des_text    : None,
+                          MotionAction.action_type : RobotArmAction.uArm_click,
+                          MotionAction.speed       : 150,
+                          MotionAction.points      : None,
+                          MotionAction.leave       : 1,
+                          MotionAction.trigger     : 0}
         self.initUI()
 
 
@@ -29,10 +29,10 @@ class AddActionTab(QWidget):
         self.button_layout = QHBoxLayout()
         # 设置标签右对齐, 不设置是默认左对齐
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
-        items = [uArm_action.uArm_click,
-                 uArm_action.uArm_double_click,
-                 uArm_action.uArm_long_click,
-                 uArm_action.uArm_slide]
+        items = [RobotArmAction.uArm_click,
+                 RobotArmAction.uArm_double_click,
+                 RobotArmAction.uArm_long_click,
+                 RobotArmAction.uArm_slide]
 
         # 设置表单内容
         # 动作描述
@@ -94,13 +94,13 @@ class AddActionTab(QWidget):
 
 
     def connect_sure(self):
-        self.info_dict[add_action_window.des_text] = self.des_text.text() if self.des_text.text() != '' else self.com_box.currentText()
-        self.info_dict[add_action_window.action_type] = self.com_box.currentText()
-        self.info_dict[add_action_window.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
+        self.info_dict[MotionAction.des_text] = self.des_text.text() if self.des_text.text() != '' else self.com_box.currentText()
+        self.info_dict[MotionAction.action_type] = self.com_box.currentText()
+        self.info_dict[MotionAction.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
         # 坐标信息需要通过主窗口传递过来
         # self.info_dict[add_action_window.points] = None
-        self.info_dict[add_action_window.leave] = '1' if self.leave_check_box.checkState()==Qt.Checked else '0'
-        self.info_dict[add_action_window.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
+        self.info_dict[MotionAction.leave] = '1' if self.leave_check_box.checkState()==Qt.Checked else '0'
+        self.info_dict[MotionAction.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('action_tab_sure>' + signal)

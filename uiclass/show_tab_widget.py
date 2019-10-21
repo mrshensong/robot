@@ -1,13 +1,12 @@
 import time
 import json
 from threading import Thread
-from GlobalVar import gloVar
 from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
-from GlobalVar import robot_other, window_status, record_action, sleep_action, logger, add_action_window
+from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction
 
 class ShowTabWidget(QTabWidget):
 
@@ -42,7 +41,7 @@ class ShowTabWidget(QTabWidget):
         # 保存actions
         elif signal_str.startswith('save_script_tag>'):
             self.text_tab.setText(signal_str.split('save_script_tag>')[1])
-            window_status.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
+            WindowStatus.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
             # 保存完脚本后(重新导入当前case目录下的脚本)
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
@@ -64,20 +63,20 @@ class ShowTabWidget(QTabWidget):
             # 设置当前tab页面
             self.setCurrentWidget(self.action_tab)
             # 如果还有actions未保存(判断是否需要将当前actions保存为case)
-            if robot_other.actions_saved_to_case is False:
+            if RobotOther.actions_saved_to_case is False:
                 QMessageBox.warning(self, "警告!action页还有未保存的actions!", "请先保存actions后,再次打开case!", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-                logger('[当前有未保存的actions, 不能打开case!]')
+                Logger('[当前有未保存的actions, 不能打开case!]')
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
                 self.action_tab.clear_all_items()
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
                 # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息
                 self.action_tab.case_file_name = dict_info_list[0]
                 self.action_tab.case_absolute_name = dict_info_list[1]
-                logger('[打开的case路径为]: %s' % dict_info_list[1])
+                Logger('[打开的case路径为]: %s' % dict_info_list[1])
                 # 遍历case中的action
                 for id in range(2, len(dict_info_list)):
                     # 判断是action/record/sleep控件
-                    if add_action_window.points in dict_info_list[id]:
+                    if MotionAction.points in dict_info_list[id]:
                         # 有points元素为action控件
                         # 将字典中的'(0, 0)'转为元祖(0, 0)
                         dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
@@ -85,19 +84,19 @@ class ShowTabWidget(QTabWidget):
                     # 为record或者sleep控件
                     else:
                         # 为record控件
-                        if record_action.record_status in dict_info_list[id]:
+                        if RecordAction.record_status in dict_info_list[id]:
                             self.action_tab.add_record_item(dict_info_list[id], flag=False)
                         # 为sleep控件
-                        elif sleep_action.sleep_time in dict_info_list[id]:
+                        elif SleepAction.sleep_time in dict_info_list[id]:
                             self.action_tab.add_sleep_item(dict_info_list[id], flag=False)
-                window_status.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
+                WindowStatus.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
             dict_info_list = eval(signal_str.split('play_single_case>')[1])
             # list中第一个参数为case文件名, 第二个参数为完整路径, 后面的为动作信息
             # self.action_tab.case_file_name = dict_info_list[0]
             # self.action_tab.case_absolute_name = dict_info_list[1]
-            logger('[正在执行的case为] : %s' % dict_info_list[1])
+            Logger('[正在执行的case为] : %s' % dict_info_list[1])
             Thread(target=self.play_single_case, args=(dict_info_list,)).start()
 
 
@@ -108,10 +107,10 @@ class ShowTabWidget(QTabWidget):
         # self.action_tab.case_absolute_name = dict_info_list[1]
         for id in range(2, len(dict_info_list)):
             while True:
-                if gloVar.request_status == 'ok':
-                    gloVar.request_status = None
+                if GloVar.request_status == 'ok':
+                    GloVar.request_status = None
                     # 判断是action/record/sleep控件
-                    if add_action_window.points in dict_info_list[id]:
+                    if MotionAction.points in dict_info_list[id]:
                         # info_dict长度大于2为action控件
                         # 将字典中的'(0, 0)'转为元祖(0, 0)
                         dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
@@ -119,12 +118,12 @@ class ShowTabWidget(QTabWidget):
                     # 为record或者sleep控件
                     else:
                         # 为record控件
-                        if record_action.record_status in dict_info_list[id]:
+                        if RecordAction.record_status in dict_info_list[id]:
                             self.signal.emit('record_execute_item>' + json.dumps(dict_info_list[id]))
                         # 为sleep控件
-                        elif sleep_action.sleep_time in dict_info_list[id]:
+                        elif SleepAction.sleep_time in dict_info_list[id]:
                             self.signal.emit('sleep_execute_item>' + json.dumps(dict_info_list[id]))
                     break
                 else:
                     time.sleep(0.02)
-        gloVar.case_execute_finished_flag = True
+        GloVar.case_execute_finished_flag = True

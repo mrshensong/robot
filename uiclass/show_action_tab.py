@@ -4,7 +4,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, add_action_window, uArm_action, logger, gloVar, robot_other, window_status, profile, record_action, sleep_action
+from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, RobotOther, WindowStatus, Profile
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 from uiclass.list_widget import ListWidget
@@ -50,23 +50,23 @@ class ShowActionTab(QWidget):
     def action_tab_init(self):
         self.add_button = QToolButton()
         self.add_button.setToolTip('add')
-        self.add_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_add + ')}')
+        self.add_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_add + ')}')
         self.add_button.clicked.connect(self.connect_add_action_button)
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('delete')
-        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_delete + ')}')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
         self.delete_button.clicked.connect(self.connect_delete_selected_items)
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('select_all')
-        self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+        self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         self.select_all_button.clicked.connect(self.connect_select_all_items)
         self.execute_button = QToolButton()
         self.execute_button.setToolTip('execute')
-        self.execute_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_execute + ')}')
+        self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_actions)
         self.save_script_tag_button = QToolButton()
         self.save_script_tag_button.setToolTip('save_tag')
-        self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_save + ')}')
+        self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_save + ')}')
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
 
         h_box = QHBoxLayout()
@@ -99,10 +99,10 @@ class ShowActionTab(QWidget):
     '''以下为五个按钮事件(添加/删除/全选/执行/保存)'''
     # 展示添加动作子窗口(add_button)
     def connect_add_action_button(self):
-        if gloVar.add_action_button_flag is True:
-            add_action_window.add_action_flag = True
+        if GloVar.add_action_button_flag is True:
+            MotionAction.add_action_flag = True
             # 默认是单击动作
-            uArm_action.uArm_action_type = uArm_action.uArm_click
+            RobotArmAction.uArm_action_type = RobotArmAction.uArm_click
             self.add_action_window.show()
             self.add_action_window.exec()
         else:
@@ -118,8 +118,8 @@ class ShowActionTab(QWidget):
                 # 全部删除后需要复位全部选中按钮的状态
                 self.select_all_flag = False
                 self.select_all_button.setToolTip('select_all')
-                self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
-                robot_other.actions_saved_to_case = True
+                self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
+                RobotOther.actions_saved_to_case = True
                 self.case_file_name = ''
                 self.case_absolute_name = ''
                 break
@@ -148,15 +148,15 @@ class ShowActionTab(QWidget):
                 self.custom_control_list[i].check_box.setCheckState(Qt.Checked)
             self.select_all_flag = True
             self.select_all_button.setToolTip('un_select_all')
-            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
-            logger('[全部选中]-->所有动作')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_un_select + ')}')
+            Logger('[全部选中]-->所有动作')
         else:
             for i in range(self.index + 1):
                 self.custom_control_list[i].check_box.setCheckState(Qt.Unchecked)
             self.select_all_flag = False
             self.select_all_button.setToolTip('select_all')
-            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
-            logger('[全不选中]-->所有动作')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
+            Logger('[全不选中]-->所有动作')
 
 
     # 选择/不选择(所有)工具栏操作(select_all_button)
@@ -174,15 +174,15 @@ class ShowActionTab(QWidget):
         for i in range(len(self.item_list)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
                 # 判断是action/record/sleep控件
-                if add_action_window.points in self.info_list[index]:
+                if MotionAction.points in self.info_list[index]:
                     self.custom_control_list[index].play_action_item()
                 # 为record或者sleep控件
                 else:
                     # 为record控件
-                    if record_action.record_status in self.info_list[index]:
+                    if RecordAction.record_status in self.info_list[index]:
                         self.custom_control_list[index].play_record_item()
                     # 为sleep控件
-                    elif sleep_action.sleep_time in self.info_list[index]:
+                    elif SleepAction.sleep_time in self.info_list[index]:
                         self.custom_control_list[index].play_sleep_item()
                 time.sleep(0.02)
             index += 1
@@ -196,24 +196,24 @@ class ShowActionTab(QWidget):
     # 保存标签工具栏操作(save_button)
     def save_script_tag(self):
         if len(self.list_widget) > 0:
-            script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
+            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').path
             filename = QFileDialog.getSaveFileName(self, 'save script', script_path, 'script file(*.xml)')
             if filename[0]:
                 current_path = '/'.join(filename[0].split('/')[:-1])
                 if current_path != script_path:
-                    profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=current_path)
+                    Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=current_path)
                 with open(filename[0], 'w', encoding='utf-8') as f:
                     self.case_absolute_name = filename[0]
                     self.case_file_name = filename[0].split('/')[-1]
                     script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
-                    logger('[保存的脚本标签名为]: %s' % filename[0])
+                    Logger('[保存的脚本标签名为]: %s' % filename[0])
                     self.signal.emit('save_script_tag>' + script_tag)
-                    robot_other.actions_saved_to_case = True
+                    RobotOther.actions_saved_to_case = True
             else:
-                logger('[取消保存脚本标签!]')
+                Logger('[取消保存脚本标签!]')
         else:
-            logger('[没有要保存的脚本标签!]')
+            Logger('[没有要保存的脚本标签!]')
 
 
     # 另起线程(保证主线程不受到破坏)
@@ -231,7 +231,7 @@ class ShowActionTab(QWidget):
         self.index = -1
         # 取消脚本页的脚本
         self.signal.emit('save_script_tag>')
-        robot_other.actions_saved_to_case = True
+        RobotOther.actions_saved_to_case = True
         self.case_file_name = ''
         self.case_absolute_name = ''
 
@@ -253,13 +253,13 @@ class ShowActionTab(QWidget):
         # 发送需要显示的脚本标签
         self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         if flag is True:
-            robot_other.actions_saved_to_case = False
+            RobotOther.actions_saved_to_case = False
             if self.case_file_name == '':  # 空白新建action
-                window_status.action_tab_status = '新建case-->>未保存!'
+                WindowStatus.action_tab_status = '新建case-->>未保存!'
             else:  # case新增action
-                window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
+                WindowStatus.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
         else:
-            robot_other.actions_saved_to_case = True
+            RobotOther.actions_saved_to_case = True
         # 滚动条滚动到当前item
         self.list_widget.scrollToItem(item)
 
@@ -278,12 +278,12 @@ class ShowActionTab(QWidget):
     # 添加video动作控件
     def add_record_item(self, info_dict, flag=True):
         # 只有record_start的时候才证明新增record动作
-        if info_dict[record_action.record_status] == record_action.record_start:
-            self.current_video_type = info_dict[record_action.video_type]
-            self.current_video_name = info_dict[record_action.video_name]
+        if info_dict[RecordAction.record_status] == RecordAction.record_start:
+            self.current_video_type = info_dict[RecordAction.video_type]
+            self.current_video_name = info_dict[RecordAction.video_name]
         # 重置视频type和name
-        info_dict[record_action.video_type] = self.current_video_type
-        info_dict[record_action.video_name] = self.current_video_name
+        info_dict[RecordAction.video_type] = self.current_video_type
+        info_dict[RecordAction.video_name] = self.current_video_name
         # 给video动作设置id
         self.index += 1
         item = QListWidgetItem()
@@ -367,15 +367,15 @@ class ShowActionTab(QWidget):
         self.index -= 1
         # 发送需要显示的脚本标签
         if len(self.tag_list) > 0:
-            robot_other.actions_saved_to_case = False
+            RobotOther.actions_saved_to_case = False
             self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         else:
             self.signal.emit('save_script_tag>')
-            robot_other.actions_saved_to_case = True
+            RobotOther.actions_saved_to_case = True
         if self.case_file_name == '':  # 空白新建action
-            window_status.action_tab_status = '新建case-->>未保存!'
+            WindowStatus.action_tab_status = '新建case-->>未保存!'
         else:  # case新增action
-            window_status.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
+            WindowStatus.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -385,40 +385,40 @@ class ShowActionTab(QWidget):
 
     # 添加action动作时生成标签
     def generate_action_tag(self, info_dict):
-        des_text = info_dict[add_action_window.des_text]
-        action_type = info_dict[add_action_window.action_type]
-        speed = str(info_dict[add_action_window.speed])
-        leave = str(info_dict[add_action_window.leave])
-        trigger = str(info_dict[add_action_window.trigger])
-        points =   str(tuple(info_dict[add_action_window.points]))
-        tag = '\t<action '+add_action_window.des_text+'="' + des_text + '">\n'+\
-              '\t\t' + '<param name="'+add_action_window.action_type+'">' +action_type+ '</param>\n'+\
-              '\t\t' + '<param name="'+add_action_window.points+'">' +points+ '</param>\n'+\
-              '\t\t' + '<param name="'+add_action_window.speed+'">' +speed+ '</param>\n'+\
-              '\t\t' + '<param name="'+add_action_window.leave+'">' +leave+ '</param>\n'+\
-              '\t\t' + '<param name="'+add_action_window.trigger+'">' +trigger+ '</param>\n'+\
+        des_text = info_dict[MotionAction.des_text]
+        action_type = info_dict[MotionAction.action_type]
+        speed = str(info_dict[MotionAction.speed])
+        leave = str(info_dict[MotionAction.leave])
+        trigger = str(info_dict[MotionAction.trigger])
+        points =   str(tuple(info_dict[MotionAction.points]))
+        tag = '\t<action '+MotionAction.des_text+'="' + des_text + '">\n'+\
+              '\t\t' + '<param name="'+MotionAction.action_type+'">' +action_type+ '</param>\n'+\
+              '\t\t' + '<param name="'+MotionAction.points+'">' +points+ '</param>\n'+\
+              '\t\t' + '<param name="'+MotionAction.speed+'">' +speed+ '</param>\n'+\
+              '\t\t' + '<param name="'+MotionAction.leave+'">' +leave+ '</param>\n'+\
+              '\t\t' + '<param name="'+MotionAction.trigger+'">' +trigger+ '</param>\n'+\
               '\t</action>\n'
         return tag
 
 
     # 添加video动作时生成标签
     def generate_record_tag(self, info_dict):
-        record_status = info_dict[record_action.record_status]
-        video_type    = info_dict[record_action.video_type]
-        video_name    = info_dict[record_action.video_name]
+        record_status = info_dict[RecordAction.record_status]
+        video_type    = info_dict[RecordAction.video_type]
+        video_name    = info_dict[RecordAction.video_name]
         tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
-              '\t\t' + '<param name="' + record_action.record_status + '">' + record_status + '</param>\n' + \
-              '\t\t' + '<param name="' + record_action.video_type + '">' + video_type + '</param>\n' + \
-              '\t\t' + '<param name="' + record_action.video_name + '">' + video_name + '</param>\n' + \
+              '\t\t' + '<param name="' + RecordAction.record_status + '">' + record_status + '</param>\n' + \
+              '\t\t' + '<param name="' + RecordAction.video_type + '">' + video_type + '</param>\n' + \
+              '\t\t' + '<param name="' + RecordAction.video_name + '">' + video_name + '</param>\n' + \
               '\t</action>\n'
         return tag
 
 
     # 添加sleep动作时生成标签
     def generate_sleep_tag(self, info_dict):
-        sleep_time = str(info_dict[sleep_action.sleep_time])
+        sleep_time = str(info_dict[SleepAction.sleep_time])
         tag = '\t<action ' + 'sleep' + '="' + 'time/s' + '">\n' + \
-              '\t\t' + '<param name="' + sleep_action.sleep_time + '">' + sleep_time + '</param>\n' + \
+              '\t\t' + '<param name="' + SleepAction.sleep_time + '">' + sleep_time + '</param>\n' + \
               '\t</action>\n'
         return tag
 

@@ -1,9 +1,11 @@
+import os
 import cv2
 import numpy as np
+from GlobalVar import MergePath, Logger
 
 class GetStartupTime:
 
-    def __init__(self, video_path, frame_rate):
+    def __init__(self, video_path):
         #
         self.image_zoom = 2
         # 帧偏差
@@ -13,9 +15,11 @@ class GetStartupTime:
         # 保存图片标志
         self.image_flag = False
         # 视频帧率
-        self.frame_rate = frame_rate
+        self.frame_rate = 30
         # 视频路径
         self.video_path = video_path
+        # 待处理的视频列表
+        self.videos_list = []
 
 
     def get_start_and_end_match_threshold(self, end_mask, video_file):
@@ -32,6 +36,8 @@ class GetStartupTime:
         end_threshold_list = []
         # 获取视频对象
         video_cap = cv2.VideoCapture(video_file)
+        # 获取视频帧率
+        self.frame_rate = int(video_cap.get(cv2.CAP_PROP_FPS))
         # cv2.IMREAD_COLOR: 读入一副彩色图片
         # cv2.IMREAD_GRAYSCALE: 以灰度模式读入图片
         # cv2.IMREAD_UNCHANGED: 读入一幅图片，并包括其alpha通道
@@ -85,7 +91,6 @@ class GetStartupTime:
                 min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
                 end_threshold_list.append(max_threshold)
             else:
-                print('Analysis Video End...')
                 break
         video_cap.release()
         return start_threshold_list, end_threshold_list
@@ -170,12 +175,31 @@ class GetStartupTime:
         return frame_serial_number, frame_threshold
 
 
+    def get_all_video_start_and_end_points(self):
+        """
+        此处传入视频路径(算出路径下所有case视频的起止点)
+        :return:
+        """
+        # 找出目录下需要处理的视频
+        for home, dirs, files in os.walk(self.video_path):
+            for file in files:
+                # 判断视频文件(通过后缀名)
+                (file_text, extension) = os.path.splitext(file)
+                if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
+                    # 文件名列表, 包含完整路径
+                    file = MergePath([home, file]).merged_path
+                    self.videos_list.append(file)
+        # 需要试用视频文件路径作为参数
+        for video in self.videos_list:
+            Logger('正在计算<%s>起止点...' % video)
+            end_mask = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+            start_threshold_list, end_threshold_list = self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=video)
+            Logger('%s-->起始 ' % video + str(self.detect_start_point(start_threshold_list)))
+            Logger('%s-->终点 ' % video + str(self.detect_end_point(end_threshold_list)))
+        Logger('finished!')
+
+
 if __name__=='__main__':
-    # video_path = 'D:/Code/Robot/robot/video/2019-10-15/启动/测试1.mp4'
-    # end_mask   = 'D:/Code/Robot/robot/picture/2019-10-15/启动/测试1.jpg'
-    video_path = 'D:/Code/Robot/robot/video/2019-10-15/启动/测试2.mp4'
-    end_mask = 'D:/Code/Robot/robot/picture/2019-10-15/启动/测试2.jpg'
-    test = GetStartupTime(video_path=video_path, frame_rate=240)
-    start_threshold_list, end_threshold_list = test.get_start_and_end_match_threshold(end_mask=end_mask, video_file=video_path)
-    print('起始', test.detect_start_point(start_threshold_list))
-    print('终点', test.detect_end_point(end_threshold_list))
+    video_path = 'D:/Code/Robot/robot/video/2019-10-15'
+    test = GetStartupTime(video_path=video_path)
+    test.get_all_video_start_and_end_points()

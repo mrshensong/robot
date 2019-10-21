@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import icon_path, logger, gloVar, merge_path, window_status, profile
+from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile
 from uiclass.controls import CaseControl
 
 class ShowCaseTab(QWidget):
@@ -32,15 +32,15 @@ class ShowCaseTab(QWidget):
     def case_tab_init(self):
         self.import_button = QToolButton()
         self.import_button.setToolTip('import')
-        self.import_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_import + ')}')
+        self.import_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_import + ')}')
         self.import_button.clicked.connect(lambda: self.connect_import_button(None))
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('select_all')
-        self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
+        self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         self.select_all_button.clicked.connect(self.connect_select_all_items)
         self.execute_button = QToolButton()
         self.execute_button.setToolTip('execute')
-        self.execute_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_execute + ')}')
+        self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_items)
         h_box = QHBoxLayout()
         h_box.addWidget(self.import_button)
@@ -58,12 +58,12 @@ class ShowCaseTab(QWidget):
     def connect_import_button(self, path=None):
         # 通过选择框导入case
         if path is None:
-            script_path = profile(type='read', file=gloVar.config_file_path, section='param', option='script_path').path
+            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').path
             case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', script_path)
             if case_folder:
                 # 将当前script路径保存到配置文件
                 if case_folder != script_path:
-                    profile(type='write', file=gloVar.config_file_path, section='param', option='script_path', value=case_folder)
+                    Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=case_folder)
             else:
                 case_folder = None
         # 直接通过参数导入case
@@ -82,12 +82,12 @@ class ShowCaseTab(QWidget):
                     (file_text, extension) = os.path.splitext(file)
                     if extension in ['.xml', '.XML']:
                         # 文件名列表, 包含完整路径
-                        case_file = merge_path([home, file]).merged_path
+                        case_file = MergePath([home, file]).merged_path
                         # 将文件名传入
                         self.add_item(case_file)
-            window_status.case_tab_status = 'case所在文件夹-->>%s!' % case_folder
+            WindowStatus.case_tab_status = 'case所在文件夹-->>%s!' % case_folder
         else:
-            logger('没有选择case所在文件夹')
+            Logger('没有选择case所在文件夹')
 
 
     def connect_select_all_items(self):
@@ -100,14 +100,14 @@ class ShowCaseTab(QWidget):
 
     # 执行选中的case
     def execute_selected_items(self):
-        if gloVar.case_execute_finished_flag is True:
+        if GloVar.case_execute_finished_flag is True:
             for i in range(self.index+1):
                 if self.case_control_list[i].check_box.checkState() == Qt.Checked:
-                    gloVar.case_execute_finished_flag = False
+                    GloVar.case_execute_finished_flag = False
                     case_info_list = self.read_script_tag(i)
                     self.signal.emit('play_single_case>' + str(case_info_list))
                     # 等待上一case执行完成后才允许下一个case
-                    while gloVar.case_execute_finished_flag is False:
+                    while GloVar.case_execute_finished_flag is False:
                         time.sleep(0.02)
 
 
@@ -174,15 +174,15 @@ class ShowCaseTab(QWidget):
                 self.case_control_list[i].check_box.setCheckState(Qt.Checked)
             self.select_all_flag = True
             self.select_all_button.setToolTip('un_select_all')
-            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_un_select + ')}')
-            logger('[全部选中]-->所有case')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_un_select + ')}')
+            Logger('[全部选中]-->所有case')
         else:
             for i in range(self.index + 1):
                 self.case_control_list[i].check_box.setCheckState(Qt.Unchecked)
             self.select_all_flag = False
             self.select_all_button.setToolTip('select_all')
-            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + icon_path.Icon_tab_widget_all_select + ')}')
-            logger('[全不选中]-->所有case')
+            self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
+            Logger('[全不选中]-->所有case')
 
 
     # 添加动作控件

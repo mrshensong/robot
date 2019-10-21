@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QLineEdit, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import record_action, logger
+from GlobalVar import RecordAction, Logger
 
 # 动作添加控件
 class AddRecordTab(QWidget):
@@ -13,9 +13,9 @@ class AddRecordTab(QWidget):
         super(AddRecordTab, self).__init__(parent)
         self.parent = parent
         # 视频录像状态
-        self.info_dict = {record_action.record_status : '',
-                          record_action.video_type: '',
-                          record_action.video_name: ''}
+        self.info_dict = {RecordAction.record_status : '',
+                          RecordAction.video_type: '',
+                          RecordAction.video_name: ''}
         self.initUI()
 
 
@@ -87,22 +87,22 @@ class AddRecordTab(QWidget):
     # 按下确认按钮
     def connect_sure(self):
         if self.video_type_edit.text() is '':
-            self.info_dict[record_action.video_type] = 'test'
+            self.info_dict[RecordAction.video_type] = 'test'
         else:
-            self.info_dict[record_action.video_type] = self.video_type_edit.text()
+            self.info_dict[RecordAction.video_type] = self.video_type_edit.text()
         if self.video_name_edit.text() is '':
-            self.info_dict[record_action.video_name] = 'test'
+            self.info_dict[RecordAction.video_name] = 'test'
         else:
             if self.video_name_edit.text().endswith('.mp4') or self.video_name_edit.text().endswith('.MP4'):
-                self.info_dict[record_action.video_name] = self.video_name_edit.text().split('.')[0]
+                self.info_dict[RecordAction.video_name] = self.video_name_edit.text().split('.')[0]
             else:
-                self.info_dict[record_action.video_name] = self.video_name_edit.text()
+                self.info_dict[RecordAction.video_name] = self.video_name_edit.text()
         if self.start_record_video.checkState() == Qt.Checked:
-            self.info_dict[record_action.record_status] = record_action.record_start
+            self.info_dict[RecordAction.record_status] = RecordAction.record_start
         elif self.stop_record_video.checkState() == Qt.Checked:
-            self.info_dict[record_action.record_status] = record_action.record_stop
+            self.info_dict[RecordAction.record_status] = RecordAction.record_stop
         else:
-            logger('[没有选择视频录像状态, 请重新选择!]')
+            Logger('[没有选择视频录像状态, 请重新选择!]')
             return
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
