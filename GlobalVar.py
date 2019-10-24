@@ -9,6 +9,8 @@ class GloVar:
     project_path = None
     # 当前工程产生视频目录
     project_video_path = None
+    # 当前工程照片存放目录
+    project_picture_path = None
     # 框选屏幕大小标志
     box_screen_flag = False
     # 保存图片标志(是否需要保存图片,用来实时监测目标位置)
@@ -26,8 +28,6 @@ class RobotOther:
     robot_start_flag = False
     # 需要进行框选动作时, 打开此标志
     select_template_flag = False
-    # 全局传递图像
-    image = None
     # 全局传递模板图片路径
     mask_path = None
     # 数据处理标志
