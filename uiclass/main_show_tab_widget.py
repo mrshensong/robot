@@ -3,7 +3,7 @@ import numpy as np
 import time
 import json
 from threading import Thread
-from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel
+from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
@@ -170,14 +170,14 @@ class PictureTab(QWidget):
         self.picture_label = QLabel(self)
         self.picture_label.setScaledContents(True)
 
-        self.picture_h_layout.addStretch(1)
-        self.picture_h_layout.addWidget(self.picture_label)
-        self.picture_h_layout.addStretch(1)
+        # 创建一个滚动区域
+        self.picture_scroll_area = QScrollArea()
+        self.picture_scroll_area.setWidget(self.picture_label)
+
+        self.picture_h_layout.addWidget(self.picture_scroll_area)
 
         self.general_layout.addLayout(self.button_h_layout)
-        self.general_layout.addStretch(1)
         self.general_layout.addLayout(self.picture_h_layout)
-        self.general_layout.addStretch(1)
 
         self.setLayout(self.general_layout)
 
@@ -187,10 +187,10 @@ class PictureTab(QWidget):
         current_zoom_scale = round((self.picture_zoom_scale + 0.5), 1)
         width = int(self.picture_size_width * current_zoom_scale)
         height = int(self.picture_size_height * current_zoom_scale)
-        if width < (self.width() - 50) and height < (self.height() - 50):
-            self.picture_zoom_scale = current_zoom_scale
-            self.picture_label.setFixedSize(width, height)
-            self.picture_size_label.setText('size: [%d:%d], zoom: [%fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
+        # 判断
+        self.picture_zoom_scale = current_zoom_scale
+        self.picture_label.setFixedSize(width, height)
+        self.picture_size_label.setText('size: [%d:%d], zoom: [%sX]' % (self.picture_size_width, self.picture_size_height, str(self.picture_zoom_scale)))
 
 
     # 缩小操作
@@ -198,10 +198,10 @@ class PictureTab(QWidget):
         current_zoom_scale = round((self.picture_zoom_scale - 0.5), 1)
         width = int(self.picture_size_width * current_zoom_scale)
         height = int(self.picture_size_height * current_zoom_scale)
-        if current_zoom_scale > 0:
-            self.picture_zoom_scale = current_zoom_scale
-            self.picture_label.setFixedSize(width, height)
-            self.picture_size_label.setText('size: [%d:%d], zoom: [%fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
+        # 判断
+        self.picture_zoom_scale = current_zoom_scale
+        self.picture_label.setFixedSize(width, height)
+        self.picture_size_label.setText('size: [%d:%d], zoom: [%sX]' % (self.picture_size_width, self.picture_size_height, str(self.picture_zoom_scale)))
 
 
     # 原图操作
@@ -217,26 +217,19 @@ class PictureTab(QWidget):
         size = image.shape
         self.picture_size_width = int(size[1])
         self.picture_size_height = int(size[0])
-        if self.picture_size_width < (self.width() - 50) and self.picture_size_height < (self.height() - 50):
-            self.picture_label.setFixedSize(self.picture_size_width, self.picture_size_height)
-            self.zoom_button.setEnabled(True)
-            self.zoom_out_button.setEnabled(True)
-            self.original_size_button.setEnabled(True)
-        else:
-            # 真实照片比例
-            picture_size_scale = float(self.picture_size_height / self.picture_size_width)
-            # 临界比例(根据页面网格布局得到, 不可随便修改)
-            limit_size_scale = float((self.height() - 50) / (self.width() - 50))
-            if picture_size_scale >= limit_size_scale:
-                picture_label_size_height = self.height() - 50
-                picture_label_size_width = int(((self.height() - 50) / self.picture_size_height) * self.picture_size_width)
-            else:
-                picture_label_size_width = self.width() - 50
-                picture_label_size_height = int(((self.width() - 50) / self.picture_size_width) * self.picture_size_height)
-            self.picture_label.setFixedSize(picture_label_size_width, picture_label_size_height)
-            self.zoom_button.setEnabled(False)
-            self.zoom_out_button.setEnabled(False)
-            self.original_size_button.setEnabled(False)
+        if self.picture_size_width < self.picture_scroll_area.width() and self.picture_size_height < self.picture_scroll_area.height():
+            # widget居中显示
+            self.picture_scroll_area.setAlignment(Qt.AlignCenter)
+        elif self.picture_size_width < self.picture_scroll_area.width() and self.picture_size_height >= self.picture_scroll_area.height():
+            # 居中靠上
+            self.picture_scroll_area.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        elif self.picture_size_width >= self.picture_scroll_area.width() and self.picture_size_height < self.picture_scroll_area.height():
+            # 居中中靠左
+            self.picture_scroll_area.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        elif self.picture_size_width >= self.picture_scroll_area.width() and self.picture_size_height >= self.picture_scroll_area.height():
+            # 居上靠左
+            self.picture_scroll_area.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.picture_label.setFixedSize(self.picture_size_width, self.picture_size_height)
         self.picture_label.setPixmap(QPixmap(self.picture_path))
         self.picture_path_label.setText(str(self.picture_path))
         self.picture_size_label.setText('size: [%d:%d], zoom: [1.0X]' % (self.picture_size_width, self.picture_size_height))
