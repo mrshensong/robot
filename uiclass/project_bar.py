@@ -1,17 +1,20 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QLabel, QVBoxLayout, QFileSystemModel, QLineEdit
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit
+from PyQt5.QtCore import Qt, pyqtSignal
 
 
 class ProjectBar(QWidget):
-    def __init__(self, parent):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent, path):
         super(ProjectBar, self).__init__(parent)
         self.parent = parent
-        self.path = 'D:/Code/Robot/robot'
+        self.path = path
 
         self.model = QFileSystemModel(self)
-        # self.model.setData()
-        self.model.setHeaderData(0, Qt.Horizontal, "123455")
+        # 改表头名字(无效)
+        # self.model.setHeaderData(0, Qt.Horizontal, "123455")
         self.model.setRootPath(self.path)
 
         # 树形视图
@@ -24,6 +27,7 @@ class ProjectBar(QWidget):
         self.tree.setHeaderHidden(True)
         self.tree.setRootIndex(self.model.index(self.path))
         self.tree.clicked.connect(self.show_info)
+        self.tree.doubleClicked.connect(self.operation_file)
 
         self.info_label = QLineEdit(self)
         self.info_label.setText(self.path)
@@ -43,6 +47,17 @@ class ProjectBar(QWidget):
         self.info_label.setText(file_path)
         # path = self.dirModel.fileInfo(index).absoluteFilePath()
         # self.listview.setRootIndex(self.fileModel.setRootPath(path))
+
+
+    # 双击操作
+    def operation_file(self):
+        index = self.tree.currentIndex()
+        file_path = self.model.filePath(index)
+        # 当前双击只支持展示图片
+        if file_path.endswith('.jpg') or file_path.endswith('.png'):
+            self.signal.emit('open_picture>' + str(file_path))
+        else:
+            pass
 
 
 if __name__ == '__main__':

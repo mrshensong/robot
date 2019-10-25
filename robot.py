@@ -270,7 +270,8 @@ class UiMainWindow(QMainWindow):
 
     # 工程栏
     def project_bar(self):
-        self.project_bar_widget = ProjectBar(self.central_widget)
+        self.project_bar_widget = ProjectBar(self.central_widget, GloVar.project_path)
+        self.project_bar_widget.signal[str].connect(self.recv_project_bar_signal)
 
 
     # 控制台输出
@@ -378,6 +379,14 @@ class UiMainWindow(QMainWindow):
             RobotArmAction.uArm_action_type = signal_str.split('>')[1]
         else:
             pass
+
+
+    # 接收工具栏信号
+    def recv_project_bar_signal(self, signal_str):
+        # 打开图片
+        if signal_str.startswith('open_picture>'):
+            self.main_show_tab_widget.picture_tab.picture_path = signal_str.split('open_picture>')[1]
+            self.main_show_tab_widget.picture_tab.show_picture()
 
 
     '''以下内容为python_service相关操作函数'''

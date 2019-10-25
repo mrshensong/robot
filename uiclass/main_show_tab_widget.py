@@ -1,3 +1,5 @@
+import cv2
+import numpy as np
 import time
 import json
 from threading import Thread
@@ -123,6 +125,9 @@ class PictureTab(QWidget):
     def __init__(self, parent):
         super(PictureTab, self).__init__(parent)
         self.parent = parent
+        self.picture_path = None
+        self.picture_size_width = None
+        self.picture_size_height = None
         self.initUI()
 
 
@@ -134,17 +139,17 @@ class PictureTab(QWidget):
         self.zoom_button = QToolButton()
         self.zoom_button.setToolTip('zoom')
         self.zoom_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_picture + ')}')
-        # self.zoom_button.clicked.connect(self.connect_add_action_button)
+        self.zoom_button.clicked.connect(self.connect_zoom_button)
         # 原图按钮
         self.original_size_button = QToolButton()
         self.original_size_button.setToolTip('original_size')
         self.original_size_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_original_size_picture + ')}')
-        # self.original_size_button.clicked.connect(self.connect_add_action_button)
+        self.original_size_button.clicked.connect(self.connect_original_size_button)
         # 缩小按钮
         self.zoom_out_button = QToolButton()
         self.zoom_out_button.setToolTip('zoom_out')
         self.zoom_out_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_out_picture + ')}')
-        # self.zoom_out_button.clicked.connect(self.connect_add_action_button)
+        self.zoom_out_button.clicked.connect(self.connect_zoom_out_button)
         # 显示图片路径
         self.picture_path_label = QLabel(self)
         self.picture_path_label.setText('None')
@@ -163,7 +168,6 @@ class PictureTab(QWidget):
         # 填充图片标签
         self.picture_label = QLabel(self)
         self.picture_label.setScaledContents(True)
-        self.picture_label.setPixmap(QPixmap(IconPath.Icon_main_tab_widget_zoom_out_picture))
 
         self.picture_h_layout.addStretch(1)
         self.picture_h_layout.addWidget(self.picture_label)
@@ -175,3 +179,29 @@ class PictureTab(QWidget):
         self.general_layout.addStretch(1)
 
         self.setLayout(self.general_layout)
+
+
+    # 放大操作
+    def connect_zoom_button(self):
+        pass
+
+
+    # 缩小操作
+    def connect_zoom_out_button(self):
+        pass
+
+
+    # 原图操作
+    def connect_original_size_button(self):
+        pass
+
+
+    # 图片展示操作
+    def show_picture(self):
+        image = cv2.imdecode(np.fromfile(self.picture_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+        size = image.shape
+        self.picture_size_width = int(size[1])
+        self.picture_size_height = int(size[0])
+        self.picture_label.setPixmap(QPixmap(self.picture_path))
+        self.picture_path_label.setText(str(self.picture_path))
+        self.picture_size_label.setText('size: [%d:%d]' % (self.picture_size_width, self.picture_size_height))
