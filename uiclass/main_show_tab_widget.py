@@ -46,18 +46,22 @@ class VideoTab(QWidget):
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
-        self.h_layout = QHBoxLayout(self)
+        self.video_label_h_layout = QHBoxLayout(self)
 
         self.video_label = VideoLabel(self)
         self.video_label.signal[str].connect(self.recv_video_label_signal)
 
-        self.h_layout.addStretch(1)
-        self.h_layout.addWidget(self.video_label)
-        self.h_layout.addStretch(1)
+        # 创建一个滚动区域
+        self.video_scroll_area = QScrollArea()
+        self.video_scroll_area.setWidget(self.video_label)
+        self.video_scroll_area.setAlignment(Qt.AlignCenter)
+        # 隐藏横竖向滚动条
+        # self.video_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.video_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        self.general_layout.addStretch(1)
-        self.general_layout.addLayout(self.h_layout)
-        self.general_layout.addStretch(1)
+        self.video_label_h_layout.addWidget(self.video_scroll_area)
+
+        self.general_layout.addLayout(self.video_label_h_layout)
 
         self.setLayout(self.general_layout)
 
@@ -80,8 +84,8 @@ class VideoTab(QWidget):
     def video_label_adaptive(self, video_width, video_height):
         # video_label高度和VideoTab的高度大致相同(留点余量)
         # video_label宽度为VideoTab的宽度大致相同(留点余量)
-        self.video_label.video_label_size_width  = int((self.width() - 60))
-        self.video_label.video_label_size_height = int((self.height() - 60))
+        self.video_label.video_label_size_width  = int(self.video_scroll_area.width() - 2)
+        self.video_label.video_label_size_height = int(self.video_scroll_area.height() - 2)
         # 更改label_video大小以确保视频展示不失比例
         # 真实视频比例
         video_size_scale = float(video_height / video_width)
