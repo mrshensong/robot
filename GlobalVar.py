@@ -96,6 +96,10 @@ class IconPath:
     Icon_tab_widget_execute       = 'config/Icon/tab_widget_icon/execute.png'
     Icon_tab_widget_import        = 'config/Icon/tab_widget_icon/import.png'
     Icon_tab_widget_save          = 'config/Icon/tab_widget_icon/save.png'
+    # 视频和照片展示栏相关图标
+    Icon_main_tab_widget_zoom_picture          = 'config/Icon/main_tab_widget_icon/zoom.png'
+    Icon_main_tab_widget_zoom_out_picture      = 'config/Icon/main_tab_widget_icon/zoom_out.png'
+    Icon_main_tab_widget_original_size_picture = 'config/Icon/main_tab_widget_icon/original_size.png'
 
 
 class RobotArmAction:

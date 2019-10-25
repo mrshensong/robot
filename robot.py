@@ -89,7 +89,8 @@ class UiMainWindow(QMainWindow):
         self.status_bar.setObjectName('status_bar')
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage(self.window_status_text)
-        self.status_bar.setStyleSheet('color:green')
+        # 状态栏颜色
+        # self.status_bar.setStyleSheet('color:green')
         self.status_bar.setFont(QFont(self.font, 13))
         # 工具栏
         # 实时流工具栏
@@ -133,7 +134,7 @@ class UiMainWindow(QMainWindow):
         self.splitter_h_general.setStretchFactor(0, 2)
         self.splitter_h_general.setStretchFactor(1, 3)
         self.general_v_layout.addWidget(self.splitter_h_general)
-        # self.setLayout(self.general_v_layout)
+        self.setLayout(self.general_v_layout)
 
         # 打开python_service
         # Thread(target=self.open_python_server, args=()).start()
@@ -275,13 +276,17 @@ class UiMainWindow(QMainWindow):
     # 控制台输出
     def output_text(self):
         self.console = QTextEdit(self.central_widget)
+        # 滚动条宽度设置
         # self.console.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
         self.console.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
         self.console.setReadOnly(True)
         self.console.ensureCursorVisible()
         self.console.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.console.setWordWrapMode(QTextOption.NoWrap)
+        # 字体型号
         self.console.setFont(QFont('monospaced', 13))
+        # 字体粗细
+        self.console.setStyleSheet('font-weight:bold')
 
 
     # 更新控制台内容

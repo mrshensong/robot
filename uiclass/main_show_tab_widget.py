@@ -1,32 +1,37 @@
 import time
 import json
 from threading import Thread
-from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
 from uiclass.video_label import VideoLabel
-from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction, RobotArmAction
+from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction, RobotArmAction, IconPath
 
 class MainShowTabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, video_tab='video'):
+    def __init__(self, parent):
         super(MainShowTabWidget, self).__init__(parent)
         self.parent = parent
         # self.setTabPosition(self.South)
         # tab1
         self.video_tab = VideoTab(self)  # 1
         self.video_tab.signal[str].connect(self.recv_video_tab_signal)
-        self.addTab(self.video_tab, video_tab)
+
+        self.picture_tab = PictureTab(self)
+
+        self.addTab(self.video_tab, 'video')
+        self.addTab(self.picture_tab, 'picture')
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_tab_signal(self, info_str):
         self.signal.emit(info_str)
 
 
+# 视频tab
 class VideoTab(QWidget):
 
     signal = pyqtSignal(str)
@@ -108,3 +113,65 @@ class VideoTab(QWidget):
         # 和gif图缩放
         else:
             self.video_label_adaptive(self.video_label.local_video_width, self.video_label.local_video_height)
+
+
+# 照片tab
+class PictureTab(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(PictureTab, self).__init__(parent)
+        self.parent = parent
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QVBoxLayout(self)
+        self.picture_h_layout = QHBoxLayout(self)
+        self.button_h_layout = QHBoxLayout(self)
+        # 放大按钮
+        self.zoom_button = QToolButton()
+        self.zoom_button.setToolTip('zoom')
+        self.zoom_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_picture + ')}')
+        # self.zoom_button.clicked.connect(self.connect_add_action_button)
+        # 原图按钮
+        self.original_size_button = QToolButton()
+        self.original_size_button.setToolTip('original_size')
+        self.original_size_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_original_size_picture + ')}')
+        # self.original_size_button.clicked.connect(self.connect_add_action_button)
+        # 缩小按钮
+        self.zoom_out_button = QToolButton()
+        self.zoom_out_button.setToolTip('zoom_out')
+        self.zoom_out_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_out_picture + ')}')
+        # self.zoom_out_button.clicked.connect(self.connect_add_action_button)
+        # 显示图片路径
+        self.picture_path_label = QLabel(self)
+        self.picture_path_label.setText('None')
+        # 显示照片尺寸
+        self.picture_size_label = QLabel(self)
+        self.picture_size_label.setText('size: [0:0]')
+
+        self.button_h_layout.addWidget(self.zoom_button)
+        self.button_h_layout.addWidget(self.original_size_button)
+        self.button_h_layout.addWidget(self.zoom_out_button)
+        self.button_h_layout.addStretch(1)
+        self.button_h_layout.addWidget(self.picture_path_label)
+        self.button_h_layout.addStretch(1)
+        self.button_h_layout.addWidget(self.picture_size_label)
+
+        # 填充图片标签
+        self.picture_label = QLabel(self)
+        self.picture_label.setScaledContents(True)
+        self.picture_label.setPixmap(QPixmap(IconPath.Icon_main_tab_widget_zoom_out_picture))
+
+        self.picture_h_layout.addStretch(1)
+        self.picture_h_layout.addWidget(self.picture_label)
+        self.picture_h_layout.addStretch(1)
+
+        self.general_layout.addLayout(self.button_h_layout)
+        self.general_layout.addStretch(1)
+        self.general_layout.addLayout(self.picture_h_layout)
+        self.general_layout.addStretch(1)
+
+        self.setLayout(self.general_layout)

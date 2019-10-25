@@ -3,7 +3,7 @@ import json
 from threading import Thread
 from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtGui import QTextOption, QFont
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
 from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction
@@ -31,6 +31,8 @@ class ShowTabWidget(QTabWidget):
         self.addTab(self.action_tab, action_tab)
         self.addTab(self.case_tab, case_tab)
         self.addTab(self.text_tab, text_tab)
+        # 调整背景颜色
+        # self.setStyleSheet('background-color:#DDDDDD;')
 
 
     # 接收从action_tab窗口传来的信号
