@@ -128,6 +128,7 @@ class PictureTab(QWidget):
         self.picture_path = None
         self.picture_size_width = None
         self.picture_size_height = None
+        self.picture_zoom_scale = 1.0
         self.initUI()
 
 
@@ -155,7 +156,7 @@ class PictureTab(QWidget):
         self.picture_path_label.setText('None')
         # 显示照片尺寸
         self.picture_size_label = QLabel(self)
-        self.picture_size_label.setText('size: [0:0]')
+        self.picture_size_label.setText('size: [0:0], zoom: [1.0X]')
 
         self.button_h_layout.addWidget(self.zoom_button)
         self.button_h_layout.addWidget(self.original_size_button)
@@ -183,17 +184,31 @@ class PictureTab(QWidget):
 
     # 放大操作
     def connect_zoom_button(self):
-        pass
+        current_zoom_scale = round((self.picture_zoom_scale + 0.5), 1)
+        width = int(self.picture_size_width * current_zoom_scale)
+        height = int(self.picture_size_height * current_zoom_scale)
+        if width < (self.width() - 50) and height < (self.height() - 50):
+            self.picture_zoom_scale = current_zoom_scale
+            self.picture_label.setFixedSize(width, height)
+            self.picture_size_label.setText('size: [%d:%d], zoom: [%fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
 
 
     # 缩小操作
     def connect_zoom_out_button(self):
-        pass
+        current_zoom_scale = round((self.picture_zoom_scale - 0.5), 1)
+        width = int(self.picture_size_width * current_zoom_scale)
+        height = int(self.picture_size_height * current_zoom_scale)
+        if current_zoom_scale > 0:
+            self.picture_zoom_scale = current_zoom_scale
+            self.picture_label.setFixedSize(width, height)
+            self.picture_size_label.setText('size: [%d:%d], zoom: [%fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
 
 
     # 原图操作
     def connect_original_size_button(self):
-        pass
+        self.picture_zoom_scale = 1.0
+        self.picture_label.setFixedSize(self.picture_size_width, self.picture_size_height)
+        self.picture_size_label.setText('size: [%d:%d], zoom: [1.0X]' % (self.picture_size_width, self.picture_size_height))
 
 
     # 图片展示操作
@@ -202,6 +217,27 @@ class PictureTab(QWidget):
         size = image.shape
         self.picture_size_width = int(size[1])
         self.picture_size_height = int(size[0])
+        if self.picture_size_width < (self.width() - 50) and self.picture_size_height < (self.height() - 50):
+            self.picture_label.setFixedSize(self.picture_size_width, self.picture_size_height)
+            self.zoom_button.setEnabled(True)
+            self.zoom_out_button.setEnabled(True)
+            self.original_size_button.setEnabled(True)
+        else:
+            # 真实照片比例
+            picture_size_scale = float(self.picture_size_height / self.picture_size_width)
+            # 临界比例(根据页面网格布局得到, 不可随便修改)
+            limit_size_scale = float((self.height() - 50) / (self.width() - 50))
+            if picture_size_scale >= limit_size_scale:
+                picture_label_size_height = self.height() - 50
+                picture_label_size_width = int(((self.height() - 50) / self.picture_size_height) * self.picture_size_width)
+            else:
+                picture_label_size_width = self.width() - 50
+                picture_label_size_height = int(((self.width() - 50) / self.picture_size_width) * self.picture_size_height)
+            self.picture_label.setFixedSize(picture_label_size_width, picture_label_size_height)
+            self.zoom_button.setEnabled(False)
+            self.zoom_out_button.setEnabled(False)
+            self.original_size_button.setEnabled(False)
         self.picture_label.setPixmap(QPixmap(self.picture_path))
         self.picture_path_label.setText(str(self.picture_path))
-        self.picture_size_label.setText('size: [%d:%d]' % (self.picture_size_width, self.picture_size_height))
+        self.picture_size_label.setText('size: [%d:%d], zoom: [1.0X]' % (self.picture_size_width, self.picture_size_height))
+        self.picture_zoom_scale = 1.0
