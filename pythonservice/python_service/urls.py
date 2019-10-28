@@ -14,8 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from python_service import uarm_service
-from python_service import usbhub3p_service
+from pythonservice.python_service import uarm_service
+from pythonservice.python_service import usbhub3p_service
 
 urlpatterns = [
     url(r'^uArm/set_position$', uarm_service.set_position),

@@ -394,7 +394,7 @@ class UiMainWindow(QMainWindow):
     '''以下内容为python_service相关操作函数'''
     # 打开python服务
     def open_python_server(self):
-        os.system('python pythonservice/manage.py runserver')
+        os.system(GloVar.project_path + '/venv/Scripts/python.exe pythonservice/manage.py runserver')
 
 
     # 获取8000端口pid

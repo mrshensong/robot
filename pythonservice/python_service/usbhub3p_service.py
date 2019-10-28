@@ -1,7 +1,7 @@
-import brainstem
-from brainstem.result import Result
+from pythonservice import brainstem
+from pythonservice.brainstem.result import Result
 from django.http import HttpResponse
-from python_service.utils import logger
+from pythonservice.python_service.utils import logger
 
 try:
     stem = brainstem.stem.USBHub3p()
