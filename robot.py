@@ -386,6 +386,8 @@ class UiMainWindow(QMainWindow):
         # 打开图片
         if signal_str.startswith('open_picture>'):
             self.main_show_tab_widget.picture_tab.picture_path = signal_str.split('open_picture>')[1]
+            # 自动跳转到picture页面
+            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.picture_tab)
             self.main_show_tab_widget.picture_tab.show_picture()
 
 

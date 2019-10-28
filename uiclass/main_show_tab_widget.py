@@ -142,16 +142,19 @@ class PictureTab(QWidget):
         self.button_h_layout = QHBoxLayout(self)
         # 放大按钮
         self.zoom_button = QToolButton()
+        self.zoom_button.setEnabled(False)
         self.zoom_button.setToolTip('zoom')
         self.zoom_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_picture + ')}')
         self.zoom_button.clicked.connect(self.connect_zoom_button)
         # 原图按钮
         self.original_size_button = QToolButton()
+        self.original_size_button.setEnabled(False)
         self.original_size_button.setToolTip('original_size')
         self.original_size_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_original_size_picture + ')}')
         self.original_size_button.clicked.connect(self.connect_original_size_button)
         # 缩小按钮
         self.zoom_out_button = QToolButton()
+        self.zoom_out_button.setEnabled(False)
         self.zoom_out_button.setToolTip('zoom_out')
         self.zoom_out_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_out_picture + ')}')
         self.zoom_out_button.clicked.connect(self.connect_zoom_out_button)
@@ -191,10 +194,10 @@ class PictureTab(QWidget):
         current_zoom_scale = round((self.picture_zoom_scale + 0.5), 1)
         width = int(self.picture_size_width * current_zoom_scale)
         height = int(self.picture_size_height * current_zoom_scale)
-        # 判断
+        # 不用判断(可以无限放大)
         self.picture_zoom_scale = current_zoom_scale
         self.picture_label.setFixedSize(width, height)
-        self.picture_size_label.setText('size: [%d:%d], zoom: [%sX]' % (self.picture_size_width, self.picture_size_height, str(self.picture_zoom_scale)))
+        self.picture_size_label.setText('size: [%d:%d], zoom: [%.1fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
 
 
     # 缩小操作
@@ -202,10 +205,11 @@ class PictureTab(QWidget):
         current_zoom_scale = round((self.picture_zoom_scale - 0.5), 1)
         width = int(self.picture_size_width * current_zoom_scale)
         height = int(self.picture_size_height * current_zoom_scale)
-        # 判断
-        self.picture_zoom_scale = current_zoom_scale
-        self.picture_label.setFixedSize(width, height)
-        self.picture_size_label.setText('size: [%d:%d], zoom: [%sX]' % (self.picture_size_width, self.picture_size_height, str(self.picture_zoom_scale)))
+        # 需要判断(不能小于0)
+        if current_zoom_scale > 0.0:
+            self.picture_zoom_scale = current_zoom_scale
+            self.picture_label.setFixedSize(width, height)
+            self.picture_size_label.setText('size: [%d:%d], zoom: [%.1fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
 
 
     # 原图操作
@@ -217,6 +221,9 @@ class PictureTab(QWidget):
 
     # 图片展示操作
     def show_picture(self):
+        self.zoom_button.setEnabled(True)
+        self.zoom_out_button.setEnabled(True)
+        self.original_size_button.setEnabled(True)
         image = cv2.imdecode(np.fromfile(self.picture_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
         size = image.shape
         self.picture_size_width = int(size[1])
