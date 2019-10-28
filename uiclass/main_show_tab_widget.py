@@ -1,15 +1,10 @@
 import cv2
 import numpy as np
-import time
-import json
-from threading import Thread
-from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from uiclass.show_action_tab import ShowActionTab
-from uiclass.show_case_tab import ShowCaseTab
 from uiclass.video_label import VideoLabel
-from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction, RobotArmAction, IconPath
+from GlobalVar import IconPath
 
 class MainShowTabWidget(QTabWidget):
 
