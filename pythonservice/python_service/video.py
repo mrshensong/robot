@@ -28,6 +28,8 @@ class Video:
         # 视频需要保存的高和宽
         self.video_width = None
         self.video_height = None
+        # 当前图片
+        self.image = None
 
 
     # 视频流线程
@@ -103,16 +105,16 @@ class Video:
             if numpy_image is None:
                 continue
             # 将图片格式转换为cv模式
-            numpy_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
+            self.image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
             # 当录像标志打开时, 将frame存起来
             if self.record_flag is True:
                 # 在这儿是否需要判断Frame ID有重复的情况(如果有的话就需要进行处理--考虑要不要加进去)
                 # 将摄像头产生的frame放到容器中
                 if self.robot_start_flag is True:
-                    self.video_frames_list.append(numpy_image.copy()[0].fill(255))
+                    self.video_frames_list.append(self.image.copy()[0].fill(255))
                     self.robot_start_flag = False
                 else:
-                    self.video_frames_list.append(numpy_image.copy())
+                    self.video_frames_list.append(self.image.copy())
                 # print height, width, and frame ID of the acquisition image
                 print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
 
@@ -128,16 +130,16 @@ class Video:
         self.video_width = int(cap.get(3))
         self.video_height = int(cap.get(4))
         while self.record_thread_flag is True:
-            _, frame = cap.read()
+            _, self.image = cap.read()
             cv2.waitKey(10)
             if self.record_flag is True:
                 # 标记这一帧
                 if self.robot_start_flag is True:
-                    self.video_frames_list.append(frame.copy()[0].fill(255))
+                    self.video_frames_list.append(self.image.copy()[0].fill(255))
                     self.robot_start_flag = False
                 else:
-                    self.video_frames_list.append(frame.copy())
-            #     cv2.imshow('frame', frame.copy())
+                    self.video_frames_list.append(self.image.copy())
+            #     cv2.imshow('frame', self.image.copy())
             # else:
             #     cv2.destroyAllWindows()
         cap.release()
