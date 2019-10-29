@@ -27,7 +27,7 @@ class AddSleepTab(QWidget):
         # 设置表单内容
         # 睡眠时间设置
         self.sleep_time_edit = QLineEdit(self)
-        self.sleep_time_edit.setPlaceholderText('请输入睡眠时间(单位:ms)')
+        self.sleep_time_edit.setPlaceholderText('请输入睡眠时间(单位:s)')
         # 表单布局
         self.from_layout.addRow('睡眠时间: ', self.sleep_time_edit)
 
