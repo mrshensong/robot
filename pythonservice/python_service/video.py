@@ -220,8 +220,8 @@ class Video:
 
 
 if __name__=='__main__':
-    path = 'D:/Work/MindVision/DemoPy/'
-    video = Video(path)
+    path = 'D:/Work/MindVision/DemoPy'
+    video = Video(video_path=path)
 
 
     def case_run():

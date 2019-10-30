@@ -22,7 +22,7 @@ time.sleep(1)
 swift.set_position(50, 100, 40, 20, cmd="G0")
 swift.flush_cmd()
 # 视频线程
-video = Video(video_path='D:/Work/MindVision/DemoPy/')
+video = Video(video_path=None)
 Thread(target=video.recording, args=()).start()
 
 
