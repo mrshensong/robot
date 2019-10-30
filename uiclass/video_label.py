@@ -71,6 +71,8 @@ class VideoLabel(QLabel):
         self.data_process_background_size = tuple(reversed(cv2.imread(IconPath.data_is_ready_file).shape[:2]))
         # 当前获取的图片
         self.image = None
+        # 模板图片(暂停时框选图片模板图片)
+        self.mask_image = None
         '''以下为本地视频相关'''
         # 保存的case执行完的视频
         self.videos = []
@@ -466,6 +468,7 @@ class VideoLabel(QLabel):
                 self.setCursor(Qt.CrossCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_play + ')')
                 self.template_label()
+                self.mask_image = self.image
                 Logger('<暂停视频流>')
             elif self.video_status is self.STATUS_PAUSE:
                 self.timer_video.start()
@@ -501,6 +504,7 @@ class VideoLabel(QLabel):
                 RobotOther.select_template_flag = True
                 self.setCursor(Qt.CrossCursor)
                 self.template_label()
+                self.mask_image = self.image
                 Logger('<暂停视频>')
             elif self.video_status is self.STATUS_PAUSE:
                 self.timer_video.start()
@@ -640,6 +644,7 @@ class VideoLabel(QLabel):
         self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
         flag, self.image = self.video_cap.read()
         if flag is True:
+            self.mask_image = self.image
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
             self.setPixmap(QPixmap.fromImage(show_image))
@@ -671,6 +676,7 @@ class VideoLabel(QLabel):
         self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
         flag, self.image = self.video_cap.read()
         if flag is True:
+            self.mask_image = self.image
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
             self.setPixmap(QPixmap.fromImage(show_image))
@@ -997,7 +1003,7 @@ class VideoLabel(QLabel):
             # x_unit, y_unit = 1280 / 1280, 1024 / 1024
             x_unit, y_unit = self.x_unit, self.y_unit
             x0, y0, x1, y1 = int(self.x0 * x_unit), int(self.y0 * y_unit), int(self.x1 * x_unit), int(self.y1 * y_unit)
-            cut_img = self.image[y0:y1, x0:x1]
+            cut_img = self.mask_image[y0:y1, x0:x1]
             # 直播状态
             if self.video_play_flag is False:
                 # 接收模板路径
