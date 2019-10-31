@@ -277,7 +277,6 @@ def play_click_action(info_dict):
         video.robot_start_flag = True
     if leave == 1:
         set_position_(50, 100, 40)
-    return HttpResponse("ok")
 
 
 def play_double_click_action(info_dict):
@@ -298,7 +297,6 @@ def play_double_click_action(info_dict):
         set_position_(x, y, z_h, speed)
     if leave == 1:
         set_position_(50, 100, 40)
-    return HttpResponse("ok")
 
 
 def play_long_click(info_dict):
@@ -323,7 +321,6 @@ def play_long_click(info_dict):
         video.robot_start_flag = True
     if leave == 1:
         set_position_(50, 100, 40)
-    return HttpResponse("ok")
 
 
 def play_slide_action(info_dict):
@@ -354,7 +351,6 @@ def play_slide_action(info_dict):
     swift.flush_cmd()
     if leave == 1:
         set_position_(50, 100, 40)
-    return HttpResponse("ok")
 
 
 def play_record_action(info_dict):
@@ -371,15 +367,12 @@ def play_record_action(info_dict):
         video.stop_record_video()
         while video.re_start_record_flag is False:
             time.sleep(0.02)
-    # print(record_status)
-    return HttpResponse("ok")
 
 
 def play_sleep_action(info_dict):
     data = info_dict
     sleep_time = float(data['sleep_time'])
     time.sleep(sleep_time)
-    return HttpResponse("ok")
 
 
 # start
