@@ -17,6 +17,7 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, RobotOther, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
+from uarm_action.action import ArmAction
 
 
 class UiMainWindow(QMainWindow):
@@ -140,6 +141,7 @@ class UiMainWindow(QMainWindow):
         # Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
         # Thread(target=self.get_python_server_pid, args=()).start()
+        self.robot = ArmAction()
 
 
     '''以下部分为界面各个控件信息'''
@@ -264,7 +266,7 @@ class UiMainWindow(QMainWindow):
     # case展示
     def show_case(self):
         self.show_tab_widget = ShowTabWidget(self.central_widget)
-        self.show_tab_widget.setEnabled(False)
+        # self.show_tab_widget.setEnabled(False)
         self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
 
 
@@ -358,17 +360,20 @@ class UiMainWindow(QMainWindow):
             GloVar.post_info_list.append('start')
             GloVar.post_info_list.append(info_dict)
             GloVar.post_info_list.append('stop')
-            Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+            # Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+            Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
 
 
     # 接收show_tab_widget的信号
     def recv_show_tab_widget_signal(self, signal_str):
         # 执行选中所有动作动作
         if signal_str.startswith('play_actions>'):
-            Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+            # Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+            Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
         # 执行一条case动作
         elif signal_str.startswith('play_single_case>'):
-            Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+            # Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+            Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
         # 添加action控件时候, 设置动作标志位
         elif signal_str.startswith('action_tab_action>'):
             # 消除留在视频界面的印记
