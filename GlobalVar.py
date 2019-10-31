@@ -21,6 +21,8 @@ class GloVar:
     request_status = 'ok'
     # 一条case是否执行完了(当前case执行完后才会允许第二条case执行)
     case_execute_finished_flag = True
+    # post请求信息(将当前所有需要执行的action装入list/第一个元素'start', 最后一个元素'stop')
+    post_info_list = []
 
 
 class RobotOther:

@@ -48,13 +48,7 @@ class ShowTabWidget(QTabWidget):
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
         # 执行action
-        elif signal_str.startswith('action_execute_item>'):
-            self.signal.emit(signal_str)
-        # 执行action
-        elif signal_str.startswith('record_execute_item>'):
-            self.signal.emit(signal_str)
-        # 执行action
-        elif signal_str.startswith('sleep_execute_item>'):
+        elif signal_str.startswith('play_actions>'):
             self.signal.emit(signal_str)
 
 
@@ -94,38 +88,4 @@ class ShowTabWidget(QTabWidget):
                 WindowStatus.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
-            dict_info_list = eval(signal_str.split('play_single_case>')[1])
-            # list中第一个参数为case文件名, 第二个参数为完整路径, 后面的为动作信息
-            # self.action_tab.case_file_name = dict_info_list[0]
-            # self.action_tab.case_absolute_name = dict_info_list[1]
-            Logger('[正在执行的case为] : %s' % dict_info_list[1])
-            Thread(target=self.play_single_case, args=(dict_info_list,)).start()
-
-
-    # 执行单个case
-    def play_single_case(self, dict_info_list):
-        # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息(action展示需要用到)
-        # self.action_tab.case_file_name = dict_info_list[0]
-        # self.action_tab.case_absolute_name = dict_info_list[1]
-        for id in range(2, len(dict_info_list)):
-            while True:
-                if GloVar.request_status == 'ok':
-                    GloVar.request_status = None
-                    # 判断是action/record/sleep控件
-                    if MotionAction.points in dict_info_list[id]:
-                        # info_dict长度大于2为action控件
-                        # 将字典中的'(0, 0)'转为元祖(0, 0)
-                        dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                        self.signal.emit('action_execute_item>' + json.dumps(dict_info_list[id]))
-                    # 为record或者sleep控件
-                    else:
-                        # 为record控件
-                        if RecordAction.record_status in dict_info_list[id]:
-                            self.signal.emit('record_execute_item>' + json.dumps(dict_info_list[id]))
-                        # 为sleep控件
-                        elif SleepAction.sleep_time in dict_info_list[id]:
-                            self.signal.emit('sleep_execute_item>' + json.dumps(dict_info_list[id]))
-                    break
-                else:
-                    time.sleep(0.02)
-        GloVar.case_execute_finished_flag = True
+            self.signal.emit(signal_str)

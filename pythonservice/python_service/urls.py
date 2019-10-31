@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^uArm/servo_attach$', uarm_service.servo_attach),
     url(r'^record/record_status$', uarm_service.execute_record_action),
     url(r'^sleep/sleep_time$', uarm_service.execute_sleep_action),
+    url(r'^execute/actions$', uarm_service.execute_actions),
 
     url(r'^usbHub/openPort$', usbhub3p_service.setPortEnable),
     url(r'^usbHub/closePort$', usbhub3p_service.setPortDisable),

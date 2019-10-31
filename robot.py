@@ -299,7 +299,7 @@ class UiMainWindow(QMainWindow):
         self.console.ensureCursorVisible()
 
 
-    # 接收实时流的相关参数调整
+    # 接收实时流的相关参数调整(暂时没有用到)
     def recv_camera_param_setting_widget(self, signal_str):
         if signal_str.startswith('exposure_time>'):
             pass
@@ -346,31 +346,29 @@ class UiMainWindow(QMainWindow):
                          MotionAction.points: info_list[1],
                          MotionAction.leave: 1,
                          MotionAction.trigger: 0}
-            # 默认速度150 & 动作执行后离开
-            Thread(target=self.uArm_action_execute, args=(info_dict,)).start()
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
             # 脚本录制操作
             if RobotArmAction.uArm_with_record is True:
                 self.show_tab_widget.action_tab.add_action_item(info_dict=info_dict)
+            info_dict['execute_action'] = 'motion_action'
+            info_dict['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(info_dict)
+            GloVar.post_info_list.append('stop')
+            Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
 
 
     # 接收show_tab_widget的信号
     def recv_show_tab_widget_signal(self, signal_str):
-        # 执行action动作
-        if signal_str.startswith('action_execute_item>'):
-            signal_dict = json.loads(signal_str.split('>')[1])
-            Thread(target=self.uArm_action_execute, args=(signal_dict,)).start()
-        # 执行record动作
-        elif signal_str.startswith('record_execute_item>'):
-            signal_dict = json.loads(signal_str.split('>')[1])
-            # 添加视频存放根目录
-            signal_dict['video_path'] = GloVar.project_video_path
-            Thread(target=self.uArm_post_request, args=('record', 'record_status', signal_dict)).start()
-            Logger('执行-->action[%s]----status[%s]' %(RecordAction.record_status, signal_dict[RecordAction.record_status]))
-        # 执行sleep动作
-        elif signal_str.startswith('sleep_execute_item>'):
-            signal_dict = json.loads(signal_str.split('>')[1])
-            Thread(target=self.uArm_post_request, args=('sleep', 'sleep_time', signal_dict)).start()
-            Logger('执行-->action[%s]----status[%s]' %(SleepAction.sleep_time, str(signal_dict[SleepAction.sleep_time])))
+        # 执行选中所有动作动作
+        if signal_str.startswith('play_actions>'):
+            Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
+        # 执行一条case动作
+        elif signal_str.startswith('play_single_case>'):
+            Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
         # 添加action控件时候, 设置动作标志位
         elif signal_str.startswith('action_tab_action>'):
             # 消除留在视频界面的印记
@@ -544,52 +542,6 @@ class UiMainWindow(QMainWindow):
             Logger('当前位置为: %s' % response)
         else:
             Logger('当前不支持[%s]这个动作' % action)
-
-
-    # 机械臂动作执行
-    def uArm_action_execute(self, info_dict):
-        # 从字典中获取键值
-        speed = int(info_dict[MotionAction.speed])
-        leave = int(info_dict[MotionAction.leave])
-        trigger = int(info_dict[MotionAction.trigger])
-        action_type = info_dict[MotionAction.action_type]
-        position_tuple = tuple(info_dict[MotionAction.points])
-        # 有;存在则说明是滑动动作(两个坐标)
-        if len(position_tuple) == 2:
-            position = tuple(position_tuple)
-            start, end = (0.0, 0.0), (0.0, 0.0)
-        # 没有则说明是点击动作(单个坐标)
-        else:
-            position = (0.0, 0.0)
-            start, end = position_tuple[:2], position_tuple[2:]
-        # 执行单击动作
-        if action_type == RobotArmAction.uArm_click:
-            data = {'base': (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
-                    'position': position, 'pressure_duration': 0}
-            Thread(target=self.uArm_post_request, args=('uArm', RobotArmAction.uArm_click, data,)).start()
-            Logger('执行-->action[click]---------坐标: %s' % str(position))
-        # 执行双击动作
-        elif action_type == RobotArmAction.uArm_double_click:
-            data = {'base': (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 2,
-                    'position': position, 'pressure_duration': 0}
-            Thread(target=self.uArm_post_request, args=('uArm', RobotArmAction.uArm_click, data,)).start()
-            Logger('执行-->action[double_click]--坐标: %s' % str(position))
-        # 执行长按动作
-        elif action_type == RobotArmAction.uArm_long_click:
-            data = {'base': (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger, 'time': 1,
-                    'position': position, 'pressure_duration': 1000}
-            Thread(target=self.uArm_post_request, args=('uArm', RobotArmAction.uArm_click, data,)).start()
-            Logger('执行-->action[long_click]----坐标: %s' % str(position))
-        # 执行滑动动作
-        elif action_type == RobotArmAction.uArm_slide:
-            data = {'base': (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point),
-                    'speed': speed, 'leave': leave, 'trigger': trigger,
-                    'start': start, 'end': end}
-            Thread(target=self.uArm_post_request, args=('uArm', RobotArmAction.uArm_slide, data,)).start()
-            Logger('执行-->action[slide]---------坐标: %s' % str(tuple(start + end)))
 
 
     # 机械臂动作事件(需要先框选屏幕大小)

@@ -4,7 +4,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, RobotOther, WindowStatus, Profile
+from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, RobotOther, WindowStatus, Profile, RobotArmParam
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 from uiclass.list_widget import ListWidget
@@ -170,22 +170,35 @@ class ShowActionTab(QWidget):
 
     # 执行选中actions的具体操作
     def execute_selected_actions(self):
+        if GloVar.request_status is None:
+            Logger('[当前还有正在执行的动作, 请稍后执行!]')
+            return
+        GloVar.post_info_list = []
+        GloVar.post_info_list.append('start')
         index = 0
         for i in range(len(self.item_list)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
                 # 判断是action/record/sleep控件
                 if MotionAction.points in self.info_list[index]:
-                    self.custom_control_list[index].play_action_item()
+                    self.info_list[index]['execute_action'] = 'motion_action'
+                    self.info_list[index]['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+                    GloVar.post_info_list.append(self.info_list[index])
                 # 为record或者sleep控件
                 else:
                     # 为record控件
                     if RecordAction.record_status in self.info_list[index]:
-                        self.custom_control_list[index].play_record_item()
+                        self.info_list[index]['execute_action'] = 'record_action'
+                        # 添加视频存放根目录
+                        self.info_list[index]['video_path'] = GloVar.project_video_path
+                        GloVar.post_info_list.append(self.info_list[index])
                     # 为sleep控件
                     elif SleepAction.sleep_time in self.info_list[index]:
-                        self.custom_control_list[index].play_sleep_item()
-                time.sleep(0.02)
+                        self.info_list[index]['execute_action'] = 'sleep_action'
+                        GloVar.post_info_list.append(self.info_list[index])
             index += 1
+        GloVar.post_info_list.append('stop')
+        # 将GloVar.post_info_list传递出去
+        self.signal.emit('play_actions>')
 
 
     # 执行选中的actions(execute_button/单独起线程)
@@ -310,8 +323,17 @@ class ShowActionTab(QWidget):
             id = int(signal_str.split('action_delete_item>')[1])
             self.delete_item(id)
         elif signal_str.startswith('action_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
             id = int(signal_str.split('action_execute_item>')[1])
-            self.signal.emit('action_execute_item>'+json.dumps(self.info_list[id]))
+            self.info_list[id]['execute_action'] = 'motion_action'
+            self.info_list[id]['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
 
 
     # 接收record控件传来的删除和执行信号
@@ -320,8 +342,18 @@ class ShowActionTab(QWidget):
             id = int(signal_str.split('record_delete_item>')[1])
             self.delete_item(id)
         elif signal_str.startswith('record_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
             id = int(signal_str.split('record_execute_item>')[1])
-            self.signal.emit('record_execute_item>' + json.dumps(self.info_list[id]))
+            self.info_list[id]['execute_action'] = 'record_action'
+            # 添加视频存放根目录
+            self.info_list[id]['video_path'] = GloVar.project_video_path
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
 
 
     # 接收sleep控件传来的删除和执行信号
@@ -330,8 +362,16 @@ class ShowActionTab(QWidget):
             id = int(signal_str.split('sleep_delete_item>')[1])
             self.delete_item(id)
         elif signal_str.startswith('sleep_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
             id = int(signal_str.split('sleep_execute_item>')[1])
-            self.signal.emit('sleep_execute_item>' + json.dumps(self.info_list[id]))
+            self.info_list[id]['execute_action'] = 'sleep_action'
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
 
 
 

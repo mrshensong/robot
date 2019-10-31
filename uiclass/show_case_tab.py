@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile
+from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam
 from uiclass.controls import CaseControl
 
 class ShowCaseTab(QWidget):
@@ -100,15 +100,24 @@ class ShowCaseTab(QWidget):
 
     # 执行选中的case
     def execute_selected_items(self):
-        if GloVar.case_execute_finished_flag is True:
-            for i in range(self.index+1):
-                if self.case_control_list[i].check_box.checkState() == Qt.Checked:
-                    GloVar.case_execute_finished_flag = False
-                    case_info_list = self.read_script_tag(i)
-                    self.signal.emit('play_single_case>' + str(case_info_list))
-                    # 等待上一case执行完成后才允许下一个case
-                    while GloVar.case_execute_finished_flag is False:
-                        time.sleep(0.02)
+        if GloVar.request_status is None:
+            Logger('[当前还有正在执行的动作, 请稍后执行!]')
+            return
+        for i in range(self.index+1):
+            if self.case_control_list[i].check_box.checkState() == Qt.Checked:
+                while True:
+                    if GloVar.request_status == 'ok':
+                        GloVar.request_status = None
+                        dict_info_list = self.read_script_tag(i)
+                        # list中第一个参数为case文件名, 第二个参数为完整路径, 后面的为动作信息
+                        # self.action_tab.case_file_name = dict_info_list[0]
+                        # self.action_tab.case_absolute_name = dict_info_list[1]
+                        Logger('[正在执行的case为] : %s' % dict_info_list[1])
+                        self.play_single_case(dict_info_list)
+                        self.signal.emit('play_single_case>')
+                        break
+                    else:
+                        time.sleep(0.002)
 
 
     # 线程中执行选中的case
@@ -125,9 +134,14 @@ class ShowCaseTab(QWidget):
             self.signal.emit('case_transform_to_action>'+str(case_info_list))
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
             id = int(signal_str.split('>')[1])
-            case_info_list = self.read_script_tag(id)
-            self.signal.emit('play_single_case>' + str(case_info_list))
+            dict_info_list = self.read_script_tag(id)
+            Logger('[正在执行的case为] : %s' % dict_info_list[1])
+            self.play_single_case(dict_info_list)
+            self.signal.emit('play_single_case>')
         else:
             pass
 
@@ -156,6 +170,39 @@ class ShowCaseTab(QWidget):
             new_dict_info.append(dict_buffer)
         return new_dict_info
 
+
+    # 执行单个case(参数为从xml中读出来的)
+    def play_single_case(self, dict_info_list):
+        # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息(action展示需要用到)
+        # self.action_tab.case_file_name = dict_info_list[0]
+        # self.action_tab.case_absolute_name = dict_info_list[1]
+        GloVar.post_info_list = []
+        GloVar.post_info_list.append('start')
+        for id in range(2, len(dict_info_list)):
+            # 判断是action控件
+            if MotionAction.points in dict_info_list[id]:
+                # info_dict长度大于2为action控件
+                # 将字典中的'(0, 0)'转为元祖(0, 0)
+                dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
+                # 一个action字典中需要标明什么类型动作
+                dict_info_list[id]['execute_action'] = 'motion_action'
+                dict_info_list[id]['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+                GloVar.post_info_list.append(dict_info_list[id])
+            # 为record或者sleep控件
+            else:
+                # 为record控件
+                if RecordAction.record_status in dict_info_list[id]:
+                    dict_info_list[id]['execute_action'] = 'record_action'
+                    # 添加视频存放根目录
+                    dict_info_list[id]['video_path'] = GloVar.project_video_path
+                    GloVar.post_info_list.append(dict_info_list[id])
+                # 为sleep控件
+                elif SleepAction.sleep_time in dict_info_list[id]:
+                    dict_info_list[id]['execute_action'] = 'sleep_action'
+                    GloVar.post_info_list.append(dict_info_list[id])
+        GloVar.post_info_list.append('stop')
+        # 执行一条case
+        # self.signal.emit('sleep_execute_item>' + json.dumps(GloVar.post_info_list))
 
 
     # 清除所有动作
