@@ -141,6 +141,8 @@ class UiMainWindow(QMainWindow):
         # Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
         # Thread(target=self.get_python_server_pid, args=()).start()
+
+        # 机械臂处理
         self.robot = ArmAction()
 
 

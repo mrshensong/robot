@@ -56,10 +56,21 @@ class ArmAction:
     def execute_actions(self, info_list):
         data = info_list
         # 判断校验位
-        if data[0] == 'start' and data[-1] == 'stop':
-            # 去掉校验信息(只保留有用内容)
+        if data[0].startswith('start') and data[-1] == 'stop':
+            # 执行的是case&选中的actions
+            if '>' in data[0]:
+                description = data[0].split('>')[1]
+                if description == 'actions':
+                    Logger('[开始执行选中actions]')
+                else:
+                    Logger('[开始执行case] : %s' % description)
+            # 执行的是单个action
+            else:
+                description = None
+            # 去掉校验信息(掐头去尾, 只保留有用内容)
             data.pop(-1)
             data.pop(0)
+            # 开始执行动作
             for action in data:
                 if action['execute_action'] == 'motion_action':
                     if action['action_type'] == 'click':
@@ -74,6 +85,12 @@ class ArmAction:
                     self.play_record_action(action)
                 elif action['execute_action'] == 'sleep_action':
                     self.play_sleep_action(action)
+            # 打印描述信息
+            if description is not None:
+                if description == 'actions':
+                    Logger('[选中的actions执行结束]')
+                else:
+                    Logger('[执行结束case] : %s' % description)
         GloVar.request_status = 'ok'
         # else:
         #     return HttpResponse("data error")
@@ -88,6 +105,7 @@ class ArmAction:
         leave = int(data['leave'])
         base_position = data['base']
         position = data['points']
+        Logger('执行-->action[click]---------坐标: %s' % str(position))
         # 坐标浮点数精度过高机械臂无法处理,造成长时间无响应
         x = round(base_position[0] - position[0], 4)
         y = round(base_position[1] - position[1], 4)
@@ -110,6 +128,7 @@ class ArmAction:
         leave = int(data['leave'])
         base_position = data['base']
         position = data['points']
+        Logger('执行-->action[double_click]---------坐标: %s' % str(position))
         # 坐标浮点数精度过高机械臂无法处理,造成长时间无响应
         x = round(base_position[0] - position[0], 4)
         y = round(base_position[1] - position[1], 4)
@@ -131,6 +150,7 @@ class ArmAction:
         base_position = data['base']
         position = data['points']
         pressure_duration = 1000
+        Logger('执行-->action[long_click]---------坐标: %s' % str(position))
         # 坐标浮点数精度过高机械臂无法处理,造成长时间无响应
         x = round(base_position[0] - position[0], 4)
         y = round(base_position[1] - position[1], 4)
@@ -153,8 +173,10 @@ class ArmAction:
         trigger = int(data['trigger'])
         leave = int(data['leave'])
         base_position = data['base']
-        start = data['points'][:2]
-        end = data['points'][2:]
+        position = data['points']
+        start = position[:2]
+        end = position[2:]
+        Logger('执行-->action[slide]---------坐标: %s' % str(position))
         # 坐标浮点数精度过高机械臂无法处理,造成长时间无响应
         x_s = round(base_position[0] - start[0], 4)
         y_s = round(base_position[1] - start[1], 4)
@@ -183,6 +205,8 @@ class ArmAction:
         record_status = data['record_status']
         video_type = data['video_type']
         video_name = data['video_name']
+        video_file = (video_path + '/' + video_type + '/' + video_name + '.mp4')
+        Logger('执行-->action[record]----status[%s]----path: %s' % (record_status, video_file))
         # 重置video对象中的video_path
         self.video.video_path = video_path
         if record_status == 'record_start':
@@ -196,6 +220,7 @@ class ArmAction:
     def play_sleep_action(self, info_dict):
         data = info_dict
         sleep_time = float(data['sleep_time'])
+        Logger('执行-->action[sleep]----status[%s]' % str(sleep_time))
         time.sleep(sleep_time)
 
 

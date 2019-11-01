@@ -109,10 +109,6 @@ class ShowCaseTab(QWidget):
                     if GloVar.request_status == 'ok':
                         GloVar.request_status = None
                         dict_info_list = self.read_script_tag(i)
-                        # list中第一个参数为case文件名, 第二个参数为完整路径, 后面的为动作信息
-                        # self.action_tab.case_file_name = dict_info_list[0]
-                        # self.action_tab.case_absolute_name = dict_info_list[1]
-                        Logger('[正在执行的case为] : %s' % dict_info_list[1])
                         self.play_single_case(dict_info_list)
                         self.signal.emit('play_single_case>')
                         break
@@ -139,7 +135,6 @@ class ShowCaseTab(QWidget):
                 return
             id = int(signal_str.split('>')[1])
             dict_info_list = self.read_script_tag(id)
-            Logger('[正在执行的case为] : %s' % dict_info_list[1])
             self.play_single_case(dict_info_list)
             self.signal.emit('play_single_case>')
         else:
@@ -177,7 +172,7 @@ class ShowCaseTab(QWidget):
         # self.action_tab.case_file_name = dict_info_list[0]
         # self.action_tab.case_absolute_name = dict_info_list[1]
         GloVar.post_info_list = []
-        GloVar.post_info_list.append('start')
+        GloVar.post_info_list.append('start>'+dict_info_list[1])
         for id in range(2, len(dict_info_list)):
             # 判断是action控件
             if MotionAction.points in dict_info_list[id]:

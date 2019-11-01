@@ -131,7 +131,6 @@ class Video:
         self.video_height = int(cap.get(4))
         while self.record_thread_flag is True:
             _, self.image = cap.read()
-            cv2.waitKey(10)
             if self.record_flag is True:
                 # 标记这一帧
                 if self.robot_start_flag is True:

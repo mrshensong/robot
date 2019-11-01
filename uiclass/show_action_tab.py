@@ -174,7 +174,7 @@ class ShowActionTab(QWidget):
             Logger('[当前还有正在执行的动作, 请稍后执行!]')
             return
         GloVar.post_info_list = []
-        GloVar.post_info_list.append('start')
+        GloVar.post_info_list.append('start>actions')
         index = 0
         for i in range(len(self.item_list)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
