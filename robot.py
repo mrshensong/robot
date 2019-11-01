@@ -135,8 +135,8 @@ class UiMainWindow(QMainWindow):
         self.splitter_v_part_2.setStretchFactor(1, 1)
         self.splitter_h_general.addWidget(self.splitter_v_part_1)
         self.splitter_h_general.addWidget(self.splitter_v_part_2)
-        self.splitter_h_general.setStretchFactor(0, 2)
-        self.splitter_h_general.setStretchFactor(1, 3)
+        self.splitter_h_general.setStretchFactor(0, 6)
+        self.splitter_h_general.setStretchFactor(1, 13)
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
 
@@ -271,7 +271,7 @@ class UiMainWindow(QMainWindow):
     # case展示
     def show_case(self):
         self.show_tab_widget = ShowTabWidget(self.central_widget)
-        # self.show_tab_widget.setEnabled(False)
+        self.show_tab_widget.setEnabled(False)
         self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
 
 

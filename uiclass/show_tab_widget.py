@@ -40,10 +40,9 @@ class ShowTabWidget(QTabWidget):
         # 添加action控件时候, 设置动作标志位
         if signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
-        # 保存actions
-        elif signal_str.startswith('save_script_tag>'):
-            self.text_tab.setText(signal_str.split('save_script_tag>')[1])
-            WindowStatus.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
+        elif signal_str.startswith('write_script_tag>'):
+            tab_text = signal_str.split('write_script_tag>')[1]
+            self.text_tab.setText(tab_text)
             # 保存完脚本后(重新导入当前case目录下的脚本)
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
@@ -85,7 +84,8 @@ class ShowTabWidget(QTabWidget):
                         # 为sleep控件
                         elif SleepAction.sleep_time in dict_info_list[id]:
                             self.action_tab.add_sleep_item(dict_info_list[id], flag=False)
-                WindowStatus.action_tab_status = '%s未改动-->>已保存!' % self.action_tab.case_absolute_name
+                self.action_tab.des_text.setText(self.action_tab.case_file_name)
+                WindowStatus.action_tab_status = '%s' % self.action_tab.case_absolute_name
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
             self.signal.emit(signal_str)

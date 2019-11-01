@@ -136,7 +136,7 @@ class WindowStatus:
     # 视频帧率
     video_frame_rate = '120fps'
     # action_tab页面
-    action_tab_status = '没有action'
+    action_tab_status = '空白'
     # case_tab页面
     case_tab_status = '没有打开case目录'
 

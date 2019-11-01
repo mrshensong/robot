@@ -1,7 +1,7 @@
 import json
 import time
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, RobotOther, WindowStatus, Profile, RobotArmParam
@@ -68,6 +68,8 @@ class ShowActionTab(QWidget):
         self.save_script_tag_button.setToolTip('save_tag')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_save + ')}')
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
+        self.des_text = QLineEdit()
+        self.des_text.setText('空白')
 
         h_box = QHBoxLayout()
         h_box.addWidget(self.add_button)
@@ -75,6 +77,7 @@ class ShowActionTab(QWidget):
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
         h_box.addWidget(self.save_script_tag_button)
+        h_box.addWidget(self.des_text)
         h_box.addStretch(1)
         # 原生QListWidget
         self.list_widget = QListWidget()
@@ -221,7 +224,9 @@ class ShowActionTab(QWidget):
                     script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
                     Logger('[保存的脚本标签名为]: %s' % filename[0])
-                    self.signal.emit('save_script_tag>' + script_tag)
+                    self.signal.emit('write_script_tag>' + script_tag)
+                    WindowStatus.action_tab_status = '%s>已保存!' % self.case_absolute_name
+                    self.des_text.setText(self.case_file_name)
                     RobotOther.actions_saved_to_case = True
             else:
                 Logger('[取消保存脚本标签!]')
@@ -243,7 +248,9 @@ class ShowActionTab(QWidget):
         self.tag_list = []
         self.index = -1
         # 取消脚本页的脚本
-        self.signal.emit('save_script_tag>')
+        self.signal.emit('write_script_tag>')
+        self.des_text.setText('空白')
+        WindowStatus.action_tab_status = '空白!'
         RobotOther.actions_saved_to_case = True
         self.case_file_name = ''
         self.case_absolute_name = ''
@@ -264,13 +271,15 @@ class ShowActionTab(QWidget):
         elif item_type == 'sleep':
             self.tag_list.append(self.generate_sleep_tag(info_dict))
         # 发送需要显示的脚本标签
-        self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         if flag is True:
             RobotOther.actions_saved_to_case = False
             if self.case_file_name == '':  # 空白新建action
-                WindowStatus.action_tab_status = '新建case-->>未保存!'
+                WindowStatus.action_tab_status = '新case>未保存!'
+                self.des_text.setText('空白')
             else:  # case新增action
-                WindowStatus.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
+                WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
+                self.des_text.setText(self.case_file_name)
         else:
             RobotOther.actions_saved_to_case = True
         # 滚动条滚动到当前item
@@ -408,14 +417,18 @@ class ShowActionTab(QWidget):
         # 发送需要显示的脚本标签
         if len(self.tag_list) > 0:
             RobotOther.actions_saved_to_case = False
-            self.signal.emit('save_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+            self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         else:
-            self.signal.emit('save_script_tag>')
+            self.signal.emit('write_script_tag>')
+            self.case_file_name = ''
+            self.case_absolute_name = ''
             RobotOther.actions_saved_to_case = True
         if self.case_file_name == '':  # 空白新建action
-            WindowStatus.action_tab_status = '新建case-->>未保存!'
+            WindowStatus.action_tab_status = '空白!'
+            self.des_text.setText('空白')
         else:  # case新增action
-            WindowStatus.action_tab_status = '%s有改动-->>未保存!' % self.case_absolute_name
+            WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
+            self.des_text.setText(self.case_file_name)
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')

@@ -85,7 +85,7 @@ class ShowCaseTab(QWidget):
                         case_file = MergePath([home, file]).merged_path
                         # 将文件名传入
                         self.add_item(case_file)
-            WindowStatus.case_tab_status = 'case所在文件夹-->>%s!' % case_folder
+            WindowStatus.case_tab_status = 'case路径>%s!' % case_folder
         else:
             Logger('没有选择case所在文件夹')
 
