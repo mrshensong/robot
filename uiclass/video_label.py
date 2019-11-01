@@ -17,7 +17,7 @@ class VideoLabel(QLabel):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, camera_width, camera_height):
         super(VideoLabel, self).__init__(parent)
         self.parent = parent
         # 使用字体
@@ -45,6 +45,9 @@ class VideoLabel(QLabel):
         # 视频进度条刷新
         self.slider_thread = Timer(frequent=4)
         self.slider_thread.timeSignal[str].connect(self.slider_refresh)
+        # 获取实时流时候的image
+        self.timer_camera_image = Timer()
+        self.timer_camera_image.timeSignal[str].connect(self.get_camera_image)
         # 相机状态
         self.camera_opened = 'OPENED'
         self.camera_closed = 'CLOSED'
@@ -59,11 +62,11 @@ class VideoLabel(QLabel):
         self.video_label_size_width = 0
         self.video_label_size_height = 0
         # 视频流&视频尺寸
-        self.real_time_video_width = 1280
-        self.real_time_video_height = 720
+        self.real_time_video_width = camera_width
+        self.real_time_video_height = camera_height
         # 默认将实时流尺寸和本地视频尺寸置位一样
-        self.local_video_width = self.real_time_video_width
-        self.local_video_height = self.real_time_video_height
+        self.local_video_width = camera_width
+        self.local_video_height = camera_height
         # 数据处理gif动图
         self.data_processing_gif = QMovie(IconPath.data_processing_file)
         # 取出来图片的尺寸(shape有三个元素(height/width/通道数)-->我们只需要前两个height和width)
@@ -194,15 +197,6 @@ class VideoLabel(QLabel):
 
 
     '''以下内容为实时流工具栏相关操作'''
-    # 视频流
-    def video_stream(self):
-        # 使用电脑自带摄像头
-        if self.use_system_camera is True:
-            Thread(target=self.system_camera_stream, args=()).start()
-        # 使用外接工业摄像头
-        else:
-            Thread(target=self.external_camera_stream, args=()).start()
-
     # 切换摄像头状态
     def switch_camera_status(self):
         # 实时流保证30fps/s即可
@@ -231,7 +225,8 @@ class VideoLabel(QLabel):
             # 打开实时流视频并播放
             Logger('<打开摄像头>')
             self.camera_status = self.camera_opened
-            self.video_stream()
+            # self.video_stream()
+            self.timer_camera_image.start()
             time.sleep(3)
             # time.sleep(15)
             # 打开视频展示定时器
@@ -245,6 +240,8 @@ class VideoLabel(QLabel):
             Logger('<关闭摄像头>')
             # 关闭视频展示定时器
             self.timer_video.stop()
+            # 停止获取实时流image
+            self.timer_camera_image.stop()
             self.video_status = self.STATUS_INIT
             RobotOther.select_template_flag = False
             self.setCursor(Qt.ArrowCursor)
@@ -252,89 +249,6 @@ class VideoLabel(QLabel):
             self.camera_status = self.camera_closed
             self.setPixmap(QPixmap(IconPath.background_file))
             self.status_video_button.setEnabled(False)
-
-
-    # 系统摄像头流
-    def system_camera_stream(self):
-        # 使用电脑自带摄像头
-        cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.real_time_video_width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.real_time_video_height)
-        # 使用罗技摄像头
-        # cap = cv2.VideoCapture(1)
-        while self.camera_status == self.camera_opened:
-            _, frame = cap.read()
-            self.image = frame.copy()
-        cap.release()
-
-    # 外接摄像头
-    def external_camera_stream(self):
-        # create a device manager
-        device_manager = gx.DeviceManager()
-        dev_num, dev_info_list = device_manager.update_device_list()
-        if dev_num is 0:
-            print("Number of enumerated devices is 0")
-            return
-        # open device by serial number
-        cam = device_manager.open_device_by_sn(dev_info_list[0].get("sn"))
-        # if camera is mono
-        if cam.PixelColorFilter.is_implemented() is False:
-            print("This sample does not support mono camera.")
-            cam.close_device()
-            return
-        # set continuous acquisition
-        cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
-        # set exposure(曝光)
-        cam.ExposureTime.set(10000.0)
-        # set gain(增益)
-        cam.Gain.set(10.0)
-        # set roi(ROI)
-        cam.Width.set(self.real_time_video_width)
-        cam.Height.set(self.real_time_video_height)
-        cam.OffsetX.set(int((1200 - self.real_time_video_height) / 2))
-        cam.OffsetY.set(int((1920 - self.real_time_video_width) / 2))
-        # 自动白平衡
-        cam.BalanceWhiteAuto.set(True)
-        # set param of improving image quality
-        if cam.GammaParam.is_readable():
-            gamma_value = cam.GammaParam.get()
-            gamma_lut = gx.Utility.get_gamma_lut(gamma_value)
-        else:
-            gamma_lut = None
-        if cam.ContrastParam.is_readable():
-            contrast_value = cam.ContrastParam.get()
-            contrast_lut = gx.Utility.get_contrast_lut(contrast_value)
-        else:
-            contrast_lut = None
-        color_correction_param = cam.ColorCorrectionParam.get()
-        # start data acquisition
-        cam.stream_on()
-        # acquisition image: num is the image number
-        while self.camera_status == self.camera_opened:
-            # get raw image
-            raw_image = cam.data_stream[0].get_image()
-            if raw_image is None:
-                print("Getting image failed.")
-                continue
-            # get RGB image from raw image
-            rgb_image = raw_image.convert("RGB")
-            if rgb_image is None:
-                continue
-            # improve image quality
-            rgb_image.image_improvement(color_correction_param, contrast_lut, gamma_lut)
-            # create numpy array with data from raw image
-            numpy_image = rgb_image.get_numpy_array()
-            if numpy_image is None:
-                continue
-            # 将图片格式转换为cv模式
-            numpy_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
-            self.image = numpy_image.copy()
-            # print height, width, and frame ID of the acquisition image
-            # print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
-        # stop data acquisition
-        cam.stream_off()
-        # close device
-        cam.close_device()
 
 
     '''以下内容为视频进度栏的刷新'''
@@ -370,6 +284,11 @@ class VideoLabel(QLabel):
             except Exception as e:
                 Logger('[当前视频播放完毕]')
             self.slider_flag = False
+
+
+    # 定时器获取实时流摄像头图片(代替展示摄像头)
+    def get_camera_image(self):
+        self.image = GloVar.camera_image
 
 
     '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''

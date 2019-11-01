@@ -10,12 +10,12 @@ class MainShowTabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, camera_width, camera_height):
         super(MainShowTabWidget, self).__init__(parent)
         self.parent = parent
         # self.setTabPosition(self.South)
         # tab1
-        self.video_tab = VideoTab(self)  # 1
+        self.video_tab = VideoTab(self, camera_width=camera_width, camera_height=camera_height)  # 1
         self.video_tab.signal[str].connect(self.recv_video_tab_signal)
 
         self.picture_tab = PictureTab(self)
@@ -33,9 +33,11 @@ class VideoTab(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, camera_width, camera_height):
         super(VideoTab, self).__init__(parent)
         self.parent = parent
+        self.camera_width = camera_width
+        self.camera_height = camera_height
         self.initUI()
 
 
@@ -43,7 +45,7 @@ class VideoTab(QWidget):
         self.general_layout = QVBoxLayout(self)
         self.video_label_h_layout = QHBoxLayout(self)
 
-        self.video_label = VideoLabel(self)
+        self.video_label = VideoLabel(self, camera_width=self.camera_width, camera_height=self.camera_height)
         self.video_label.signal[str].connect(self.recv_video_label_signal)
 
         # 创建一个滚动区域

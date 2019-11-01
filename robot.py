@@ -31,6 +31,9 @@ class UiMainWindow(QMainWindow):
 
     def setupUi(self):
         """初始化参数"""
+        # 摄像机图像尺寸
+        self.camera_image_width = 1280
+        self.camera_image_height = 720
         # 获取到的视频根目录
         self.get_path = None
         # 获取截图保存路径
@@ -81,6 +84,8 @@ class UiMainWindow(QMainWindow):
         self.project_bar()
         # 控制台输出框架
         self.output_text()
+        # 机械臂处理
+        self.robot = ArmAction(camera_width=self.camera_image_width, camera_height=self.camera_image_height)
         # 菜单栏
         self.menu_bar = QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')
@@ -141,9 +146,6 @@ class UiMainWindow(QMainWindow):
         # Thread(target=self.open_python_server, args=()).start()
         # 获取python_server的pid
         # Thread(target=self.get_python_server_pid, args=()).start()
-
-        # 机械臂处理
-        self.robot = ArmAction()
 
 
     '''以下部分为界面各个控件信息'''
@@ -261,7 +263,7 @@ class UiMainWindow(QMainWindow):
 
     # 视频播放框架
     def video_play_frame(self):
-        self.main_show_tab_widget = MainShowTabWidget(self.central_widget)
+        self.main_show_tab_widget = MainShowTabWidget(self.central_widget, camera_width=self.camera_image_width, camera_height=self.camera_image_height)
         self.main_show_tab_widget.signal[str].connect(self.recv_video_label_signal)
 
 
@@ -802,7 +804,8 @@ class UiMainWindow(QMainWindow):
             if self.python_server_pid is not None:
                 os.system('taskkill -f -pid %s' % self.python_server_pid)
             # 关闭摄像头
-            self.main_show_tab_widget.video_tab.video_label.camera_status = self.main_show_tab_widget.video_tab.video_label.camera_closed
+            self.robot.video.stop_record_thread()
+            self.main_show_tab_widget.video_tab.video_label.timer_camera_image.stop()
             self.timer_window_status.stop()
             self.main_show_tab_widget.video_tab.video_label.slider_thread.stop()
             event.accept()

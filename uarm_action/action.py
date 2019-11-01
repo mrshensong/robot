@@ -6,7 +6,7 @@ from uarm_action.video import Video
 from GlobalVar import GloVar
 
 class ArmAction:
-    def __init__(self):
+    def __init__(self, camera_width, camera_height):
         self.speed_opt = 150
         self.cmd_g1 = "G1"
         self.cmd_g0 = "G0"
@@ -22,7 +22,7 @@ class ArmAction:
         self.swift.set_position(50, 100, 40, 20, cmd="G0")
         self.swift.flush_cmd()
         # 视频线程
-        self.video = Video(video_path=None)
+        self.video = Video(video_path=None, video_width=camera_width, video_height=camera_height)
         Thread(target=self.video.recording, args=()).start()
 
 

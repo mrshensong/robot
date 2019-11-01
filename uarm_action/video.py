@@ -5,10 +5,12 @@ import gxipy as gx
 import numpy as np
 from threading import Thread
 from pythonservice.python_service.utils import logger
+from GlobalVar import GloVar
+
 
 class Video:
 
-    def __init__(self, video_path):
+    def __init__(self, video_path, video_width, video_height):
         # 保存视频需要用到的参数
         self.video_path = video_path
         # 保存视频帧列表
@@ -26,8 +28,8 @@ class Video:
         # 视频名称(桌面滑动)
         self.case_name = None
         # 视频需要保存的高和宽
-        self.video_width = None
-        self.video_height = None
+        self.video_width = video_width
+        self.video_height = video_height
         # 当前图片
         self.image = None
 
@@ -105,16 +107,19 @@ class Video:
             if numpy_image is None:
                 continue
             # 将图片格式转换为cv模式
-            self.image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
+            # self.image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
+            GloVar.camera_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
             # 当录像标志打开时, 将frame存起来
             if self.record_flag is True:
                 # 在这儿是否需要判断Frame ID有重复的情况(如果有的话就需要进行处理--考虑要不要加进去)
                 # 将摄像头产生的frame放到容器中
                 if self.robot_start_flag is True:
-                    self.video_frames_list.append(self.image.copy()[0].fill(255))
+                    # self.video_frames_list.append(self.image.copy()[0].fill(255))
+                    self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
                     self.robot_start_flag = False
                 else:
-                    self.video_frames_list.append(self.image.copy())
+                    # self.video_frames_list.append(self.image.copy())
+                    self.video_frames_list.append(GloVar.camera_image.copy())
                 # print height, width, and frame ID of the acquisition image
                 print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
 
@@ -127,20 +132,20 @@ class Video:
     # 调用笔记本摄像头模拟工业摄像头
     def video_stream(self):
         cap = cv2.VideoCapture(0)
-        self.video_width = int(cap.get(3))
-        self.video_height = int(cap.get(4))
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_height)
         while self.record_thread_flag is True:
-            _, self.image = cap.read()
+            # _, self.image = cap.read()
+            _, GloVar.camera_image = cap.read()
             if self.record_flag is True:
                 # 标记这一帧
                 if self.robot_start_flag is True:
-                    self.video_frames_list.append(self.image.copy()[0].fill(255))
+                    # self.video_frames_list.append(self.image.copy()[0].fill(255))
+                    self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
                     self.robot_start_flag = False
                 else:
-                    self.video_frames_list.append(self.image.copy())
-            #     cv2.imshow('frame', self.image.copy())
-            # else:
-            #     cv2.destroyAllWindows()
+                    # self.video_frames_list.append(self.image.copy())
+                    self.video_frames_list.append(GloVar.camera_image.copy())
         cap.release()
 
 
@@ -160,11 +165,7 @@ class Video:
                         logger.info('开始保存视频')
                         flag_out = True
                         video_file_path = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
-                        # out = cv2.VideoWriter(video_file_path, fourcc, 240.0, (self.video_width, self.video_height), True)
-                        while True:
-                            if self.video_height is not None and self.video_width is not None:
-                                out = cv2.VideoWriter(video_file_path, fourcc, 30.0, (self.video_width, self.video_height), True)
-                                break
+                        out = cv2.VideoWriter(video_file_path, fourcc, 30.0, (self.video_width, self.video_height), True)
                     if len(self.video_frames_list) > 0:
                         out.write(self.video_frames_list[0])
                         self.video_frames_list.pop(0)

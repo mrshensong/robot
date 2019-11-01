@@ -11,6 +11,8 @@ class GloVar:
     project_video_path = None
     # 当前工程照片存放目录
     project_picture_path = None
+    # 保存的摄像头实时照片
+    camera_image = None
     # 框选屏幕大小标志
     box_screen_flag = False
     # 保存图片标志(是否需要保存图片,用来实时监测目标位置)
