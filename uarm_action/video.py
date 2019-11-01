@@ -220,29 +220,16 @@ class Video:
 
 
 if __name__=='__main__':
-    path = 'D:/Work/MindVision/DemoPy'
+    path = 'D:/Code/robot/video'
     video = Video(video_path=path)
+    Thread(target=video.recording, args=()).start()
 
-
-    def case_run():
-        # 开始录制视频
-        video.start_record_video(case_type='test', case_name='123')
-        time.sleep(10)
-        # 停止录制视频
-        video.stop_record_video()
-        video.start_record_video(case_type='test', case_name='234')
-        time.sleep(6)
-        # 停止录制视频
-        video.stop_record_video()
-        video.stop_record_thread()
-
-
-    def recording():
-        video.recording()
-
-
-    def running():
-        Thread(target=case_run, args=()).start()
-        Thread(target=recording, args=()).start()
-
-    running()
+    # 开始录制视频
+    video.start_record_video(case_type='test', case_name='123')
+    time.sleep(5)
+    # 停止录制视频
+    video.stop_record_video()
+    # video.start_record_video(case_type='test', case_name='234')
+    # time.sleep(6)
+    # video.stop_record_video()
+    video.stop_record_thread()
