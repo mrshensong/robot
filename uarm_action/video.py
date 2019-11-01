@@ -5,7 +5,7 @@ import gxipy as gx
 import numpy as np
 from threading import Thread
 from pythonservice.python_service.utils import logger
-from GlobalVar import GloVar
+from GlobalVar import GloVar, MergePath
 
 
 class Video:
@@ -164,7 +164,8 @@ class Video:
                     if count == 0:
                         logger.info('开始保存视频')
                         flag_out = True
-                        video_file_path = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
+                        # video_file_path = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
+                        video_file_path = MergePath(section_path=[self.video_path, self.case_type, (self.case_name + '.mp4')]).merged_path
                         out = cv2.VideoWriter(video_file_path, fourcc, 30.0, (self.video_width, self.video_height), True)
                     if len(self.video_frames_list) > 0:
                         out.write(self.video_frames_list[0])
@@ -193,7 +194,8 @@ class Video:
     def start_record_video(self, case_type='test', case_name='test'):
         self.case_type = case_type
         self.case_name = case_name
-        video_path = self.video_path + '/' + self.case_type
+        # video_path = self.video_path + '/' + self.case_type
+        video_path = MergePath(section_path=[self.video_path, self.case_type]).merged_path
         if os.path.exists(video_path) is False:
             os.makedirs(video_path)
         if self.re_start_record_flag is False:
@@ -221,7 +223,7 @@ class Video:
 
 if __name__=='__main__':
     path = 'D:/Code/robot/video'
-    video = Video(video_path=path)
+    video = Video(video_path=path, video_width=1280, video_height=720)
     Thread(target=video.recording, args=()).start()
 
     # 开始录制视频

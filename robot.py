@@ -84,8 +84,6 @@ class UiMainWindow(QMainWindow):
         self.project_bar()
         # 控制台输出框架
         self.output_text()
-        # 机械臂处理
-        self.robot = ArmAction(camera_width=self.camera_image_width, camera_height=self.camera_image_height)
         # 菜单栏
         self.menu_bar = QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')
@@ -141,6 +139,9 @@ class UiMainWindow(QMainWindow):
         self.splitter_h_general.setStretchFactor(1, 3)
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
+
+        # 机械臂处理
+        self.robot = ArmAction(camera_width=self.camera_image_width, camera_height=self.camera_image_height)
 
         # 打开python_service
         # Thread(target=self.open_python_server, args=()).start()
@@ -322,6 +323,7 @@ class UiMainWindow(QMainWindow):
         if signal_str.startswith('frame_rate_adjust>'):
             frame_rate = int(signal_str.split('frame_rate_adjust>')[1])
             self.main_show_tab_widget.video_tab.video_label.timer_video.frequent = frame_rate
+            WindowStatus.video_frame_rate = str(frame_rate) + 'fps'
 
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
@@ -536,19 +538,16 @@ class UiMainWindow(QMainWindow):
             RobotArmAction.uArm_action_type = RobotArmAction.uArm_slide
         elif action == RobotArmAction.uArm_lock:
             # 机械臂锁定
-            response = self.uArm_get_request(RobotArmAction.uArm_lock)
-            Logger(response)
+            # response = self.uArm_get_request(RobotArmAction.uArm_lock)
+            Thread(target=self.robot.servo_attach, args=()).start()
         elif action == RobotArmAction.uArm_unlock:
             # 机械臂解锁
-            response = self.uArm_get_request(RobotArmAction.uArm_unlock)
-            Logger(response)
+            # response = self.uArm_get_request(RobotArmAction.uArm_unlock)
+            Thread(target=self.robot.servo_detach, args=()).start()
         elif action == RobotArmAction.uArm_get_position:
             # 获取机械臂当前坐标
-            response = self.uArm_get_request(RobotArmAction.uArm_get_position)
-            RobotArmParam.base_x_point = float(response.split(',')[0])
-            RobotArmParam.base_y_point = float(response.split(',')[1])
-            RobotArmParam.base_z_point = float(response.split(',')[2])
-            Logger('当前位置为: %s' % response)
+            # response = self.uArm_get_request(RobotArmAction.uArm_get_position)
+            Thread(target=self.robot.get_position, args=()).start()
         else:
             Logger('当前不支持[%s]这个动作' % action)
 
