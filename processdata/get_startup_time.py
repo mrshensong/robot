@@ -194,10 +194,15 @@ class GetStartupTime:
             Logger('正在计算<%s>起止点...' % video)
             end_mask = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
             start_threshold_list, end_threshold_list = self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=video)
-            Logger('%s-->起始 ' % video + str(self.detect_start_point(start_threshold_list)))
-            Logger('%s-->终点 ' % video + str(self.detect_end_point(end_threshold_list)))
+            # 起始帧和停止帧(因这里帧数从零开始, 故而帧数增加一个)
+            start_frame, start_threshold = self.detect_start_point(start_threshold_list)
+            end_frame, end_threshold = self.detect_end_point(end_threshold_list)
+            start_frame = start_frame + 1
+            end_frame = end_frame + 1
+            Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (video, start_frame, start_threshold))
+            Logger('%s-->终点点: 帧> %d, 匹配率> %.4f' % (video, end_frame, end_threshold))
         RobotOther.data_process_finished_flag = True
-        Logger('finished!')
+        Logger('data process finished!')
 
 
 if __name__=='__main__':
