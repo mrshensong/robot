@@ -2,22 +2,21 @@ import os
 import cv2
 import numpy as np
 from GlobalVar import MergePath, Logger, RobotOther
+from processdata.operate_excel import OperateExcel
 
 class GetStartupTime:
 
     def __init__(self, video_path):
-        #
-        self.image_zoom = 2
-        # 帧偏差
-        self.frame_deviation = 16
-        # 模板匹配率
-        self.match_threshold = 0.93
-        # 保存图片标志
-        self.image_flag = False
-        # 视频帧率
-        self.frame_rate = 30
         # 视频路径
         self.video_path = video_path
+        # 报告路径
+        self.report_path = video_path.replace('/video/', '/report/')
+        if os.path.exists(self.report_path) is False:
+            os.makedirs(self.report_path)
+        # excel存储数据
+        self.report_excel = self.report_path + '/' + 'report.xlsx'
+        # 模板匹配率
+        self.match_threshold = 0.93
         # 待处理的视频列表
         self.videos_list = []
 
@@ -172,7 +171,7 @@ class GetStartupTime:
                 frame_serial_number = i
                 frame_threshold = match_threshold_expected_list[i]
                 break
-        return frame_serial_number, frame_threshold
+        return frame_serial_number, round(frame_threshold, 4)
 
 
     def get_all_video_start_and_end_points(self):
@@ -189,6 +188,8 @@ class GetStartupTime:
                     # 文件名列表, 包含完整路径
                     file = MergePath([home, file]).merged_path
                     self.videos_list.append(file)
+        # 用list保存起始和终止点参数(需要写入excel)
+        data_list = []
         # 需要试用视频文件路径作为参数
         for video in self.videos_list:
             Logger('正在计算<%s>起止点...' % video)
@@ -201,11 +202,14 @@ class GetStartupTime:
             end_frame = end_frame + 1
             Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (video, start_frame, start_threshold))
             Logger('%s-->终点点: 帧> %d, 匹配率> %.4f' % (video, end_frame, end_threshold))
+            data_list.append({'name':video, 'start_frame':start_frame, 'start_threshold':start_threshold, 'end_frame':end_frame, 'end_threshold':end_threshold})
         RobotOther.data_process_finished_flag = True
+        # 保存excel
+        OperateExcel(file=self.report_excel, data_list=data_list).generate_data()
         Logger('data process finished!')
 
 
 if __name__=='__main__':
-    video_path = 'D:/Code/Robot/robot/video/2019-10-15'
+    video_path = 'D:/Code/robot/video/2019-10-15'
     test = GetStartupTime(video_path=video_path)
     test.get_all_video_start_and_end_points()
