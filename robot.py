@@ -398,6 +398,12 @@ class UiMainWindow(QMainWindow):
             # 自动跳转到picture页面
             self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.picture_tab)
             self.main_show_tab_widget.picture_tab.show_picture()
+        # 打开报告
+        elif signal_str.startswith('open_report>'):
+            self.main_show_tab_widget.report_tab.report_path = signal_str.split('open_report>')[1]
+            # 自动跳转到report页面
+            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.report_tab)
+            self.main_show_tab_widget.report_tab.show_html()
 
 
     '''以下内容为python_service相关操作函数'''

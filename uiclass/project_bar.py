@@ -53,9 +53,12 @@ class ProjectBar(QWidget):
     def operation_file(self):
         index = self.tree.currentIndex()
         file_path = self.model.filePath(index)
-        # 当前双击只支持展示图片
+        # 展示图片
         if file_path.endswith('.jpg') or file_path.endswith('.png'):
             self.signal.emit('open_picture>' + str(file_path))
+        # 展示报告
+        elif file_path.endswith('.html'):
+            self.signal.emit('open_report>' + str(file_path))
         else:
             pass
 

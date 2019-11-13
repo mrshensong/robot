@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.video_label import VideoLabel
@@ -13,15 +13,19 @@ class MainShowTabWidget(QTabWidget):
     def __init__(self, parent, camera_width, camera_height):
         super(MainShowTabWidget, self).__init__(parent)
         self.parent = parent
+        # 标签位置放在底部
         # self.setTabPosition(self.South)
-        # tab1
+        # 视频页
         self.video_tab = VideoTab(self, camera_width=camera_width, camera_height=camera_height)  # 1
         self.video_tab.signal[str].connect(self.recv_video_tab_signal)
-
+        # 照片页
         self.picture_tab = PictureTab(self)
+        # 报告页
+        self.report_tab = ReportTab(self)
 
         self.addTab(self.video_tab, 'video')
         self.addTab(self.picture_tab, 'picture')
+        self.addTab(self.report_tab, 'report')
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_tab_signal(self, info_str):
@@ -242,3 +246,49 @@ class PictureTab(QWidget):
         self.picture_path_label.setText(str(self.picture_path))
         self.picture_size_label.setText('size: [%d:%d], zoom: [1.0X]' % (self.picture_size_width, self.picture_size_height))
         self.picture_zoom_scale = 1.0
+
+
+# 照片tab
+class ReportTab(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(ReportTab, self).__init__(parent)
+        self.parent = parent
+        self.report_path = None
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QVBoxLayout(self)
+        self.html_h_layout = QHBoxLayout(self)
+        self.title_h_layout = QHBoxLayout(self)
+        # 显示报告路径
+        self.html_path_label = QLabel(self)
+        self.html_path_label.setText('None')
+
+        self.title_h_layout.addStretch(1)
+        self.title_h_layout.addWidget(self.html_path_label)
+        self.title_h_layout.addStretch(1)
+
+        # html展示
+        self.html_show_text = QTextEdit(self)
+
+        self.html_h_layout.addWidget(self.html_show_text)
+
+        self.general_layout.addLayout(self.title_h_layout)
+        self.general_layout.addLayout(self.html_h_layout)
+
+        self.setLayout(self.general_layout)
+
+
+    # html展示操作
+    def show_html(self):
+        with open(self.report_path, 'r', encoding='utf-8') as f:
+            html = f.read()
+        # 将报告中的image相对路径改为绝对路径
+        report_picture_path = self.report_path.split('.')[0] + '.png'
+        html = html.replace('<img src="report.png"/>', '<img src="'+report_picture_path+'"/>')
+        self.html_path_label.setText(self.report_path)
+        self.html_show_text.setHtml(html)
