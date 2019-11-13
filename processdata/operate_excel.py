@@ -22,7 +22,7 @@ class OperateExcel:
             # 将所有的case_type放入列表, 然后去重(即可知道需要新建几个sheet)
             sheet_name_list.append(case_type)
             # case文件名
-            file_name =  data['name'].split('/')[-1]
+            file_name = data['name'].split('/')[-1]
             data_dict['file_name'] = file_name
             # 开始帧
             start_frame = data['start_frame']
@@ -62,11 +62,11 @@ class OperateExcel:
                 end_frame_list.append(data[i]['end_frame'])
                 end_threshold_list.append(data[i]['end_threshold'])
             sheet_name = data[0]
-            data = {'用例' : file_name_list,
-                    '开始帧' : start_frame_list,
-                    '开始帧匹配率' : start_threshold_list,
-                    '结束帧' : end_frame_list,
-                    '结束帧匹配率' : end_threshold_list}
+            data = {'用例': file_name_list,
+                    '开始帧': start_frame_list,
+                    '开始帧匹配率': start_threshold_list,
+                    '结束帧': end_frame_list,
+                    '结束帧匹配率': end_threshold_list}
             Logger('保存sheet: ' + sheet_name)
             df = pd.DataFrame(data=data)
             df.to_excel(excel_writer=excel_writer, sheet_name=sheet_name, index=False)
