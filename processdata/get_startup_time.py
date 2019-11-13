@@ -1,8 +1,9 @@
 import os
 import cv2
 import numpy as np
+from openpyxl import Workbook
 from GlobalVar import MergePath, Logger, RobotOther
-from processdata.operate_excel import OperateExcel
+
 
 class GetStartupTime:
 
@@ -200,13 +201,71 @@ class GetStartupTime:
             end_frame, end_threshold = self.detect_end_point(end_threshold_list)
             start_frame = start_frame + 1
             end_frame = end_frame + 1
+            frame_gap = end_frame - start_frame
             Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (video, start_frame, start_threshold))
             Logger('%s-->终点点: 帧> %d, 匹配率> %.4f' % (video, end_frame, end_threshold))
-            data_list.append({'name':video, 'start_frame':start_frame, 'start_threshold':start_threshold, 'end_frame':end_frame, 'end_threshold':end_threshold})
+            data_list.append({'name':video, 'start_frame':start_frame, 'start_threshold':start_threshold, 'end_frame':end_frame, 'end_threshold':end_threshold, 'frame_gap':frame_gap})
         RobotOther.data_process_finished_flag = True
         # 保存excel
-        OperateExcel(file=self.report_excel, data_list=data_list).generate_data()
+        self.write_data_to_excel(file=self.report_excel, original_data_list=data_list)
         Logger('data process finished!')
+
+    # 将得到的数据写入excel
+    def write_data_to_excel(self, file, original_data_list):
+        data_list = []
+        sheet_name_list = []
+        for data in original_data_list:
+            data_dict = {}
+            # 通过文件名的倒数第二个获取到case类型(也就是sheet名)
+            case_type = data['name'].split('/')[-2]
+            data_dict['case_type'] = case_type
+            # 将所有的case_type放入列表, 然后去重(即可知道需要新建几个sheet)
+            sheet_name_list.append(case_type)
+            # case文件名
+            file_name = data['name'].split('/')[-1].split('.')[0]
+            data_dict['file_name'] = file_name
+            # 开始帧
+            start_frame = data['start_frame']
+            data_dict['start_frame'] = start_frame
+            # 开始帧的匹配率
+            start_threshold = data['start_threshold']
+            data_dict['start_threshold'] = start_threshold
+            # 结束帧
+            end_frame = data['end_frame']
+            data_dict['end_frame'] = end_frame
+            # 结束帧的匹配率
+            end_threshold = data['end_threshold']
+            data_dict['end_threshold'] = end_threshold
+            # 帧差
+            frame_gap = data['frame_gap']
+            data_dict['frame_gap'] = frame_gap
+            # 将一行内容存入list
+            data_list.append(data_dict)
+        # sheet_name去重
+        sheet_name_list = list(set(sheet_name_list))
+        # 创建新list(每一个子list放同样类型的case的dict元素)
+        data_list_by_sheet = [[sheet_name] for sheet_name in sheet_name_list]
+        for data in data_list:
+            sheet_name = data['case_type']
+            data.pop('case_type')
+            index = sheet_name_list.index(sheet_name)
+            data_list_by_sheet[index].append(data)
+        # 开始在excel中写入数据
+        work_book = Workbook()
+        # 直接在data_list_by_case_type取出数据即可
+        for data in data_list_by_sheet:
+            # 创建sheet表
+            work_sheet = work_book.create_sheet(data[0])
+            # 创建表头
+            work_sheet.append(['用例', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧'])
+            for i in range(1, len(data)):
+                # 写入每一行内容
+                work_sheet.append(list(data[i].values()))
+        # 删除掉第一个空白sheet
+        work_book.remove(work_book['Sheet'])
+        Logger('生成数据表: ' + file)
+        work_book.save(file)
+        work_book.close()
 
 
 if __name__=='__main__':
