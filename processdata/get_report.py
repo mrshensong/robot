@@ -1,0 +1,1 @@
+# 通过遍历report/date/目录下的png文件来生成html报告

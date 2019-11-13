@@ -46,11 +46,11 @@ class DataGraph:
         # 设置data_list存放获取到的数据([[cases, frame_gap], [cases, frame_gap]])
         data_list = []
         for sheet in sheet_list:
-            print('sheet表: ', sheet)
+            case_type = sheet
             work_sheet = work_book[sheet]
             cases = self.get_column_values(sheet=work_sheet, column=1)
             frame_gap = self.get_column_values(sheet=work_sheet, column=6)
-            data_list.append([cases, frame_gap])
+            data_list.append([case_type, cases, frame_gap])
         work_book.close()
         return data_list
 
@@ -65,11 +65,15 @@ class DataGraph:
         plt.figure()
         plt.barh(y=range(len(case_list)), width=frame_gap_list, height=0.4, color='steelblue', alpha=0.8)  # 从下往上画
         plt.yticks(range(len(case_list)), case_list)
+        # 获取图片title
+        title = file_name.split('/')[-1].split('.')[0]
+        plt.title('['+ title + ']' + '间隔帧数')
         # plt.xlim(30, 47)
-        plt.xlabel("差帧")
-        plt.title("间隔帧数")
+        plt.xlabel('差帧')
         for x, y in enumerate(frame_gap_list):
             plt.text(y + 0.2, x - 0.1, '%s' % y)
+        # 避免出现title或者纵坐标显示不完整的问题
+        plt.tight_layout()
         plt.savefig(file_name)
         # plt.show()
 
@@ -77,8 +81,8 @@ class DataGraph:
     def get_graphs(self):
         data_list = self.get_data()
         for data in data_list:
-            file_name = self.file.split('.')[0] + '-' + str(data_list.index(data) + 1) + '.png'
-            self.drawing(file_name=file_name, case_list=data[0], frame_gap_list=data[1])
+            file_name = '/'.join(self.file.split('/')[:-1]) + '/' + data[0] + '.png'
+            self.drawing(file_name=file_name, case_list=data[1], frame_gap_list=data[2])
 
 
 
