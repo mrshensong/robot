@@ -276,6 +276,7 @@ class ReportTab(QWidget):
 
         # html展示
         self.html_show_text = QTextEdit(self)
+        self.html_show_text.setReadOnly(True)
 
         self.html_h_layout.addWidget(self.html_show_text)
 

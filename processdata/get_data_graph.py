@@ -63,7 +63,8 @@ class GenerateDataGraph:
         参数一：y轴
         参数二：x轴
         """
-        plt.figure()
+        # 像素300, 图片尺寸4*300:3*300
+        plt.figure(figsize=(4, 3), dpi=300)
         plt.barh(y=range(len(case_list)), width=frame_gap_list, height=0.4, color='steelblue', alpha=0.8)  # 从下往上画
         plt.yticks(range(len(case_list)), case_list)
         # 获取图片title
