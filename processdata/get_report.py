@@ -20,8 +20,8 @@ class GenerateReport:
     # 通过柱形图表来生成html中的一部分
     def generate_html_by_graph(self, graph):
         case_type = graph.split('.')[0]
-        text = '\n<h3>【'+ case_type +'】类测试结果如下: </h3>' +\
-               '\n<p><img src="'+ graph +'"/></p>'
+        text = '\n<h3 style="text-align:center">【'+ case_type +'】类测试结果如下: </h3>' +\
+               '\n<p style="text-align:center"><img src="'+ graph +'"/></p>'
         return text
 
     # 保存生成的html代码
