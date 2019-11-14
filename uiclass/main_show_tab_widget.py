@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from uiclass.video_label import VideoLabel
 from GlobalVar import IconPath
 
+
 class MainShowTabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
