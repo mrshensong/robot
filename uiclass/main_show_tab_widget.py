@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit
@@ -288,7 +289,7 @@ class ReportTab(QWidget):
         with open(self.report_path, 'r', encoding='utf-8') as f:
             html = f.read()
         # 将报告中的image相对路径改为绝对路径
-        report_picture_path = self.report_path.split('.')[0] + '.png'
-        html = html.replace('<img src="report.png"/>', '<img src="'+report_picture_path+'"/>')
+        report_picture_path = os.path.split(self.report_path)[0] + '/'
+        html = html.replace('<img src="', '<img src="'+report_picture_path)
         self.html_path_label.setText(self.report_path)
         self.html_show_text.setHtml(html)

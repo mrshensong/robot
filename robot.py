@@ -745,7 +745,7 @@ class UiMainWindow(QMainWindow):
         # 此处调用数据处理函数
         video_path = self.get_path
         test = GetStartupTime(video_path=video_path)
-        Thread(target=test.get_all_video_start_and_end_points, args=()).start()
+        Thread(target=test.data_processing, args=()).start()
         Thread(target=self.data_process_finished, args=()).start()
 
 

@@ -1,12 +1,13 @@
 from openpyxl import load_workbook
 import matplotlib
 import matplotlib.pyplot as plt
+from GlobalVar import Logger
 # 设置中文字体和负号正常显示
 matplotlib.rcParams['font.sans-serif'] = ['SimHei']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 
-class DataGraph:
+class GenerateDataGraph:
     def __init__(self, file):
         self.file = file
 
@@ -75,7 +76,7 @@ class DataGraph:
         # 避免出现title或者纵坐标显示不完整的问题
         plt.tight_layout()
         plt.savefig(file_name)
-        # plt.show()
+        Logger('生成数据图: ' + file_name)
 
     # 获取图片
     def get_graphs(self):
@@ -89,5 +90,5 @@ class DataGraph:
 if __name__=='__main__':
     file = 'D:/Code/robot/report/2019-10-15/report.xlsx'
     # DataGraph(file=None).drawing()
-    data_graph = DataGraph(file=file)
+    data_graph = GenerateDataGraph(file=file)
     data_graph.get_graphs()

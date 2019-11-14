@@ -2,6 +2,8 @@ import os
 import cv2
 import numpy as np
 from openpyxl import Workbook
+from processdata.get_data_graph import GenerateDataGraph
+from processdata.get_report import GenerateReport
 from GlobalVar import MergePath, Logger, RobotOther
 
 
@@ -174,7 +176,7 @@ class GetStartupTime:
                 break
         return frame_serial_number, round(frame_threshold, 4)
 
-
+    # 获取起止点以及对应匹配率等等
     def get_all_video_start_and_end_points(self):
         """
         此处传入视频路径(算出路径下所有case视频的起止点)
@@ -206,9 +208,7 @@ class GetStartupTime:
             Logger('%s-->终点点: 帧> %d, 匹配率> %.4f' % (video, end_frame, end_threshold))
             data_list.append({'name':video, 'start_frame':start_frame, 'start_threshold':start_threshold, 'end_frame':end_frame, 'end_threshold':end_threshold, 'frame_gap':frame_gap})
         RobotOther.data_process_finished_flag = True
-        # 保存excel
-        self.write_data_to_excel(file=self.report_excel, original_data_list=data_list)
-        Logger('data process finished!')
+        return data_list
 
     # 将得到的数据写入excel
     def write_data_to_excel(self, file, original_data_list):
@@ -267,8 +267,29 @@ class GetStartupTime:
         work_book.save(file)
         work_book.close()
 
+    # 通过excel获取柱形图
+    def get_graph_data(self):
+        generate_graph = GenerateDataGraph(file=self.report_excel)
+        generate_graph.get_graphs()
+
+    # 生成html并保存
+    def get_report(self):
+        generate_report = GenerateReport(report_path=self.report_path)
+        generate_report.save_html()
+
+    # 结合(1.生成excel, 2.通过excel获取柱形图, 3.生成html并保存)
+    def data_processing(self):
+        # 保存excel
+        data_list = self.get_all_video_start_and_end_points()
+        self.write_data_to_excel(file=self.report_excel, original_data_list=data_list)
+        # 通过excel获取柱形图
+        self.get_graph_data()
+        # 生成html并保存
+        self.get_report()
+        Logger('data process finished!')
+
 
 if __name__=='__main__':
     video_path = 'D:/Code/robot/video/2019-10-15'
     test = GetStartupTime(video_path=video_path)
-    test.get_all_video_start_and_end_points()
+    test.data_processing()
