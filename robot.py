@@ -32,8 +32,10 @@ class UiMainWindow(QMainWindow):
     def setupUi(self):
         """初始化参数"""
         # 摄像机图像尺寸
-        self.camera_image_width = 1280
-        self.camera_image_height = 720
+        # self.camera_image_width = 1280
+        # self.camera_image_height = 720
+        self.camera_image_width = 1600
+        self.camera_image_height = 1000
         # 获取到的视频根目录
         self.get_path = None
         # 获取截图保存路径

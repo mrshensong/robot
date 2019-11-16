@@ -26,7 +26,6 @@ class ArmAction:
         self.swift.flush_cmd()
         # 视频线程
         self.video = Video(video_path=None, video_width=camera_width, video_height=camera_height)
-        Thread(target=self.video.recording, args=()).start()
 
     def stop(self):
         self.set_position(50, 100, 40)
@@ -172,7 +171,7 @@ class ArmAction:
             self.video.start_record_video(case_type=video_type, case_name=video_name)
         elif record_status == 'record_stop':
             self.video.stop_record_video()
-            while self.video.re_start_record_flag is False:
+            while self.video.restart_record_flag is False:
                 time.sleep(0.02)
 
     # 延时动作

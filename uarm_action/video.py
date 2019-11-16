@@ -4,8 +4,7 @@ import time
 import gxipy as gx
 import numpy as np
 from threading import Thread
-from pythonservice.python_service.utils import logger
-from GlobalVar import GloVar, MergePath
+from GlobalVar import GloVar, MergePath, Logger
 
 
 class Video:
@@ -13,225 +12,246 @@ class Video:
     def __init__(self, video_path, video_width, video_height):
         # 保存视频需要用到的参数
         self.video_path = video_path
+        # 视频需要保存的高和宽
+        self.video_width = video_width
+        self.video_height = video_height
+        # 帧率
+        self.frame_rate = 60.0
+        # 保存的视频名
+        self.video_file_name = None
+        # 帧id
+        self.frame_id = 0
         # 保存视频帧列表
         self.video_frames_list = []
+        # 开始和停止录像标志
+        self.record_flag = False
         # 在录制的视频中给某一帧做标记(当做动作的起点, True:标记, False不做标记)
         self.robot_start_flag = False
         # 线程结束标志位
         self.record_thread_flag = True
-        # 开始和停止录像标志
-        self.record_flag = False
         # 是否可以重新开始录制视频
-        self.re_start_record_flag = True
+        self.restart_record_flag = True
         # 视频类型(app冷/app热/滑动流畅度等等)
         self.case_type = None
         # 视频名称(桌面滑动)
         self.case_name = None
-        # 视频需要保存的高和宽
-        self.video_width = video_width
-        self.video_height = video_height
-        # 当前图片
-        self.image = None
+        # 畸变矫正相关参数
+        npz_file = np.load('uarm_action/calibrate.npz')
+        self.mtx = npz_file['mtx']
+        self.dist = npz_file['dist']
+        self.map_x = None
+        self.map_y = None
+        # 开启视频流
+        Thread(target=self.video_stream, args=()).start()
+
+
+    # 消除畸变函数
+    def un_distortion(self, img, mtx, dist):
+        h, w = img.shape[:2]
+        new_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+        # print('roi ', roi)
+        # 耗时操作
+        # dst = cv2.undistort(img, mtx, dist, None, new_camera_mtx)
+        # 替代方案(节省时间)/map_x, map_y使用全局变量更加节省时间
+        if self.map_x is None and self.map_y is None:
+            # 计算一个从畸变图像到非畸变图像的映射(只需要执行一次, 找出映射关系即可)
+            self.map_x, self.map_y = cv2.initUndistortRectifyMap(mtx, dist, None, new_camera_mtx, (w, h), 5)
+        # 使用映射关系对图像进行去畸变
+        dst = cv2.remap(img, self.map_x, self.map_y, cv2.INTER_LINEAR)
+        # 裁剪图片
+        # x, y, w, h = roi
+        # if roi != (0, 0, 0, 0):
+        #     dst = dst[y:y + h, x:x + w]
+        return dst
+
+
+    # 调用笔记本摄像头模拟工业摄像头
+    def video_stream_1(self):
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_height)
+        while self.record_thread_flag is True:
+            _, GloVar.camera_image = cap.read()
+            if self.record_flag is True:
+                # 标记这一帧
+                if self.robot_start_flag is False:
+                    self.video_frames_list.append(GloVar.camera_image.copy())
+                else:
+                    self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
+        cap.release()
+        Logger('退出视频录像线程')
 
 
     # 视频流线程
-    def video_stream_1(self):
+    def video_stream(self):
         # create a device manager
         device_manager = gx.DeviceManager()
         dev_num, dev_info_list = device_manager.update_device_list()
         if dev_num is 0:
-            logger.warning('Number of enumerated devices is 0')
+            Logger('Number of enumerated devices is 0')
             return
-
-        # open device by serial number
+        # open device by serial number(通过sn码获取相机对象)
         cam = device_manager.open_device_by_sn(dev_info_list[0].get("sn"))
-
-        # if camera is mono
+        # if camera is mono(如果相机是单通道, 则关闭相机)
         if cam.PixelColorFilter.is_implemented() is False:
-            logger.warning('This sample does not support mono camera.')
+            Logger('This sample does not support mono camera.')
             cam.close_device()
             return
-
-        # set continuous acquisition
+        # set continuous acquisition(连续触发模式)
         cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
-
-        # set exposure(曝光)
-        cam.ExposureTime.set(10000.0)
-
-        # set gain(增益)
-        cam.Gain.set(10.0)
-
-        # set roi(ROI)
-        cam.Width.set(1600)
-        cam.Height.set(1000)
-        cam.OffsetX.set(100)
-        cam.OffsetY.set(160)
-
-        #
-        cam.BalanceWhiteAuto.set(True)
-
-        # set param of improving image quality
-        if cam.GammaParam.is_readable():
-            gamma_value = cam.GammaParam.get()
-            gamma_lut = gx.Utility.get_gamma_lut(gamma_value)
-        else:
-            gamma_lut = None
-        if cam.ContrastParam.is_readable():
-            contrast_value = cam.ContrastParam.get()
-            contrast_lut = gx.Utility.get_contrast_lut(contrast_value)
-        else:
-            contrast_lut = None
-        color_correction_param = cam.ColorCorrectionParam.get()
-
-        # start data acquisition
+        # 白平衡设置(连续白平衡)
+        cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
+        '''120帧'''
+        # # 相机采集帧率(相机采集帧率设置为120)
+        # cam.AcquisitionFrameRate.set(self.frame_rate)
+        # # set exposure(曝光设置为8250, 通过相机帧率计算公司得到, 120帧对应曝光时间为120fps)
+        # cam.ExposureTime.set(8250.0)
+        # # set gain(设置增益, 调节相机亮度)
+        # cam.Gain.set(8.0)
+        '''100帧'''
+        # # 相机采集帧率(相机采集帧率设置为60)
+        # cam.AcquisitionFrameRate.set(self.frame_rate)
+        # # set exposure(曝光设置为9930, 通过相机帧率计算公司得到, 100帧对应曝光时间为100fps)
+        # cam.ExposureTime.set(9930.0)
+        # # set gain(设置增益, 调节相机亮度)
+        # cam.Gain.set(1.0)
+        '''60帧'''
+        # 相机采集帧率(相机采集帧率设置为60)
+        cam.AcquisitionFrameRate.set(self.frame_rate)
+        # set exposure(曝光设置为16580, 通过相机帧率计算公司得到, 60帧对应曝光时间为60fps)
+        cam.ExposureTime.set(16580.0)
+        # set gain(设置增益, 调节相机亮度)
+        cam.Gain.set(1.0)
+        # set roi(设置相机ROI, 裁剪尺寸)
+        cam.Width.set(self.video_width)  # 宽度
+        cam.Height.set(self.video_height)  # 高度
+        cam.OffsetX.set(int((1920 - self.video_width) / 2))  # 宽度偏移量
+        cam.OffsetY.set(int((1200 - self.video_height) / 2))  # 高度偏移量
+        # start data acquisition(开始相机流采集)
         cam.stream_on()
-
         # acquisition image: num is the image number
         while self.record_thread_flag is True:  # 只要标志为True, 摄像头一直工作
-            # 关闭摄像头
-            # if self.close_camera_flag is True:
-            #     break
-            # get raw image
             raw_image = cam.data_stream[0].get_image()
             if raw_image is None:
-                logger.error('Getting image failed.')
+                Logger('Getting image failed.')
                 continue
-            # get RGB image from raw image
-            rgb_image = raw_image.convert("RGB")
-            if rgb_image is None:
-                continue
-            # improve image quality
-            rgb_image.image_improvement(color_correction_param, contrast_lut, gamma_lut)
-            # create numpy array with data from raw image
-            numpy_image = rgb_image.get_numpy_array()
-            if numpy_image is None:
-                continue
-            # 将图片格式转换为cv模式
-            # self.image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
-            GloVar.camera_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_RGB2BGR)
-            # 当录像标志打开时, 将frame存起来
             if self.record_flag is True:
-                # 在这儿是否需要判断Frame ID有重复的情况(如果有的话就需要进行处理--考虑要不要加进去)
-                # 将摄像头产生的frame放到容器中
-                if self.robot_start_flag is True:
-                    # self.video_frames_list.append(self.image.copy()[0].fill(255))
-                    self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
-                    self.robot_start_flag = False
-                else:
-                    # self.video_frames_list.append(self.image.copy())
-                    self.video_frames_list.append(GloVar.camera_image.copy())
-                # print height, width, and frame ID of the acquisition image
-                print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
-
+                Thread(target=self.get_frame, args=(raw_image, self.robot_start_flag,)).start()
+                self.frame_id += 1
+                self.robot_start_flag = False
+            else:
+                numpy_image = raw_image.get_numpy_array()
+                GloVar.camera_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_BayerBG2BGR)
         # stop data acquisition
         cam.stream_off()
         # close device
         cam.close_device()
 
 
-    # 调用笔记本摄像头模拟工业摄像头
-    def video_stream(self):
-        cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_height)
-        while self.record_thread_flag is True:
-            # _, self.image = cap.read()
-            _, GloVar.camera_image = cap.read()
-            if self.record_flag is True:
-                # 标记这一帧
-                if self.robot_start_flag is True:
-                    # self.video_frames_list.append(self.image.copy()[0].fill(255))
-                    self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
-                    self.robot_start_flag = False
-                else:
-                    # self.video_frames_list.append(self.image.copy())
-                    self.video_frames_list.append(GloVar.camera_image.copy())
-        cap.release()
+    # 获取帧(raw_image: 原生帧, start_flag:动作起点标志)
+    def get_frame(self, raw_image, start_flag=False):
+        # 使用大恒相机方法: 将raw原生图转为RGB(RGB格式open-cv不支持)
+        # # (通过原生图生成RGB图)
+        # rgb_image = raw_image.convert("RGB")
+        # # (从RGB图像数据创建numpy数组)
+        # numpy_image = rgb_image.get_numpy_array()
+
+        # 这里直接使用open-cv将raw原生图转为open-cv支持的BGR(替换掉大恒将raw转为RGB的过程)
+        numpy_image = raw_image.get_numpy_array()
+        GloVar.camera_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_BayerBG2BGR)
+
+        # 验证图片顺序是否正确
+        # cv2.putText(image, str(raw_image.get_frame_id()), (200, 100), cv2.FONT_HERSHEY_COMPLEX, 2.0, (100, 200, 200), 5)
+        # 畸变校正(加在这儿最好, 有点问题, 未验证)
+        # image = self.un_distortion(image, self.mtx, self.dist)
+
+        # 将摄像头产生的frame放到容器中
+        if start_flag is True:
+            self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
+            self.robot_start_flag = False
+        else:
+            self.video_frames_list.append(GloVar.camera_image.copy())
+
+        # # print height, width, and frame ID of the acquisition image(打印帧信息)
+        # # print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
 
 
-    # 保存视频线程
-    def save_out_video(self):
-        try:
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = None
-            # 开始保存视频
-            while self.record_thread_flag:
-                count = 0
-                flag_out = False
-                while self.record_flag or len(self.video_frames_list) > 0:
-                    # 此时不能录制视频(需要先保存完上一视频)
-                    self.re_start_record_flag = False
-                    if count == 0:
-                        logger.info('开始保存视频')
-                        flag_out = True
-                        # video_file_path = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
-                        video_file_path = MergePath(section_path=[self.video_path, self.case_type, (self.case_name + '.mp4')]).merged_path
-                        out = cv2.VideoWriter(video_file_path, fourcc, 30.0, (self.video_width, self.video_height), True)
+    # 保存视频
+    def save_video(self):
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(self.video_file_name, fourcc, self.frame_rate, (self.video_width, self.video_height))
+        while True:
+            if len(self.video_frames_list) > 0:
+                # frame = self.un_distortion(self.video_frames_list[0], self.mtx, self.dist)
+                # out.write(frame)
+                out.write(self.video_frames_list[0])
+                self.video_frames_list.pop(0)
+            elif self.record_flag is False:
+                while 1:
                     if len(self.video_frames_list) > 0:
+                        # frame = self.un_distortion(self.video_frames_list[0], self.mtx, self.dist)
+                        # out.write(frame)
                         out.write(self.video_frames_list[0])
                         self.video_frames_list.pop(0)
-                    count = 1
-                if flag_out:
-                    logger.info('视频保存完毕')
-                    out.release()
-                    time.sleep(3)
-                    # 此时可以录制视频
-                    self.re_start_record_flag = True
-                time.sleep(0.2)
-        except Exception as e:
-            logger.error('save video thread error!')
-            raise Exception('save video thread error!', e)
+                    else:
+                        break
+                break
+            else:
+                time.sleep(0.001)
+        out.release()
+        self.restart_record_flag = True
+        Logger('视频保存结束: %s' %self.video_file_name)
 
 
-    # 录像+保存视频
-    def recording(self):
-        # 开启视频流采集和视频保存线程
-        Thread(target=self.video_stream, args=()).start()
-        Thread(target=self.save_out_video, args=()).start()
-
-
-    # 开始录制视频
     def start_record_video(self, case_type='test', case_name='test'):
+        # 判断视频是否保存完成(保存完毕才允许再次开始录像)
+        if self.restart_record_flag is False:
+            Logger('当前还有未保存完的视频, 请稍等...')
+            while self.restart_record_flag is False:
+                time.sleep(0.002)
+        # 传入视频类型和视频名
         self.case_type = case_type
         self.case_name = case_name
-        # video_path = self.video_path + '/' + self.case_type
-        video_path = MergePath(section_path=[self.video_path, self.case_type]).merged_path
+        # 创建文件夹(没有就创建)
+        video_path = self.video_path + '/' + self.case_type
         if os.path.exists(video_path) is False:
             os.makedirs(video_path)
-        if self.re_start_record_flag is False:
-            logger.warning('上一个视频还未保存完成, 请稍等...')
-        while self.re_start_record_flag is False:
-            time.sleep(0.02)
+        self.video_file_name = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
+        # 重新录制视频标志重新置位
+        self.restart_record_flag = False
+        '''开始录像(通过标志位)'''
         self.record_flag = True
-        logger.info('开始录像')
-        # logger.info(time.time())
+        Thread(target=self.save_video, args=()).start()
+        Logger('开始录制视频: %s' %self.video_file_name)
 
 
-    # 停止录制视频
     def stop_record_video(self):
         self.record_flag = False
-        logger.info('停止录像')
-        # logger.info(time.time())
+        Logger('当前视频帧数为: %d' %self.frame_id)
+        self.frame_id = 0
 
-    # 结束录像线程
+
     def stop_record_thread(self):
-        while self.re_start_record_flag is False:
-            time.sleep(0.02)
+        # 判断视频是否保存完成(保存完才能停止线程)
+        if self.restart_record_flag is False:
+            Logger('当前还有未保存完的视频, 请稍等一会再退出线程...')
+            while self.restart_record_flag is False:
+                time.sleep(0.002)
+        time.sleep(0.5)
         self.record_thread_flag = False
-        logger.info('停止录像线程')
 
 
 if __name__=='__main__':
-    path = 'D:/Code/robot/video'
-    video = Video(video_path=path, video_width=1280, video_height=720)
-    Thread(target=video.recording, args=()).start()
-
-    # 开始录制视频
-    video.start_record_video(case_type='test', case_name='123')
+    video = Video(video_path='D:/Code/robot/video', video_width=1600, video_height=1000)
+    # time.sleep(2)
     time.sleep(5)
-    # 停止录制视频
+    # 第一个视频
+    video.start_record_video(case_type='test', case_name='123')
+    time.sleep(10)
     video.stop_record_video()
-    # video.start_record_video(case_type='test', case_name='234')
-    # time.sleep(6)
-    # video.stop_record_video()
+
+    # 第二个视频
+    video.start_record_video(case_type='test', case_name='456')
+    time.sleep(10)
+    video.stop_record_video()
     video.stop_record_thread()
