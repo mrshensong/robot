@@ -115,10 +115,12 @@ class ShowActionTab(QWidget):
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
     def delete_selected_items(self):
-        # (从后面开始删除)先删除后面的
+        # (从后面开始删除)先删除后面的(每次循环递减一个)
         index = len(self.custom_control_list) - 1
+        # 通过判断剩余item数量, 来确定是否需要更改‘全选’按键状态
+        exist_items_count = index + 1
         while True:
-            if len(self.custom_control_list) < 1:
+            if exist_items_count < 1:
                 # 全部删除后需要复位全部选中按钮的状态
                 self.select_all_flag = False
                 self.select_all_button.setToolTip('select_all')
@@ -127,14 +129,15 @@ class ShowActionTab(QWidget):
                 self.case_file_name = ''
                 self.case_absolute_name = ''
                 break
+            # 遍历完item后退出
             elif index < 0:
                 break
+            # 未遍历完item, 判断是否选中
             else:
                 if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
-                    # 模拟点击action中的单独delete按钮
-                    # self.custom_control_list[index].delete_button.click()
-                    self.delete_item(index)
-                    time.sleep(0.03)
+                    # 模拟点击action中的单独delete按钮(稳定)
+                    self.custom_control_list[index].delete_button.click()
+                    exist_items_count -= 1
             index -= 1
 
 
