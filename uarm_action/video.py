@@ -15,6 +15,8 @@ class Video:
         # 视频需要保存的高和宽
         self.video_width = video_width
         self.video_height = video_height
+        # 相机对象
+        self.cam = None
         # 帧率
         self.frame_rate = 60.0
         # 保存的视频名
@@ -91,16 +93,16 @@ class Video:
             Logger('Number of enumerated devices is 0')
             return
         # open device by serial number(通过sn码获取相机对象)
-        cam = device_manager.open_device_by_sn(dev_info_list[0].get("sn"))
+        self.cam = device_manager.open_device_by_sn(dev_info_list[0].get("sn"))
         # if camera is mono(如果相机是单通道, 则关闭相机)
-        if cam.PixelColorFilter.is_implemented() is False:
+        if self.cam.PixelColorFilter.is_implemented() is False:
             Logger('This sample does not support mono camera.')
-            cam.close_device()
+            self.cam.close_device()
             return
         # set continuous acquisition(连续触发模式)
-        cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
+        self.cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
         # 白平衡设置(连续白平衡)
-        cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
+        self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
         '''120帧'''
         # # 相机采集帧率(相机采集帧率设置为120)
         # cam.AcquisitionFrameRate.set(self.frame_rate)
@@ -117,21 +119,21 @@ class Video:
         # cam.Gain.set(1.0)
         '''60帧'''
         # 相机采集帧率(相机采集帧率设置为60)
-        cam.AcquisitionFrameRate.set(self.frame_rate)
+        self.cam.AcquisitionFrameRate.set(self.frame_rate)
         # set exposure(曝光设置为16580, 通过相机帧率计算公司得到, 60帧对应曝光时间为60fps)
-        cam.ExposureTime.set(16580.0)
+        self.cam.ExposureTime.set(16580.0)
         # set gain(设置增益, 调节相机亮度)
-        cam.Gain.set(1.0)
+        self.cam.Gain.set(1.0)
         # set roi(设置相机ROI, 裁剪尺寸)
-        cam.Width.set(self.video_width)  # 宽度
-        cam.Height.set(self.video_height)  # 高度
-        cam.OffsetX.set(int((1920 - self.video_width) / 2))  # 宽度偏移量
-        cam.OffsetY.set(int((1200 - self.video_height) / 2))  # 高度偏移量
+        self.cam.Width.set(self.video_width)  # 宽度
+        self.cam.Height.set(self.video_height)  # 高度
+        self.cam.OffsetX.set(int((1920 - self.video_width) / 2))  # 宽度偏移量
+        self.cam.OffsetY.set(int((1200 - self.video_height) / 2))  # 高度偏移量
         # start data acquisition(开始相机流采集)
-        cam.stream_on()
+        self.cam.stream_on()
         # acquisition image: num is the image number
         while self.record_thread_flag is True:  # 只要标志为True, 摄像头一直工作
-            raw_image = cam.data_stream[0].get_image()
+            raw_image = self.cam.data_stream[0].get_image()
             if raw_image is None:
                 Logger('Getting image failed.')
                 continue
@@ -143,9 +145,9 @@ class Video:
                 numpy_image = raw_image.get_numpy_array()
                 GloVar.camera_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_BayerBG2BGR)
         # stop data acquisition
-        cam.stream_off()
+        self.cam.stream_off()
         # close device
-        cam.close_device()
+        self.cam.close_device()
 
 
     # 获取帧(raw_image: 原生帧, start_flag:动作起点标志)
