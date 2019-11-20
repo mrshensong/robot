@@ -18,7 +18,7 @@ class Video:
         # 相机对象
         self.cam = None
         # 帧率
-        self.frame_rate = 60.0
+        self.frame_rate = 120.0
         # 保存的视频名
         self.video_file_name = None
         # 帧id
@@ -48,16 +48,16 @@ class Video:
 
 
     # 消除畸变函数
-    def un_distortion(self, img, mtx, dist):
+    def un_distortion(self, img):
         h, w = img.shape[:2]
-        new_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+        new_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 1, (w, h))
         # print('roi ', roi)
         # 耗时操作
         # dst = cv2.undistort(img, mtx, dist, None, new_camera_mtx)
         # 替代方案(节省时间)/map_x, map_y使用全局变量更加节省时间
         if self.map_x is None and self.map_y is None:
             # 计算一个从畸变图像到非畸变图像的映射(只需要执行一次, 找出映射关系即可)
-            self.map_x, self.map_y = cv2.initUndistortRectifyMap(mtx, dist, None, new_camera_mtx, (w, h), 5)
+            self.map_x, self.map_y = cv2.initUndistortRectifyMap(self.mtx, self.dist, None, new_camera_mtx, (w, h), 5)
         # 使用映射关系对图像进行去畸变
         dst = cv2.remap(img, self.map_x, self.map_y, cv2.INTER_LINEAR)
         # 裁剪图片
@@ -104,12 +104,12 @@ class Video:
         # 白平衡设置(连续白平衡)
         self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
         '''120帧'''
-        # # 相机采集帧率(相机采集帧率设置为120)
-        # self.cam.AcquisitionFrameRate.set(self.frame_rate)
-        # # set exposure(曝光设置为8250, 通过相机帧率计算公司得到, 120帧对应曝光时间为120fps)
-        # self.cam.ExposureTime.set(8250.0)
-        # # set gain(设置增益, 调节相机亮度)
-        # self.cam.Gain.set(8.0)
+        # 相机采集帧率(相机采集帧率设置为120)
+        self.cam.AcquisitionFrameRate.set(self.frame_rate)
+        # set exposure(曝光设置为8250, 通过相机帧率计算公司得到, 120帧对应曝光时间为120fps)
+        self.cam.ExposureTime.set(8250.0)
+        # set gain(设置增益, 调节相机亮度)
+        self.cam.Gain.set(8.0)
         '''100帧'''
         # # 相机采集帧率(相机采集帧率设置为60)
         # self.cam.AcquisitionFrameRate.set(self.frame_rate)
@@ -118,12 +118,12 @@ class Video:
         # # set gain(设置增益, 调节相机亮度)
         # self.cam.Gain.set(1.0)
         '''60帧'''
-        # 相机采集帧率(相机采集帧率设置为60)
-        self.cam.AcquisitionFrameRate.set(self.frame_rate)
-        # set exposure(曝光设置为16580, 通过相机帧率计算公司得到, 60帧对应曝光时间为60fps)
-        self.cam.ExposureTime.set(16580.0)
-        # set gain(设置增益, 调节相机亮度)
-        self.cam.Gain.set(1.0)
+        # # 相机采集帧率(相机采集帧率设置为60)
+        # self.cam.AcquisitionFrameRate.set(self.frame_rate)
+        # # set exposure(曝光设置为16580, 通过相机帧率计算公司得到, 60帧对应曝光时间为60fps)
+        # self.cam.ExposureTime.set(16580.0)
+        # # set gain(设置增益, 调节相机亮度)
+        # self.cam.Gain.set(1.0)
         # set roi(设置相机ROI, 裁剪尺寸)
         self.cam.Width.set(self.video_width)  # 宽度
         self.cam.Height.set(self.video_height)  # 高度
@@ -184,14 +184,14 @@ class Video:
         out = cv2.VideoWriter(self.video_file_name, fourcc, self.frame_rate, (self.video_width, self.video_height))
         while True:
             if len(self.video_frames_list) > 0:
-                # frame = self.un_distortion(self.video_frames_list[0], self.mtx, self.dist)
+                # frame = self.un_distortion(self.video_frames_list[0])
                 # out.write(frame)
                 out.write(self.video_frames_list[0])
                 self.video_frames_list.pop(0)
             elif self.record_flag is False:
                 while 1:
                     if len(self.video_frames_list) > 0:
-                        # frame = self.un_distortion(self.video_frames_list[0], self.mtx, self.dist)
+                        # frame = self.un_distortion(self.video_frames_list[0])
                         # out.write(frame)
                         out.write(self.video_frames_list[0])
                         self.video_frames_list.pop(0)

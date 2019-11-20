@@ -288,7 +288,7 @@ class VideoLabel(QLabel):
 
     # 定时器获取实时流摄像头图片(代替展示摄像头)
     def get_camera_image(self):
-        self.image = GloVar.camera_image
+        self.image = GloVar.camera_image.copy()
 
 
     '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''
