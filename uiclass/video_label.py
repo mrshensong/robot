@@ -299,9 +299,9 @@ class VideoLabel(QLabel):
             show = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             show_image = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
             self.setPixmap(QPixmap.fromImage(show_image))
-            if GloVar.save_pic_flag is True:
-                cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
-                GloVar.save_pic_flag = False
+            # if GloVar.save_pic_flag is True:
+            #     cv2.imencode('.jpg', self.image.copy())[1].tofile('mask.jpg')
+            #     GloVar.save_pic_flag = False
         # 本地视频播放模式(可以数帧)
         elif self.video_play_flag is True:
             if self.current_frame < self.frame_count:
