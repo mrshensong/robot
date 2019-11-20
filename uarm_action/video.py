@@ -189,7 +189,7 @@ class Video:
                 out.write(self.video_frames_list[0])
                 self.video_frames_list.pop(0)
             elif self.record_flag is False:
-                while 1:
+                while True:
                     if len(self.video_frames_list) > 0:
                         # frame = self.un_distortion(self.video_frames_list[0])
                         # out.write(frame)
