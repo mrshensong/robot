@@ -204,16 +204,22 @@ class ArmAction:
                 if action['execute_action'] == 'motion_action':
                     if action['action_type'] == 'click':
                         self.play_click_action(action)
+                        time.sleep(0.2)
                     elif action['action_type'] == 'double_click':
                         self.play_double_click_action(action)
+                        time.sleep(0.2)
                     elif action['action_type'] == 'long_click':
                         self.play_long_click(action)
+                        time.sleep(0.2)
                     elif action['action_type'] == 'slide':
                         self.play_slide_action(action)
+                        time.sleep(0.2)
                 elif action['execute_action'] == 'record_action':
                     self.play_record_action(action)
+                    time.sleep(0.2)
                 elif action['execute_action'] == 'sleep_action':
                     self.play_sleep_action(action)
+                    time.sleep(0.2)
             # 打印描述信息
             if description is not None:
                 if description == 'actions':

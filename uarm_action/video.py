@@ -39,6 +39,7 @@ class Video:
         self.case_name = None
         # 畸变矫正相关参数
         npz_file = np.load('uarm_action/calibrate.npz')
+        # npz_file = np.load('calibrate.npz')
         self.mtx = npz_file['mtx']
         self.dist = npz_file['dist']
         self.map_x = None
@@ -143,7 +144,9 @@ class Video:
                 self.robot_start_flag = False
             else:
                 numpy_image = raw_image.get_numpy_array()
-                GloVar.camera_image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_BayerBG2BGR)
+                image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_BayerBG2BGR)
+                GloVar.camera_image = self.un_distortion(image)
+                time.sleep(0.003)
         # stop data acquisition
         self.cam.stream_off()
         # close device
@@ -184,16 +187,16 @@ class Video:
         out = cv2.VideoWriter(self.video_file_name, fourcc, self.frame_rate, (self.video_width, self.video_height))
         while True:
             if len(self.video_frames_list) > 0:
-                # frame = self.un_distortion(self.video_frames_list[0])
-                # out.write(frame)
-                out.write(self.video_frames_list[0])
+                frame = self.un_distortion(self.video_frames_list[0])
+                out.write(frame)
+                # out.write(self.video_frames_list[0])
                 self.video_frames_list.pop(0)
             elif self.record_flag is False:
                 while True:
                     if len(self.video_frames_list) > 0:
-                        # frame = self.un_distortion(self.video_frames_list[0])
-                        # out.write(frame)
-                        out.write(self.video_frames_list[0])
+                        frame = self.un_distortion(self.video_frames_list[0])
+                        out.write(frame)
+                        # out.write(self.video_frames_list[0])
                         self.video_frames_list.pop(0)
                     else:
                         break
@@ -244,7 +247,7 @@ class Video:
 
 
 if __name__=='__main__':
-    video = Video(video_path='D:/Code/robot/video', video_width=1600, video_height=1000)
+    video = Video(video_path='D:/Code/robot/video', video_width=1600, video_height=800)
     # time.sleep(2)
     time.sleep(5)
     # 第一个视频
