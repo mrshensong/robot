@@ -188,9 +188,10 @@ class ArmAction:
         if data[0].startswith('start') and data[-1] == 'stop':
             # 执行的是case&选中的actions
             if '>' in data[0]:
+                # 获取描述:case/选中的actions
                 description = data[0].split('>')[1]
                 if description == 'actions':
-                    Logger('[开始执行选中actions]')
+                    Logger('[开始执行选中的actions]')
                 else:
                     Logger('[开始执行case] : %s' % description)
             # 执行的是单个action
@@ -233,7 +234,7 @@ class ArmAction:
 
 
 '''传入的样例'''
-# start / start>actions /start>D:/Code/robot/case/测试/滑动测试.xml
+# start / start>actions /start>D:/Code/robot/case/测试/滑动测试.xml(三种形式分别:单个action/选中的多个actions/一条case)
 # {'des_text': '单击', 'action_type': 'click', 'points': [-53.046, 100.332], 'speed': '200', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
 # {'des_text': '双击', 'action_type': 'double_click', 'points': [-64.662, 120.263], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
 # {'des_text': '长按', 'action_type': 'long_click', 'points': [-47.819, 93.744], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}

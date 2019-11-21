@@ -50,17 +50,22 @@ class Video:
 
     # 消除畸变函数
     def un_distortion(self, img):
-        h, w = img.shape[:2]
-        new_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 1, (w, h))
-        # print('roi ', roi)
-        # 耗时操作
-        # dst = cv2.undistort(img, mtx, dist, None, new_camera_mtx)
-        # 替代方案(节省时间)/map_x, map_y使用全局变量更加节省时间
-        if self.map_x is None and self.map_y is None:
-            # 计算一个从畸变图像到非畸变图像的映射(只需要执行一次, 找出映射关系即可)
-            self.map_x, self.map_y = cv2.initUndistortRectifyMap(self.mtx, self.dist, None, new_camera_mtx, (w, h), 5)
-        # 使用映射关系对图像进行去畸变
-        dst = cv2.remap(img, self.map_x, self.map_y, cv2.INTER_LINEAR)
+        try:
+            # 耗时操作
+            # dst = cv2.undistort(img, mtx, dist, None, new_camera_mtx)
+            # 替代方案(节省时间)/map_x, map_y使用全局变量更加节省时间
+            if self.map_x is None and self.map_y is None:
+                # 计算一个从畸变图像到非畸变图像的映射(只需要执行一次, 找出映射关系即可)
+                h, w = img.shape[:2]
+                new_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 1, (w, h))
+                self.map_x, self.map_y = cv2.initUndistortRectifyMap(self.mtx, self.dist, None, new_camera_mtx, (w, h), 5)
+            # 使用映射关系对图像进行去畸变
+            dst = cv2.remap(img, self.map_x, self.map_y, cv2.INTER_LINEAR)
+        except TypeError:
+            # 如果发生异常则获取(传入容器是故意传入一个元祖, 使其产生TypeError异常, 好捕捉到开始帧)
+            image = img[1]
+            dst = cv2.remap(image, self.map_x, self.map_y, cv2.INTER_LINEAR)
+            dst[0].fill(255)
         # 裁剪图片
         # x, y, w, h = roi
         # if roi != (0, 0, 0, 0):
@@ -139,7 +144,8 @@ class Video:
                 Logger('Getting image failed.')
                 continue
             if self.record_flag is True:
-                Thread(target=self.get_frame, args=(raw_image, self.robot_start_flag,)).start()
+                robot_start_flag = self.robot_start_flag
+                Thread(target=self.get_frame, args=(raw_image, robot_start_flag,)).start()
                 self.frame_id += 1
                 self.robot_start_flag = False
             else:
@@ -171,11 +177,11 @@ class Video:
         # image = self.un_distortion(image, self.mtx, self.dist)
 
         # 将摄像头产生的frame放到容器中
-        if start_flag is True:
-            self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
-            self.robot_start_flag = False
-        else:
+        if start_flag is False:
             self.video_frames_list.append(GloVar.camera_image.copy())
+        else:
+            # 添加起点标志(故意传入一个数组(使其发生TypeError异常), 这样畸变校正时, 通过捕捉才能识别到此帧)
+            self.video_frames_list.append(('start_flag', GloVar.camera_image.copy()))
 
         # # print height, width, and frame ID of the acquisition image(打印帧信息)
         # # print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
@@ -189,14 +195,12 @@ class Video:
             if len(self.video_frames_list) > 0:
                 frame = self.un_distortion(self.video_frames_list[0])
                 out.write(frame)
-                # out.write(self.video_frames_list[0])
                 self.video_frames_list.pop(0)
             elif self.record_flag is False:
                 while True:
                     if len(self.video_frames_list) > 0:
                         frame = self.un_distortion(self.video_frames_list[0])
                         out.write(frame)
-                        # out.write(self.video_frames_list[0])
                         self.video_frames_list.pop(0)
                     else:
                         break
@@ -232,7 +236,8 @@ class Video:
 
     def stop_record_video(self):
         self.record_flag = False
-        Logger('当前视频帧数为: %d' %self.frame_id)
+        Logger('当前视频总帧数为: %d' %self.frame_id)
+        Logger('正在保存缓存区的视频...')
         self.frame_id = 0
 
 
@@ -252,11 +257,14 @@ if __name__=='__main__':
     time.sleep(5)
     # 第一个视频
     video.start_record_video(case_type='test', case_name='123')
-    time.sleep(10)
+    time.sleep(5)
+    # 模拟机械臂产生一个起始信号
+    video.robot_start_flag = True
+    time.sleep(5)
     video.stop_record_video()
 
-    # 第二个视频
-    video.start_record_video(case_type='test', case_name='456')
-    time.sleep(10)
-    video.stop_record_video()
+    # # 第二个视频
+    # video.start_record_video(case_type='test', case_name='456')
+    # time.sleep(10)
+    # video.stop_record_video()
     video.stop_record_thread()
