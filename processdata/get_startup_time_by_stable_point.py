@@ -32,78 +32,89 @@ class GetStartupTime:
         self.videos_list = []
 
 
-    def get_start_and_end_match_threshold(self, end_mask, video_file):
+    def match_template(self, source_img, target_img):
+        '''
+        :param source_img: 源图像(大图)
+        :param target_img: 靶子图像(小图)
+        :param match_rate: 匹配率
+        :return:
+        '''
+        if type(source_img) is str:
+            source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
+        if type(target_img) is str:
+            target_img = cv2.imdecode(np.fromfile(target_img, dtype=np.uint8), -1)
+        # 匹配方法
+        match_method = cv2.TM_CCOEFF_NORMED
+        # 模板匹配
+        match_result = cv2.matchTemplate(source_img, target_img, match_method)
+        # 查找匹配度和坐标位置
+        min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
+        # 返回最大匹配率
+        return max_threshold
+
+
+
+    def get_start_and_end_match_threshold(self, video_file):
         """
         获取起止点的匹配率列表
         :param end_mask: 稳定点模板
         :param video_file: 视频文件
         :return: 开始点匹配率列表, 稳定点匹配率列表
         """
-        match_methods = [cv2.TM_SQDIFF_NORMED, cv2.TM_CCORR_NORMED, cv2.TM_CCOEFF_NORMED]
-        current_match_method = match_methods[2]
-        # 放置开始点和稳定点的list容器
-        start_threshold_list = []
-        end_threshold_list = []
         # 获取视频对象
         video_cap = cv2.VideoCapture(video_file)
-        # 获取视频帧率
-        self.frame_rate = int(video_cap.get(cv2.CAP_PROP_FPS))
-        # cv2.IMREAD_COLOR: 读入一副彩色图片
-        # cv2.IMREAD_GRAYSCALE: 以灰度模式读入图片
-        # cv2.IMREAD_UNCHANGED: 读入一幅图片，并包括其alpha通道
-        # 获取模板的灰度图
-        end_mask_gray = cv2.imdecode(np.fromfile(end_mask, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
-        # 模板的尺寸
-        end_mask_height, end_mask_width = end_mask_gray.shape
+        # 帧编号
+        frame_id = 0
+        # 起点结果是否找到标志位
+        start_point_exist_flag = False
+        # 上一帧图片(前后两帧需要对比)
+        last_picture = None
+        # 匹配率连续大于0.99的次数(只要中断就从零计算)/原理:连续十帧匹配率大于0.99就可以认为此帧为稳定帧
+        stability_num = 0
+        # 上一循环是否匹配率大于0.99的标志
+        cycle_flag = False
+        # 起始帧和结束帧结果(frame_id, match_rate), (frame_id, match_rate)
+        start_point_result = ()
+        end_point_result = ()
         # 视频读取
         while video_cap.isOpened():
+            # 帧从1开始
+            frame_id += 1
             successfully_read, frame = video_cap.read()
             if successfully_read is True:
+                # 灰度化
                 frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                frame_height, frame_width = frame_gray.shape
                 # 起点
-                # 如果图像第一行像素为白色
-                if frame[0].mean() > 235:
-                    start_threshold_list.append(1.0)
+                if start_point_exist_flag is False:
+                    # 如果图像第一行像素为白色
+                    if frame[0].mean() > 245:
+                        start_point_result = (frame_id, 1.0)
+                        start_point_exist_flag = True
+                        last_picture = frame_gray
+                    # 先寻找起点(没有找到起点进行下一循环)
+                    continue
+                # 终点(稳定点)
                 else:
-                    start_threshold_list.append(0)
-                # 终点
-                # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点)
-                # 行起点
-                row_start = (end_mask_gray[0][0] * 10 - end_mask_height)
-                if row_start < 0:
-                    row_start = 0
-                else:
-                    row_start = row_start
-                # 行终点
-                row_end = (end_mask_gray[0][1] * 10 + end_mask_height)
-                if row_end >= frame_height:
-                    row_end = frame_height - 1
-                else:
-                    row_end = row_end
-                # 列起点
-                column_start = (end_mask_gray[0][2] * 10 - end_mask_width)
-                if column_start < 0:
-                    column_start = 0
-                else:
-                    column_start = column_start
-                # 列终点
-                column_end = (end_mask_gray[0][3] * 10 + end_mask_width)
-                if column_end >= frame_width:
-                    column_end = frame_width - 1
-                else:
-                    column_end = column_end
-                # 目标图片(待匹配)
-                target = frame_gray[row_start: row_end, column_start: column_end]
-                # 模板匹配
-                match_result = cv2.matchTemplate(target, end_mask_gray, current_match_method)
-                # 查找匹配度和坐标位置
-                min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
-                end_threshold_list.append(max_threshold)
+                    match_rate = self.match_template(last_picture, frame_gray)
+                    print(match_rate)
+                    if cycle_flag is True:
+                        if match_rate > 0.99:
+                            cycle_flag = True
+                            stability_num += 1
+                            if stability_num == 10:
+                                end_point_result = (frame_id - 10, 0.99)
+                                break
+                        else:
+                            cycle_flag = False
+                            stability_num = 0
+                    else:
+                        if match_rate > 0.99:
+                            cycle_flag = True
+                            stability_num = 1
             else:
                 break
         video_cap.release()
-        return start_threshold_list, end_threshold_list
+        return start_point_result, end_point_result
 
 
     def detect_start_point(self, start_threshold_list):
@@ -297,7 +308,8 @@ class GetStartupTime:
         Logger('data process finished!')
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     video_path = 'D:/Code/robot/video/2019-10-15'
     test = GetStartupTime(video_path=video_path)
-    test.data_processing()
+    # test.data_processing()
+    print(test.get_start_and_end_match_threshold('D:/Test/Python/TestVideo/video/test_.mp4'))
