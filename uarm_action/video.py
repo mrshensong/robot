@@ -115,7 +115,7 @@ class Video:
         # set exposure(曝光设置为8250, 通过相机帧率计算公司得到, 120帧对应曝光时间为120fps)
         self.cam.ExposureTime.set(8250.0)
         # set gain(设置增益, 调节相机亮度)
-        self.cam.Gain.set(8.0)
+        self.cam.Gain.set(0.0)
         '''100帧'''
         # # 相机采集帧率(相机采集帧率设置为60)
         # self.cam.AcquisitionFrameRate.set(self.frame_rate)

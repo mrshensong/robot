@@ -314,7 +314,7 @@ class UiMainWindow(QMainWindow):
             pass
         elif signal_str.startswith('gain>'):
             gain = int(signal_str.split('gain>')[1])
-            self.robot.video.cam.Gain.set(gain)
+            Thread(target=self.robot.video.cam.Gain.set, args=(gain,)).start()
         elif signal_str.startswith('picture_path>'):
             self.picture_path = signal_str.split('>')[1]
             self.main_show_tab_widget.video_tab.video_label.picture_path = self.picture_path
