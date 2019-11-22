@@ -170,7 +170,7 @@ class VideoLabel(QLabel):
         self.label_video_title = QLabel(self)
         self.label_video_title.setObjectName("label_video_title")
         self.label_video_title.setAlignment(Qt.AlignCenter)
-        self.label_video_title.setStyleSheet('color:black')
+        self.label_video_title.setStyleSheet('color:white')
         self.label_video_title.setText('[实时视频流]')
         self.label_video_title.setFont(QFont(self.font, 15))
         # 视频进度条
