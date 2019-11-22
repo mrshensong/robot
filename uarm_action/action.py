@@ -163,8 +163,7 @@ class ArmAction:
         record_status = data['record_status']
         video_type = data['video_type']
         video_name = data['video_name']
-        video_file = (video_path + '/' + video_type + '/' + video_name + '.mp4')
-        Logger('执行-->action[record]----status[%s]----path: %s' % (record_status, video_file))
+        Logger('执行-->action[record]----status[%s]' % record_status)
         # 重置video对象中的video_path
         self.video.video_path = video_path
         if record_status == 'record_start':
@@ -175,7 +174,8 @@ class ArmAction:
                 time.sleep(0.02)
 
     # 延时动作
-    def play_sleep_action(self, info_dict):
+    @staticmethod
+    def play_sleep_action(info_dict):
         data = info_dict
         sleep_time = float(data['sleep_time'])
         Logger('执行-->action[sleep]----status[%s]' % str(sleep_time))
