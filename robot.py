@@ -397,6 +397,12 @@ class UiMainWindow(QMainWindow):
             # 自动跳转到report页面
             self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.report_tab)
             self.main_show_tab_widget.report_tab.show_html()
+        # 打开文本
+        elif signal_str.startswith('open_text>'):
+            self.main_show_tab_widget.text_tab.text_path = signal_str.split('open_text>')[1]
+            # 自动跳到text页面
+            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.text_tab)
+            self.main_show_tab_widget.text_tab.show_text()
 
 
     '''以下内容为实时流工具栏相关操作'''

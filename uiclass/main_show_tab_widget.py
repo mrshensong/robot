@@ -24,10 +24,13 @@ class MainShowTabWidget(QTabWidget):
         self.picture_tab = PictureTab(self)
         # 报告页
         self.report_tab = ReportTab(self)
+        # text页面
+        self.text_tab = TextTab(self)
 
         self.addTab(self.video_tab, 'video')
         self.addTab(self.picture_tab, 'picture')
         self.addTab(self.report_tab, 'report')
+        self.addTab(self.text_tab, 'text')
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_tab_signal(self, info_str):
@@ -295,3 +298,47 @@ class ReportTab(QWidget):
         html = html.replace('<img src="', '<img src="'+report_picture_path)
         self.html_path_label.setText(self.report_path)
         self.html_show_text.setHtml(html)
+
+
+# 文本tab
+class TextTab(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(TextTab, self).__init__(parent)
+        self.parent = parent
+        self.text_path = None
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QVBoxLayout(self)
+        self.text_h_layout = QHBoxLayout(self)
+        self.title_h_layout = QHBoxLayout(self)
+        # 显示文本路径
+        self.text_path_label = QLabel(self)
+        self.text_path_label.setText('None')
+
+        self.title_h_layout.addStretch(1)
+        self.title_h_layout.addWidget(self.text_path_label)
+        self.title_h_layout.addStretch(1)
+
+        # text展示
+        self.text_show_text = QTextEdit(self)
+        self.text_show_text.setReadOnly(True)
+
+        self.text_h_layout.addWidget(self.text_show_text)
+
+        self.general_layout.addLayout(self.title_h_layout)
+        self.general_layout.addLayout(self.text_h_layout)
+
+        self.setLayout(self.general_layout)
+
+
+    # text展示操作
+    def show_text(self):
+        with open(self.text_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+        self.text_path_label.setText(self.text_path)
+        self.text_show_text.setText(text)

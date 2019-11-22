@@ -1,6 +1,8 @@
+import os
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit
 from PyQt5.QtCore import Qt, pyqtSignal
+from GlobalVar import Logger
 
 
 class ProjectBar(QWidget):
@@ -53,12 +55,19 @@ class ProjectBar(QWidget):
     def operation_file(self):
         index = self.tree.currentIndex()
         file_path = self.model.filePath(index)
-        # 展示图片
-        if file_path.endswith('.jpg') or file_path.endswith('.png'):
-            self.signal.emit('open_picture>' + str(file_path))
-        # 展示报告
-        elif file_path.endswith('.html'):
-            self.signal.emit('open_report>' + str(file_path))
+        # 判断双击是否为文件(只对文件操作)
+        if os.path.isfile(file_path) is True:
+            # 展示图片
+            if file_path.endswith('.jpg') or file_path.endswith('.png'):
+                self.signal.emit('open_picture>' + str(file_path))
+            # 展示报告
+            elif file_path.endswith('.html'):
+                self.signal.emit('open_report>' + str(file_path))
+            # 展示text
+            elif file_path.split('.')[1] in ['txt', 'py', 'xml', 'md', 'ini']:
+                self.signal.emit('open_text>' + str(file_path))
+            else:
+                Logger('暂不支持其他文件!!!')
         else:
             pass
 
