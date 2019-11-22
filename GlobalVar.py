@@ -125,8 +125,8 @@ class RobotArmParam:
     base_x_point = 0.0
     base_y_point = 0.0
     base_z_point = 0.0
-    actual_screen_width  = 226
-    actual_screen_height = 127
+    actual_screen_width  = 0
+    actual_screen_height = 0
     port_address = 'http://localhost:8000/'
 
 
@@ -177,7 +177,7 @@ class SleepAction:
 class Profile:
     def __init__(self, type='read', file=None, section=None, option=None, value=None):
         if type == 'read':
-            self.path = self.get_config_value(file=file, section=section, option=option)
+            self.value = self.get_config_value(file=file, section=section, option=option)
         if type == 'write':
             self.set_config_value(file=file, section=section, option=option, value=value)
 

@@ -93,7 +93,9 @@ class VideoLabel(QLabel):
         self.frame_count = 0
         # 滑动条标志位(如果有滑动动作标志为True, 否则为False)
         self.slider_flag = False
-
+        # 读取配置文件中车机真实尺寸
+        RobotArmParam.actual_screen_width = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_width').value)
+        RobotArmParam.actual_screen_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_height').value)
         # 控件初始化
         self.initUI()
 

@@ -336,7 +336,7 @@ class CameraParamAdjustControl(QDialog):
     def __init__(self, parent):
         super(CameraParamAdjustControl, self).__init__(parent)
         self.parent = parent
-        self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').path
+        self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').value
         self.exposure_time_value = 1000
         self.gain_value = 0
         self.initUI()

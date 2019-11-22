@@ -39,10 +39,10 @@ class UiMainWindow(QMainWindow):
         # 获取到的视频根目录
         self.get_path = None
         # 获取截图保存路径
-        self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').path
+        self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').value
         GloVar.project_picture_path = self.picture_path
         # 视频所在的路径
-        self.videos_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='videos_path').path
+        self.videos_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='videos_path').value
         # 窗口状态栏显示的固定格式
         self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
                                   % (WindowStatus.robot_connect_status, WindowStatus.video_frame_rate,

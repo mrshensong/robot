@@ -218,7 +218,7 @@ class ShowActionTab(QWidget):
     # 保存标签工具栏操作(save_button)
     def save_script_tag(self):
         if len(self.list_widget) > 0:
-            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').path
+            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
             filename = QFileDialog.getSaveFileName(self, 'save script', script_path, 'script file(*.xml)')
             if filename[0]:
                 current_path = '/'.join(filename[0].split('/')[:-1])

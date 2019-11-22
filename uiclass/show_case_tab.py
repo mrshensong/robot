@@ -58,7 +58,7 @@ class ShowCaseTab(QWidget):
     def connect_import_button(self, path=None):
         # 通过选择框导入case
         if path is None:
-            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').path
+            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
             case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', script_path)
             if case_folder:
                 # 将当前script路径保存到配置文件
