@@ -55,8 +55,6 @@ class UiMainWindow(QMainWindow):
         GloVar.project_path = MergePath(section_path=[os.path.abspath(os.getcwd())]).merged_path
         # 获取工程视频保存路径
         GloVar.project_video_path = MergePath(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
-        # python_server的pid
-        self.python_server_pid = None
 
         # 显示窗口状态栏
         self.timer_window_status = Timer(frequent=3)
@@ -755,9 +753,6 @@ class UiMainWindow(QMainWindow):
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '本程序', '是否要退出程序?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            # 杀死python_server
-            if self.python_server_pid is not None:
-                os.system('taskkill -f -pid %s' % self.python_server_pid)
             # 关闭摄像头
             self.robot.video.stop_record_thread()
             self.main_show_tab_widget.video_tab.video_label.timer_camera_image.stop()
