@@ -7,7 +7,7 @@ from threading import Thread
 from GlobalVar import GloVar, MergePath, Logger
 
 
-class Video:
+class ExternalCameraVideo:
 
     def __init__(self, video_path, video_width, video_height):
         # 保存视频需要用到的参数
@@ -71,23 +71,6 @@ class Video:
         # if roi != (0, 0, 0, 0):
         #     dst = dst[y:y + h, x:x + w]
         return dst
-
-
-    # 调用笔记本摄像头模拟工业摄像头
-    def video_stream_1(self):
-        cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_height)
-        while self.record_thread_flag is True:
-            _, GloVar.camera_image = cap.read()
-            if self.record_flag is True:
-                # 标记这一帧
-                if self.robot_start_flag is False:
-                    self.video_frames_list.append(GloVar.camera_image.copy())
-                else:
-                    self.video_frames_list.append(GloVar.camera_image.copy()[0].fill(255))
-        cap.release()
-        Logger('退出视频录像线程')
 
 
     # 视频流线程
@@ -252,7 +235,7 @@ class Video:
 
 
 if __name__=='__main__':
-    video = Video(video_path='D:/Code/robot/video', video_width=1600, video_height=800)
+    video = ExternalCameraVideo(video_path='D:/Code/robot/video', video_width=1600, video_height=800)
     # time.sleep(2)
     time.sleep(5)
     # 第一个视频

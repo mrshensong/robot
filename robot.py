@@ -34,8 +34,8 @@ class UiMainWindow(QMainWindow):
         # 摄像机图像尺寸
         # self.camera_image_width = 1280
         # self.camera_image_height = 720
-        self.camera_image_width = 1600
-        self.camera_image_height = 800
+        self.camera_image_width = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_width').value)
+        self.camera_image_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_height').value)
         # 获取到的视频根目录
         self.get_path = None
         # 获取截图保存路径

@@ -2,8 +2,9 @@ import time
 from threading import Thread
 from uarm_action.uarm import SwiftAPI
 from GlobalVar import Logger
-from uarm_action.video import Video
-from GlobalVar import GloVar, RobotArmParam, WindowStatus
+from uarm_action.video_of_external_camera import ExternalCameraVideo
+from uarm_action.video_of_system_camera import SystemCameraVideo
+from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile
 
 
 class ArmAction:
@@ -24,8 +25,13 @@ class ArmAction:
         time.sleep(1)
         self.swift.set_position(50, 100, 40, 20, cmd="G0")
         self.swift.flush_cmd()
+        # 如果为True则使用外接相机, False使用电脑内置相机
+        use_external_camera_flag = str(Profile(type='read', file=GloVar.config_file_path, section='param', option='use_external_camera').value)
         # 视频线程
-        self.video = Video(video_path=None, video_width=camera_width, video_height=camera_height)
+        if use_external_camera_flag == 'True':
+            self.video = ExternalCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
+        else:
+            self.video = SystemCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
 
     def stop(self):
         self.set_position(50, 100, 40)
