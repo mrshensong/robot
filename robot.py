@@ -145,11 +145,6 @@ class UiMainWindow(QMainWindow):
         # 机械臂处理
         self.robot = ArmAction(camera_width=self.camera_image_width, camera_height=self.camera_image_height)
 
-        # 打开python_service
-        # Thread(target=self.open_python_server, args=()).start()
-        # 获取python_server的pid
-        # Thread(target=self.get_python_server_pid, args=()).start()
-
 
     '''以下部分为界面各个控件信息'''
     # 菜单栏
@@ -369,7 +364,6 @@ class UiMainWindow(QMainWindow):
             GloVar.post_info_list.append('start')
             GloVar.post_info_list.append(info_dict)
             GloVar.post_info_list.append('stop')
-            # Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
             Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
 
 
@@ -377,11 +371,9 @@ class UiMainWindow(QMainWindow):
     def recv_show_tab_widget_signal(self, signal_str):
         # 执行选中所有动作动作
         if signal_str.startswith('play_actions>'):
-            # Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
             Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
         # 执行一条case动作
         elif signal_str.startswith('play_single_case>'):
-            # Thread(target=self.uArm_post_request, args=('execute', 'actions', GloVar.post_info_list,)).start()
             Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
         # 添加action控件时候, 设置动作标志位
         elif signal_str.startswith('action_tab_action>'):
@@ -407,26 +399,6 @@ class UiMainWindow(QMainWindow):
             # 自动跳转到report页面
             self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.report_tab)
             self.main_show_tab_widget.report_tab.show_html()
-
-
-    '''以下内容为python_service相关操作函数'''
-    # 打开python服务
-    def open_python_server(self):
-        os.system(GloVar.project_path + '/venv/Scripts/python.exe pythonservice/manage.py runserver')
-
-
-    # 获取8000端口pid
-    def get_python_server_pid(self):
-        while True:
-            result = os.popen('netstat -aon | findstr 8000').readlines()
-            if '127.0.0.1:8000' in ''.join(result):
-                for line in result:
-                    if '127.0.0.1:8000' in line:
-                        self.python_server_pid = line.split('LISTENING')[1].split('\n')[0].strip()
-                        break
-                break
-            else:
-                time.sleep(0.5)
 
 
     '''以下内容为实时流工具栏相关操作'''
@@ -507,28 +479,6 @@ class UiMainWindow(QMainWindow):
 
 
     '''以下为机械臂工具栏相关操作'''
-    # get请求->机械臂相关操作函数(解锁/上锁/获取坐标)
-    def uArm_get_request(self, action):
-        try:
-            response = requests.get(RobotArmParam.port_address + 'uArm/' + str(action))
-            GloVar.request_status = response.text
-        except TimeoutError:
-            GloVar.request_status = '机械臂服务连接异常'
-        finally:
-            return GloVar.request_status
-
-
-    # post请求->机械臂命令(单击/双击/长按/滑动)
-    def uArm_post_request(self, type, action, data_dict):
-        try:
-            response = requests.post(url=RobotArmParam.port_address + str(type) +'/' + str(action), data=json.dumps(data_dict))
-            GloVar.request_status = response.text
-        except TimeoutError:
-            GloVar.request_status = '机械臂服务连接异常'
-        finally:
-            return GloVar.request_status
-
-
     # 机械臂动作线程
     def uArm_action_event_thread(self, action):
         if action == RobotArmAction.uArm_click:
@@ -547,15 +497,12 @@ class UiMainWindow(QMainWindow):
             RobotArmAction.uArm_action_type = RobotArmAction.uArm_slide
         elif action == RobotArmAction.uArm_lock:
             # 机械臂锁定
-            # response = self.uArm_get_request(RobotArmAction.uArm_lock)
             Thread(target=self.robot.servo_attach, args=()).start()
         elif action == RobotArmAction.uArm_unlock:
             # 机械臂解锁
-            # response = self.uArm_get_request(RobotArmAction.uArm_unlock)
             Thread(target=self.robot.servo_detach, args=()).start()
         elif action == RobotArmAction.uArm_get_position:
             # 获取机械臂当前坐标
-            # response = self.uArm_get_request(RobotArmAction.uArm_get_position)
             Thread(target=self.robot.get_position, args=()).start()
         else:
             Logger('当前不支持[%s]这个动作' % action)
