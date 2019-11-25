@@ -32,7 +32,7 @@ class VideoLabel(QLabel):
         self.x_unit = 1.0
         self.y_unit = 1.0
         # 框选的屏幕起点和终点所占label_video比例
-        self.box_screen_scale = [0.0, 0.0, 0.0, 0.0]
+        self.box_screen_scale = eval(Profile(type='read', file=GloVar.config_file_path, section='param', option='box_screen_scale').value)
         # 框选的屏幕大小
         self.box_screen_size = [0, 0, 0, 0]
         # False直播/True录播/None什么都不播放状态
@@ -834,11 +834,13 @@ class VideoLabel(QLabel):
                 self.box_screen_scale[1] = round(float(self.y0/self.size().height()), 6)
                 self.box_screen_scale[2] = round(float(self.x1/self.size().width()),  6)
                 self.box_screen_scale[3] = round(float(self.y1/self.size().height()), 6)
+                # 将box_screen_scale尺寸存入配置文件(不需要每次打开都进行框选)
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='box_screen_scale', value=str(self.box_screen_scale))
                 GloVar.box_screen_flag = False
                 RobotOther.select_template_flag = False
                 GloVar.add_action_button_flag = True
                 self.setCursor(Qt.ArrowCursor)
-                Logger('[框选车机屏幕]--起点及尺寸: %s' %str(self.box_screen_size))
+                Logger('[框选车机屏幕]--起点及尺寸: %s' % str(self.box_screen_size))
             # 如果是机械臂滑动动作
             elif RobotArmAction.uArm_action_type == RobotArmAction.uArm_slide:
                 start = self.calculating_point(self.x0, self.y0)

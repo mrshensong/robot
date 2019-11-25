@@ -107,8 +107,8 @@ class VideoTab(QWidget):
         # 计算视频和label_video之间比例因子(框选保存图片需要用到)
         self.video_label.x_unit = float(video_width / self.video_label.video_label_size_width)
         self.video_label.y_unit = float(video_height / self.video_label.video_label_size_height)
-        # 重新计算框选的车机屏幕大小(可以适应不同大小屏幕)
-        if sum(self.video_label.box_screen_size) > 0:
+        # 重新计算框选的车机屏幕大小(可以适应不同大小屏幕, 通过判断框选比例来决定是否出现框选框, 如果box_screen_scale不为0, 就画出矩形框)
+        if sum(self.video_label.box_screen_scale) > 0:
             self.video_label.box_screen_size[0] = int(self.video_label.width()  * self.video_label.box_screen_scale[0])
             self.video_label.box_screen_size[1] = int(self.video_label.height() * self.video_label.box_screen_scale[1])
             self.video_label.box_screen_size[2] = int(self.video_label.width()  * (self.video_label.box_screen_scale[2] - self.video_label.box_screen_scale[0]))
