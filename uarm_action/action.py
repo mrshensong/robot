@@ -25,6 +25,8 @@ class ArmAction:
         time.sleep(1)
         self.swift.set_position(50, 100, 40, 20, cmd="G0")
         self.swift.flush_cmd()
+        # 锁定机械臂
+        self.swift.set_servo_attach()
         # 如果为True则使用外接相机, False使用电脑内置相机
         use_external_camera_flag = str(Profile(type='read', file=GloVar.config_file_path, section='param', option='use_external_camera').value)
         # 视频线程
@@ -50,6 +52,8 @@ class ArmAction:
     # 机械臂获取当前位置
     def get_position(self):
         position = self.swift.get_position()
+        # 将基准坐标写入配置文件
+        Profile(type='write', file=GloVar.config_file_path, section='param', option='base_point', value=str(position))
         RobotArmParam.base_x_point = position[0]
         RobotArmParam.base_y_point = position[1]
         RobotArmParam.base_z_point = position[2]

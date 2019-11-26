@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QTool
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from uiclass.video_label import VideoLabel
-from GlobalVar import IconPath
+from GlobalVar import IconPath, GloVar
 
 
 class MainShowTabWidget(QTabWidget):
@@ -109,6 +109,8 @@ class VideoTab(QWidget):
         self.video_label.y_unit = float(video_height / self.video_label.video_label_size_height)
         # 重新计算框选的车机屏幕大小(可以适应不同大小屏幕, 通过判断框选比例来决定是否出现框选框, 如果box_screen_scale不为0, 就画出矩形框)
         if sum(self.video_label.box_screen_scale) > 0:
+            # 车机是否框选了标志
+            GloVar.add_action_button_flag = True
             self.video_label.box_screen_size[0] = int(self.video_label.width()  * self.video_label.box_screen_scale[0])
             self.video_label.box_screen_size[1] = int(self.video_label.height() * self.video_label.box_screen_scale[1])
             self.video_label.box_screen_size[2] = int(self.video_label.width()  * (self.video_label.box_screen_scale[2] - self.video_label.box_screen_scale[0]))
@@ -253,7 +255,7 @@ class PictureTab(QWidget):
         self.picture_zoom_scale = 1.0
 
 
-# 照片tab
+# 报告tab
 class ReportTab(QWidget):
 
     signal = pyqtSignal(str)
@@ -320,20 +322,46 @@ class TextTab(QWidget):
         self.text_path_label = QLabel(self)
         self.text_path_label.setText('None')
 
+        # 编辑文本按钮
+        self.edit_text_button = QToolButton()
+        self.edit_text_button.setEnabled(False)
+        self.edit_text_button.setToolTip('edit')
+        self.edit_text_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_edit_text + ')}')
+        self.edit_text_button.clicked.connect(self.connect_edit_text)
+
+        # 保存文本按钮
+        self.save_text_button = QToolButton()
+        self.save_text_button.setEnabled(False)
+        self.save_text_button.setToolTip('save')
+        self.save_text_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_save_text + ')}')
+        self.save_text_button.clicked.connect(self.connect_save_text)
+
+        # title行布局
+        self.title_h_layout.addWidget(self.edit_text_button)
         self.title_h_layout.addStretch(1)
         self.title_h_layout.addWidget(self.text_path_label)
         self.title_h_layout.addStretch(1)
+        self.title_h_layout.addWidget(self.save_text_button)
 
         # text展示
         self.text_show_text = QTextEdit(self)
         self.text_show_text.setReadOnly(True)
-
         self.text_h_layout.addWidget(self.text_show_text)
 
         self.general_layout.addLayout(self.title_h_layout)
         self.general_layout.addLayout(self.text_h_layout)
 
         self.setLayout(self.general_layout)
+
+
+    # 编辑文本
+    def connect_edit_text(self):
+        pass
+
+
+    # 保存文本
+    def connect_save_text(self):
+        pass
 
 
     # text展示操作

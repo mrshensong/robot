@@ -36,6 +36,9 @@ class UiMainWindow(QMainWindow):
         # self.camera_image_height = 720
         self.camera_image_width = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_width').value)
         self.camera_image_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_height').value)
+        # 从配置文件中读取基准点
+        base_point = eval(Profile(type='read', file=GloVar.config_file_path, section='param', option='base_point').value)
+        RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point = base_point
         # 获取到的视频根目录
         self.get_path = None
         # 获取截图保存路径
