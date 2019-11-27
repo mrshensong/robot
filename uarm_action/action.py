@@ -81,10 +81,13 @@ class ArmAction:
         z_h = round(z_l + 30, 4)
         self.set_position(x, y, z_h, speed)
         self.set_position(x, y, z_l, speed)
-        self.set_position(x, y, z_h, speed)
-        # 此处为视频中的当前帧插入标记(抬起前还是抬起后插入标记)
+        self.set_position(x, y, z_l+1.3, speed)
         if trigger == 1:
             self.video.robot_start_flag = True
+        self.set_position(x, y, z_h, speed)
+        # # 此处为视频中的当前帧插入标记(抬起前还是抬起后插入标记)
+        # if trigger == 1:
+        #     self.video.robot_start_flag = True
         # self.set_position(x, y, z_h, speed)
         if leave == 1:
             self.set_position(50, 100, 40)

@@ -183,7 +183,7 @@ class UiMainWindow(QMainWindow):
         self.robot_slide_action        = QAction(QIcon(IconPath.Icon_robot_slide), 'slide', self)
         self.robot_lock_action         = QAction(QIcon(IconPath.Icon_robot_lock), 'lock', self)
         self.robot_unlock_action       = QAction(QIcon(IconPath.Icon_robot_unlock), 'unlock', self)
-        self.robot_get_position_action = QAction(QIcon(IconPath.Icon_robot_get_position), 'get_position', self)
+        self.robot_get_base_position_action = QAction(QIcon(IconPath.Icon_robot_get_base_position), 'get_position', self)
         self.robot_with_record_action  = QAction(QIcon(IconPath.Icon_robot_with_record), 'with_record', self)
         # 绑定触发函数
         self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_click))
@@ -192,7 +192,7 @@ class UiMainWindow(QMainWindow):
         self.robot_slide_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_slide))
         self.robot_lock_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_lock))
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_unlock))
-        self.robot_get_position_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_get_position))
+        self.robot_get_base_position_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_get_position))
         self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
         # 视频播放工具栏
         self.local_video_toolbar_label = QLabel(self)
@@ -230,7 +230,7 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar.addWidget(self.robot_toolbar_label)
         self.robot_toolbar.addAction(self.robot_lock_action)
         self.robot_toolbar.addAction(self.robot_unlock_action)
-        self.robot_toolbar.addAction(self.robot_get_position_action)
+        self.robot_toolbar.addAction(self.robot_get_base_position_action)
         self.robot_toolbar.addAction(self.robot_click_action)
         self.robot_toolbar.addAction(self.robot_double_click_action)
         self.robot_toolbar.addAction(self.robot_long_click_action)

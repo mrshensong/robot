@@ -76,7 +76,7 @@ class IconPath:
     Icon_robot_slide          = 'config/Icon/robot_toolbar_icon/slide.png'
     Icon_robot_lock           = 'config/Icon/robot_toolbar_icon/lock.png'
     Icon_robot_unlock         = 'config/Icon/robot_toolbar_icon/unlock.png'
-    Icon_robot_get_position   = 'config/Icon/robot_toolbar_icon/get_position.png'
+    Icon_robot_get_base_position   = 'config/Icon/robot_toolbar_icon/get_base_position.png'
     Icon_robot_with_record    = 'config/Icon/robot_toolbar_icon/with_record.png'
     Icon_robot_without_record = 'config/Icon/robot_toolbar_icon/without_record.png'
     # 本地视频播放工具栏相关图标
