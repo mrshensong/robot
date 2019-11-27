@@ -1,5 +1,5 @@
 import time
-import configparser
+from other.operate_config import ConfigWithComment
 
 # 文件之间参数传递
 class GloVar:
@@ -178,28 +178,43 @@ class SleepAction:
 # 配置文件的读取和写入
 class Profile:
     def __init__(self, type='read', file=None, section=None, option=None, value=None):
+        self.config_file = ConfigWithComment(file=file)
         if type == 'read':
-            self.value = self.get_config_value(file=file, section=section, option=option)
+            # self.value = self.get_config_value(file=file, section=section, option=option)
+            self.value = self.get_config_value(section=section, option=option)
         if type == 'write':
-            self.set_config_value(file=file, section=section, option=option, value=value)
+            # self.set_config_value(file=file, section=section, option=option, value=value)
+            self.set_config_value(section=section, option=option, value=value)
 
 
+    '''更改配置文件会去掉注释'''
+    # def get_config_value(self, file, section, option):
+    #     config = configparser.ConfigParser()
+    #     config.read(file, encoding='utf-8')
+    #     return config.get(section, option)
+
+
+    # # 设置config的参数
+    # def set_config_value(self, file, section, option, value):
+    #     config = configparser.ConfigParser()
+    #     config.read(file, encoding='utf-8')
+    #     if section not in config.sections():
+    #         config.add_section(section)
+    #     config.set(section, option, str(value))
+    #     with open(file, 'w+', encoding='utf-8') as cf:
+    #         config.write(cf)
+
+
+    '''修改配置文件会保留注释(增加可读性)'''
     # 获取config的参数
-    def get_config_value(self, file, section, option):
-        config = configparser.ConfigParser()
-        config.read(file, encoding='utf-8')
-        return config.get(section, option)
+    def get_config_value(self, section, option):
+        value = self.config_file.read_config_value(section=section, option=option)
+        return value
 
 
     # 设置config的参数
-    def set_config_value(self, file, section, option, value):
-        config = configparser.ConfigParser()
-        config.read(file, encoding='utf-8')
-        if section not in config.sections():
-            config.add_section(section)
-        config.set(section, option, str(value))
-        with open(file, 'w+', encoding='utf-8') as cf:
-            config.write(cf)
+    def set_config_value(self, section, option, value):
+        self.config_file.write_config_value(section=section, option=option, value=value)
 
 
 # 自定义log对象
