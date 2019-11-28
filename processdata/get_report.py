@@ -24,6 +24,10 @@ class GenerateReport:
                '\n<p style="text-align:center"><img src="'+ graph +'"/></p>'
         return text
 
+    # 获取表图报告
+    def get_table_chart_report(self):
+        pass
+
     # 保存生成的html代码
     def save_html(self):
         html_head = '<!DOCTYPE HTML>\n' +\
