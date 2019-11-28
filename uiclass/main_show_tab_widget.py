@@ -341,4 +341,6 @@ class TextTab(QWidget):
         with open(self.text_path, 'r', encoding='utf-8') as f:
             text = f.read()
         self.text_path_label.setText(self.text_path)
-        self.text_show_text.setText(text)
+        # self.text_show_text.setText(text)
+        # 展示纯文本(不会渲染html)
+        self.text_show_text.setPlainText(text)
