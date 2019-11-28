@@ -103,8 +103,8 @@ class GenerateDataGraph:
                 plt.text(chat_width - 6, num - 0.1, 'pass', size=16, color='green', ha='center', va='bottom')
         # 获取图片title
         title = file_name.split('/')[-1].split('.')[0]
-        plt.title('[' + title + ']' + '间隔帧数')
-        plt.xlabel('间隔帧数')
+        plt.title('[' + title + ']' + '-->流畅度测试')
+        plt.xlabel('-*- 间隔帧数/fps -*-')
         # 显示图例
         plt.legend(loc='upper left')
         # 避免出现title或者纵坐标显示不完整的问题
