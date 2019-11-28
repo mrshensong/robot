@@ -4,6 +4,7 @@ import numpy as np
 from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWebEngineWidgets import *
 from uiclass.video_label import VideoLabel
 from GlobalVar import IconPath, GloVar
 
@@ -256,7 +257,7 @@ class PictureTab(QWidget):
 
 
 # 报告tab
-class ReportTab(QWidget):
+class ReportTab(QWebEngineView):
 
     signal = pyqtSignal(str)
 
@@ -264,42 +265,13 @@ class ReportTab(QWidget):
         super(ReportTab, self).__init__(parent)
         self.parent = parent
         self.report_path = None
-        self.initUI()
-
-
-    def initUI(self):
-        self.general_layout = QVBoxLayout(self)
-        self.html_h_layout = QHBoxLayout(self)
-        self.title_h_layout = QHBoxLayout(self)
-        # 显示报告路径
-        self.html_path_label = QLabel(self)
-        self.html_path_label.setText('None')
-
-        self.title_h_layout.addStretch(1)
-        self.title_h_layout.addWidget(self.html_path_label)
-        self.title_h_layout.addStretch(1)
-
-        # html展示
-        self.html_show_text = QTextEdit(self)
-        self.html_show_text.setReadOnly(True)
-
-        self.html_h_layout.addWidget(self.html_show_text)
-
-        self.general_layout.addLayout(self.title_h_layout)
-        self.general_layout.addLayout(self.html_h_layout)
-
-        self.setLayout(self.general_layout)
 
 
     # html展示操作
     def show_html(self):
-        with open(self.report_path, 'r', encoding='utf-8') as f:
-            html = f.read()
-        # 将报告中的image相对路径改为绝对路径
-        report_picture_path = os.path.split(self.report_path)[0] + '/'
-        html = html.replace('<img src="', '<img src="'+report_picture_path)
-        self.html_path_label.setText(self.report_path)
-        self.html_show_text.setHtml(html)
+        # self.setHtml(html)
+        # 加载本地html文件
+        self.load(QUrl('file:///' + self.report_path))
 
 
 # 文本tab

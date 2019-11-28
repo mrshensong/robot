@@ -63,8 +63,14 @@ class GenerateDataGraph:
         参数一：y轴
         参数二：x轴
         """
-        # 像素300, 图片尺寸4*300:3*300
-        plt.figure(figsize=(4, 3), dpi=300)
+        # 根据数据量设置画布大小, 以及刻度范围
+        if len(case_list) < 5:
+            plt.figure(figsize=(12, 6))
+            plt.axis([10, max(frame_gap_list)+20, -1, 6])
+        else:
+            plt.figure(figsize=(12, 8))
+            plt.axis([10, max(frame_gap_list) + 20, -1, len(case_list)+1])
+
         plt.barh(y=range(len(case_list)), width=frame_gap_list, height=0.4, color='steelblue', alpha=0.8)  # 从下往上画
         plt.yticks(range(len(case_list)), case_list)
         # 获取图片title
@@ -73,7 +79,7 @@ class GenerateDataGraph:
         # plt.xlim(30, 47)
         plt.xlabel('差帧')
         for x, y in enumerate(frame_gap_list):
-            plt.text(y + 0.2, x - 0.1, '%s' % y)
+            plt.text(y+0.5, x, '%s' % y)
         # 避免出现title或者纵坐标显示不完整的问题
         plt.tight_layout()
         plt.savefig(file_name)
@@ -89,7 +95,7 @@ class GenerateDataGraph:
 
 
 if __name__=='__main__':
-    file = 'D:/Code/robot/report/2019-10-15/report.xlsx'
+    file = 'D:/Code/robot/report/2019-11-27/report.xlsx'
     # DataGraph(file=None).drawing()
     data_graph = GenerateDataGraph(file=file)
     data_graph.get_graphs()

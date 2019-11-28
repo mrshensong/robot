@@ -30,6 +30,7 @@ class GenerateReport:
                '<html>\n' +\
                '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n' +\
                '<body>\n' +\
+               '<h1 style="text-align:center">' + self.report_name + '</h1>\n' +\
                '<h1 style="text-align:center">北京车和家</h1>'
         html_tail = '\n</body>' +\
                     '\n</html>'
