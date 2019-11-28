@@ -1,4 +1,5 @@
-from openpyxl import load_workbook
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import Font, Alignment
 import matplotlib
 import matplotlib.pyplot as plt
 from GlobalVar import Logger, Profile, GloVar
@@ -123,6 +124,5 @@ class GenerateDataGraph:
 
 if __name__=='__main__':
     file = 'D:/Code/robot/report/2019-11-27/report.xlsx'
-    # DataGraph(file=None).drawing()
     data_graph = GenerateDataGraph(file=file)
     data_graph.get_graphs()
