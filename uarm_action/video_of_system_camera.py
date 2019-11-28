@@ -92,11 +92,13 @@ class SystemCameraVideo:
         # 传入视频类型和视频名
         self.case_type = case_type
         self.case_name = case_name
-        # 创建文件夹(没有就创建)
-        video_path = self.video_path + '/' + self.case_type
+        # 创建文件夹(没有就创建)/(D:/Code/robot/video/2019-11-27/测试/点击设置/1.2.3.4.5)--多次测试会产生这样的视频
+        video_path = self.video_path + '/' + self.case_type + '/' + self.case_name
         if os.path.exists(video_path) is False:
             os.makedirs(video_path)
-        self.video_file_name = self.video_path + '/' + self.case_type + '/' + self.case_name + '.mp4'
+        # 以当前目录的文件产生顺序命名
+        video_count = len(os.listdir(video_path))
+        self.video_file_name = video_path + '/' + str(video_count + 1) + '.mp4'
         # 重新录制视频标志重新置位
         self.restart_record_flag = False
         '''开始录像(通过标志位)'''
