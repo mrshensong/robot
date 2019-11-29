@@ -2,64 +2,21 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Font, Alignment
 import matplotlib
 import matplotlib.pyplot as plt
-from GlobalVar import Logger, Profile, GloVar
+from GlobalVar import Logger, Profile, GloVar, MergePath
 # 设置中文字体和负号正常显示
 matplotlib.rcParams['font.sans-serif'] = ['SimHei']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 
 class GenerateDataGraph:
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, graph_path, data_dict):
+        self.graph_path = graph_path
+        self.data_dict = data_dict
         # self.standard_value = int(Profile(type='read', file=GloVar.config_file_path, section='standard', option='critical_value').value)
         self.standard_value = 100
 
-    # 获取某个单元格的值
-    def get_cell_value(self, sheet, row, column):
-        cell_value = sheet.cell(row=row, column=column).value
-        return cell_value
 
-    # 获取某行所有值
-    def get_row_values(self, sheet, row):
-        columns = sheet.max_column
-        row_data = []
-        for i in range(1, columns + 1):
-            cell_value = sheet.cell(row=row, column=i).value
-            row_data.append(cell_value)
-        # 去掉行头(在这里就代表case名)
-        row_data.pop(0)
-        return row_data
-
-    # 获取某列的所有值
-    def get_column_values(self, sheet, column):
-        rows = sheet.max_row
-        column_data = []
-        for i in range(1, rows + 1):
-            cell_value = sheet.cell(row=i, column=column).value
-            column_data.append(cell_value)
-        # 去掉列头(在这里就代表差帧)
-        column_data.pop(0)
-        return column_data
-
-    # 从excel表中获取数据(每一个sheet表对应一个数据图)
-    def get_data(self):
-        # 载入excel
-        work_book = load_workbook(self.file)
-        # 获取所有sheet
-        sheet_list = work_book.sheetnames
-        # 设置data_list存放获取到的数据([[cases, frame_gap], [cases, frame_gap]])
-        data_list = []
-        for sheet in sheet_list:
-            case_type = sheet
-            work_sheet = work_book[sheet]
-            cases = self.get_column_values(sheet=work_sheet, column=1)
-            frame_gap = self.get_column_values(sheet=work_sheet, column=6)
-            data_list.append([case_type, cases, frame_gap])
-        work_book.close()
-        return data_list
-
-
-    def drawing(self, file_name, case_list, frame_gap_list):
+    def drawing(self, file_name, case_list, frame_gap_list, standard_list, status_list):
         # 水平条形图
         """
         绘制水平条形图方法barh
@@ -68,8 +25,6 @@ class GenerateDataGraph:
         """
         # 根据数据量设置画布大小, 以及刻度范围
         case_num = len(case_list)
-        # 获取标准数据(由此判断pass/failed)
-        standard_list = [self.standard_value] * case_num
         # 画布大小根据case数量来
         plt.figure(figsize=(12, case_num + 2))
         # 根据在标准值和测试值中取最大值再加上20, 作为表的宽度
@@ -97,8 +52,8 @@ class GenerateDataGraph:
         for x, y in enumerate(standard_list):
             plt.text(y - 1.5, x - 0.3, '%s' % y, ha='center', va='bottom')
         # 标注pass/failed
-        for num in range(case_num):
-            if frame_gap_list[num] > standard_list[num]:
+        for num, status in enumerate(status_list):
+            if status == 'failed':
                 plt.text(chat_width - 6, num - 0.1, 'failed', size=16, color='red', ha='center', va='bottom')
             else:
                 plt.text(chat_width - 6, num - 0.1, 'pass', size=16, color='green', ha='center', va='bottom')
@@ -113,16 +68,22 @@ class GenerateDataGraph:
         plt.savefig(file_name)
         Logger('生成数据图: ' + file_name)
 
-    # 获取图片
+
     def get_graphs(self):
-        data_list = self.get_data()
-        for data in data_list:
-            file_name = '/'.join(self.file.split('/')[:-1]) + '/' + data[0] + '.png'
-            self.drawing(file_name=file_name, case_list=data[1], frame_gap_list=data[2])
+        for key, data in self.data_dict.items():
+            file_name = MergePath([self.graph_path, key+'.png']).merged_path
+            case_list, frame_gap_list, standard_list, status_list = [], [], [], []
+            for case in data:
+                case_list.append(case[0])
+                standard_list.append(case[3])
+                frame_gap_list.append(case[4])
+                status_list.append(case[5])
+            self.drawing(file_name, case_list, frame_gap_list, standard_list, status_list)
 
 
 
 if __name__=='__main__':
-    file = 'D:/Code/robot/report/2019-11-27/report.xlsx'
-    data_graph = GenerateDataGraph(file=file)
+    graph_path = 'D:/Code/robot/report/2019-11-27'
+    data_dict = {}
+    data_graph = GenerateDataGraph(graph_path=graph_path, data_dict=data_dict)
     data_graph.get_graphs()

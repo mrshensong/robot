@@ -649,14 +649,11 @@ class UiMainWindow(QMainWindow):
             # 获取需要展示出来的视频
             videos, videos_title, videos_without_template = [], [], []
             for home, dirs, files in os.walk(self.get_path):
-                for file in files:
-                    # 判断视频文件(通过后缀名)
-                    (file_text, extension) = os.path.splitext(file)
-                    if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
-                        # 文件名列表, 包含完整路径
-                        file = MergePath([home, file]).merged_path
-                        videos.append(file)
-                        videos_title.append(file)
+                if len(files) > 0:
+                    # 合并路径
+                    file = MergePath([home, '1.mp4']).merged_path
+                    videos.append(file)
+                    videos_title.append(file)
             # 遍历出来没有对应模板的视频文件
             for video in videos:
                 template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
@@ -717,7 +714,9 @@ class UiMainWindow(QMainWindow):
             videos_without_template = []
             # 遍历出来没有对应模板的视频文件
             for video in self.main_show_tab_widget.video_tab.video_label.videos:
-                template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+                # template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+                # 适应数据处理
+                template_path = os.path.split(video.replace('/video/', '/picture/'))[0] + '.jpg'
                 # 模板图片不存在
                 if os.path.exists(template_path) is False:
                     videos_without_template.append(video)

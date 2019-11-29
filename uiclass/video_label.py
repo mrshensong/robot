@@ -364,8 +364,13 @@ class VideoLabel(QLabel):
             RobotOther.mask_path = mask_image_path
         # 本地视频(框选模板名称默认和视频名相同>路径只是将video替换为picture即可)
         else:
-            mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
-            RobotOther.mask_path = mask_image_path
+            # 数据处理时传入的路径少一级
+            if RobotOther.data_process_flag is True:
+                mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
+                RobotOther.mask_path = MergePath([os.path.split(mask_image_path)[0]]).merged_path + '.mp4'
+            else:
+                mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
+                RobotOther.mask_path = mask_image_path
 
 
     # 空格键 播放/暂停/重播
