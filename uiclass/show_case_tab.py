@@ -2,7 +2,7 @@ import os
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam
@@ -42,10 +42,18 @@ class ShowCaseTab(QWidget):
         self.execute_button.setToolTip('execute')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_items)
+        self.execute_times_label = QLabel()
+        self.execute_times_label.setText('次数:')
+        self.execute_times_control = QSpinBox()
+        self.execute_times_control.setRange(1, 10)
+        self.execute_times_control.setValue(1)
+
         h_box = QHBoxLayout()
         h_box.addWidget(self.import_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
+        h_box.addWidget(self.execute_times_label)
+        h_box.addWidget(self.execute_times_control)
         h_box.addStretch(1)
         self.list_widget = QListWidget()
         v_box = QVBoxLayout()
@@ -99,26 +107,31 @@ class ShowCaseTab(QWidget):
 
 
     # 执行选中的case
-    def execute_selected_items(self):
+    def execute_selected_items(self, execute_times):
         if GloVar.request_status is None:
             Logger('[当前还有正在执行的动作, 请稍后执行!]')
             return
         for i in range(self.index+1):
             if self.case_control_list[i].check_box.checkState() == Qt.Checked:
-                while True:
-                    if GloVar.request_status == 'ok':
-                        GloVar.request_status = None
-                        dict_info_list = self.read_script_tag(i)
-                        self.play_single_case(dict_info_list)
-                        self.signal.emit('play_single_case>')
-                        break
-                    else:
-                        time.sleep(0.002)
+                # 根据执行次数执行
+                for x in range(execute_times):
+                    while True:
+                        if GloVar.request_status == 'ok':
+                            GloVar.request_status = None
+                            dict_info_list = self.read_script_tag(i)
+                            self.play_single_case(dict_info_list)
+                            self.signal.emit('play_single_case>')
+                            break
+                        else:
+                            time.sleep(0.002)
+                        # 执行每一条case后cpu休息一秒钟
+                        time.sleep(1)
 
 
     # 线程中执行选中的case
     def connect_execute_selected_items(self):
-        Thread(target=self.execute_selected_items, args=()).start()
+        execute_times = self.execute_times_control.value()
+        Thread(target=self.execute_selected_items, args=(execute_times,)).start()
 
 
     # 接受case控件发送的信号
