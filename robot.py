@@ -420,6 +420,8 @@ class UiMainWindow(QMainWindow):
         # 是否需要进行数据检测的标志位复位
         self.need_detect_data_flag = False
         if self.main_show_tab_widget.video_tab.video_label.camera_status == self.main_show_tab_widget.video_tab.video_label.camera_closed:
+            # 设置当前tab页为视频页面
+            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.video_tab)
             # 打开此时需要打开的控件
             self.robot_toolbar.setEnabled(True)
             self.live_video_box_screen_action.setEnabled(True)

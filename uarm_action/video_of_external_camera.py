@@ -165,6 +165,7 @@ class ExternalCameraVideo:
         else:
             # 添加起点标志(故意传入一个数组(使其发生TypeError异常), 这样畸变校正时, 通过捕捉才能识别到此帧)
             self.video_frames_list.append(('start_flag', GloVar.camera_image.copy()))
+            print('start...')
 
         # # print height, width, and frame ID of the acquisition image(打印帧信息)
         # # print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
