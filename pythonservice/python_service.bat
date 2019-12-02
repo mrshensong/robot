@@ -1,1 +1,0 @@
-python_service.exe runserver
