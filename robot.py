@@ -128,8 +128,11 @@ class UiMainWindow(QMainWindow):
         self.splitter_v_part_2 = QSplitter(Qt.Vertical)
         self.splitter_v_part_1.addWidget(self.project_bar_widget)
         self.splitter_v_part_1.addWidget(self.show_tab_widget)
-        self.splitter_v_part_1.setStretchFactor(0, 2)
-        self.splitter_v_part_1.setStretchFactor(1, 3)
+        # 设置QSplitter中的两个widget的高度(第一个不显示, 剩余高度全部显示第二个)
+        self.splitter_v_part_1.setSizes([0, 100])
+        # 通过比例显示QSplitter中的两个widget的所占比例
+        # self.splitter_v_part_1.setStretchFactor(0, 0)
+        # self.splitter_v_part_1.setStretchFactor(1, 1)
         self.splitter_v_part_2.addWidget(self.main_show_tab_widget)
         self.splitter_v_part_2.addWidget(self.console)
         self.splitter_v_part_2.setStretchFactor(0, 4)
