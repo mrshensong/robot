@@ -27,8 +27,8 @@ class ExternalCameraVideo:
         self.video_frames_list = []
         # 开始和停止录像标志
         self.record_flag = False
-        # 在录制的视频中给某一帧做标记(当做动作的起点, True:标记, False不做标记)
-        self.robot_start_flag = False
+        # 可以开始插入起点(只有此标志置位后才能开始标起始帧)
+        self.allow_start_flag = False
         # 线程结束标志位
         self.record_thread_flag = True
         # 是否可以重新开始录制视频
@@ -127,10 +127,8 @@ class ExternalCameraVideo:
                 Logger('Getting image failed.')
                 continue
             if self.record_flag is True:
-                robot_start_flag = self.robot_start_flag
-                Thread(target=self.get_frame, args=(raw_image, robot_start_flag,)).start()
+                Thread(target=self.get_frame, args=(raw_image, self.allow_start_flag,)).start()
                 self.frame_id += 1
-                self.robot_start_flag = False
             else:
                 numpy_image = raw_image.get_numpy_array()
                 image = cv2.cvtColor(np.asarray(numpy_image), cv2.COLOR_BayerBG2BGR)
@@ -143,7 +141,7 @@ class ExternalCameraVideo:
 
 
     # 获取帧(raw_image: 原生帧, start_flag:动作起点标志)
-    def get_frame(self, raw_image, start_flag=False):
+    def get_frame(self, raw_image, allow_start_flag=False):
         # 使用大恒相机方法: 将raw原生图转为RGB(RGB格式open-cv不支持)
         # # (通过原生图生成RGB图)
         # rgb_image = raw_image.convert("RGB")
@@ -160,12 +158,12 @@ class ExternalCameraVideo:
         # image = self.un_distortion(image, self.mtx, self.dist)
 
         # 将摄像头产生的frame放到容器中
-        if start_flag is False:
+        if allow_start_flag is False:
             self.video_frames_list.append(GloVar.camera_image.copy())
         else:
             # 添加起点标志(故意传入一个数组(使其发生TypeError异常), 这样畸变校正时, 通过捕捉才能识别到此帧)
             self.video_frames_list.append(('start_flag', GloVar.camera_image.copy()))
-            print('start...')
+            self.allow_start_flag = False
 
         # # print height, width, and frame ID of the acquisition image(打印帧信息)
         # # print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))

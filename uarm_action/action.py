@@ -82,12 +82,8 @@ class ArmAction:
         self.set_position(x, y, z_l, speed)
         self.set_position(x, y, z_l+1.3, speed)
         if trigger == 1:
-            self.video.robot_start_flag = True
+            self.video.allow_start_flag = True
         self.set_position(x, y, z_h, speed)
-        # # 此处为视频中的当前帧插入标记(抬起前还是抬起后插入标记)
-        # if trigger == 1:
-        #     self.video.robot_start_flag = True
-        # self.set_position(x, y, z_h, speed)
         if leave == 1:
             self.set_position(50, 100, 40)
 
@@ -133,7 +129,7 @@ class ArmAction:
         self.set_position(x, y, z_h, speed)
         # 此处为视频中的当前帧插入标记(抬起前还是抬起后插入标记)
         if trigger == 1:
-            self.video.robot_start_flag = True
+            self.video.allow_start_flag = True
         # self.set_position(x, y, z_h, speed)
         if leave == 1:
             self.set_position(50, 100, 40)
@@ -162,7 +158,7 @@ class ArmAction:
         self.swift.flush_cmd()
         # 此处为视频中的当前帧插入标记
         if trigger == 1:
-            self.video.robot_start_flag = True
+            self.video.allow_start_flag = True
         self.swift.set_position(x_e, y_e, speed=speed, cmd=self.cmd_g1)
         self.swift.flush_cmd()
         self.swift.set_position(z=z_h, speed=speed)

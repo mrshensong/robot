@@ -109,7 +109,7 @@ class GetStartupTime:
         frame_threshold = 0
         length = len(start_threshold_list)
         for i in range(1, (length - 1)):
-            if start_threshold_list[i-1] == 0 and start_threshold_list[i] == 1.0 and start_threshold_list[i+1] == 0:
+            if start_threshold_list[i-1] == 0 and start_threshold_list[i] == 1.0:
                 frame_serial_number = i
                 frame_threshold = start_threshold_list[i]
                 break
@@ -188,7 +188,7 @@ class GetStartupTime:
         end_frame = end_frame + 1
         frame_gap = end_frame - start_frame
         Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (file, start_frame, start_threshold))
-        Logger('%s-->终点点: 帧> %d, 匹配率> %.4f' % (file, end_frame, end_threshold))
+        Logger('%s-->终止点: 帧> %d, 匹配率> %.4f' % (file, end_frame, end_threshold))
         return {'次序':video_id, '开始帧':start_frame, '开始帧匹配率':start_threshold, '结束帧':end_frame, '结束帧匹配率':end_threshold, '差帧':frame_gap}
 
     # 处理一条case(可能含有多次执行产生的多个视频, 传入的参数为产生的这些视频的当前目录路径)
@@ -407,6 +407,6 @@ class GetStartupTime:
 
 if __name__=='__main__':
     # video_path = 'D:/Code/robot/video/2019-10-15'
-    video_path = 'D:/Code/robot/video/2019-11-27'
+    video_path = 'D:/Code/robot/video/2019-12-03/点击/点击设置'
     test = GetStartupTime(video_path=video_path)
     test.data_processing()

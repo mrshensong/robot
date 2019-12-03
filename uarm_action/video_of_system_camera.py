@@ -25,8 +25,8 @@ class SystemCameraVideo:
         self.video_frames_list = []
         # 开始和停止录像标志
         self.record_flag = False
-        # 在录制的视频中给某一帧做标记(当做动作的起点, True:标记, False不做标记)
-        self.robot_start_flag = False
+        # 可以开始插入起点(只有此标志置位后才能开始标起始帧)
+        self.allow_start_flag = False
         # 线程结束标志位
         self.record_thread_flag = True
         # 是否可以重新开始录制视频
@@ -49,12 +49,12 @@ class SystemCameraVideo:
             if self.record_flag is True:
                 image = GloVar.camera_image
                 # 标记这一帧
-                if self.robot_start_flag is False:
+                if self.allow_start_flag is False:
                     self.video_frames_list.append(image.copy())
                 else:
                     image[0].fill(255)
                     self.video_frames_list.append(image.copy())
-                    self.robot_start_flag = False
+                    self.allow_start_flag = False
                 self.frame_id += 1
         cap.release()
         Logger('退出视频录像线程')
@@ -132,7 +132,7 @@ if __name__=='__main__':
     video.start_record_video(case_type='test', case_name='123')
     time.sleep(5)
     # 模拟机械臂产生一个起始信号
-    video.robot_start_flag = True
+    video.allow_start_flag = True
     time.sleep(5)
     video.stop_record_video()
 
