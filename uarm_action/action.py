@@ -1,5 +1,4 @@
 import time
-from threading import Thread
 from uarm_action.uarm import SwiftAPI
 from GlobalVar import Logger
 from uarm_action.video_of_external_camera import ExternalCameraVideo

@@ -1,8 +1,6 @@
-from openpyxl import load_workbook, Workbook
-from openpyxl.styles import Font, Alignment
 import matplotlib
 import matplotlib.pyplot as plt
-from GlobalVar import Logger, Profile, GloVar, MergePath
+from GlobalVar import Logger, MergePath
 # 设置中文字体和负号正常显示
 matplotlib.rcParams['font.sans-serif'] = ['SimHei']
 matplotlib.rcParams['axes.unicode_minus'] = False

@@ -2,8 +2,6 @@ import os
 import sys
 import cv2
 import time
-import json
-import requests
 import datetime
 from threading import Thread
 from processdata.get_startup_time import GetStartupTime

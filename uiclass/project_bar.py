@@ -1,7 +1,7 @@
 import os
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 from GlobalVar import Logger
 
 
@@ -18,6 +18,12 @@ class ProjectBar(QWidget):
         # 改表头名字(无效)
         # self.model.setHeaderData(0, Qt.Horizontal, "123455")
         self.model.setRootPath(self.path)
+        # 文件过滤
+        # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
+        # 需要显示的文件
+        filters = ['*.mp4', '*.html', '*.jpg', '*.png', '*.xlsx', '*.MP4', '*.HTML', '*.JPG', '*.PNG', '*.XLSX', '*.xml', '*.XML']
+        self.model.setNameFilters(filters)
+        self.model.setNameFilterDisables(False)
 
         # 树形视图
         self.tree = QTreeView(self)  # 2

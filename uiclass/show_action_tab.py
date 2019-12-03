@@ -1,9 +1,7 @@
 import json
-import time
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, RobotOther, WindowStatus, Profile, RobotArmParam
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget

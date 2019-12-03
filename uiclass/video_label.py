@@ -2,14 +2,10 @@ import os
 import cv2
 import sys
 import time
-import json
-import gxipy as gx
-import numpy as np
-from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QFrame, QLabel, QSlider, QApplication, QInputDialog
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QPushButton, QFrame, QLabel, QSlider, QApplication, QInputDialog
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import RobotArmAction, MotionAction, IconPath, RobotOther, Logger, GloVar, MergePath, RobotArmParam, Profile
+from GlobalVar import RobotArmAction, IconPath, RobotOther, Logger, GloVar, MergePath, RobotArmParam, Profile
 from uiclass.timer import Timer
 
 # 动作添加控件

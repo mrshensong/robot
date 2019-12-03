@@ -4,7 +4,7 @@ import time
 import gxipy as gx
 import numpy as np
 from threading import Thread
-from GlobalVar import GloVar, MergePath, Logger
+from GlobalVar import GloVar, Logger
 
 
 class ExternalCameraVideo:
