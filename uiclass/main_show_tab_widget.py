@@ -300,7 +300,7 @@ class ReportTab(QWidget):
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
         self.title_h_layout = QHBoxLayout(self)
-        # self.line =
+        self.report_h_layout = QHBoxLayout(self)
         # 显示html路径
         self.html_path_label = QLabel(self)
         self.html_path_label.setMaximumHeight(25)
@@ -313,9 +313,18 @@ class ReportTab(QWidget):
         self.open_file_button.setToolTip('open_file(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
-        # 使用QFrame画出一条隔离线
-        self.h_line_frame = QFrame(self)
-        self.h_line_frame.setFrameShape(QFrame.HLine)
+        # 使用QFrame画出一条顶部横隔离线
+        self.top_h_line_frame = QFrame(self)
+        self.top_h_line_frame.setFrameShape(QFrame.HLine)
+        # 使用QFrame画出一条底部横隔离线
+        self.bottom_h_line_frame = QFrame(self)
+        self.bottom_h_line_frame.setFrameShape(QFrame.HLine)
+        # 使用QFrame画出一条左边竖隔离线
+        self.left_v_line_frame = QFrame(self)
+        self.left_v_line_frame.setFrameShape(QFrame.VLine)
+        # 使用QFrame画出一条左边竖隔离线
+        self.right_v_line_frame = QFrame(self)
+        self.right_v_line_frame.setFrameShape(QFrame.VLine)
         # html展示
         self.html_show_text = QWebEngineView()
         self.html_show_text.setStyleSheet('background-color:blue')
@@ -325,11 +334,17 @@ class ReportTab(QWidget):
         self.title_h_layout.addStretch(1)
         self.title_h_layout.addWidget(self.html_path_label)
         self.title_h_layout.addStretch(1)
-
+        # report布局
+        self.report_h_layout.setSpacing(0)
+        self.report_h_layout.addWidget(self.left_v_line_frame)
+        self.report_h_layout.addWidget(self.html_show_text)
+        self.report_h_layout.addWidget(self.right_v_line_frame)
+        # 全局布局
+        self.general_layout.setSpacing(0)
         self.general_layout.addLayout(self.title_h_layout)
-        self.general_layout.addWidget(self.h_line_frame)
-        self.general_layout.addWidget(self.html_show_text)
-
+        self.general_layout.addWidget(self.top_h_line_frame)
+        self.general_layout.addLayout(self.report_h_layout)
+        self.general_layout.addWidget(self.bottom_h_line_frame)
         self.setLayout(self.general_layout)
 
 
