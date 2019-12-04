@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMessageBox
+from PyQt5.QtWidgets import QTabWidget, QMessageBox
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QTextOption, QFont
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
+from uiclass.show_script_tab import ShowScriptTab
 from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction
 
 class ShowTabWidget(QTabWidget):
@@ -20,14 +20,11 @@ class ShowTabWidget(QTabWidget):
         self.case_tab = ShowCaseTab(self)
         self.case_tab.signal[str].connect(self.recv_case_tab_signal)
         # tab3
-        self.text_tab   = QTextEdit(self)
-        # self.text_tab.setLineWrapMode(QTextEdit.FixedPixelWidth)
-        self.text_tab.setWordWrapMode(QTextOption.NoWrap)
-        self.text_tab.setStyleSheet('background-color:lightGreen')
-        self.text_tab.setFont(QFont('Times New Roman', 13))
+        self.script_tab   = ShowScriptTab(self)
+        # QTabWidget添加tab
         self.addTab(self.action_tab, action_tab)
         self.addTab(self.case_tab, case_tab)
-        self.addTab(self.text_tab, text_tab)
+        self.addTab(self.script_tab, text_tab)
         # 调整背景颜色
         # self.setStyleSheet('background-color:#DDDDDD;')
 
@@ -38,8 +35,8 @@ class ShowTabWidget(QTabWidget):
         if signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         elif signal_str.startswith('write_script_tag>'):
-            tab_text = signal_str.split('write_script_tag>')[1]
-            self.text_tab.setText(tab_text)
+            script_text = signal_str.split('write_script_tag>')[1]
+            self.script_tab.setText(script_text)
             # 保存完脚本后(重新导入当前case目录下的脚本)
             if self.case_tab.script_path is not None:
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
