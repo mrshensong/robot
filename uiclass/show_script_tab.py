@@ -13,5 +13,5 @@ class ShowScriptTab(QTextEdit):
         self.setReadOnly(True)
         # self.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.setWordWrapMode(QTextOption.NoWrap)
-        self.setStyleSheet('background-color:lightGreen')
+        self.setStyleSheet('background-color:#C0D8F0')
         self.setFont(QFont('Times New Roman', 13))

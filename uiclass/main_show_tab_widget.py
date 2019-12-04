@@ -151,8 +151,10 @@ class PictureTab(QWidget):
         self.button_h_layout = QHBoxLayout(self)
         # 打开文件按钮
         self.open_file_button = QToolButton()
+        # 打开文件快捷键
+        self.open_file_button.setShortcut('o')
         self.open_file_button.setEnabled(True)
-        self.open_file_button.setToolTip('open_file')
+        self.open_file_button.setToolTip('open_file(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
         # 放大按钮
@@ -305,8 +307,10 @@ class ReportTab(QWidget):
         self.html_path_label.setText('None')
         # 打开文件按钮
         self.open_file_button = QToolButton()
+        # 打开文件快捷键
+        self.open_file_button.setShortcut('o')
         self.open_file_button.setEnabled(True)
-        self.open_file_button.setToolTip('open_file')
+        self.open_file_button.setToolTip('open_file(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
         # 使用QFrame画出一条隔离线
@@ -314,6 +318,7 @@ class ReportTab(QWidget):
         self.h_line_frame.setFrameShape(QFrame.HLine)
         # html展示
         self.html_show_text = QWebEngineView()
+        self.html_show_text.setStyleSheet('background-color:blue')
         # title行布局
         self.title_h_layout.setSpacing(0)
         self.title_h_layout.addWidget(self.open_file_button)
@@ -378,22 +383,28 @@ class TextTab(QWidget):
 
         # 打开文件按钮
         self.open_file_button = QToolButton()
+        # 打开文件快捷键
+        self.open_file_button.setShortcut('o')
         self.open_file_button.setEnabled(True)
-        self.open_file_button.setToolTip('open_file')
+        self.open_file_button.setToolTip('open_file(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
 
         # 编辑文本按钮
         self.edit_text_button = QToolButton()
+        # 编辑快捷键
+        self.edit_text_button.setShortcut('e')
         self.edit_text_button.setEnabled(False)
-        self.edit_text_button.setToolTip('edit')
+        self.edit_text_button.setToolTip('edit(e)')
         self.edit_text_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_edit_text + ')}')
         self.edit_text_button.clicked.connect(self.connect_edit_text)
 
         # 保存文本按钮
         self.save_text_button = QToolButton()
+        # 保存快捷键
+        self.save_text_button.setShortcut('ctrl+s')
         self.save_text_button.setEnabled(False)
-        self.save_text_button.setToolTip('save')
+        self.save_text_button.setToolTip('save(ctrl+s)')
         self.save_text_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_save_text + ')}')
         self.save_text_button.clicked.connect(self.connect_save_text)
 
@@ -407,6 +418,7 @@ class TextTab(QWidget):
 
         # text展示
         self.text_show_text = QTextEdit(self)
+        self.text_show_text.setFont(QFont('Times New Roman', 13))
         self.text_show_text.setReadOnly(True)
         self.text_h_layout.addWidget(self.text_show_text)
 
@@ -443,16 +455,31 @@ class TextTab(QWidget):
 
     # 编辑文本
     def connect_edit_text(self):
-        pass
+        Logger('编辑当前文件: %s' % self.text_path)
+        # 允许写入
+        self.text_show_text.setReadOnly(False)
+        # 更改背景
+        self.text_show_text.setStyleSheet('background-color:#C0D8F0')
 
 
     # 保存文本
     def connect_save_text(self):
-        pass
+        Logger('保存当前文件: %s' % self.text_path)
+        # 获取文本内容
+        text = self.text_show_text.toPlainText()
+        with open(self.text_path, 'w+', encoding='utf-8') as f:
+            f.write(text)
+        # 不允许写入
+        self.text_show_text.setReadOnly(True)
+        # 恢复背景颜色
+        self.text_show_text.setStyleSheet('background-color:white')
 
 
     # text展示操作
     def show_text(self):
+        self.edit_text_button.setEnabled(True)
+        self.save_text_button.setEnabled(True)
+        self.text_show_text.setStyleSheet('background-color:white')
         with open(self.text_path, 'r', encoding='utf-8') as f:
             text = f.read()
         self.text_path_label.setText(self.text_path)
