@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit, QFrame
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
@@ -149,6 +149,12 @@ class PictureTab(QWidget):
         self.general_layout = QVBoxLayout(self)
         self.picture_h_layout = QHBoxLayout(self)
         self.button_h_layout = QHBoxLayout(self)
+        # 打开文件按钮
+        self.open_file_button = QToolButton()
+        self.open_file_button.setEnabled(True)
+        self.open_file_button.setToolTip('open_file')
+        self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
+        self.open_file_button.clicked.connect(self.connect_open_file)
         # 放大按钮
         self.zoom_button = QToolButton()
         self.zoom_button.setEnabled(False)
@@ -174,6 +180,7 @@ class PictureTab(QWidget):
         self.picture_size_label = QLabel(self)
         self.picture_size_label.setText('size: [0:0], zoom: [1.0X]')
 
+        self.button_h_layout.addWidget(self.open_file_button)
         self.button_h_layout.addWidget(self.zoom_button)
         self.button_h_layout.addWidget(self.original_size_button)
         self.button_h_layout.addWidget(self.zoom_out_button)
@@ -196,6 +203,11 @@ class PictureTab(QWidget):
         self.general_layout.addLayout(self.picture_h_layout)
 
         self.setLayout(self.general_layout)
+
+
+    # 打开文件
+    def connect_open_file(self):
+        pass
 
 
     # 放大操作
@@ -257,7 +269,7 @@ class PictureTab(QWidget):
 
 
 # 报告tab
-class ReportTab(QWebEngineView):
+class ReportTab(QWidget):
 
     signal = pyqtSignal(str)
 
@@ -265,13 +277,52 @@ class ReportTab(QWebEngineView):
         super(ReportTab, self).__init__(parent)
         self.parent = parent
         self.report_path = None
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QVBoxLayout(self)
+        self.title_h_layout = QHBoxLayout(self)
+        # self.line =
+        # 显示html路径
+        self.html_path_label = QLabel(self)
+        self.html_path_label.setMaximumHeight(25)
+        self.html_path_label.setText('None')
+        # 打开文件按钮
+        self.open_file_button = QToolButton()
+        self.open_file_button.setEnabled(True)
+        self.open_file_button.setToolTip('open_file')
+        self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
+        self.open_file_button.clicked.connect(self.connect_open_file)
+        # 使用QFrame画出一条隔离线
+        self.h_line_frame = QFrame(self)
+        self.h_line_frame.setFrameShape(QFrame.HLine)
+        # html展示
+        self.html_show_text = QWebEngineView()
+        # title行布局
+        self.title_h_layout.setSpacing(0)
+        self.title_h_layout.addWidget(self.open_file_button)
+        self.title_h_layout.addStretch(1)
+        self.title_h_layout.addWidget(self.html_path_label)
+        self.title_h_layout.addStretch(1)
+
+        self.general_layout.addLayout(self.title_h_layout)
+        self.general_layout.addWidget(self.h_line_frame)
+        self.general_layout.addWidget(self.html_show_text)
+
+        self.setLayout(self.general_layout)
+
+
+    # 打开文件
+    def connect_open_file(self):
+        pass
 
 
     # html展示操作
     def show_html(self):
         # self.setHtml(html)
         # 加载本地html文件
-        self.load(QUrl('file:///' + self.report_path))
+        self.html_show_text.load(QUrl('file:///' + self.report_path))
 
 
 # 文本tab
@@ -294,6 +345,13 @@ class TextTab(QWidget):
         self.text_path_label = QLabel(self)
         self.text_path_label.setText('None')
 
+        # 打开文件按钮
+        self.open_file_button = QToolButton()
+        self.open_file_button.setEnabled(True)
+        self.open_file_button.setToolTip('open_file')
+        self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
+        self.open_file_button.clicked.connect(self.connect_open_file)
+
         # 编辑文本按钮
         self.edit_text_button = QToolButton()
         self.edit_text_button.setEnabled(False)
@@ -309,11 +367,12 @@ class TextTab(QWidget):
         self.save_text_button.clicked.connect(self.connect_save_text)
 
         # title行布局
+        self.title_h_layout.addWidget(self.open_file_button)
         self.title_h_layout.addWidget(self.edit_text_button)
+        self.title_h_layout.addWidget(self.save_text_button)
         self.title_h_layout.addStretch(1)
         self.title_h_layout.addWidget(self.text_path_label)
         self.title_h_layout.addStretch(1)
-        self.title_h_layout.addWidget(self.save_text_button)
 
         # text展示
         self.text_show_text = QTextEdit(self)
@@ -324,6 +383,11 @@ class TextTab(QWidget):
         self.general_layout.addLayout(self.text_h_layout)
 
         self.setLayout(self.general_layout)
+
+
+    # 打开文件
+    def connect_open_file(self):
+        pass
 
 
     # 编辑文本

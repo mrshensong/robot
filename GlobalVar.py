@@ -104,6 +104,7 @@ class IconPath:
     Icon_main_tab_widget_zoom_picture          = 'config/Icon/main_tab_widget_icon/zoom.png'
     Icon_main_tab_widget_zoom_out_picture      = 'config/Icon/main_tab_widget_icon/zoom_out.png'
     Icon_main_tab_widget_original_size_picture = 'config/Icon/main_tab_widget_icon/original_size.png'
+    Icon_main_tab_widget_open_file             = 'config/Icon/main_tab_widget_icon/open_file.png'
     Icon_main_tab_widget_edit_text             = 'config/Icon/main_tab_widget_icon/edit_text.png'
     Icon_main_tab_widget_save_text             = 'config/Icon/main_tab_widget_icon/save_text.png'
 
