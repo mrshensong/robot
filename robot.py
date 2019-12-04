@@ -398,8 +398,6 @@ class UiMainWindow(QMainWindow):
         # 打开报告(同时打开报告页面和文本页面)
         elif signal_str.startswith('open_report>'):
             self.main_show_tab_widget.report_tab.report_path = signal_str.split('open_report>')[1]
-            self.main_show_tab_widget.text_tab.text_path = signal_str.split('open_report>')[1]
-            self.main_show_tab_widget.text_tab.show_text()
             # 自动跳转到report页面
             self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.report_tab)
             self.main_show_tab_widget.report_tab.show_html()

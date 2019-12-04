@@ -1,12 +1,12 @@
 import os
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit, QFrame
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit, QFrame, QFileDialog
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 from uiclass.video_label import VideoLabel
-from GlobalVar import IconPath, GloVar
+from GlobalVar import IconPath, GloVar, Profile, Logger
 
 
 class MainShowTabWidget(QTabWidget):
@@ -205,9 +205,24 @@ class PictureTab(QWidget):
         self.setLayout(self.general_layout)
 
 
-    # 打开文件
+    # 打开文件(图片)
     def connect_open_file(self):
-        pass
+        file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
+        # 文件过滤
+        file_filter = 'jpg(*.jpg);;png(*.png);;jpeg(*.jpeg);;bmp(*.bmp)'
+        # 返回元祖(第一个元素文件路径, 第二个元素文件类型), 这里只需要第一个文件路径
+        picture_path = QFileDialog.getOpenFileName(self, '选择需要打开的文件', file_path, file_filter)[0]
+        if picture_path:
+            Logger('打开文件: %s' % picture_path)
+            # 展示照片
+            self.picture_path = picture_path
+            self.show_picture()
+            current_file_path = os.path.split(picture_path)[0]
+            # 将当前picture_path路径保存到配置文件
+            if file_path != current_file_path:
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='file_path', value=current_file_path)
+        else:
+            Logger('取消打开文件!')
 
 
     # 放大操作
@@ -315,12 +330,28 @@ class ReportTab(QWidget):
 
     # 打开文件
     def connect_open_file(self):
-        pass
+        file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
+        # 文件过滤
+        file_filter = 'html(*.html)'
+        # 返回元祖(第一个元素文件路径, 第二个元素文件类型), 这里只需要第一个文件路径
+        report_path = QFileDialog.getOpenFileName(self, '选择需要打开的文件', file_path, file_filter)[0]
+        if report_path:
+            Logger('打开文件: %s' % report_path)
+            # 展示报告
+            self.report_path = report_path
+            self.show_html()
+            current_file_path = os.path.split(report_path)[0]
+            # 将当前report_path路径保存到配置文件
+            if file_path != current_file_path:
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='file_path', value=current_file_path)
+        else:
+            Logger('取消打开文件!')
 
 
     # html展示操作
     def show_html(self):
-        # self.setHtml(html)
+        # 展示文件路径
+        self.html_path_label.setText(self.report_path)
         # 加载本地html文件
         self.html_show_text.load(QUrl('file:///' + self.report_path))
 
@@ -387,7 +418,27 @@ class TextTab(QWidget):
 
     # 打开文件
     def connect_open_file(self):
-        pass
+        file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
+        # 文件过滤
+        file_filter = 'all file(*)'
+        # 返回元祖(第一个元素文件路径, 第二个元素文件类型), 这里只需要第一个文件路径
+        text_path = QFileDialog.getOpenFileName(self, '选择需要打开的文件', file_path, file_filter)[0]
+        if text_path:
+            text_type = text_path.split('.')[1]
+            # 判断支持的类型
+            if text_type in ['txt', 'py', 'xml', 'html', 'md', 'ini', 'TXT', 'PY', 'XML', 'HTML', 'MD', 'INI']:
+                Logger('打开文件: %s' % text_path)
+                # 展示文本
+                self.text_path = text_path
+                self.show_text()
+                current_file_path = os.path.split(text_path)[0]
+                # 将当前text_path路径保存到配置文件
+                if file_path != current_file_path:
+                    Profile(type='write', file=GloVar.config_file_path, section='param', option='file_path', value=current_file_path)
+            else:
+                Logger('暂不支持此类型文件!!!')
+        else:
+            Logger('取消打开文件!')
 
 
     # 编辑文本

@@ -21,7 +21,7 @@ class ProjectBar(QWidget):
         # 文件过滤
         # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
         # 需要显示的文件
-        filters = ['*.mp4', '*.html', '*.jpg', '*.png', '*.xlsx', '*.MP4', '*.HTML', '*.JPG', '*.PNG', '*.XLSX', '*.xml', '*.XML']
+        filters = ['*.mp4', '*.html', '*.jpg', '*.png', '*.xlsx', '*.txt', '*.ini']
         self.model.setNameFilters(filters)
         self.model.setNameFilterDisables(False)
 
@@ -73,7 +73,7 @@ class ProjectBar(QWidget):
             elif file_path.split('.')[1] in ['txt', 'py', 'xml', 'md', 'ini']:
                 self.signal.emit('open_text>' + str(file_path))
             else:
-                Logger('暂不支持其他文件!!!')
+                Logger('暂不支持此类型文件!!!')
         else:
             pass
 
