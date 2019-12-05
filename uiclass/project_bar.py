@@ -21,7 +21,7 @@ class ProjectBar(QWidget):
         # 文件过滤
         # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
         # 需要显示的文件
-        filters = ['*.mp4', '*.html', '*.jpg', '*.png', '*.xlsx', '*.txt', '*.ini']
+        filters = ['*.mp4', '*.html', '*.jpg', '*.png', '*.xlsx', '*.xml', '*.txt', '*.ini']
         self.model.setNameFilters(filters)
         self.model.setNameFilterDisables(False)
 
