@@ -124,8 +124,11 @@ class UiMainWindow(QMainWindow):
         self.general_v_layout = QVBoxLayout(self.central_widget)
         # 分割窗口布局
         self.splitter_h_general = QSplitter(Qt.Horizontal)
+        self.splitter_h_general.setHandleWidth(0)
         self.splitter_v_part_1 = QSplitter(Qt.Vertical)
+        self.splitter_v_part_1.setHandleWidth(0)
         self.splitter_v_part_2 = QSplitter(Qt.Vertical)
+        self.splitter_v_part_2.setHandleWidth(0)
         self.splitter_v_part_1.addWidget(self.project_bar_widget)
         self.splitter_v_part_1.addWidget(self.show_tab_widget)
         # 设置QSplitter中的两个widget的高度(第一个不显示, 剩余高度全部显示第二个)
