@@ -210,7 +210,9 @@ class GetStartupTime:
                 file = MergePath([video_name_path, video_file]).merged_path
                 # 获取到视频处理后的信息
                 video_info = self.process_video(video_id=video_count, file=file, end_mask=end_mask)
-                video_info_list.append(video_info)
+                # video_info_list.append(video_info)
+                # 根据视频名的数字插入info(确保视频的先后顺序和info对应)
+                video_info_list.insert(int(file_text), video_info)
                 sum_frame_gap += int(video_info['差帧'])
         average_frame_gap = int(sum_frame_gap / video_count)
         status = 'failed' if average_frame_gap > standard_frame_gap else 'pass'
