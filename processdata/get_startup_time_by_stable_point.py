@@ -4,7 +4,7 @@ import numpy as np
 from openpyxl import Workbook
 from processdata.get_data_graph import GenerateDataGraph
 from processdata.get_report import GenerateReport
-from GlobalVar import MergePath, Logger, RobotOther
+from GlobalVar import MergePath, Logger, GloVar
 
 
 '''
@@ -226,7 +226,7 @@ class GetStartupTime:
             Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (video, start_frame, start_threshold))
             Logger('%s-->终点点: 帧> %d, 匹配率> %.4f' % (video, end_frame, end_threshold))
             data_list.append({'name':video, 'start_frame':start_frame, 'start_threshold':start_threshold, 'end_frame':end_frame, 'end_threshold':end_threshold, 'frame_gap':frame_gap})
-        RobotOther.data_process_finished_flag = True
+        GloVar.data_process_finished_flag = True
         return data_list
 
     # 将得到的数据写入excel

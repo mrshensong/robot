@@ -14,7 +14,7 @@ from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter
-from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, RobotOther, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
+from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
 from uarm_action.action import ArmAction
 
 
@@ -386,6 +386,28 @@ class UiMainWindow(QMainWindow):
             self.main_show_tab_widget.video_tab.video_label.x1 = self.main_show_tab_widget.video_tab.video_label.x0
             self.main_show_tab_widget.video_tab.video_label.y1 = self.main_show_tab_widget.video_tab.video_label.y0
             RobotArmAction.uArm_action_type = signal_str.split('>')[1]
+        # 框选模板(case中录像action的模板图片)
+        elif signal_str.startswith('draw_frame>'):
+            # case中框选标志位
+            GloVar.draw_frame_flag = True
+            # 需要暂停视频流(进行框选)
+            self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
+            self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+        # 测试结束
+        elif signal_str.startswith('test_finished>'):
+            # 调用视频处理函数
+            if GloVar.video_process_switch == 'ON':
+                Logger('此次测试完成, 开始进行数据处理!')
+                # 暂停视频流(减小CPU占用, 数据处理可以更快)
+                self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
+                self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+                # 此处调用数据处理函数
+                video_path = MergePath([GloVar.project_video_path, GloVar.current_time]).merged_path
+                test = GetStartupTime(video_path=video_path)
+                Thread(target=test.data_processing, args=()).start()
+            # 打印测试结束信息
+            else:
+                Logger('此次测试完成, 不需要进行数据处理!')
         else:
             pass
 
@@ -480,7 +502,7 @@ class UiMainWindow(QMainWindow):
                 self.main_show_tab_widget.video_tab.video_label.y1 = self.main_show_tab_widget.video_tab.video_label.y0
                 self.main_show_tab_widget.video_tab.video_label.x1 = self.main_show_tab_widget.video_tab.video_label.x0
                 self.main_show_tab_widget.video_tab.video_label.setCursor(Qt.CrossCursor)
-                RobotOther.select_template_flag = True
+                GloVar.select_template_flag = True
                 GloVar.box_screen_flag = True
                 RobotArmAction.uArm_action_type = None
 
@@ -638,7 +660,7 @@ class UiMainWindow(QMainWindow):
             RobotArmAction.uArm_action_type = None
             # 设置不可框选模板&鼠标变为标准鼠标
             self.main_show_tab_widget.video_tab.video_label.setCursor(Qt.ArrowCursor)
-            RobotOther.select_template_flag = False
+            GloVar.select_template_flag = False
             # 关闭此时不能打开的控件
             self.robot_toolbar.setEnabled(False)
             self.live_video_box_screen_action.setEnabled(False)
@@ -674,7 +696,7 @@ class UiMainWindow(QMainWindow):
                 # 同时启动模板检测
                 self.need_detect_data_flag = True
                 # 打开数据处理标志位
-                RobotOther.data_process_flag = True
+                GloVar.data_process_flag = True
                 Thread(target=self.detect_data_is_ready, args=()).start()
             else:
                 Logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
@@ -718,9 +740,10 @@ class UiMainWindow(QMainWindow):
             videos_without_template = []
             # 遍历出来没有对应模板的视频文件
             for video in self.main_show_tab_widget.video_tab.video_label.videos:
-                # template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
-                # 适应数据处理
-                template_path = os.path.split(video.replace('/video/', '/picture/'))[0] + '.jpg'
+                # 检查模板图片是否存在
+                video_name_path_cut_list = os.path.split(video)[0].split('/')
+                new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
+                template_path = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.jpg'
                 # 模板图片不存在
                 if os.path.exists(template_path) is False:
                     videos_without_template.append(video)
@@ -745,9 +768,9 @@ class UiMainWindow(QMainWindow):
     # 数据处理结束
     def data_process_finished(self):
         while True:
-            if RobotOther.data_process_finished_flag is True:
+            if GloVar.data_process_finished_flag is True:
                 flag = True
-                RobotOther.data_process_finished_flag = False
+                GloVar.data_process_finished_flag = False
                 break
             else:
                 time.sleep(0.2)

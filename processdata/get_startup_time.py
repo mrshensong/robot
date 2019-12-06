@@ -5,7 +5,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill, colors
 from processdata.get_data_graph import GenerateDataGraph
 from processdata.get_report import GenerateReport
-from GlobalVar import MergePath, Logger, RobotOther
+from GlobalVar import MergePath, Logger, GloVar
 
 
 class GetStartupTime:
@@ -197,7 +197,10 @@ class GetStartupTime:
         video_info_list = []
         video_files = os.listdir(video_name_path)
         case_name = video_name_path.split('/')[-1]
-        end_mask = video_name_path.replace('/video/', '/picture/') + '.jpg'
+        # end_mask = video_name_path.replace('/video/', '/picture/') + '.jpg'
+        video_name_path_cut_list = video_name_path.split('/')
+        new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
+        end_mask = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.jpg'
         # 差帧标准
         standard_frame_gap = 100
         # 差帧总和 & 平均差帧
@@ -242,7 +245,7 @@ class GetStartupTime:
                 case_type_dict[case_type] = []
             case_type_dict[case_type].append(case_data)
         # 将数据处理完成标志位置位
-        RobotOther.data_process_finished_flag = True
+        GloVar.data_process_finished_flag = True
         # 返回(如:{'滑动':[[桌面滑动], [设置滑动]], '点击':[[点击设置], [点击地图]]})
         return case_type_dict
 

@@ -25,9 +25,10 @@ class GloVar:
     case_execute_finished_flag = True
     # post请求信息(将当前所有需要执行的action装入list/第一个元素'start', 最后一个元素'stop')
     post_info_list = []
-
-
-class RobotOther:
+    # 当前时间(小时-分-秒), 测试过程中需要用这个当做路径, 保证每一次执行都能拥有一个独立的文件夹
+    current_time = None
+    # 视频处理开关标志位(OFF/ON, 默认打开, 不需要视频处理关掉即可)
+    video_process_switch = 'ON'
     # 机械臂起点标志
     robot_start_flag = False
     # 需要进行框选动作时, 打开此标志
@@ -40,6 +41,8 @@ class RobotOther:
     actions_saved_to_case = True
     # 数据处理完成标志
     data_process_finished_flag = False
+    # 框选case中录像视频模板
+    draw_frame_flag = False
 
 
 # Icon路径
@@ -100,6 +103,9 @@ class IconPath:
     Icon_tab_widget_execute       = 'config/Icon/tab_widget_icon/execute.png'
     Icon_tab_widget_import        = 'config/Icon/tab_widget_icon/import.png'
     Icon_tab_widget_save          = 'config/Icon/tab_widget_icon/save.png'
+    Icon_tab_widget_draw_frame    = 'config/Icon/tab_widget_icon/draw_frame.png'
+    Icon_tab_widget_switch_on     = 'config/Icon/tab_widget_icon/switch_on.png'
+    Icon_tab_widget_switch_off    = 'config/Icon/tab_widget_icon/switch_off.png'
     # 视频和照片展示栏相关图标
     Icon_main_tab_widget_zoom_picture          = 'config/Icon/main_tab_widget_icon/zoom.png'
     Icon_main_tab_widget_zoom_out_picture      = 'config/Icon/main_tab_widget_icon/zoom_out.png'

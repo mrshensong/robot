@@ -195,6 +195,8 @@ class RecordControl(QWidget):
 
     # 执行单个动作(新建线程/控件中的执行按钮)
     def record_execute_item(self):
+        # 每执行一次都需要获取当前时间(作为文件夹)
+        GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         Thread(target=self.play_record_item, args=()).start()
 
 
@@ -325,6 +327,8 @@ class CaseControl(QWidget):
 
     # 执行单个case
     def play_single_case(self):
+        # 每执行一次都需要获取当前时间(作为文件夹)
+        GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         self.signal.emit('play_single_case>' + str(self.id))
 
 

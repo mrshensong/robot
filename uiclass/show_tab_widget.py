@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
 from uiclass.show_script_tab import ShowScriptTab
-from GlobalVar import GloVar, RobotOther, WindowStatus, RecordAction, SleepAction, Logger, MotionAction
+from GlobalVar import GloVar, WindowStatus, RecordAction, SleepAction, Logger, MotionAction
 
 class ShowTabWidget(QTabWidget):
 
@@ -34,6 +34,7 @@ class ShowTabWidget(QTabWidget):
         # 添加action控件时候, 设置动作标志位
         if signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
+        # 保存脚本
         elif signal_str.startswith('write_script_tag>'):
             script_text = signal_str.split('write_script_tag>')[1]
             self.script_tab.setText(script_text)
@@ -42,6 +43,9 @@ class ShowTabWidget(QTabWidget):
                 self.case_tab.connect_import_button(path=self.case_tab.script_path)
         # 执行action
         elif signal_str.startswith('play_actions>'):
+            self.signal.emit(signal_str)
+        # 框选模板(case中录像action的模板图片)
+        elif signal_str.startswith('draw_frame>'):
             self.signal.emit(signal_str)
 
 
@@ -52,7 +56,7 @@ class ShowTabWidget(QTabWidget):
             # 设置当前tab页面
             self.setCurrentWidget(self.action_tab)
             # 如果还有actions未保存(判断是否需要将当前actions保存为case)
-            if RobotOther.actions_saved_to_case is False:
+            if GloVar.actions_saved_to_case is False:
                 QMessageBox.warning(self, "警告!action页还有未保存的actions!", "请先保存actions后,再次打开case!", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 Logger('[当前有未保存的actions, 不能打开case!]')
             else: # action_tab界面当前所有actions都已经保存完, 可以打开当前双击的case
@@ -82,4 +86,7 @@ class ShowTabWidget(QTabWidget):
                 WindowStatus.action_tab_status = '%s' % self.action_tab.case_absolute_name
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
+            self.signal.emit(signal_str)
+        # 测试结束命令
+        elif signal_str.startswith('test_finished>'):
             self.signal.emit(signal_str)

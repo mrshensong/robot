@@ -1,8 +1,9 @@
 import json
+import time
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
 from PyQt5.QtCore import *
-from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, RobotOther, WindowStatus, Profile, RobotArmParam
+from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 from uiclass.list_widget import ListWidget
@@ -66,6 +67,10 @@ class ShowActionTab(QWidget):
         self.save_script_tag_button.setToolTip('save_tag')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_save + ')}')
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
+        self.draw_frame_button = QToolButton()
+        self.draw_frame_button.setToolTip('draw_frame')
+        self.draw_frame_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_draw_frame + ')}')
+        self.draw_frame_button.clicked.connect(self.connect_draw_frame)
         self.des_text = QLineEdit()
         self.des_text.setText('空白')
 
@@ -75,6 +80,7 @@ class ShowActionTab(QWidget):
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
         h_box.addWidget(self.save_script_tag_button)
+        h_box.addWidget(self.draw_frame_button)
         h_box.addWidget(self.des_text)
         h_box.addStretch(1)
         # 原生QListWidget
@@ -123,7 +129,7 @@ class ShowActionTab(QWidget):
                 self.select_all_flag = False
                 self.select_all_button.setToolTip('select_all')
                 self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
-                RobotOther.actions_saved_to_case = True
+                GloVar.actions_saved_to_case = True
                 self.case_file_name = ''
                 self.case_absolute_name = ''
                 break
@@ -210,6 +216,8 @@ class ShowActionTab(QWidget):
 
     # 执行选中的actions(execute_button/单独起线程)
     def connect_execute_selected_actions(self):
+        # 每执行一次都需要获取当前时间(作为文件夹)
+        GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         Thread(target=self.execute_selected_actions, args=()).start()
 
 
@@ -231,7 +239,7 @@ class ShowActionTab(QWidget):
                     self.signal.emit('write_script_tag>' + script_tag)
                     WindowStatus.action_tab_status = '%s>已保存!' % self.case_absolute_name
                     self.des_text.setText(self.case_file_name)
-                    RobotOther.actions_saved_to_case = True
+                    GloVar.actions_saved_to_case = True
             else:
                 Logger('[取消保存脚本标签!]')
         else:
@@ -241,6 +249,12 @@ class ShowActionTab(QWidget):
     # 另起线程(保证主线程不受到破坏)
     def connect_save_script_tag(self):
         Thread(target=self.save_script_tag, args=()).start()
+
+
+    # 框选模板
+    def connect_draw_frame(self):
+        # 发出框选模板信号
+        self.signal.emit('draw_frame>')
 
 
     # 清除所有动作
@@ -255,7 +269,7 @@ class ShowActionTab(QWidget):
         self.signal.emit('write_script_tag>')
         self.des_text.setText('空白')
         WindowStatus.action_tab_status = '空白!'
-        RobotOther.actions_saved_to_case = True
+        GloVar.actions_saved_to_case = True
         self.case_file_name = ''
         self.case_absolute_name = ''
 
@@ -277,7 +291,7 @@ class ShowActionTab(QWidget):
         # 发送需要显示的脚本标签
         self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         if flag is True:
-            RobotOther.actions_saved_to_case = False
+            GloVar.actions_saved_to_case = False
             if self.case_file_name == '':  # 空白新建action
                 WindowStatus.action_tab_status = '新case>未保存!'
                 self.des_text.setText('空白')
@@ -285,7 +299,7 @@ class ShowActionTab(QWidget):
                 WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
                 self.des_text.setText(self.case_file_name)
         else:
-            RobotOther.actions_saved_to_case = True
+            GloVar.actions_saved_to_case = True
         # 滚动条滚动到当前item
         self.list_widget.scrollToItem(item)
 
@@ -420,13 +434,13 @@ class ShowActionTab(QWidget):
         self.index -= 1
         # 发送需要显示的脚本标签
         if len(self.tag_list) > 0:
-            RobotOther.actions_saved_to_case = False
+            GloVar.actions_saved_to_case = False
             self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         else:
             self.signal.emit('write_script_tag>')
             self.case_file_name = ''
             self.case_absolute_name = ''
-            RobotOther.actions_saved_to_case = True
+            GloVar.actions_saved_to_case = True
         if self.case_file_name == '':  # 空白新建action
             WindowStatus.action_tab_status = '空白!'
             self.des_text.setText('空白')

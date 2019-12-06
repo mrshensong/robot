@@ -5,7 +5,7 @@ import time
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QPushButton, QFrame, QLabel, QSlider, QApplication, QInputDialog
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import RobotArmAction, IconPath, RobotOther, Logger, GloVar, MergePath, RobotArmParam, Profile
+from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile
 from uiclass.timer import Timer
 
 # 动作添加控件
@@ -207,7 +207,7 @@ class VideoLabel(QLabel):
         self.last_frame_button.setEnabled(False)
         self.next_frame_button.setEnabled(False)
         # 关掉数据处理标志位
-        RobotOther.data_process_flag = False
+        GloVar.data_process_flag = False
         # 复位本地视频相关参数
         self.videos, self.videos_title = [], []
         self.current_frame, self.current_video, self.frame_count = 0, 0, 0
@@ -219,7 +219,7 @@ class VideoLabel(QLabel):
             self.video_progress_bar.setValue(0)
             self.label_frame_show.setText('')
             self.video_progress_bar.setEnabled(False)
-            RobotOther.select_template_flag = False
+            GloVar.select_template_flag = False
             # 打开实时流视频并播放
             Logger('<打开摄像头>')
             self.camera_status = self.camera_opened
@@ -241,7 +241,7 @@ class VideoLabel(QLabel):
             # 停止获取实时流image
             self.timer_camera_image.stop()
             self.video_status = self.STATUS_INIT
-            RobotOther.select_template_flag = False
+            GloVar.select_template_flag = False
             self.setCursor(Qt.ArrowCursor)
             self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_play + ')')
             self.camera_status = self.camera_closed
@@ -349,24 +349,24 @@ class VideoLabel(QLabel):
         time.sleep(0.3)
         # 暂停后不允许机械臂动作操作
         RobotArmAction.uArm_action_type = None
-        # # 数据处理调用
-        # if robot_other.data_process_flag is True:
-        #     mask_image_path = os.path.join(self.get_path, 'mask')
-        # else:
-        #     mask_image_path = None
         # 实时流
         if self.video_play_flag is False:
-            mask_image_path = GloVar.project_picture_path
-            RobotOther.mask_path = mask_image_path
+            # 如果是case中框选视频模板动作
+            if GloVar.draw_frame_flag is True:
+                # 此目录必须一直存在(不能被修改(需要进行数据处理))
+                GloVar.mask_path = MergePath([GloVar.project_path, 'picture', 'template']).merged_path
+            # 其余情况
+            else:
+                GloVar.mask_path = MergePath([GloVar.project_picture_path, '框选图']).merged_path
         # 本地视频(框选模板名称默认和视频名相同>路径只是将video替换为picture即可)
         else:
-            # 数据处理时传入的路径少一级
-            if RobotOther.data_process_flag is True:
-                mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
-                RobotOther.mask_path = MergePath([os.path.split(mask_image_path)[0]]).merged_path + '.mp4'
+            # 数据处理时传入的路径(根据视频名字来的)
+            if GloVar.data_process_flag is True:
+                video_name_path_cut_list = os.path.split(self.videos_title[self.current_video])[0].split('/')
+                new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
+                GloVar.mask_path = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/')
             else:
-                mask_image_path = self.videos_title[self.current_video].replace('/video/', '/picture/')
-                RobotOther.mask_path = mask_image_path
+                GloVar.mask_path = MergePath([GloVar.project_picture_path, '框选图']).merged_path
 
 
     # 空格键 播放/暂停/重播
@@ -379,14 +379,14 @@ class VideoLabel(QLabel):
                 self.timer_video.start()
                 self.label_video_title.setStyleSheet('color:white')
                 self.video_status = self.STATUS_PLAYING
-                RobotOther.select_template_flag = False
+                GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_pause + ')')
                 Logger('<打开视频流>')
             elif self.video_status is self.STATUS_PLAYING:
                 self.timer_video.stop()
                 self.video_status = self.STATUS_PAUSE
-                RobotOther.select_template_flag = True
+                GloVar.select_template_flag = True
                 self.setCursor(Qt.CrossCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_play + ')')
                 self.template_label()
@@ -396,7 +396,7 @@ class VideoLabel(QLabel):
                 self.timer_video.start()
                 self.label_video_title.setStyleSheet('color:white')
                 self.video_status = self.STATUS_PLAYING
-                RobotOther.select_template_flag = False
+                GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_pause + ')')
                 Logger('<打开视频流>')
@@ -411,7 +411,7 @@ class VideoLabel(QLabel):
                 self.label_video_title.setStyleSheet('color:white')
                 self.video_status = self.STATUS_PLAYING
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_pause + ')')
-                RobotOther.select_template_flag = False
+                GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
                 Logger('<播放视频>')
             elif self.video_status is self.STATUS_PLAYING:
@@ -423,7 +423,7 @@ class VideoLabel(QLabel):
                 self.next_video_button.setEnabled(True)
                 self.video_status = self.STATUS_PAUSE
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_play + ')')
-                RobotOther.select_template_flag = True
+                GloVar.select_template_flag = True
                 self.setCursor(Qt.CrossCursor)
                 self.template_label()
                 self.mask_image = self.image
@@ -437,7 +437,7 @@ class VideoLabel(QLabel):
                 self.label_video_title.setStyleSheet('color:white')
                 self.video_status = self.STATUS_PLAYING
                 self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_pause + ')')
-                RobotOther.select_template_flag = False
+                GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
                 Logger('<播放视频>')
             elif self.video_status is self.STATUS_STOP:
@@ -652,7 +652,7 @@ class VideoLabel(QLabel):
         self.last_frame_button.setEnabled(True)
         self.next_frame_button.setEnabled(True)
         # 关掉数据处理标志位
-        RobotOther.data_process_flag = False
+        GloVar.data_process_flag = False
         # 调整视频尺寸
         self.signal.emit('reset_video_label_size>local_video')
 
@@ -705,7 +705,7 @@ class VideoLabel(QLabel):
         # 此时什么都不播放(状态为None)
         self.video_play_flag = None
         # 关掉数据处理标志位
-        RobotOther.data_process_flag = False
+        GloVar.data_process_flag = False
         # 复位视频状态为STATUS_INIT
         self.video_status = self.STATUS_INIT
         # 进度条关闭
@@ -746,7 +746,7 @@ class VideoLabel(QLabel):
         # 进度条关闭
         self.slider_thread.stop()
         # 关掉数据处理标志位
-        RobotOther.data_process_flag = False
+        GloVar.data_process_flag = False
         # 实时流保证30fps/s即可
         self.timer_video.frequent = 30
         self.setCursor(Qt.ArrowCursor)
@@ -786,7 +786,7 @@ class VideoLabel(QLabel):
         # 实时流保证30fps/s即可
         self.timer_video.frequent = 30
         # 关掉数据处理标志位
-        RobotOther.data_process_flag = False
+        GloVar.data_process_flag = False
         self.setCursor(Qt.ArrowCursor)
         self.status_video_button.setEnabled(False)
         self.last_video_button.setEnabled(False)
@@ -838,7 +838,7 @@ class VideoLabel(QLabel):
                 # 将box_screen_scale尺寸存入配置文件(不需要每次打开都进行框选)
                 Profile(type='write', file=GloVar.config_file_path, section='param', option='box_screen_scale', value=str(self.box_screen_scale))
                 GloVar.box_screen_flag = False
-                RobotOther.select_template_flag = False
+                GloVar.select_template_flag = False
                 GloVar.add_action_button_flag = True
                 self.setCursor(Qt.ArrowCursor)
                 Logger('[框选车机屏幕]--起点及尺寸: %s' % str(self.box_screen_size))
@@ -902,7 +902,7 @@ class VideoLabel(QLabel):
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
                 painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
         # 框选动作
-        elif RobotOther.select_template_flag is True:
+        elif GloVar.select_template_flag is True:
             rect = QRect(self.x0, self.y0, abs(self.x1 - self.x0), abs(self.y1 - self.y0))
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
@@ -923,20 +923,32 @@ class VideoLabel(QLabel):
 
     # 保存模板
     def save_template(self):
-        if RobotOther.select_template_flag is True:
+        if GloVar.select_template_flag is True:
             # x_unit, y_unit = 1280 / 1280, 1024 / 1024
             x_unit, y_unit = self.x_unit, self.y_unit
             x0, y0, x1, y1 = int(self.x0 * x_unit), int(self.y0 * y_unit), int(self.x1 * x_unit), int(self.y1 * y_unit)
             cut_img = self.mask_image[y0:y1, x0:x1]
             # 直播状态
             if self.video_play_flag is False:
-                # 接收模板路径
-                mask_path = RobotOther.mask_path
-                default_name = '应用'
+                # 如果是case中框选视频模板动作
+                if GloVar.draw_frame_flag is True:
+                    # 接收模板路径
+                    mask_path = GloVar.mask_path
+                    default_name = 'type-name'
+                else:
+                    # 接收模板路径
+                    mask_path = GloVar.mask_path
+                    default_name = '截图'
             # 本地视频播放
             elif self.video_play_flag is True:
-                mask_path = os.path.split(RobotOther.mask_path)[0]
-                default_name = os.path.splitext(os.path.split(RobotOther.mask_path)[1])[0]
+                # 数据处理产生的模板
+                if GloVar.data_process_flag is True:
+                    mask_path = os.path.split(GloVar.mask_path)[0]
+                    default_name = os.path.split(GloVar.mask_path)[1]
+                # 离线视频产生的模板
+                else:
+                    mask_path = GloVar.mask_path
+                    default_name = '截图'
             else:
                 Logger('[当前状态不允许保存模板!]')
                 return
@@ -947,7 +959,7 @@ class VideoLabel(QLabel):
                 # 如果输入有效值
                 if ok:
                     # 如果是数据处理(需要对图像特殊处理)
-                    if RobotOther.data_process_flag is True:
+                    if GloVar.data_process_flag is True:
                         # 将模板灰度化/并在模板起始位置打标记
                         rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
                         # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
@@ -978,9 +990,17 @@ class VideoLabel(QLabel):
                                     return
                                 if os.path.exists(mask_path) is False:
                                     os.makedirs(mask_path)
-                                # windows文件名大小写一样,此处需要区分(大写如A1.jpg, 小写如a.jpg)
-                                if len(value.split('-')[1])==1 and value.split('-')[1].isupper():
-                                    template_name = MergePath([mask_path, value.split('-')[-1] + '1.jpg']).merged_path
+                                # 如果是框选数据匹配模板的话(框选模板保存为灰度图)
+                                if GloVar.draw_frame_flag is True:
+                                    # 将模板灰度化/并在模板起始位置打标记
+                                    rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
+                                    # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
+                                    rect_image[0][0] = y0 // 10
+                                    rect_image[0][1] = y1 // 10
+                                    rect_image[0][2] = x0 // 10
+                                    rect_image[0][3] = x1 // 10
+                                    cut_img = rect_image
+                                    template_name = MergePath([mask_path, value.split('-')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                                 else:
                                     template_name = MergePath([mask_path, value.split('-')[-1] + '.jpg']).merged_path
@@ -997,7 +1017,7 @@ class VideoLabel(QLabel):
                         else:
                             # 直播
                             if self.video_play_flag is False:
-                                mask_path = MergePath([mask_path, '其他']).merged_path
+                                mask_path = MergePath([mask_path]).merged_path
                             # 本地视频播放
                             elif self.video_play_flag is True:
                                 mask_path = mask_path
@@ -1008,6 +1028,8 @@ class VideoLabel(QLabel):
                                 os.makedirs(mask_path)
                             template_name = MergePath([mask_path, value + '.jpg']).merged_path
                             cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                    # case中框选模板标志位复位
+                    GloVar.draw_frame_flag = False
                     Logger('[框选的模板保存路径为]: %s' % template_name)
                 else:
                     Logger('[框选动作取消!]')

@@ -41,6 +41,13 @@ class ShowCaseTab(QWidget):
         self.execute_button.setToolTip('execute')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_items)
+        # 切换按钮(是否需要产生报告)
+        self.switch_button = QToolButton()
+        self.switch_button.setMinimumWidth(40)
+        self.switch_button.setToolTip('switch_off')
+        self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+        self.switch_button.clicked.connect(self.connect_switch)
+        # 次数标签
         self.execute_times_label = QLabel()
         self.execute_times_label.setText('次数:')
         self.execute_times_control = QSpinBox()
@@ -51,6 +58,7 @@ class ShowCaseTab(QWidget):
         h_box.addWidget(self.import_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
+        h_box.addWidget(self.switch_button)
         h_box.addWidget(self.execute_times_label)
         h_box.addWidget(self.execute_times_control)
         h_box.addStretch(1)
@@ -125,12 +133,36 @@ class ShowCaseTab(QWidget):
                             time.sleep(0.002)
                         # 执行每一条case后cpu休息一秒钟
                         time.sleep(1)
+        # 测试执行结束(改变标志位)
+        while True:
+            if GloVar.request_status == 'ok':
+                self.signal.emit('test_finished>')
+                break
+            else:
+                time.sleep(0.02)
 
 
     # 线程中执行选中的case
     def connect_execute_selected_items(self):
+        # 每执行一次都需要获取当前时间(作为文件夹)
+        GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
+        # 获取执行次数
         execute_times = self.execute_times_control.value()
         Thread(target=self.execute_selected_items, args=(execute_times,)).start()
+
+
+    # 视频处理开关切换
+    def connect_switch(self):
+        # 打开开关
+        if GloVar.video_process_switch == 'OFF':
+            GloVar.video_process_switch = 'ON'
+            self.switch_button.setToolTip('switch_off')
+            self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+        # 关闭开关
+        else:
+            GloVar.video_process_switch = 'OFF'
+            self.switch_button.setToolTip('switch_on')
+            self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
 
 
     # 接受case控件发送的信号

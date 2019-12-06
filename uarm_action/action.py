@@ -3,7 +3,7 @@ from uarm_action.uarm import SwiftAPI
 from GlobalVar import Logger
 from uarm_action.video_of_external_camera import ExternalCameraVideo
 from uarm_action.video_of_system_camera import SystemCameraVideo
-from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile
+from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile, MergePath
 
 
 class ArmAction:
@@ -169,7 +169,8 @@ class ArmAction:
     # 摄像头录制动作
     def play_record_action(self, info_dict):
         data = info_dict
-        video_path = data['video_path']
+        # 视频路径为参数中的获取到的路径+当前case开始执行的时间
+        video_path = MergePath([data['video_path'], GloVar.current_time]).merged_path
         record_status = data['record_status']
         video_type = data['video_type']
         video_name = data['video_name']
