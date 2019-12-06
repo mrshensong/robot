@@ -156,8 +156,11 @@ class UiMainWindow(QMainWindow):
     def menu_bar_show(self):
         # 菜单栏显示
         self.test_action = QAction('exit', self)
+        self.help_action = QAction('help', self)
         self.file_bar = self.menu_bar.addMenu('File')
+        self.help_bar = self.menu_bar.addMenu('Help')
         self.file_bar.addAction(self.test_action)
+        self.help_bar.addAction(self.help_action)
 
 
     # 工具栏

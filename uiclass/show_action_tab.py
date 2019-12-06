@@ -68,10 +68,12 @@ class ShowActionTab(QWidget):
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_save + ')}')
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
         self.draw_frame_button = QToolButton()
+        self.draw_frame_button.setShortcut('q')
         self.draw_frame_button.setToolTip('draw_frame')
         self.draw_frame_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_draw_frame + ')}')
         self.draw_frame_button.clicked.connect(self.connect_draw_frame)
         self.des_text = QLineEdit()
+        self.des_text.setMaximumWidth(200)
         self.des_text.setText('空白')
 
         h_box = QHBoxLayout()

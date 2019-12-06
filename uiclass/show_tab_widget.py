@@ -22,8 +22,8 @@ class ShowTabWidget(QTabWidget):
         # tab3
         self.script_tab   = ShowScriptTab(self)
         # QTabWidget添加tab
-        self.addTab(self.action_tab, action_tab)
         self.addTab(self.case_tab, case_tab)
+        self.addTab(self.action_tab, action_tab)
         self.addTab(self.script_tab, text_tab)
         # 调整背景颜色
         # self.setStyleSheet('background-color:#DDDDDD;')

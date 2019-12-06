@@ -37,16 +37,17 @@ class AddActionTab(QWidget):
         # 设置表单内容
         # 动作描述
         self.des_text = QLineEdit(self)
-        self.des_text.setPlaceholderText('请输入动作描述(可不写)')
+        self.des_text.setPlaceholderText('动作描述(选填)')
         # 动作选择
         self.com_box = QComboBox(self)
         self.com_box.addItems(items)
         self.com_box.currentIndexChanged.connect(self.connect_com_box)
         # 动作速度
         self.speed_text = QLineEdit(self)
-        self.speed_text.setPlaceholderText('请输入动作速度(可不写)')
+        self.speed_text.setPlaceholderText('动作速度(选填)')
         # 坐标
         self.points = QLineEdit(self)
+        self.points.setPlaceholderText('自动获取(不填)')
         # 是否收回
         self.leave_check_box = QCheckBox(self)
         self.leave_check_box.setCheckState(Qt.Checked)

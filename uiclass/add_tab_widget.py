@@ -82,23 +82,24 @@ class AddTabWidget(QDialog):
                           MotionAction.trigger     : 1}
         # action_tab复位
         self.widget.action_tab.des_text.setText('')
-        self.widget.action_tab.des_text.setPlaceholderText('请输入动作描述(可不写)')
+        self.widget.action_tab.des_text.setPlaceholderText('动作描述(选填)')
         self.widget.action_tab.com_box.setCurrentText(RobotArmAction.uArm_click)
         self.widget.action_tab.speed_text.setText('')
-        self.widget.action_tab.speed_text.setPlaceholderText('请输入动作速度(可不写)')
+        self.widget.action_tab.speed_text.setPlaceholderText('动作速度(选填)')
         self.widget.action_tab.points.setText('')
+        self.widget.action_tab.points.setPlaceholderText('自动获取(不填)')
         self.widget.action_tab.leave_check_box.setCheckState(Qt.Checked)
         self.widget.action_tab.camera_trigger_check_box.setCheckState(Qt.Unchecked)
         # video_tab复位
         self.widget.record_tab.start_record_video.setCheckState(Qt.Unchecked)
         self.widget.record_tab.stop_record_video.setCheckState(Qt.Unchecked)
         self.widget.record_tab.video_type_edit.setText('')
-        self.widget.record_tab.video_type_edit.setPlaceholderText('默认test')
+        self.widget.record_tab.video_type_edit.setPlaceholderText('默认(启动)')
         self.widget.record_tab.video_name_edit.setText('')
-        self.widget.record_tab.video_name_edit.setPlaceholderText('默认test.mp4(后缀可无)')
+        self.widget.record_tab.video_name_edit.setPlaceholderText('默认(name)')
         # sleep_tab复位
         self.widget.sleep_tab.sleep_time_edit.setText('')
-        self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('请输入睡眠时间(单位:s)')
+        self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('睡眠时间(单位:s)')
         self.widget.setCurrentWidget(self.widget.action_tab)
         self.close()
 

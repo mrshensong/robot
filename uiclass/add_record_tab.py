@@ -38,10 +38,10 @@ class AddRecordTab(QWidget):
         self.stop_record_video.stateChanged.connect(self.connect_stop_record_video)
         # 视频类型
         self.video_type_edit = QLineEdit(self)
-        self.video_type_edit.setPlaceholderText('默认test')
+        self.video_type_edit.setPlaceholderText('默认(启动)')
         # 视频名称
         self.video_name_edit = QLineEdit(self)
-        self.video_name_edit.setPlaceholderText('默认test.mp4(后缀可无)')
+        self.video_name_edit.setPlaceholderText('默认(name)')
         # 表单布局
         self.from_layout.addRow('开始录制视频: ', self.start_record_video)
         self.from_layout.addRow('停止录制视频: ', self.stop_record_video)
@@ -87,11 +87,11 @@ class AddRecordTab(QWidget):
     # 按下确认按钮
     def connect_sure(self):
         if self.video_type_edit.text() is '':
-            self.info_dict[RecordAction.video_type] = 'test'
+            self.info_dict[RecordAction.video_type] = '启动'
         else:
             self.info_dict[RecordAction.video_type] = self.video_type_edit.text()
         if self.video_name_edit.text() is '':
-            self.info_dict[RecordAction.video_name] = 'test'
+            self.info_dict[RecordAction.video_name] = 'name'
         else:
             if self.video_name_edit.text().endswith('.mp4') or self.video_name_edit.text().endswith('.MP4'):
                 self.info_dict[RecordAction.video_name] = self.video_name_edit.text().split('.')[0]

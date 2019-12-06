@@ -78,6 +78,7 @@ class ActionControl(QWidget):
         self.h_box.addWidget(self.delete_button)
 
         self.setLayout(self.h_box)
+        self.setMaximumWidth(400)
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -179,6 +180,7 @@ class RecordControl(QWidget):
         self.h_box.addWidget(self.play_button)
         self.h_box.addWidget(self.delete_button)
         self.setLayout(self.h_box)
+        self.setMaximumWidth(400)
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -255,6 +257,7 @@ class SleepControl(QWidget):
         self.h_box.addWidget(self.play_button)
         self.h_box.addWidget(self.delete_button)
         self.setLayout(self.h_box)
+        self.setMaximumWidth(400)
 
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
@@ -318,6 +321,7 @@ class CaseControl(QWidget):
         self.h_box.addWidget(self.play_button)
         self.h_box.addWidget(self.case_name_edit)
         self.setLayout(self.h_box)
+        self.setMaximumWidth(300)
 
 
     # 当前控件双击事件后(发送信号到父控件, 发送当前id)
