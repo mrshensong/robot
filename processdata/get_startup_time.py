@@ -187,9 +187,10 @@ class GetStartupTime:
         start_frame = start_frame + 1
         end_frame = end_frame + 1
         frame_gap = end_frame - start_frame
+        time_gap = int(frame_gap * (1000 / 120))
         Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (file, start_frame, start_threshold))
         Logger('%s-->终止点: 帧> %d, 匹配率> %.4f' % (file, end_frame, end_threshold))
-        return {'次序':video_id, '开始帧':start_frame, '开始帧匹配率':start_threshold, '结束帧':end_frame, '结束帧匹配率':end_threshold, '差帧':frame_gap}
+        return {'次序':video_id, '开始帧':start_frame, '开始帧匹配率':start_threshold, '结束帧':end_frame, '结束帧匹配率':end_threshold, '差帧':frame_gap, '耗时':time_gap}
 
     # 处理一条case(可能含有多次执行产生的多个视频, 传入的参数为产生的这些视频的当前目录路径)
     def process_case(self, video_name_path):
@@ -201,8 +202,10 @@ class GetStartupTime:
         video_name_path_cut_list = video_name_path.split('/')
         new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
         end_mask = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.jpg'
-        # 差帧标准
-        standard_frame_gap = 100
+        # 标准耗时(单位/ms)
+        standard_time_gap = 800
+        # 标准差帧
+        standard_frame_gap = int(standard_time_gap / (1000 / 120))
         # 差帧总和 & 平均差帧
         sum_frame_gap, average_frame_gap = 0, 0
         # 处理一个case中的多次执行产生的视频
@@ -218,9 +221,10 @@ class GetStartupTime:
                 video_info_list.insert(int(file_text), video_info)
                 sum_frame_gap += int(video_info['差帧'])
         average_frame_gap = int(sum_frame_gap / video_count)
-        status = 'failed' if average_frame_gap > standard_frame_gap else 'pass'
+        average_time_gap = int((sum_frame_gap * (1000 / 120)) / video_count)
+        status = 'failed' if average_time_gap > standard_time_gap else 'pass'
         # 返回的信息跟excel模型相似(列表第一个参数代表case类型, 也就是sheet名字)
-        return [case_name, video_count, video_info_list, standard_frame_gap, average_frame_gap, status]
+        return [case_name, video_count, video_info_list, standard_frame_gap, standard_time_gap, average_frame_gap, average_time_gap, status]
 
     # 获取起止点以及对应匹配率等等
     def get_all_video_start_and_end_points(self):
@@ -228,7 +232,7 @@ class GetStartupTime:
         此处传入视频路径(算出路径下所有case视频的起止点)
         :return:
         """
-        # 获取视频名文件夹(如:D:/Code/robot/video/2019-11-27/测试/点击设置, 里面装有1/2/3/4/5.MP4这样的记录次数的文件)
+        # 获取视频名文件夹(如:D:/Code/robot/video/2019-11-27/15-10-55/测试/点击设置, 里面装有1/2/3/4/5.MP4这样的记录次数的文件)
         video_name_path_list = []
         for home, dirs, files in os.walk(self.video_path):
             if len(files) > 0:
@@ -264,9 +268,10 @@ class GetStartupTime:
             # 创建sheet表
             work_sheet = work_book.create_sheet(key)
             # 创建表头
-            work_sheet.append(['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '标准差帧', '平均差帧', '状态'])
+            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧', '标准耗时', '标准耗时', '平均差帧', '平均耗时', '状态']
+            work_sheet.append(head)
             # 表头背景颜色
-            for i in range(1, 12):
+            for i in range(1, len(head)):
                 work_sheet.cell(1, i).alignment = align
                 work_sheet.cell(1, i).fill = gray_background
             # 当前可用行号
@@ -324,28 +329,37 @@ class GetStartupTime:
                 sheet.cell(current_row + id, 8).value = data['差帧']
                 sheet.cell(current_row + id, 8).alignment = align
                 sheet.cell(current_row + id, 8).fill = background_color
+                sheet.cell(current_row + id, 9).value = data['耗时']
+                sheet.cell(current_row + id, 9).alignment = align
+                sheet.cell(current_row + id, 9).fill = background_color
             # 合并标准差帧
-            sheet.merge_cells('I' + str(current_row) + ':' + 'I' + str(next_current_row - 1))
-            # 标准差帧
-            sheet.cell(current_row, 9).value = case_data[3]
-            sheet.cell(current_row, 9).alignment = align
-            sheet.cell(current_row, 9).fill = background_color
-            # 合并平均差帧
             sheet.merge_cells('J' + str(current_row) + ':' + 'J' + str(next_current_row - 1))
-            # 平均差帧
-            sheet.cell(current_row, 10).value = case_data[4]
+            sheet.cell(current_row, 10).value = case_data[3]
             sheet.cell(current_row, 10).alignment = align
             sheet.cell(current_row, 10).fill = background_color
-            # 合并状态
+            # 合并标准耗时
             sheet.merge_cells('K' + str(current_row) + ':' + 'K' + str(next_current_row - 1))
-            # 状态
-            sheet.cell(current_row, 11).value = case_data[5]
+            sheet.cell(current_row, 11).value = case_data[4]
             sheet.cell(current_row, 11).alignment = align
-            if case_data[5] == 'failed':
+            sheet.cell(current_row, 11).fill = background_color
+            # 合并平均差帧
+            sheet.merge_cells('L' + str(current_row) + ':' + 'L' + str(next_current_row - 1))
+            sheet.cell(current_row, 12).value = case_data[5]
+            sheet.cell(current_row, 12).alignment = align
+            sheet.cell(current_row, 12).fill = background_color
+            # 合并平均耗时
+            sheet.merge_cells('M' + str(current_row) + ':' + 'M' + str(next_current_row - 1))
+            sheet.cell(current_row, 13).value = case_data[6]
+            sheet.cell(current_row, 13).alignment = align
+            # 合并状态
+            sheet.merge_cells('N' + str(current_row) + ':' + 'N' + str(next_current_row - 1))
+            sheet.cell(current_row, 14).value = case_data[7]
+            sheet.cell(current_row, 14).alignment = align
+            if case_data[7] == 'failed':
                 background_color = PatternFill("solid", fgColor=colors.RED)
             else:
                 background_color = PatternFill("solid", fgColor=colors.GREEN)
-            sheet.cell(current_row, 11).fill = background_color
+            sheet.cell(current_row, 14).fill = background_color
         # 只有执行了一次的数据
         else:
             sheet.cell(current_row, 1).value = case_data[0]
@@ -372,19 +386,28 @@ class GetStartupTime:
             sheet.cell(current_row, 8).value = case_data[2][0]['差帧']
             sheet.cell(current_row, 8).alignment = align
             sheet.cell(current_row, 8).fill = background_color
-            sheet.cell(current_row, 9).value = case_data[3]
+            sheet.cell(current_row, 9).value = case_data[2][0]['耗时']
             sheet.cell(current_row, 9).alignment = align
             sheet.cell(current_row, 9).fill = background_color
-            sheet.cell(current_row, 10).value = case_data[4]
+            sheet.cell(current_row, 10).value = case_data[3]
             sheet.cell(current_row, 10).alignment = align
             sheet.cell(current_row, 10).fill = background_color
-            sheet.cell(current_row, 11).value = case_data[5]
+            sheet.cell(current_row, 11).value = case_data[4]
             sheet.cell(current_row, 11).alignment = align
-            if case_data[5] == 'failed':
+            sheet.cell(current_row, 11).fill = background_color
+            sheet.cell(current_row, 12).value = case_data[5]
+            sheet.cell(current_row, 12).alignment = align
+            sheet.cell(current_row, 12).fill = background_color
+            sheet.cell(current_row, 13).value = case_data[6]
+            sheet.cell(current_row, 13).alignment = align
+            sheet.cell(current_row, 13).fill = background_color
+            sheet.cell(current_row, 14).value = case_data[7]
+            sheet.cell(current_row, 14).alignment = align
+            if case_data[7] == 'failed':
                 background_color = PatternFill("solid", fgColor=colors.RED)
             else:
                 background_color = PatternFill("solid", fgColor=colors.GREEN)
-            sheet.cell(current_row, 11).fill = background_color
+            sheet.cell(current_row, 14).fill = background_color
         return next_current_row
 
     # 通过excel获取柱形图

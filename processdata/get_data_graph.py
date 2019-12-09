@@ -14,7 +14,7 @@ class GenerateDataGraph:
         self.standard_value = 100
 
 
-    def drawing(self, file_name, case_list, frame_gap_list, standard_list, status_list):
+    def drawing(self, file_name, case_list, actual_value_list, standard_list, status_list):
         # 水平条形图
         """
         绘制水平条形图方法barh
@@ -26,39 +26,34 @@ class GenerateDataGraph:
         # 画布大小根据case数量来
         plt.figure(figsize=(12, case_num + 2))
         # 根据在标准值和测试值中取最大值再加上20, 作为表的宽度
-        chat_width = max(frame_gap_list + standard_list) + 20
+        chat_width = max(actual_value_list + standard_list) + 100
         # 设置x & y 轴范围
         plt.axis([10, chat_width, -1, case_num + 1])
         # 画条形(真实数据, 横向展示)
         y_list = [num + 0.2 for num in range(case_num)]
-        plt.barh(y=y_list, width=frame_gap_list, label='测试帧数', height=0.4, color='purple', alpha=0.5)
+        plt.barh(y=y_list, width=actual_value_list, label='测试时间', height=0.4, color='purple', alpha=0.5)
         # 画条形(标准数据, 紧挨着真实数据)
         y_list = [num - 0.2 for num in range(case_num)]
-        plt.barh(y=y_list, width=standard_list, label='标准帧数', height=0.4, color='steelblue', alpha=0.7)
+        plt.barh(y=y_list, width=standard_list, label='标准时间', height=0.4, color='steelblue', alpha=0.7)
         # 显示case名
         plt.yticks(range(case_num), case_list)
-        # 找出真实帧数和标准帧数中较大的值(组成一个列表)
-        larger_value_list = []
-        for i in range(case_num):
-            larger_value = standard_list[i] if standard_list[i] >= frame_gap_list[i] else frame_gap_list[i]
-            larger_value_list.append(larger_value)
         # 柱形图标注
         # 标注真实测量数据
-        for x, y in enumerate(frame_gap_list):
-            plt.text(y + 1.5, x + 0.1, '%s' % y, ha='center', va='bottom')
+        for x, y in enumerate(actual_value_list):
+            plt.text(y + 10, x + 0.1, '%s' % y, ha='center', va='bottom')
         # 标注标准数据
         for x, y in enumerate(standard_list):
-            plt.text(y - 1.5, x - 0.3, '%s' % y, ha='center', va='bottom')
+            plt.text(y + 10, x - 0.3, '%s' % y, ha='center', va='bottom')
         # 标注pass/failed
         for num, status in enumerate(status_list):
             if status == 'failed':
-                plt.text(chat_width - 6, num - 0.1, 'failed', size=16, color='red', ha='center', va='bottom')
+                plt.text(chat_width - 40, num - 0.1, 'failed', size=16, color='red', ha='center', va='bottom')
             else:
-                plt.text(chat_width - 6, num - 0.1, 'pass', size=16, color='green', ha='center', va='bottom')
+                plt.text(chat_width - 40, num - 0.1, 'pass', size=16, color='green', ha='center', va='bottom')
         # 获取图片title
         title = file_name.split('/')[-1].split('.')[0]
         plt.title('[' + title + ']' + '-->流畅度测试')
-        plt.xlabel('-*- 间隔帧数/fps -*-')
+        plt.xlabel('-*- 时间/ms -*-')
         # 显示图例
         plt.legend(loc='upper left')
         # 避免出现title或者纵坐标显示不完整的问题
@@ -70,13 +65,13 @@ class GenerateDataGraph:
     def get_graphs(self):
         for key, data in self.data_dict.items():
             file_name = MergePath([self.graph_path, key+'.png']).merged_path
-            case_list, frame_gap_list, standard_list, status_list = [], [], [], []
+            case_list, time_gap_list, standard_list, status_list = [], [], [], []
             for case in data:
                 case_list.append(case[0])
-                standard_list.append(case[3])
-                frame_gap_list.append(case[4])
-                status_list.append(case[5])
-            self.drawing(file_name, case_list, frame_gap_list, standard_list, status_list)
+                standard_list.append(case[4])
+                time_gap_list.append(case[6])
+                status_list.append(case[7])
+            self.drawing(file_name, case_list, time_gap_list, standard_list, status_list)
 
 
 

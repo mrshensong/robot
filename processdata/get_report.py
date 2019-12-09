@@ -33,14 +33,14 @@ class GenerateReport:
                     '<td width="250">类型</td>\n' +\
                     '<td width="500">用例</td>\n' +\
                     '<td width="100">次数</td>\n' +\
-                    '<td width="100">标准</td>\n' +\
-                    '<td width="100">平均值</td>\n' +\
+                    '<td width="100">标准(ms)</td>\n' +\
+                    '<td width="100">平均值(ms)</td>\n' +\
                     '<td width="100">状态</td>\n' +\
                     '</tr>\n'
         for key, data in data_dict.items():
             data_length = len(data)
             for i in range(data_length):
-                if data[i][5] == 'failed':
+                if data[i][7] == 'failed':
                     background_color = 'red'
                 else:
                     background_color = 'green'
@@ -50,17 +50,17 @@ class GenerateReport:
                                  '<td bgcolor="blue" rowspan="'+ str(data_length) +'">'+ str(key) +'</td>\n' +\
                                  '<td align="left">'+ str(data[i][0]) +'</td>\n' +\
                                  '<td>'+ str(data[i][1]) +'</td>\n' +\
-                                 '<td>'+ str(data[i][3]) +'</td>\n' +\
                                  '<td>'+ str(data[i][4]) +'</td>\n' +\
-                                 '<td>'+ str(data[i][5]) +'</td>\n' +\
+                                 '<td>'+ str(data[i][6]) +'</td>\n' +\
+                                 '<td>'+ str(data[i][7]) +'</td>\n' +\
                                  '</tr>\n'
                 else:
                     html_chat += '<tr bgcolor="'+ background_color +'" height="30" align="center">\n' + \
                                  '<td align="left">' + str(data[i][0]) + '</td>\n' + \
                                  '<td>' + str(data[i][1]) + '</td>\n' + \
-                                 '<td>' + str(data[i][3]) + '</td>\n' + \
                                  '<td>' + str(data[i][4]) + '</td>\n' + \
-                                 '<td>' + str(data[i][5]) + '</td>\n' + \
+                                 '<td>' + str(data[i][6]) + '</td>\n' + \
+                                 '<td>' + str(data[i][7]) + '</td>\n' + \
                                  '</tr>\n'
         html_chat += '</table>\n'
         return html_chat
@@ -72,7 +72,7 @@ class GenerateReport:
                '<html>\n' +\
                '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n' +\
                '<body>\n' +\
-               '<h1 style="text-align:left">' + self.report_name + '</h1>\n' +\
+               '<h2 style="text-align:left">' + self.report_name + '</h1>\n' +\
                '<br/>\n'
         html_tail = '\n</body>' +\
                     '\n</html>'
