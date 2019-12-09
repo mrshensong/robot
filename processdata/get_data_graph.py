@@ -21,6 +21,11 @@ class GenerateDataGraph:
         参数一：y轴
         参数二：x轴
         """
+        # 将传入的数据倒序排列(因为图表画图是从下往上画图, 正好与正常人们理解的从上往下相反)
+        case_list.reverse()
+        actual_value_list.reverse()
+        standard_list.reverse()
+        status_list.reverse()
         # 根据数据量设置画布大小, 以及刻度范围
         case_num = len(case_list)
         # 画布大小根据case数量来
