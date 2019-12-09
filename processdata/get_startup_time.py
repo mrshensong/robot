@@ -268,10 +268,10 @@ class GetStartupTime:
             # 创建sheet表
             work_sheet = work_book.create_sheet(key)
             # 创建表头
-            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧', '标准耗时', '标准耗时', '平均差帧', '平均耗时', '状态']
+            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧', '标准耗时', '平均差帧', '平均耗时', '状态']
             work_sheet.append(head)
             # 表头背景颜色
-            for i in range(1, len(head)):
+            for i in range(1, len(head)+1):
                 work_sheet.cell(1, i).alignment = align
                 work_sheet.cell(1, i).fill = gray_background
             # 当前可用行号
@@ -351,6 +351,7 @@ class GetStartupTime:
             sheet.merge_cells('M' + str(current_row) + ':' + 'M' + str(next_current_row - 1))
             sheet.cell(current_row, 13).value = case_data[6]
             sheet.cell(current_row, 13).alignment = align
+            sheet.cell(current_row, 13).fill = background_color
             # 合并状态
             sheet.merge_cells('N' + str(current_row) + ':' + 'N' + str(next_current_row - 1))
             sheet.cell(current_row, 14).value = case_data[7]

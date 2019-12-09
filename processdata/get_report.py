@@ -21,14 +21,17 @@ class GenerateReport:
     # 通过柱形图表来生成html中的一部分
     def generate_html_by_graph(self, graph):
         case_type = graph.split('.')[0]
-        text = '\n<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>' +\
+        text = '\n<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>' + \
+               '<hr/>\n' +\
                '\n<p style="text-align:left"><img src="'+ graph +'"/></p>'
         return text
 
 
     # 获取表图报告
-    def get_table_chart_report(self, data_dict):
-        html_chat = '<table border="1" cellspacing="0">\n' +\
+    def get_table_chart_report(self):
+        html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">用例执行情况如下: </p>\n' +\
+                    '<hr/>\n' +\
+                    '<table border="1" cellspacing="0">\n' +\
                     '<tr bgcolor="gray" height="50" align="center">\n' +\
                     '<td width="250">类型</td>\n' +\
                     '<td width="500">用例</td>\n' +\
@@ -37,7 +40,7 @@ class GenerateReport:
                     '<td width="100">平均值(ms)</td>\n' +\
                     '<td width="100">状态</td>\n' +\
                     '</tr>\n'
-        for key, data in data_dict.items():
+        for key, data in self.data_dict.items():
             data_length = len(data)
             for i in range(data_length):
                 if data[i][7] == 'failed':
@@ -66,24 +69,53 @@ class GenerateReport:
         return html_chat
 
 
+    # 获取报告描述
+    def get_description(self):
+        # 报告路径
+        report_path = self.report_name
+        # 开始时间
+        start_time = '-'.join(os.path.split(self.report_name)[0].split('/')[-2:])
+        # 获取报告状态(pass/failed)
+        failures = 0
+        for key, data in self.data_dict.items():
+            data_length = len(data)
+            for i in range(data_length):
+                if data[i][7] == 'failed':
+                    failures += 1
+        report_status = 'pass' if failures == 0 else 'failed'
+        html_description = '<p>\n' +\
+            '<span style="font-family:arial;font-size:20px;font-weight:bold">报告路径: </span>\n' +\
+            '<span style="font-size:20px">' + report_path + '</span>\n' +\
+            '</p>\n' +\
+            '<p>\n' +\
+            '<span style="font-family:arial;font-size:20px;font-weight:bold">开始时间: </span>\n' +\
+            '<span style="font-size:20px">' + start_time + '</span>\n' +\
+            '</p>\n' +\
+            '<p>\n' +\
+            '<span style="font-family:arial;font-size:20px;font-weight:bold">测试结果: </span>\n' +\
+            '<span style="font-size:20px">' + report_status + '</span>\n' +\
+            '</p>\n'
+        return html_description
+
+
     # 保存生成的html代码
     def save_html(self):
         html_head = '<!DOCTYPE HTML>\n' +\
                '<html>\n' +\
-               '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n' +\
-               '<body>\n' +\
-               '<h2 style="text-align:left">' + self.report_name + '</h1>\n' +\
-               '<br/>\n'
+               '<meta charset=utf-8">\n' +\
+               '<body>\n'
         html_tail = '\n</body>' +\
                     '\n</html>'
-        # html_body = ''
-        html_body = self.get_table_chart_report(self.data_dict)
+        # 获取报告开头描述
+        html_description = self.get_description()
+        # 获取图表
+        html_body = self.get_table_chart_report()
         # 获取html_body内容
         graph_list = self.get_report_graph()
         for graph in graph_list:
             text = self.generate_html_by_graph(graph=graph)
             html_body += text
-        html = html_head + html_body + html_tail
+        html = html_head + html_description + html_body + html_tail
         with open(self.report_name, 'w', encoding='utf-8') as f:
             f.write(html)
         Logger('生成报告: ' + self.report_name)
