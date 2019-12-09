@@ -102,7 +102,9 @@ class GenerateReport:
     def save_html(self):
         html_head = '<!DOCTYPE HTML>\n' +\
                '<html>\n' +\
-               '<meta http-equiv="Content-Type" content="text/html" charset=utf-8">\n' +\
+               '<head>\n' +\
+               '<meta charset="utf-8">\n' +\
+               '</head>\n' +\
                '<body>\n'
         html_tail = '\n</body>' +\
                     '\n</html>'
