@@ -108,6 +108,8 @@ class SystemCameraVideo:
 
 
     def stop_record_video(self):
+        # 多录制一秒钟(预防结束的太早)
+        time.sleep(1)
         self.record_flag = False
         Logger('当前视频总帧数为: %d' %self.frame_id)
         Logger('正在保存缓存区的视频...')
