@@ -51,10 +51,13 @@ class ActionControl(QWidget):
         self.type_label.setPixmap(pix_map)
 
         self.des_line_edit = QLineEdit(self)
+        self.des_line_edit.setReadOnly(True)
         self.des_line_edit.setText(self.des_text)
         self.points_line_edit = QLineEdit(self)
+        self.points_line_edit.setReadOnly(True)
         self.points_line_edit.setText(self.points_text)
         self.other_param_edit = QLineEdit(self)
+        self.other_param_edit.setReadOnly(True)
         self.other_param_edit.setText(self.other_param)
         self.v_box = QVBoxLayout()
         self.v_box.addWidget(self.des_line_edit)
@@ -147,12 +150,15 @@ class RecordControl(QWidget):
         self.video_camera_label.setPixmap(QPixmap(IconPath.Icon_custom_video_camera))
         # 显示视频名称
         self.video_name_text = QLineEdit(self)
+        self.video_name_text.setReadOnly(True)
         self.video_name_text.setText(self.video_name)
         # 显示视频类型
         self.video_type_text = QLineEdit(self)
+        self.video_type_text.setReadOnly(True)
         self.video_type_text.setText(self.video_type)
         # 摄像机录像开始和停止text显示
         self.video_camera_status_text = QLineEdit(self)
+        self.video_camera_status_text.setReadOnly(True)
         # 视频开始和停止显示
         if self.record_type == RecordAction.record_start:
             status = 'record: Start'
@@ -240,6 +246,7 @@ class SleepControl(QWidget):
         # 延时text显示
         status = 'sleep: ' + str(self.sleep_time)
         self.sleep_des_text = QLineEdit(self)
+        self.sleep_des_text.setReadOnly(True)
         self.sleep_des_text.setText(status)
         self.play_button = QToolButton(self)
         self.play_button.setToolTip('play')

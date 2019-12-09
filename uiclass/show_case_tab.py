@@ -30,6 +30,7 @@ class ShowCaseTab(QWidget):
 
     def case_tab_init(self):
         self.import_button = QToolButton()
+        self.import_button.setShortcut('o')
         self.import_button.setToolTip('import')
         self.import_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_import + ')}')
         self.import_button.clicked.connect(lambda: self.connect_import_button(None))
