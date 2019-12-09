@@ -21,9 +21,9 @@ class GenerateReport:
     # 通过柱形图表来生成html中的一部分
     def generate_html_by_graph(self, graph):
         case_type = graph.split('.')[0]
-        text = '\n<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>' + \
+        text = '<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>\n' + \
                '<hr/>\n' +\
-               '\n<p style="text-align:left"><img src="'+ graph +'"/></p>'
+               '<p style="text-align:left"><img src="'+ graph +'"/></p>\n'
         return text
 
 
@@ -102,7 +102,7 @@ class GenerateReport:
     def save_html(self):
         html_head = '<!DOCTYPE HTML>\n' +\
                '<html>\n' +\
-               '<meta charset=utf-8">\n' +\
+               '<meta http-equiv="Content-Type" content="text/html" charset=utf-8">\n' +\
                '<body>\n'
         html_tail = '\n</body>' +\
                     '\n</html>'
