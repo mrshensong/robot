@@ -42,11 +42,15 @@ class AddRecordTab(QWidget):
         # 视频名称
         self.video_name_edit = QLineEdit(self)
         self.video_name_edit.setPlaceholderText('默认(name)')
+        # 标准时间(用来判断测试时间是否在预期内)
+        self.standard_time_edit = QLineEdit(self)
+        self.standard_time_edit.setPlaceholderText('默认800(单位ms)')
         # 表单布局
         self.from_layout.addRow('开始录制视频: ', self.start_record_video)
         self.from_layout.addRow('停止录制视频: ', self.stop_record_video)
         self.from_layout.addRow('设置视频类型: ', self.video_type_edit)
         self.from_layout.addRow('设置视频名称: ', self.video_name_edit)
+        self.from_layout.addRow('设置标准时间: ', self.standard_time_edit)
 
         # 确定按钮
         self.sure_button = QPushButton('确定', self)
