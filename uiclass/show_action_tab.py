@@ -468,10 +468,12 @@ class ShowActionTab(QWidget):
         record_status = info_dict[RecordAction.record_status]
         video_type    = info_dict[RecordAction.video_type]
         video_name    = info_dict[RecordAction.video_name]
+        standard_time = info_dict[RecordAction.standard_time]
         tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
               '\t\t' + '<param name="' + RecordAction.record_status + '">' + record_status + '</param>\n' + \
               '\t\t' + '<param name="' + RecordAction.video_type + '">' + video_type + '</param>\n' + \
               '\t\t' + '<param name="' + RecordAction.video_name + '">' + video_name + '</param>\n' + \
+              '\t\t' + '<param name="' + RecordAction.standard_time + '">' + standard_time + '</param>\n' + \
               '\t</action>\n'
         return tag
 

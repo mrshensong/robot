@@ -15,7 +15,8 @@ class AddRecordTab(QWidget):
         # 视频录像状态
         self.info_dict = {RecordAction.record_status : '',
                           RecordAction.video_type: '',
-                          RecordAction.video_name: ''}
+                          RecordAction.video_name: '',
+                          RecordAction.standard_time: ''}
         self.initUI()
 
 
@@ -82,6 +83,7 @@ class AddRecordTab(QWidget):
             self.standard_time_edit.setEnabled(True)
             RecordAction.current_video_type = '启动'
             RecordAction.current_video_name = 'name'
+            RecordAction.current_standard_time = '800'
         elif self.start_record_video.checkState() == Qt.Unchecked:
             self.stop_record_video.setCheckState(Qt.Unchecked)
             self.stop_record_video.setEnabled(True)
@@ -96,11 +98,13 @@ class AddRecordTab(QWidget):
             self.start_record_video.setEnabled(False)
             self.video_type_edit.setText(RecordAction.current_video_type)
             self.video_name_edit.setText(RecordAction.current_video_name)
+            self.standard_time_edit.setText(RecordAction.current_standard_time)
         elif self.stop_record_video.checkState() == Qt.Unchecked:
             self.start_record_video.setCheckState(Qt.Unchecked)
             self.start_record_video.setEnabled(True)
             self.video_type_edit.clear()
             self.video_name_edit.clear()
+            self.standard_time_edit.clear()
 
 
     # 按下确认按钮
@@ -111,6 +115,9 @@ class AddRecordTab(QWidget):
         if self.video_name_edit.text() != '':
             RecordAction.current_video_name = self.video_name_edit.text()
         self.info_dict[RecordAction.video_name] = RecordAction.current_video_name
+        if self.standard_time_edit.text() != '':
+            RecordAction.current_standard_time = self.standard_time_edit.text()
+        self.info_dict[RecordAction.standard_time] = RecordAction.current_standard_time
         if self.start_record_video.checkState() == Qt.Checked:
             self.info_dict[RecordAction.record_status] = RecordAction.record_start
         elif self.stop_record_video.checkState() == Qt.Checked:

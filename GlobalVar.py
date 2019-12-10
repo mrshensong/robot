@@ -176,9 +176,11 @@ class RecordAction:
     record_stop  = 'record_stop'
     video_type   = 'video_type'
     video_name   = 'video_name'
+    standard_time= 'standard_time'
     # 保存开始录像的控件中的(type/name信息)
     current_video_type = '启动'
     current_video_name = 'name'
+    current_standard_time = '800'
 
 # 延时相关操作
 class SleepAction:

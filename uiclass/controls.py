@@ -138,6 +138,8 @@ class RecordControl(QWidget):
         self.video_name = info_dict[RecordAction.video_name] + '.mp4'
         # 录像类型(record_start/record_stop)
         self.record_type = info_dict[RecordAction.record_status]
+        # 标准时间
+        self.standard_time = info_dict[RecordAction.standard_time]
         self.initUI()
         self.describe_record()
 
@@ -148,14 +150,15 @@ class RecordControl(QWidget):
         # 摄像机图标
         self.video_camera_label = QLabel(self)
         self.video_camera_label.setPixmap(QPixmap(IconPath.Icon_custom_video_camera))
-        # 显示视频名称
-        self.video_name_text = QLineEdit(self)
-        self.video_name_text.setReadOnly(True)
-        self.video_name_text.setText(self.video_name)
-        # 显示视频类型
-        self.video_type_text = QLineEdit(self)
-        self.video_type_text.setReadOnly(True)
-        self.video_type_text.setText(self.video_type)
+        # 显示视频类型和name(如:type/name.mp4)
+        self.video_type_and_name_text = QLineEdit(self)
+        self.video_type_and_name_text.setReadOnly(True)
+        text = self.video_type + '/' + self.video_name
+        self.video_type_and_name_text.setText(text)
+        # 显示视频标准时间
+        self.video_standard_time_text = QLineEdit(self)
+        self.video_standard_time_text.setReadOnly(True)
+        self.video_standard_time_text.setText('标准时间(ms): ' + self.standard_time)
         # 摄像机录像开始和停止text显示
         self.video_camera_status_text = QLineEdit(self)
         self.video_camera_status_text.setReadOnly(True)
@@ -175,8 +178,8 @@ class RecordControl(QWidget):
         self.delete_button.clicked.connect(self.record_delete_item)
         # 竖向布局
         self.v_box = QVBoxLayout()
-        self.v_box.addWidget(self.video_type_text)
-        self.v_box.addWidget(self.video_name_text)
+        self.v_box.addWidget(self.video_type_and_name_text)
+        self.v_box.addWidget(self.video_standard_time_text)
         self.v_box.addWidget(self.video_camera_status_text)
         # 横向布局
         self.h_box = QHBoxLayout()
