@@ -96,6 +96,7 @@ class ShowActionTab(QWidget):
         # # 取消竖向滚动条
         # self.list_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         v_box = QVBoxLayout()
+        v_box.setContentsMargins(0, 0, 0, 0)
         v_box.addLayout(h_box)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
