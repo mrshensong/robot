@@ -33,12 +33,14 @@ class AddTabWidget(QDialog):
         self.parent = parent
         self.widget = TabWidget(self)
         self.general_layout = QVBoxLayout()
+        self.general_layout.setContentsMargins(0, 0, 0, 0)
         self.general_layout.addWidget(self.widget)
         self.setLayout(self.general_layout)
         self.setWindowTitle('动作设置')
         self.widget.action_tab.signal[str].connect(self.recv_action_tab_signal)
         self.widget.record_tab.signal[str].connect(self.recv_record_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
+        self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(330)
 
 
