@@ -247,7 +247,7 @@ class SleepControl(QWidget):
         self.sleep_icon_label = QLabel(self)
         self.sleep_icon_label.setPixmap(QPixmap(IconPath.Icon_custom_sleep))
         # 延时text显示
-        status = 'sleep: ' + str(self.sleep_time)
+        status = 'sleep(s): ' + str(self.sleep_time)
         self.sleep_des_text = QLineEdit(self)
         self.sleep_des_text.setReadOnly(True)
         self.sleep_des_text.setText(status)

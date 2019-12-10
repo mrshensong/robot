@@ -83,6 +83,6 @@ class ConfigWithComment:
 if __name__ == '__main__':
     file_name = 'D:/Code/robot/config/config.ini'
     config = ConfigWithComment(file=file_name)
-    config.write_config_value(section='back', option='sad', value='1')
+    config.write_config_value(section='test', option='启动/高德地图', value='2000')
     # config.write_config_value(section='back', option='laugh', value='2')
     # config.write_config_value(section='param', option='use_external_camera', value='False')

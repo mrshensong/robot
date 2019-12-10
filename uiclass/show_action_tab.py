@@ -106,11 +106,11 @@ class ShowActionTab(QWidget):
     def connect_add_action_button(self):
         if GloVar.add_action_button_flag is True:
             MotionAction.add_action_flag = True
+            GloVar.add_action_window_opened_flag = True
             # 默认是单击动作
             RobotArmAction.uArm_action_type = RobotArmAction.uArm_click
             self.add_action_window.show()
             self.add_action_window.exec()
-            GloVar.add_action_window_opened_flag = True
         else:
             QMessageBox.about(self, "提示", "请先框选屏幕大小")
             return

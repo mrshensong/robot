@@ -1,8 +1,9 @@
 import json
+from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QLineEdit, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import RecordAction, Logger
+from GlobalVar import RecordAction, Logger, Profile, GloVar
 from uiclass.controls import SelectTemplateControl
 
 # 动作添加控件
@@ -142,6 +143,15 @@ class AddRecordTab(QWidget):
         else:
             Logger('[没有选择视频录像状态, 请重新选择!]')
             return
+        # 将标准时间写入配置文件
+        Thread(target=self.write_standard_time, args=()).start()
+        # 整理数据
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('record_tab_sure>' + signal)
+
+
+    def write_standard_time(self):
+        option = RecordAction.current_video_type + '/' + RecordAction.current_video_name
+        value = RecordAction.current_standard_time
+        Profile(type='write', file=GloVar.config_file_path, section='standard', option=option, value=value)
