@@ -5,7 +5,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill, colors
 from processdata.get_data_graph import GenerateDataGraph
 from processdata.get_report import GenerateReport
-from GlobalVar import MergePath, Logger, GloVar
+from GlobalVar import MergePath, Logger, GloVar, Profile
 
 
 class GetStartupTime:
@@ -202,8 +202,10 @@ class GetStartupTime:
         video_name_path_cut_list = video_name_path.split('/')
         new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
         end_mask = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.jpg'
-        # 标准耗时(单位/ms)
-        standard_time_gap = 800
+        # 通过读取配置文件获取标准耗时(单位/ms)
+        option = '/'.join(video_name_path_cut_list[-2:])
+        # standard_time_gap = 800
+        standard_time_gap = int(Profile(type='read', file=GloVar.config_file_path, section='standard', option=option).value)
         # 标准差帧
         standard_frame_gap = int(standard_time_gap / (1000 / 120))
         # 差帧总和 & 平均差帧
