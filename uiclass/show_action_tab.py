@@ -38,10 +38,6 @@ class ShowActionTab(QWidget):
         """
         # 用来计算当前list_widget中出现的视频次数编号-从零开始(根据序号来命名)
         self.video_numbers = -1
-        # 当前action的视频类型
-        self.current_video_type = 'test'
-        # 当前action的视频名字
-        self.current_video_name = 'test.mp4'
         # tab初始化
         self.action_tab_init()
 
@@ -319,13 +315,6 @@ class ShowActionTab(QWidget):
 
     # 添加video动作控件
     def add_record_item(self, info_dict, flag=True):
-        # 只有record_start的时候才证明新增record动作
-        if info_dict[RecordAction.record_status] == RecordAction.record_start:
-            self.current_video_type = info_dict[RecordAction.video_type]
-            self.current_video_name = info_dict[RecordAction.video_name]
-        # 重置视频type和name
-        info_dict[RecordAction.video_type] = self.current_video_type
-        info_dict[RecordAction.video_name] = self.current_video_name
         # 给video动作设置id
         self.index += 1
         item = QListWidgetItem()

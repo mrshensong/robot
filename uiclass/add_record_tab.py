@@ -39,12 +39,15 @@ class AddRecordTab(QWidget):
         # 视频类型
         self.video_type_edit = QLineEdit(self)
         self.video_type_edit.setPlaceholderText('默认(启动)')
+        self.video_type_edit.setEnabled(False)
         # 视频名称
         self.video_name_edit = QLineEdit(self)
         self.video_name_edit.setPlaceholderText('默认(name)')
+        self.video_name_edit.setEnabled(False)
         # 标准时间(用来判断测试时间是否在预期内)
         self.standard_time_edit = QLineEdit(self)
         self.standard_time_edit.setPlaceholderText('默认800(单位ms)')
+        self.standard_time_edit.setEnabled(False)
         # 表单布局
         self.from_layout.addRow('开始录制视频: ', self.start_record_video)
         self.from_layout.addRow('停止录制视频: ', self.stop_record_video)
@@ -74,33 +77,40 @@ class AddRecordTab(QWidget):
         if self.start_record_video.checkState() == Qt.Checked:
             self.stop_record_video.setCheckState(Qt.Unchecked)
             self.stop_record_video.setEnabled(False)
+            self.video_type_edit.setEnabled(True)
+            self.video_name_edit.setEnabled(True)
+            self.standard_time_edit.setEnabled(True)
+            RecordAction.current_video_type = '启动'
+            RecordAction.current_video_name = 'name'
         elif self.start_record_video.checkState() == Qt.Unchecked:
             self.stop_record_video.setCheckState(Qt.Unchecked)
             self.stop_record_video.setEnabled(True)
+            self.video_type_edit.setEnabled(False)
+            self.video_name_edit.setEnabled(False)
+            self.standard_time_edit.setEnabled(False)
 
 
     def connect_stop_record_video(self):
         if self.stop_record_video.checkState() == Qt.Checked:
             self.start_record_video.setCheckState(Qt.Unchecked)
             self.start_record_video.setEnabled(False)
+            self.video_type_edit.setText(RecordAction.current_video_type)
+            self.video_name_edit.setText(RecordAction.current_video_name)
         elif self.stop_record_video.checkState() == Qt.Unchecked:
             self.start_record_video.setCheckState(Qt.Unchecked)
             self.start_record_video.setEnabled(True)
+            self.video_type_edit.clear()
+            self.video_name_edit.clear()
 
 
     # 按下确认按钮
     def connect_sure(self):
-        if self.video_type_edit.text() is '':
-            self.info_dict[RecordAction.video_type] = '启动'
-        else:
-            self.info_dict[RecordAction.video_type] = self.video_type_edit.text()
-        if self.video_name_edit.text() is '':
-            self.info_dict[RecordAction.video_name] = 'name'
-        else:
-            if self.video_name_edit.text().endswith('.mp4') or self.video_name_edit.text().endswith('.MP4'):
-                self.info_dict[RecordAction.video_name] = self.video_name_edit.text().split('.')[0]
-            else:
-                self.info_dict[RecordAction.video_name] = self.video_name_edit.text()
+        if self.video_type_edit.text() != '':
+            RecordAction.current_video_type = self.video_type_edit.text()
+        self.info_dict[RecordAction.video_type] = RecordAction.current_video_type
+        if self.video_name_edit.text() != '':
+            RecordAction.current_video_name = self.video_name_edit.text()
+        self.info_dict[RecordAction.video_name] = RecordAction.current_video_name
         if self.start_record_video.checkState() == Qt.Checked:
             self.info_dict[RecordAction.record_status] = RecordAction.record_start
         elif self.stop_record_video.checkState() == Qt.Checked:
