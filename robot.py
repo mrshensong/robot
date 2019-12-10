@@ -333,46 +333,58 @@ class UiMainWindow(QMainWindow):
 
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
-    def recv_video_label_signal(self, info_str):
-        # 先将字符串转化为list
-        # 当list为两个元素时 : 第一个为点击动作类型, 第二个为点击动作坐标
-        # 当list为三个元素时 : 第一个为滑动动作类型, 第二个为起点坐标, 第三个为终止点坐标
-        info_list = eval(info_str)
-        # 如果是添加动作时, 不作操作(只添加动作)
-        if MotionAction.add_action_flag is True:
-            if info_list[0] in [RobotArmAction.uArm_click, RobotArmAction.uArm_double_click, RobotArmAction.uArm_long_click, RobotArmAction.uArm_slide]:
-                position_str = str(info_list[1])
-                position_tuple = info_list[1]
-            else: # 为了不让position_str有警告(无具体意义)
-                position_str = '0, 0'
-                position_tuple = (0.0, 0.0)
-            # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
-            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.points.setText(position_str)
-            self.show_tab_widget.action_tab.add_action_window.widget.action_tab.info_dict[MotionAction.points] = position_tuple
-            self.show_tab_widget.action_tab.add_action_window.setHidden(False)
-            MotionAction.add_action_flag = False
-        # 正常点击时会直接执行动作
+    def recv_video_label_signal(self, signal_str):
+        # 新建录像动作时的框选视频模板完成
+        if signal_str.startswith('draw_frame_finished>'):
+            # 视频流重新打开
+            # self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+            self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+            # 重新显示窗口(添加窗口中添加的动作才会重新显示, 其余情况不会)
+            if GloVar.add_action_window_opened_flag is True:
+                self.show_tab_widget.action_tab.add_action_window.setHidden(False)
+                # 显示模板路径
+                template_name = signal_str.split('draw_frame_finished>')[1]
+                self.show_tab_widget.action_tab.add_action_window.widget.record_tab.select_template.template_path.setText(template_name)
         else:
-            # 根据返回值形成info_dict字典
-            info_dict = {MotionAction.des_text: info_list[0],
-                         MotionAction.action_type: info_list[0],
-                         MotionAction.speed: 150,
-                         MotionAction.points: info_list[1],
-                         MotionAction.leave: 1,
-                         MotionAction.trigger: 0}
-            if GloVar.request_status is None:
-                Logger('[当前还有正在执行的动作, 请稍后执行!]')
-                return
-            # 脚本录制操作
-            if RobotArmAction.uArm_with_record is True:
-                self.show_tab_widget.action_tab.add_action_item(info_dict=info_dict)
-            info_dict['execute_action'] = 'motion_action'
-            info_dict['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
-            GloVar.post_info_list = []
-            GloVar.post_info_list.append('start')
-            GloVar.post_info_list.append(info_dict)
-            GloVar.post_info_list.append('stop')
-            Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
+            # 先将字符串转化为list
+            # 当list为两个元素时 : 第一个为点击动作类型, 第二个为点击动作坐标
+            # 当list为三个元素时 : 第一个为滑动动作类型, 第二个为起点坐标, 第三个为终止点坐标
+            info_list = eval(signal_str)
+            # 如果是添加动作时, 不作操作(只添加动作)
+            if MotionAction.add_action_flag is True:
+                if info_list[0] in [RobotArmAction.uArm_click, RobotArmAction.uArm_double_click, RobotArmAction.uArm_long_click, RobotArmAction.uArm_slide]:
+                    position_str = str(info_list[1])
+                    position_tuple = info_list[1]
+                else: # 为了不让position_str有警告(无具体意义)
+                    position_str = '0, 0'
+                    position_tuple = (0.0, 0.0)
+                # 添加动作取完坐标后, 需要在子窗口中添加坐标信息, 以及回传坐标信息
+                self.show_tab_widget.action_tab.add_action_window.widget.action_tab.points.setText(position_str)
+                self.show_tab_widget.action_tab.add_action_window.widget.action_tab.info_dict[MotionAction.points] = position_tuple
+                self.show_tab_widget.action_tab.add_action_window.setHidden(False)
+                MotionAction.add_action_flag = False
+            # 正常点击时会直接执行动作
+            else:
+                # 根据返回值形成info_dict字典
+                info_dict = {MotionAction.des_text: info_list[0],
+                             MotionAction.action_type: info_list[0],
+                             MotionAction.speed: 150,
+                             MotionAction.points: info_list[1],
+                             MotionAction.leave: 1,
+                             MotionAction.trigger: 0}
+                if GloVar.request_status is None:
+                    Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                    return
+                # 脚本录制操作
+                if RobotArmAction.uArm_with_record is True:
+                    self.show_tab_widget.action_tab.add_action_item(info_dict=info_dict)
+                info_dict['execute_action'] = 'motion_action'
+                info_dict['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+                GloVar.post_info_list = []
+                GloVar.post_info_list.append('start')
+                GloVar.post_info_list.append(info_dict)
+                GloVar.post_info_list.append('stop')
+                Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
 
 
     # 接收show_tab_widget的信号

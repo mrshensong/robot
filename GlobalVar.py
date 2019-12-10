@@ -43,6 +43,8 @@ class GloVar:
     data_process_finished_flag = False
     # 框选case中录像视频模板
     draw_frame_flag = False
+    # 添加动作打开标志位
+    add_action_window_opened_flag = False
 
 
 # Icon路径

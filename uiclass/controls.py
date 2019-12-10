@@ -532,3 +532,45 @@ class FrameRateAdjustControl(QDialog):
     # 重写关闭窗口时间
     def closeEvent(self, event):
         self.close()
+
+
+# 添加视频动作表单中的框选模板控件
+class SelectTemplateControl(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(SelectTemplateControl, self).__init__(parent)
+        self.parent = parent
+        self.initUI()
+
+
+    def initUI(self):
+        # 单选框
+        self.check_box = QCheckBox(self)
+        self.check_box.setCheckState(Qt.Unchecked)
+        self.check_box.stateChanged.connect(self.connect_check_box)
+        # 模板路径展示
+        self.template_path = QLineEdit(self)
+        self.template_path.setReadOnly(True)
+        self.template_path.setPlaceholderText('模板路径')
+        # 布局
+        self.h_box = QHBoxLayout()
+        self.h_box.setContentsMargins(0, 0, 0, 0)
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.template_path)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.h_box)
+
+
+    def connect_check_box(self):
+        if self.check_box.checkState() == Qt.Checked:
+            self.signal.emit('checked_check_box>')
+        elif self.check_box.checkState() == Qt.Unchecked:
+            self.signal.emit('unchecked_check_box>')
+
+
+    def clear(self):
+        self.check_box.setCheckState(Qt.Unchecked)
+        self.template_path.clear()
+        self.template_path.setPlaceholderText('模板路径')

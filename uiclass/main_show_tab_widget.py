@@ -34,8 +34,8 @@ class MainShowTabWidget(QTabWidget):
         self.addTab(self.text_tab, 'text')
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
-    def recv_video_tab_signal(self, info_str):
-        self.signal.emit(info_str)
+    def recv_video_tab_signal(self, signal_str):
+        self.signal.emit(signal_str)
 
 
 # 视频tab
@@ -83,6 +83,9 @@ class VideoTab(QWidget):
         elif signal_str.startswith('position_info>'):
             # 只传有效信息
             self.signal.emit(signal_str.split('position_info>')[1])
+        # 视频动作中的视频模板框选完成
+        elif signal_str.startswith('draw_frame_finished>'):
+            self.signal.emit(signal_str)
         else:
             pass
 

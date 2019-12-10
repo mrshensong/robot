@@ -110,6 +110,7 @@ class ShowActionTab(QWidget):
             RobotArmAction.uArm_action_type = RobotArmAction.uArm_click
             self.add_action_window.show()
             self.add_action_window.exec()
+            GloVar.add_action_window_opened_flag = True
         else:
             QMessageBox.about(self, "提示", "请先框选屏幕大小")
             return
@@ -407,6 +408,10 @@ class ShowActionTab(QWidget):
         elif signal_str.startswith('sleep_tab_sure>'):
             info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
             self.add_sleep_item(info_dict)
+        # 接收到框选模板信号
+        elif signal_str.startswith('select_template>'):
+            self.signal.emit('draw_frame>')
+        # 切换动作信号(点击/双击/长按/滑动)
         elif signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         else:

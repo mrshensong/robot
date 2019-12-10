@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab
 from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
-from GlobalVar import RobotArmAction, MotionAction
+from GlobalVar import RobotArmAction, MotionAction, GloVar
 
 class TabWidget(QTabWidget):
 
@@ -50,18 +50,25 @@ class AddTabWidget(QDialog):
         if signal_str.startswith('action_tab_get_points>'):
             self.setHidden(True)
         # 选择动作后需要改变动作标志
-        if signal_str.startswith('action_tab_action>'):
+        elif signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
         # 按下确认按钮
         elif signal_str.startswith('action_tab_sure>'):
             self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
             self.close()
 
 
     # 接收video_tab传来的信号
     def recv_record_tab_signal(self, signal_str):
-        if signal_str.startswith('record_tab_sure>'):
+        # 框选模板(隐藏当前窗口)
+        if signal_str.startswith('select_template'):
+            # 发送框选信号
             self.signal.emit(signal_str)
+            self.setHidden(True)
+        elif signal_str.startswith('record_tab_sure>'):
+            self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
             self.close()
 
 
@@ -69,6 +76,7 @@ class AddTabWidget(QDialog):
     def recv_sleep_tab_signal(self, signal_str):
         if signal_str.startswith('sleep_tab_sure>'):
             self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
             self.close()
 
 
@@ -95,10 +103,13 @@ class AddTabWidget(QDialog):
         # video_tab复位
         self.widget.record_tab.start_record_video.setCheckState(Qt.Unchecked)
         self.widget.record_tab.stop_record_video.setCheckState(Qt.Unchecked)
+        self.widget.record_tab.select_template.clear()
         self.widget.record_tab.video_type_edit.setText('')
         self.widget.record_tab.video_type_edit.setPlaceholderText('默认(启动)')
         self.widget.record_tab.video_name_edit.setText('')
         self.widget.record_tab.video_name_edit.setPlaceholderText('默认(name)')
+        self.widget.record_tab.standard_time_edit.setText('')
+        self.widget.record_tab.standard_time_edit.setPlaceholderText('默认800(单位ms)')
         # sleep_tab复位
         self.widget.sleep_tab.sleep_time_edit.setText('')
         self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('睡眠时间(单位:s)')

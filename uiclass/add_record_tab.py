@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QChe
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from GlobalVar import RecordAction, Logger
+from uiclass.controls import SelectTemplateControl
 
 # 动作添加控件
 class AddRecordTab(QWidget):
@@ -37,6 +38,10 @@ class AddRecordTab(QWidget):
         self.stop_record_video = QCheckBox(self)
         self.stop_record_video.setCheckState(Qt.Unchecked)
         self.stop_record_video.stateChanged.connect(self.connect_stop_record_video)
+        # 是否框选模板(数据处理需要的)
+        self.select_template = SelectTemplateControl(self)
+        self.select_template.signal[str].connect(self.connect_select_template)
+        self.select_template.setEnabled(False)
         # 视频类型
         self.video_type_edit = QLineEdit(self)
         self.video_type_edit.setPlaceholderText('默认(启动)')
@@ -52,6 +57,7 @@ class AddRecordTab(QWidget):
         # 表单布局
         self.from_layout.addRow('开始录制视频: ', self.start_record_video)
         self.from_layout.addRow('停止录制视频: ', self.stop_record_video)
+        self.from_layout.addRow('框选视频模板: ', self.select_template)
         self.from_layout.addRow('设置视频类型: ', self.video_type_edit)
         self.from_layout.addRow('设置视频名称: ', self.video_name_edit)
         self.from_layout.addRow('设置标准时间: ', self.standard_time_edit)
@@ -96,15 +102,26 @@ class AddRecordTab(QWidget):
         if self.stop_record_video.checkState() == Qt.Checked:
             self.start_record_video.setCheckState(Qt.Unchecked)
             self.start_record_video.setEnabled(False)
+            self.select_template.setEnabled(True)
             self.video_type_edit.setText(RecordAction.current_video_type)
             self.video_name_edit.setText(RecordAction.current_video_name)
             self.standard_time_edit.setText(RecordAction.current_standard_time)
         elif self.stop_record_video.checkState() == Qt.Unchecked:
             self.start_record_video.setCheckState(Qt.Unchecked)
             self.start_record_video.setEnabled(True)
+            self.select_template.setEnabled(False)
             self.video_type_edit.clear()
             self.video_name_edit.clear()
             self.standard_time_edit.clear()
+
+
+    def connect_select_template(self, signal_str):
+        if signal_str.startswith('checked_check_box'):
+            # 发送信号(隐藏当前窗口, 框选模板)
+            self.signal.emit('select_template>')
+        elif signal_str.startswith('unchecked_check_box'):
+            pass
+
 
 
     # 按下确认按钮

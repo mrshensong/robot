@@ -5,7 +5,7 @@ import time
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QPushButton, QFrame, QLabel, QSlider, QApplication, QInputDialog
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile
+from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile, RecordAction
 from uiclass.timer import Timer
 
 # 动作添加控件
@@ -934,7 +934,8 @@ class VideoLabel(QLabel):
                 if GloVar.draw_frame_flag is True:
                     # 接收模板路径
                     mask_path = GloVar.mask_path
-                    default_name = 'type-name'
+                    # default_name = 'type-name'
+                    default_name = RecordAction.current_video_type + '/' + RecordAction.current_video_name
                 else:
                     # 接收模板路径
                     mask_path = GloVar.mask_path
@@ -977,14 +978,14 @@ class VideoLabel(QLabel):
                     # 非数据处理情况
                     else:
                         # 如果输入的参数中带有'-'代表需要分级保存, 并需要新建文件夹
-                        if '-' in value:
+                        if '/' in value:
                             # 直播时的情况
                             if self.video_play_flag is False:
-                                folder_layer_count = len(value.split('-')) - 1
+                                folder_layer_count = len(value.split('/')) - 1
                                 if folder_layer_count == 1:
-                                    mask_path = MergePath([mask_path, value.split('-')[0]]).merged_path
+                                    mask_path = MergePath([mask_path, value.split('/')[0]]).merged_path
                                 elif folder_layer_count == 2:
-                                    mask_path = MergePath([mask_path, value.split('-')[0], value.split('-')[1]]).merged_path
+                                    mask_path = MergePath([mask_path, value.split('/')[0], value.split('/')[1]]).merged_path
                                 else:
                                     Logger('[输入的模板名称错误!]')
                                     return
@@ -1000,10 +1001,12 @@ class VideoLabel(QLabel):
                                     rect_image[0][2] = x0 // 10
                                     rect_image[0][3] = x1 // 10
                                     cut_img = rect_image
-                                    template_name = MergePath([mask_path, value.split('-')[-1] + '.jpg']).merged_path
+                                    template_name = MergePath([mask_path, value.split('/')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                                    # 视频动作中模板框选完成
+                                    self.signal.emit('draw_frame_finished>' + template_name)
                                 else:
-                                    template_name = MergePath([mask_path, value.split('-')[-1] + '.jpg']).merged_path
+                                    template_name = MergePath([mask_path, value.split('/')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                             # 本地视频播放的情况下
                             elif self.video_play_flag is True:
