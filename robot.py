@@ -16,6 +16,7 @@ from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
 from uarm_action.action import ArmAction
+from uiclass.controls import StatusBarControl
 
 
 class UiMainWindow(QMainWindow):
@@ -58,8 +59,9 @@ class UiMainWindow(QMainWindow):
         GloVar.project_video_path = MergePath(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
 
         # 显示窗口状态栏
+        self.status_bar_control = StatusBarControl(self)
         self.timer_window_status = Timer(frequent=3)
-        self.timer_window_status.timeSignal[str].connect(self.show_window_status)
+        self.timer_window_status.timeSignal[str].connect(self.status_bar_control.show_message)
         self.timer_window_status.start()
 
         self.setObjectName("MainWindow")
@@ -93,10 +95,7 @@ class UiMainWindow(QMainWindow):
         self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
         self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage(self.window_status_text)
-        # 状态栏颜色
-        # self.status_bar.setStyleSheet('color:green')
-        self.status_bar.setFont(QFont(self.font, 13))
+        self.status_bar.addWidget(self.status_bar_control)
         # 工具栏
         # 实时流工具栏
         self.live_video_toolbar = self.addToolBar('live_video_toolbar')
@@ -261,10 +260,11 @@ class UiMainWindow(QMainWindow):
 
     # 展示窗口状态栏
     def show_window_status(self):
-        self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
-                                  % (WindowStatus.robot_connect_status, WindowStatus.video_frame_rate,
-                                     WindowStatus.action_tab_status, WindowStatus.case_tab_status)
-        self.status_bar.showMessage(self.window_status_text)
+        pass
+        # self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
+        #                           % (WindowStatus.robot_connect_status, WindowStatus.video_frame_rate,
+        #                              WindowStatus.action_tab_status, WindowStatus.case_tab_status)
+        # self.status_bar.showMessage(self.window_status_text)
 
 
     # 视频播放框架

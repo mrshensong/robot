@@ -53,6 +53,8 @@ class IconPath:
     Icon_file       = 'config/Icon/other_icon/Icon.jpg'
     # 视频栏背景图标
     background_file = 'config/Icon/other_icon/background.jpg'
+    # 分割线图标
+    split_line_icon = 'config/Icon/other_icon/split_line.png'
     # 数据准备好的背景图
     data_is_ready_file = 'config/Icon/other_icon/data_is_ready.jpg'
     # 正在进行数据处理的时候的背景图片(688*500)

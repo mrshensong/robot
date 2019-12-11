@@ -111,6 +111,8 @@ class VideoLabel(QLabel):
 
         # label垂直布局
         self.label_v_layout = QVBoxLayout(self)
+        self.label_v_layout.setSpacing(0)
+        self.label_v_layout.setContentsMargins(0, 3, 0, 3)
         # button水平布局
         self.button_h_layout = QHBoxLayout(self)
         # 暂停按钮/空格键

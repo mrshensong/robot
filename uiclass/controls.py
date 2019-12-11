@@ -3,7 +3,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton, QFileDialog
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile
+from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile, WindowStatus
 
 # 自定义动作展示控件(action)
 class ActionControl(QWidget):
@@ -574,3 +574,53 @@ class SelectTemplateControl(QWidget):
         self.check_box.setCheckState(Qt.Unchecked)
         self.template_path.clear()
         self.template_path.setPlaceholderText('模板路径')
+
+
+# 窗口状态栏控件
+class StatusBarControl(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(StatusBarControl, self).__init__(parent)
+        self.parent = parent
+        self.initUI()
+
+
+    def initUI(self):
+        self.general_layout = QHBoxLayout(self)
+        # 分割线
+        self.split_line_control_1 = QToolButton(self)
+        self.split_line_control_1.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.split_line_control_2 = QToolButton(self)
+        self.split_line_control_2.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.split_line_control_3 = QToolButton(self)
+        self.split_line_control_3.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.split_line_control_4 = QToolButton(self)
+        self.split_line_control_4.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        # 展示信息
+        self.robot_connect_status_label = QLabel(self)
+        self.video_frame_rate_label = QLabel(self)
+        self.action_tab_status_label = QLabel(self)
+        self.case_tab_status_label = QLabel(self)
+        # 布局
+        self.general_layout.addWidget(self.split_line_control_1)
+        self.general_layout.addWidget(self.robot_connect_status_label)
+        self.general_layout.addWidget(self.split_line_control_2)
+        self.general_layout.addWidget(self.video_frame_rate_label)
+        self.general_layout.addWidget(self.split_line_control_3)
+        self.general_layout.addWidget(self.action_tab_status_label)
+        self.general_layout.addWidget(self.split_line_control_4)
+        self.general_layout.addWidget(self.case_tab_status_label)
+
+        # self.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.general_layout)
+        self.setFont(QFont('Times New Roman', 13))
+
+
+    # 展示信息
+    def show_message(self):
+        self.robot_connect_status_label.setText('[' + WindowStatus.robot_connect_status + ']')
+        self.video_frame_rate_label.setText('[' + WindowStatus.video_frame_rate + ']')
+        self.action_tab_status_label.setText('[' + WindowStatus.action_tab_status + ']')
+        self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
