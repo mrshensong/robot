@@ -94,8 +94,10 @@ class UiMainWindow(QMainWindow):
         # 状态栏 & 状态栏显示
         self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
+        self.status_bar.setContentsMargins(0, 0, 0, 0)
         self.setStatusBar(self.status_bar)
-        self.status_bar.addWidget(self.status_bar_control)
+        self.status_bar.addWidget(self.status_bar_control, 0)
+        # self.status_bar.addPermanentWidget()
         # 工具栏
         # 实时流工具栏
         self.live_video_toolbar = self.addToolBar('live_video_toolbar')

@@ -589,6 +589,7 @@ class StatusBarControl(QWidget):
 
     def initUI(self):
         self.general_layout = QHBoxLayout(self)
+        self.general_layout.setContentsMargins(0, 0, 0 , 0)
         # 分割线
         self.split_line_control_1 = QToolButton(self)
         self.split_line_control_1.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
@@ -603,15 +604,23 @@ class StatusBarControl(QWidget):
         self.video_frame_rate_label = QLabel(self)
         self.action_tab_status_label = QLabel(self)
         self.case_tab_status_label = QLabel(self)
+        # case执行状态
+        self.case_run_status_label = QLabel(self)
+        self.case_run_status_label.setText('程序状态: ')
         # 布局
         self.general_layout.addWidget(self.split_line_control_1)
         self.general_layout.addWidget(self.robot_connect_status_label)
+        self.general_layout.addSpacing(20)
         self.general_layout.addWidget(self.split_line_control_2)
         self.general_layout.addWidget(self.video_frame_rate_label)
+        self.general_layout.addSpacing(20)
         self.general_layout.addWidget(self.split_line_control_3)
         self.general_layout.addWidget(self.action_tab_status_label)
+        self.general_layout.addSpacing(20)
         self.general_layout.addWidget(self.split_line_control_4)
         self.general_layout.addWidget(self.case_tab_status_label)
+        self.general_layout.addStretch(1)
+        self.general_layout.addWidget(self.case_run_status_label)
 
         # self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.general_layout)
