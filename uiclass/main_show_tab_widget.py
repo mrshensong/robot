@@ -151,7 +151,7 @@ class PictureTab(QWidget):
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
-        self.general_layout.setContentsMargins(0, 0, 0, 0)
+        self.general_layout.setContentsMargins(0, 3, 0, 0)
         self.picture_h_layout = QHBoxLayout(self)
         self.button_h_layout = QHBoxLayout(self)
         # 打开文件按钮
@@ -304,7 +304,7 @@ class ReportTab(QWidget):
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
-        self.general_layout.setContentsMargins(0, 0, 0, 0)
+        self.general_layout.setContentsMargins(0, 3, 0, 0)
         self.title_h_layout = QHBoxLayout(self)
         self.report_h_layout = QHBoxLayout(self)
         # 显示html路径
@@ -396,7 +396,7 @@ class TextTab(QWidget):
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
-        self.general_layout.setContentsMargins(0, 0, 0, 0)
+        self.general_layout.setContentsMargins(0, 3, 0, 0)
         self.text_h_layout = QHBoxLayout(self)
         self.title_h_layout = QHBoxLayout(self)
         # 显示文本路径

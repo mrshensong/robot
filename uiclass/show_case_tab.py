@@ -65,7 +65,8 @@ class ShowCaseTab(QWidget):
         h_box.addStretch(1)
         self.list_widget = QListWidget()
         v_box = QVBoxLayout()
-        v_box.setContentsMargins(0, 0 , 0, 0)
+        # 左上右下
+        v_box.setContentsMargins(0, 5, 0, 0)
         v_box.addLayout(h_box)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)

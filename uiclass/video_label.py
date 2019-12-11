@@ -171,6 +171,7 @@ class VideoLabel(QLabel):
         self.label_video_title.setFont(QFont(self.font, 15))
         # 视频进度条
         self.video_progress_bar = QSlider(Qt.Horizontal, self)
+        self.video_progress_bar.setEnabled(False)
         self.video_progress_bar.valueChanged.connect(self.connect_video_progress_bar)
         # button布局管理
         self.button_h_layout.addStretch(1)
@@ -242,6 +243,8 @@ class VideoLabel(QLabel):
             self.timer_camera_image.stop()
             self.video_status = self.STATUS_INIT
             GloVar.select_template_flag = False
+            # 既不是直播也不是本地视频播放
+            self.video_play_flag = None
             self.setCursor(Qt.ArrowCursor)
             self.status_video_button.setStyleSheet('border-image: url(' + IconPath.Icon_player_play + ')')
             self.camera_status = self.camera_closed
