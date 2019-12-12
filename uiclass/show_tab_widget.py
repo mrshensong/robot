@@ -34,13 +34,18 @@ class ShowTabWidget(QTabWidget):
         # 添加action控件时候, 设置动作标志位
         if signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)
-        # 保存脚本
+        # 更新action脚本
         elif signal_str.startswith('write_script_tag>'):
             script_text = signal_str.split('write_script_tag>')[1]
             self.script_tab.setText(script_text)
-            # 保存完脚本后(重新导入当前case目录下的脚本)
-            if self.case_tab.script_path is not None:
-                self.case_tab.connect_import_button(path=self.case_tab.script_path)
+        # 保存case
+        elif signal_str.startswith('save_case>'):
+            script_text = signal_str.split('save_case>')[1]
+            self.script_tab.setText(script_text)
+            # 在case_tab加入新保存的case
+            self.case_tab.connect_import_button(case_file=self.action_tab.case_absolute_name)
+            self.case_tab.list_widget.setCurrentRow(0)
+            # self.case_tab.case_control_list[0].click()
         # 执行action
         elif signal_str.startswith('play_actions>'):
             self.signal.emit(signal_str)

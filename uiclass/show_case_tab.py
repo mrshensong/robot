@@ -33,7 +33,7 @@ class ShowCaseTab(QWidget):
         self.import_button.setShortcut('o')
         self.import_button.setToolTip('import')
         self.import_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_import + ')}')
-        self.import_button.clicked.connect(lambda: self.connect_import_button(None))
+        self.import_button.clicked.connect(lambda : self.connect_import_button(None))
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('select_all')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
@@ -73,39 +73,33 @@ class ShowCaseTab(QWidget):
 
 
     # 连接导入case按钮
-    def connect_import_button(self, path=None):
-        # 通过选择框导入case
-        if path is None:
+    def connect_import_button(self, case_file=None):
+        if case_file is None:
+            # 通过选择框导入case
             script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
-            case_folder = QFileDialog.getExistingDirectory(self, '选择case所在文件夹', script_path)
-            if case_folder:
-                # 将当前script路径保存到配置文件
+            files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)")
+            if ok:
+                # 如果打开路径和配置文件路径不一样, 就将当前script路径保存到配置文件
+                case_folder = os.path.split(files[0])[0]
                 if case_folder != script_path:
                     Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=case_folder)
-            else:
-                case_folder = None
-        # 直接通过参数导入case
-        else:
-            case_folder = path
-            if case_folder is None:
-                return
-        # 保存当前case所在路径
-        self.script_path = case_folder
-        # 导入case的具体操作
-        if case_folder is not None:
-            self.clear_all_items()
-            for home, dirs, files in os.walk(case_folder):
+                # 清除所有case
+                self.clear_all_items()
+                # 文件按照时间排序(倒序排列)
+                files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
                 for file in files:
-                    # 判断脚本文件(通过后缀名)
-                    (file_text, extension) = os.path.splitext(file)
-                    if extension in ['.xml', '.XML']:
-                        # 文件名列表, 包含完整路径
-                        case_file = MergePath([home, file]).merged_path
-                        # 将文件名传入
-                        self.add_item(case_file)
-            WindowStatus.case_tab_status = 'case路径>%s!' % case_folder
+                    self.add_item(file)
+                WindowStatus.case_tab_status = 'case路径>%s!' % case_folder
+            else:
+                Logger('没有选择case')
         else:
-            Logger('没有选择case所在文件夹')
+            files = self.case_file_list
+            files.insert(0, case_file)
+            self.clear_all_items()
+            # 文件按照时间排序(倒序排列)
+            files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
+            for file in files:
+                self.add_item(file)
 
 
     def connect_select_all_items(self):

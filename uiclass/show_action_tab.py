@@ -236,7 +236,8 @@ class ShowActionTab(QWidget):
                     script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
                     Logger('[保存的脚本标签名为]: %s' % filename[0])
-                    self.signal.emit('write_script_tag>' + script_tag)
+                    # 保存case命令
+                    self.signal.emit('save_case>' + script_tag)
                     WindowStatus.action_tab_status = '%s>已保存!' % self.case_absolute_name
                     self.des_text.setText(self.case_file_name)
                     GloVar.actions_saved_to_case = True
