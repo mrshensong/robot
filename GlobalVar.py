@@ -98,6 +98,7 @@ class IconPath:
     Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'
     Icon_custom_video_camera      = 'config/Icon/custom_widget_icon/video_camera.png'
     Icon_custom_sleep             = 'config/Icon/custom_widget_icon/sleep.png'
+    Icon_custom_case              = 'config/Icon/custom_widget_icon/case.png'
     Icon_tab_widget_add           = 'config/Icon/tab_widget_icon/add.png'
     Icon_tab_widget_delete        = 'config/Icon/tab_widget_icon/delete.png'
     Icon_tab_widget_up            = 'config/Icon/tab_widget_icon/up.png'

@@ -319,19 +319,30 @@ class CaseControl(QWidget):
         # case名
         case_name = self.case_file.split('/')[-1]
         self.case_name_edit = QLineEdit(self)
+        self.case_name_edit.setReadOnly(True)
         self.case_name_edit.setText(case_name)
+        # case图标
+        self.case_icon_label = QLabel(self)
+        self.case_icon_label.setPixmap(QPixmap(IconPath.Icon_custom_case))
         # 播放按钮
         self.play_button = QToolButton(self)
         self.play_button.setToolTip('play')
         self.play_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_play + ')}')
         self.play_button.clicked.connect(self.play_single_case)
+        # 删除按钮
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.delete_case)
 
         self.h_box = QHBoxLayout()
         self.h_box.addWidget(self.check_box)
-        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.case_icon_label)
         self.h_box.addWidget(self.case_name_edit)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
         self.setLayout(self.h_box)
-        self.setMaximumWidth(300)
+        self.setMaximumWidth(350)
 
 
     # 当前控件双击事件后(发送信号到父控件, 发送当前id)
@@ -344,6 +355,13 @@ class CaseControl(QWidget):
         # 每执行一次都需要获取当前时间(作为文件夹)
         GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         self.signal.emit('play_single_case>' + str(self.id))
+
+
+    # 删除单个case
+    def delete_case(self):
+        # 打印删除信息
+        Logger('删除case: %s' % self.case_file)
+        self.signal.emit('delete_case>' + str(self.id))
 
 
 # 相机参数调节控件
