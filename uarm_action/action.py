@@ -14,10 +14,10 @@ class ArmAction:
         self.swift = SwiftAPI(filters={'hwid': 'USB VID:PID=2341:0042'}, do_not_open=True)
         try:
             self.swift.connect()
-            WindowStatus.robot_connect_status = '机械臂连接成功!'
+            WindowStatus.robot_connect_status = '机械臂连接成功'
             Logger("机械臂连接成功  端口: {}".format(self.swift.port))
         except:
-            WindowStatus.robot_connect_status = '机械臂连接失败!'
+            WindowStatus.robot_connect_status = '机械臂连接失败'
             Logger("连接机械臂失败")
         self.swift.waiting_ready()
         self.swift.set_mode(0)

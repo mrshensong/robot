@@ -13,7 +13,7 @@ from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor, QPixmap
-from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton
+from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
 from uarm_action.action import ArmAction
 
@@ -282,21 +282,25 @@ class UiMainWindow(QMainWindow):
         self.case_tab_status_label = QLabel(self)
         self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
 
-        self.operating_status_icon = QLabel(self)
-        self.operating_status_icon.setText('执行状态:')
-        self.operating_status_label = QLabel(self)
-        self.operating_status_label.setText('[' + WindowStatus.operating_status + ']')
+        self.operating_status_icon = QToolButton(self)
+        self.operating_status_icon.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.operating_status_title = QLabel(self)
+        self.operating_status_title.setText('执行状态:')
+        self.operating_status_edit = QLineEdit(self)
+        self.operating_status_edit.setReadOnly(True)
+        self.operating_status_edit.setText(WindowStatus.operating_status)
 
         self.status_bar.addPermanentWidget(self.robot_connect_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.robot_connect_status_label, stretch=1)
+        self.status_bar.addPermanentWidget(self.robot_connect_status_label, stretch=2)
         self.status_bar.addPermanentWidget(self.video_frame_rate_icon, stretch=0)
         self.status_bar.addPermanentWidget(self.video_frame_rate_label, stretch=1)
         self.status_bar.addPermanentWidget(self.action_tab_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.action_tab_status_label, stretch=2)
+        self.status_bar.addPermanentWidget(self.action_tab_status_label, stretch=4)
         self.status_bar.addPermanentWidget(self.case_tab_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.case_tab_status_label, stretch=4)
+        self.status_bar.addPermanentWidget(self.case_tab_status_label, stretch=8)
         self.status_bar.addPermanentWidget(self.operating_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.operating_status_label, stretch=0)
+        self.status_bar.addPermanentWidget(self.operating_status_title, stretch=0)
+        self.status_bar.addPermanentWidget(self.operating_status_edit, stretch=0)
 
 
     # 展示窗口状态栏
@@ -305,7 +309,7 @@ class UiMainWindow(QMainWindow):
         self.video_frame_rate_label.setText('[' + WindowStatus.video_frame_rate + ']')
         self.action_tab_status_label.setText('[' + WindowStatus.action_tab_status + ']')
         self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
-        self.operating_status_label.setText('[' + WindowStatus.operating_status + ']')
+        self.operating_status_edit.setText(WindowStatus.operating_status)
 
 
     # 视频播放框架

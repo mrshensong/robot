@@ -105,7 +105,7 @@ class ShowCaseTab(QWidget):
                 files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
                 for file in files:
                     self.add_item(file)
-                WindowStatus.case_tab_status = 'case路径>%s!' % case_folder
+                WindowStatus.case_tab_status = 'case路径>%s' % case_folder
             else:
                 Logger('没有选择case')
         else:

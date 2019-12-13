@@ -148,7 +148,7 @@ class RobotArmParam:
 
 class WindowStatus:
     # 机械臂('机械臂连接成功!' / '机械臂连接失败!')
-    robot_connect_status = '机械臂未连接!'
+    robot_connect_status = '机械臂未连接'
     # 视频帧率
     video_frame_rate = '120fps'
     # action_tab页面
