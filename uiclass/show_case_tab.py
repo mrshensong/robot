@@ -78,6 +78,8 @@ class ShowCaseTab(QWidget):
         h_box.addWidget(self.execute_times_control)
         h_box.addStretch(1)
         self.list_widget = QListWidget()
+        self.list_widget.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
+        self.list_widget.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
         v_box = QVBoxLayout()
         # 左上右下
         v_box.setContentsMargins(0, 5, 0, 0)
@@ -107,13 +109,37 @@ class ShowCaseTab(QWidget):
             else:
                 Logger('没有选择case')
         else:
+            # 插入第一个并去重
             files = self.case_file_list
             files.insert(0, case_file)
+            files = list(set(files))
             self.clear_all_items()
             # 文件按照时间排序(倒序排列)
             files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
             for file in files:
                 self.add_item(file)
+
+
+    def connect_add_case_button(self):
+        # 通过选择框导入case
+        script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
+        files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)")
+        if ok:
+            # 如果打开路径和配置文件路径不一样, 就将当前script路径保存到配置文件
+            case_folder = os.path.split(files[0])[0]
+            if case_folder != script_path:
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=case_folder)
+            # 追加到case列表(需要去重)
+            files = self.case_file_list + files
+            files = list(set(files))
+            self.clear_all_items()
+            # 文件按照时间排序(倒序排列)
+            files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
+            for file in files:
+                self.add_item(file)
+            WindowStatus.case_tab_status = 'case路径>%s!' % case_folder
+        else:
+            Logger('没有选择case')
 
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
@@ -122,6 +148,11 @@ class ShowCaseTab(QWidget):
         index = len(self.case_control_list) - 1
         # 通过判断剩余item数量, 来确定是否需要更改‘全选’按键状态
         exist_items_count = index + 1
+        # 获取到第一个删除项的下一项case名字(重写这一项就不会出现文本框选中现象)
+        get_rewrite_case_name_flag = False
+        # 重写case名字
+        rewrite_case_name = None
+        # 使用循环删除掉选中的case
         while True:
             if exist_items_count < 1:
                 # 全部删除后需要复位全部选中按钮的状态
@@ -135,10 +166,23 @@ class ShowCaseTab(QWidget):
             # 未遍历完item, 判断是否选中
             else:
                 if self.case_control_list[index].check_box.checkState() == Qt.Checked:
+                    if index < (len(self.case_control_list)-1) and get_rewrite_case_name_flag is False:
+                        get_rewrite_case_name_flag = True
+                        # 获取当前选中的下一项
+                        rewrite_case_name = self.case_file_list[index + 1]
                     # 模拟点击case中的单独delete按钮(稳定)
                     self.case_control_list[index].delete_button.click()
                     exist_items_count -= 1
             index -= 1
+        if rewrite_case_name is not None:
+            time.sleep(0.01)
+            try: # 此处有可能产生异常(直接跳过即可)
+                current_row = self.case_file_list.index(rewrite_case_name)
+                print('...........', current_row, rewrite_case_name)
+                text = self.case_control_list[current_row].case_name_edit.text()
+                self.case_control_list[current_row].case_name_edit.setText(text)
+            except:
+                pass
 
 
     def connect_delete_selected_items(self):
@@ -147,27 +191,6 @@ class ShowCaseTab(QWidget):
             pass
         else:
             Thread(target=self.delete_selected_items, args=()).start()
-
-
-    def connect_add_case_button(self):
-        # 通过选择框导入case
-        script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
-        files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)")
-        if ok:
-            # 如果打开路径和配置文件路径不一样, 就将当前script路径保存到配置文件
-            case_folder = os.path.split(files[0])[0]
-            if case_folder != script_path:
-                Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=case_folder)
-            # 追加
-            files = self.case_file_list + files
-            self.clear_all_items()
-            # 文件按照时间排序(倒序排列)
-            files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
-            for file in files:
-                self.add_item(file)
-            WindowStatus.case_tab_status = 'case路径>%s!' % case_folder
-        else:
-            Logger('没有选择case')
 
 
     def connect_select_all_items(self):
@@ -350,7 +373,7 @@ class ShowCaseTab(QWidget):
         obj.signal[str].connect(self.recv_case_control_signal)
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
-        self.item_list.append(obj)
+        self.item_list.append(item)
         self.case_control_list.append(obj)
         self.case_file_list.append(case_file)
 
