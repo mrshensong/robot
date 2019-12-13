@@ -148,7 +148,7 @@ class ShowCaseTab(QWidget):
         index = len(self.case_control_list) - 1
         # 通过判断剩余item数量, 来确定是否需要更改‘全选’按键状态
         exist_items_count = index + 1
-        # 获取到第一个删除项的下一项case名字(重写这一项就不会出现文本框选中现象)
+        # 获取到第一个删除项的下一项case名字(重写这一项就不会出现文本框选中现象, 不然会出现文本框选中现象)
         get_rewrite_case_name_flag = False
         # 重写case名字
         rewrite_case_name = None
@@ -178,7 +178,6 @@ class ShowCaseTab(QWidget):
             time.sleep(0.01)
             try: # 此处有可能产生异常(直接跳过即可)
                 current_row = self.case_file_list.index(rewrite_case_name)
-                print('...........', current_row, rewrite_case_name)
                 text = self.case_control_list[current_row].case_name_edit.text()
                 self.case_control_list[current_row].case_name_edit.setText(text)
             except:

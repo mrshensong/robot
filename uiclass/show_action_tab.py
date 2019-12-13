@@ -123,6 +123,10 @@ class ShowActionTab(QWidget):
         index = len(self.custom_control_list) - 1
         # 通过判断剩余item数量, 来确定是否需要更改‘全选’按键状态
         exist_items_count = index + 1
+        # 获取到第一个删除项的下一项info(重写这一项就不会出现文本框选中现象, 不然会出现文本框选中现象)
+        get_rewrite_info_flag = False
+        # 重写case名字
+        rewrite_info = None
         while True:
             if exist_items_count < 1:
                 # 全部删除后需要复位全部选中按钮的状态
@@ -139,10 +143,29 @@ class ShowActionTab(QWidget):
             # 未遍历完item, 判断是否选中
             else:
                 if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
+                    if index < (len(self.custom_control_list)-1) and get_rewrite_info_flag is False:
+                        get_rewrite_info_flag = True
+                        # 获取当前选中项的下一项info
+                        rewrite_info = self.info_list[index + 1]
                     # 模拟点击action中的单独delete按钮(稳定)
                     self.custom_control_list[index].delete_button.click()
                     exist_items_count -= 1
             index -= 1
+        if rewrite_info is not None:
+            time.sleep(0.01)
+            try:
+                current_row = self.info_list.index(rewrite_info)
+                if 'action_type' in rewrite_info:
+                    text = self.custom_control_list[current_row].des_line_edit.text()
+                    self.custom_control_list[current_row].des_line_edit.setText(text)
+                elif 'record_status' in rewrite_info:
+                    text = self.custom_control_list[current_row].video_type_and_name_text.text()
+                    self.custom_control_list[current_row].video_type_and_name_text.setText(text)
+                elif 'sleep_time' in rewrite_info:
+                    text = self.custom_control_list[current_row].sleep_des_text.text()
+                    self.custom_control_list[current_row].sleep_des_text.setText(text)
+            except:
+                pass
 
 
     # 删除工具栏操作(delete_button)
