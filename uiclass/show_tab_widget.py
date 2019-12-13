@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTabWidget, QMessageBox
+from PyQt5.QtWidgets import QTabWidget, QMessageBox, QFrame
 from PyQt5.QtCore import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
@@ -27,6 +27,10 @@ class ShowTabWidget(QTabWidget):
         self.addTab(self.script_tab, text_tab)
         # 调整背景颜色
         # self.setStyleSheet('background-color:#DDDDDD;')
+        self.setContentsMargins(0, 0, 0, 0)
+        # 准备添加一个底部横线
+        # self.bottom_h_line = QFrame(self)
+        # self.bottom_h_line.setFrameShape(QFrame.HLine)
 
 
     # 接收从action_tab窗口传来的信号

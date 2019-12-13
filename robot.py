@@ -12,11 +12,10 @@ from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
-from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter
+from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor, QPixmap
+from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
 from uarm_action.action import ArmAction
-from uiclass.controls import StatusBarControl
 
 
 class UiMainWindow(QMainWindow):
@@ -59,9 +58,8 @@ class UiMainWindow(QMainWindow):
         GloVar.project_video_path = MergePath(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
 
         # 显示窗口状态栏
-        self.status_bar_control = StatusBarControl(self)
         self.timer_window_status = Timer(frequent=3)
-        self.timer_window_status.timeSignal[str].connect(self.status_bar_control.show_message)
+        self.timer_window_status.timeSignal[str].connect(self.show_window_status)
         self.timer_window_status.start()
 
         self.setObjectName("MainWindow")
@@ -74,6 +72,8 @@ class UiMainWindow(QMainWindow):
         self.central_widget = QWidget(self)
         self.central_widget.setObjectName("central_widget")
         self.setCentralWidget(self.central_widget)
+        # self.central_widget.setContentsMargins(0, 0, 0, 0)
+        # self.setContentsMargins(0, 0, 0, 0)
 
         ## 定义UI 字体 和 字号大小
         self.setFont(QFont(self.font, 13))
@@ -96,8 +96,6 @@ class UiMainWindow(QMainWindow):
         self.status_bar.setObjectName('status_bar')
         self.status_bar.setContentsMargins(0, 0, 0, 0)
         self.setStatusBar(self.status_bar)
-        self.status_bar.addWidget(self.status_bar_control, 0)
-        # self.status_bar.addPermanentWidget()
         # 工具栏
         # 实时流工具栏
         self.live_video_toolbar = self.addToolBar('live_video_toolbar')
@@ -119,10 +117,12 @@ class UiMainWindow(QMainWindow):
         # 菜单栏
         self.menu_bar_show()
         # 工具栏
-        self.tool_bar()
-
+        self.tool_bar_show()
+        # 状态栏
+        self.status_bar_show()
         # 全局竖直布局
         self.general_v_layout = QVBoxLayout(self.central_widget)
+        self.general_v_layout.setContentsMargins(0, 0, 0, 0)
         # 分割窗口布局
         self.splitter_h_general = QSplitter(Qt.Horizontal)
         self.splitter_h_general.setHandleWidth(0)
@@ -165,7 +165,7 @@ class UiMainWindow(QMainWindow):
 
 
     # 工具栏
-    def tool_bar(self):
+    def tool_bar_show(self):
         # 实时流相关action
         self.live_video_toolbar_label = QLabel(self)
         self.live_video_toolbar_label.setText('实时流:')
@@ -260,13 +260,52 @@ class UiMainWindow(QMainWindow):
         self.live_video_setting_action.setEnabled(False)
 
 
+    # 状态栏
+    def status_bar_show(self):
+        self.robot_connect_status_icon = QToolButton(self)
+        self.robot_connect_status_icon.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.robot_connect_status_label = QLabel(self)
+        self.robot_connect_status_label.setText('[' + WindowStatus.robot_connect_status + ']')
+
+        self.video_frame_rate_icon = QToolButton(self)
+        self.video_frame_rate_icon.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.video_frame_rate_label = QLabel(self)
+        self.video_frame_rate_label.setText('[' + WindowStatus.video_frame_rate + ']')
+
+        self.action_tab_status_icon = QToolButton(self)
+        self.action_tab_status_icon.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.action_tab_status_label = QLabel(self)
+        self.action_tab_status_label.setText('[' + WindowStatus.action_tab_status + ']')
+
+        self.case_tab_status_icon = QToolButton(self)
+        self.case_tab_status_icon.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
+        self.case_tab_status_label = QLabel(self)
+        self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
+
+        self.operating_status_icon = QLabel(self)
+        self.operating_status_icon.setText('执行状态:')
+        self.operating_status_label = QLabel(self)
+        self.operating_status_label.setText('[' + WindowStatus.operating_status + ']')
+
+        self.status_bar.addPermanentWidget(self.robot_connect_status_icon, stretch=0)
+        self.status_bar.addPermanentWidget(self.robot_connect_status_label, stretch=1)
+        self.status_bar.addPermanentWidget(self.video_frame_rate_icon, stretch=0)
+        self.status_bar.addPermanentWidget(self.video_frame_rate_label, stretch=1)
+        self.status_bar.addPermanentWidget(self.action_tab_status_icon, stretch=0)
+        self.status_bar.addPermanentWidget(self.action_tab_status_label, stretch=2)
+        self.status_bar.addPermanentWidget(self.case_tab_status_icon, stretch=0)
+        self.status_bar.addPermanentWidget(self.case_tab_status_label, stretch=4)
+        self.status_bar.addPermanentWidget(self.operating_status_icon, stretch=0)
+        self.status_bar.addPermanentWidget(self.operating_status_label, stretch=0)
+
+
     # 展示窗口状态栏
     def show_window_status(self):
-        pass
-        # self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
-        #                           % (WindowStatus.robot_connect_status, WindowStatus.video_frame_rate,
-        #                              WindowStatus.action_tab_status, WindowStatus.case_tab_status)
-        # self.status_bar.showMessage(self.window_status_text)
+        self.robot_connect_status_label.setText('[' + WindowStatus.robot_connect_status + ']')
+        self.video_frame_rate_label.setText('[' + WindowStatus.video_frame_rate + ']')
+        self.action_tab_status_label.setText('[' + WindowStatus.action_tab_status + ']')
+        self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
+        self.operating_status_label.setText('[' + WindowStatus.operating_status + ']')
 
 
     # 视频播放框架
