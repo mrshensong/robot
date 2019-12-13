@@ -151,6 +151,11 @@ class ShowActionTab(QWidget):
                     self.custom_control_list[index].delete_button.click()
                     exist_items_count -= 1
             index -= 1
+        # 全部删除后需要复位全部选中按钮的状态
+        self.select_all_flag = False
+        self.select_all_button.setToolTip('select_all')
+        self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
+        # 处理出现的选中文本框
         if rewrite_info is not None:
             time.sleep(0.01)
             try:
