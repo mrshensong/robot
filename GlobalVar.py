@@ -5,6 +5,8 @@ from other.operate_config import ConfigWithComment
 class GloVar:
     # 配置文件路径
     config_file_path = 'config/config.ini'
+    # 摄像头校正模型路径
+    correction_model_path = 'config/calibrate_1600x1000.npz'
     # 当前工程根目录
     project_path = None
     # 当前工程产生视频目录

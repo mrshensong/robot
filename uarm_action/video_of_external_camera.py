@@ -38,7 +38,7 @@ class ExternalCameraVideo:
         # 视频名称(桌面滑动)
         self.case_name = None
         # 畸变矫正相关参数
-        npz_file = np.load('uarm_action/calibrate_1600x1000.npz')
+        npz_file = np.load(GloVar.correction_model_path)
         # npz_file = np.load('calibrate.npz')
         self.mtx = npz_file['mtx']
         self.dist = npz_file['dist']
