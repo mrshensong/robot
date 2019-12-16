@@ -5,7 +5,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill, colors
 from processdata.get_data_graph import GenerateDataGraph
 from processdata.get_report import GenerateReport
-from GlobalVar import MergePath, Logger, GloVar, Profile
+from GlobalVar import MergePath, Logger, GloVar, Profile, WindowStatus
 
 
 class GetStartupTime:
@@ -434,6 +434,7 @@ class GetStartupTime:
         # # 生成html并保存
         self.get_report(report_path=self.report_path, case_data_dict=case_data_dict)
         Logger('data process finished!')
+        WindowStatus.operating_status = '空闲状态/测试结束'
 
 
 if __name__=='__main__':

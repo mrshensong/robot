@@ -156,7 +156,7 @@ class WindowStatus:
     # case_tab页面
     case_tab_status = '没有打开case目录'
     # 运行状态
-    operating_status = '空闲'
+    operating_status = '空闲状态/可以使用'
 
 
 # action相关操作

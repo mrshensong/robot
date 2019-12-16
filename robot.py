@@ -44,10 +44,6 @@ class UiMainWindow(QMainWindow):
         GloVar.project_picture_path = self.picture_path
         # 视频所在的路径
         self.videos_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='videos_path').value
-        # 窗口状态栏显示的固定格式
-        self.window_status_text = '机械臂:[%s];    视频帧率:[%s];    action_tab页面:[%s];    case_tab页面:[%s]' \
-                                  % (WindowStatus.robot_connect_status, WindowStatus.video_frame_rate,
-                                     WindowStatus.action_tab_status, WindowStatus.case_tab_status)
         # 如果需要检测, 数据处理需要用到的模板, 是否准备完成(True:确认需要检测/False:退出检测)
         self.need_detect_data_flag = False
         # 今天的日期(用作文件夹名)
@@ -286,21 +282,20 @@ class UiMainWindow(QMainWindow):
         self.operating_status_icon.setStyleSheet('QToolButton{border-image: url(' + IconPath.split_line_icon + ')}')
         self.operating_status_title = QLabel(self)
         self.operating_status_title.setText('执行状态:')
-        self.operating_status_edit = QLineEdit(self)
-        self.operating_status_edit.setReadOnly(True)
-        self.operating_status_edit.setText(WindowStatus.operating_status)
+        self.operating_status_label = QLabel(self)
+        self.operating_status_label.setText(WindowStatus.operating_status)
 
         self.status_bar.addPermanentWidget(self.robot_connect_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.robot_connect_status_label, stretch=2)
+        self.status_bar.addPermanentWidget(self.robot_connect_status_label, stretch=0)
         self.status_bar.addPermanentWidget(self.video_frame_rate_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.video_frame_rate_label, stretch=1)
-        self.status_bar.addPermanentWidget(self.action_tab_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.action_tab_status_label, stretch=4)
+        self.status_bar.addPermanentWidget(self.video_frame_rate_label, stretch=0)
         self.status_bar.addPermanentWidget(self.case_tab_status_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.case_tab_status_label, stretch=8)
+        self.status_bar.addPermanentWidget(self.case_tab_status_label, stretch=0)
+        self.status_bar.addPermanentWidget(self.action_tab_status_icon, stretch=0)
+        self.status_bar.addPermanentWidget(self.action_tab_status_label, stretch=1)
         self.status_bar.addPermanentWidget(self.operating_status_icon, stretch=0)
         self.status_bar.addPermanentWidget(self.operating_status_title, stretch=0)
-        self.status_bar.addPermanentWidget(self.operating_status_edit, stretch=0)
+        self.status_bar.addPermanentWidget(self.operating_status_label, stretch=0)
 
 
     # 展示窗口状态栏
@@ -309,7 +304,7 @@ class UiMainWindow(QMainWindow):
         self.video_frame_rate_label.setText('[' + WindowStatus.video_frame_rate + ']')
         self.action_tab_status_label.setText('[' + WindowStatus.action_tab_status + ']')
         self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
-        self.operating_status_edit.setText(WindowStatus.operating_status)
+        self.operating_status_label.setText(WindowStatus.operating_status)
 
 
     # 视频播放框架
@@ -436,9 +431,11 @@ class UiMainWindow(QMainWindow):
     def recv_show_tab_widget_signal(self, signal_str):
         # 执行选中所有动作动作
         if signal_str.startswith('play_actions>'):
+            WindowStatus.operating_status = '使用状态/执行动作中...'
             Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
         # 执行一条case动作
         elif signal_str.startswith('play_single_case>'):
+            WindowStatus.operating_status = '使用状态/执行动作中...'
             Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
         # 添加action控件时候, 设置动作标志位
         elif signal_str.startswith('action_tab_action>'):
@@ -457,12 +454,18 @@ class UiMainWindow(QMainWindow):
         elif signal_str.startswith('test_finished>'):
             # 调用视频处理函数
             if GloVar.video_process_switch == 'ON':
+                # 产生的视频路径
+                video_path = MergePath([GloVar.project_video_path, GloVar.current_time]).merged_path
+                # 视频路径不存在(即没有产生视频, 不用进行数据处理)
+                if os.path.exists(video_path) is False:
+                    Logger('此次测试没有产生视频, 不用进行数据处理!')
+                    return
                 Logger('此次测试完成, 开始进行数据处理!')
+                WindowStatus.operating_status = '使用状态/数据处理中...'
                 # 暂停视频流(减小CPU占用, 数据处理可以更快)
                 self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
                 self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
                 # 此处调用数据处理函数
-                video_path = MergePath([GloVar.project_video_path, GloVar.current_time]).merged_path
                 test = GetStartupTime(video_path=video_path)
                 Thread(target=test.data_processing, args=()).start()
             # 打印测试结束信息

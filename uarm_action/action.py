@@ -238,6 +238,7 @@ class ArmAction:
                     Logger('[选中的actions执行结束]')
                 else:
                     Logger('[执行结束case] : %s' % description)
+                WindowStatus.operating_status = '空闲状态/动作执行结束'
         GloVar.request_status = 'ok'
         # else:
         #     return HttpResponse("data error")
