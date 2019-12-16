@@ -225,7 +225,7 @@ class ShowCaseTab(QWidget):
                             time.sleep(0.002)
                         # 执行每一条case后cpu休息一秒钟
                         time.sleep(1)
-        # 测试执行结束(改变标志位)
+        # 测试执行结束(改变标志位, 触发数据处理函数)
         while True:
             if GloVar.request_status == 'ok':
                 self.signal.emit('test_finished>')
