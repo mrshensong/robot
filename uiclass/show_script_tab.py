@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from GlobalVar import GloVar
 
 
 class ShowScriptTab(QTextEdit):
@@ -14,4 +15,4 @@ class ShowScriptTab(QTextEdit):
         # self.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.setWordWrapMode(QTextOption.NoWrap)
         self.setStyleSheet('background-color:#C0D8F0')
-        self.setFont(QFont('Times New Roman', 13))
+        self.setFont(QFont(GloVar.font, 13))

@@ -16,6 +16,10 @@ class MainShowTabWidget(QTabWidget):
     def __init__(self, parent, camera_width, camera_height):
         super(MainShowTabWidget, self).__init__(parent)
         self.parent = parent
+        self.setFont(QFont(GloVar.font, 13))
+        self.setTabsClosable(True)
+        self.setStyleSheet('QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + ');}')
+        self.tabCloseRequested.connect(self.close_tab)
         # 标签位置放在底部
         # self.setTabPosition(self.South)
         # 视频页
@@ -36,6 +40,11 @@ class MainShowTabWidget(QTabWidget):
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_tab_signal(self, signal_str):
         self.signal.emit(signal_str)
+
+    # 关闭标签页(需要判断)
+    def close_tab(self):
+        index = self.currentIndex()
+        print(index)
 
 
 # 视频tab
@@ -142,6 +151,7 @@ class PictureTab(QWidget):
     def __init__(self, parent):
         super(PictureTab, self).__init__(parent)
         self.parent = parent
+        self.setFont(QFont(GloVar.font, 13))
         self.picture_path = None
         self.picture_size_width = None
         self.picture_size_height = None
@@ -183,9 +193,11 @@ class PictureTab(QWidget):
         # 显示图片路径
         self.picture_path_label = QLabel(self)
         self.picture_path_label.setText('None')
+        self.picture_path_label.setFont(QFont(GloVar.font, 13))
         # 显示照片尺寸
         self.picture_size_label = QLabel(self)
         self.picture_size_label.setText('size: [0:0], zoom: [1.0X]')
+        self.picture_size_label.setFont(QFont(GloVar.font, 13))
 
         self.button_h_layout.addWidget(self.open_file_button)
         self.button_h_layout.addWidget(self.zoom_button)
@@ -298,6 +310,7 @@ class ReportTab(QWidget):
     def __init__(self, parent):
         super(ReportTab, self).__init__(parent)
         self.parent = parent
+        self.setFont(QFont(GloVar.font, 13))
         self.report_path = None
         self.initUI()
 
@@ -311,6 +324,7 @@ class ReportTab(QWidget):
         self.html_path_label = QLabel(self)
         self.html_path_label.setMaximumHeight(25)
         self.html_path_label.setText('None')
+        self.html_path_label.setFont(QFont(GloVar.font, 13))
         # 打开文件按钮
         self.open_file_button = QToolButton()
         # 打开文件快捷键
@@ -390,6 +404,7 @@ class TextTab(QWidget):
     def __init__(self, parent):
         super(TextTab, self).__init__(parent)
         self.parent = parent
+        self.setFont(QFont(GloVar.font, 13))
         self.text_path = None
         self.initUI()
 
@@ -402,6 +417,7 @@ class TextTab(QWidget):
         # 显示文本路径
         self.text_path_label = QLabel(self)
         self.text_path_label.setText('None')
+        self.text_path_label.setFont(QFont(GloVar.font, 13))
 
         # 打开文件按钮
         self.open_file_button = QToolButton()

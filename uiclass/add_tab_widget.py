@@ -22,7 +22,7 @@ class TabWidget(QTabWidget):
         self.addTab(self.record_tab, video_tab)
         self.addTab(self.sleep_tab, sleep_tab)
         # 设置字体
-        self.setFont(QFont('Times New Roman', 11))
+        self.setFont(QFont(GloVar.font, 11))
 
 class AddTabWidget(QDialog):
 

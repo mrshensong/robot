@@ -435,7 +435,7 @@ class CameraParamAdjustControl(QDialog):
         self.general_layout.addLayout(self.sure_button_layout)
         self.setLayout(self.general_layout)
         # 设置字体
-        self.setFont(QFont('Times New Roman', 11))
+        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setFixedWidth(500)
@@ -526,7 +526,7 @@ class FrameRateAdjustControl(QDialog):
 
         self.setLayout(self.general_layout)
         # 设置字体
-        self.setFont(QFont('Times New Roman', 11))
+        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setWindowTitle('离线视频帧率参数')

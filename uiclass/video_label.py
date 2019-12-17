@@ -17,7 +17,7 @@ class VideoLabel(QLabel):
         super(VideoLabel, self).__init__(parent)
         self.parent = parent
         # 使用字体
-        self.font = 'Times New Roman'
+        self.font = GloVar.font
         # 鼠标拖动的起始和终止x/y
         self.x0, self.y0, self.x1, self.y1 = 0, 0, 0, 0
         # 鼠标是否按下标志

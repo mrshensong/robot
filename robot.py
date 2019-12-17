@@ -19,8 +19,6 @@ from uarm_action.action import ArmAction
 
 
 class UiMainWindow(QMainWindow):
-    # 字体 'Microsoft YaHei'
-    font = 'Times New Roman'
     # icon文件
     icon_file = IconPath.Icon_file
     # background文件
@@ -72,7 +70,7 @@ class UiMainWindow(QMainWindow):
         # self.setContentsMargins(0, 0, 0, 0)
 
         ## 定义UI 字体 和 字号大小
-        self.setFont(QFont(self.font, 13))
+        self.setFont(QFont(GloVar.font, 13))
         # 设置UI背景颜色为灰色
         # self.central_widget.setStyleSheet('background-color:lightgrey')
         # 视频播放框架
@@ -166,7 +164,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_toolbar_label = QLabel(self)
         self.live_video_toolbar_label.setText('实时流:')
         self.live_video_toolbar_label.setStyleSheet('color:blue')
-        self.live_video_toolbar_label.setFont(QFont(self.font, 13))
+        self.live_video_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.live_video_setting_action               = QAction(QIcon(IconPath.Icon_live_video_setting), 'setting', self)
         self.live_video_switch_camera_status_action  = QAction(QIcon(IconPath.Icon_live_video_open_camera), 'open_camera', self)
         self.live_video_capture_action               = QAction(QIcon(IconPath.Icon_live_video_capture), 'capture', self)
@@ -180,7 +178,7 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar_label = QLabel(self)
         self.robot_toolbar_label.setText('机械臂:')
         self.robot_toolbar_label.setStyleSheet('color:blue')
-        self.robot_toolbar_label.setFont(QFont(self.font, 13))
+        self.robot_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.robot_click_action        = QAction(QIcon(IconPath.Icon_robot_click), 'click', self)
         self.robot_double_click_action = QAction(QIcon(IconPath.Icon_robot_double_click), 'double_click', self)
         self.robot_long_click_action   = QAction(QIcon(IconPath.Icon_robot_long_click), 'long_click', self)
@@ -202,7 +200,7 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar_label = QLabel(self)
         self.local_video_toolbar_label.setText('本地视频:')
         self.local_video_toolbar_label.setStyleSheet('color:blue')
-        self.local_video_toolbar_label.setFont(QFont(self.font, 13))
+        self.local_video_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.local_video_import_video_action = QAction(QIcon(IconPath.Icon_local_import_video), 'import_video', self)
         self.local_video_setting_action      = QAction(QIcon(IconPath.Icon_local_video_setting), 'setting', self)
         self.local_video_setting_action.setEnabled(False)
@@ -213,7 +211,7 @@ class UiMainWindow(QMainWindow):
         self.data_process_toolbar_label = QLabel(self)
         self.data_process_toolbar_label.setText('数据处理:')
         self.data_process_toolbar_label.setStyleSheet('color:blue')
-        self.data_process_toolbar_label.setFont(QFont(self.font, 13))
+        self.data_process_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.data_process_import_video_action = QAction(QIcon(IconPath.Icon_data_process_import_video), 'import_video', self)
         self.data_process_setting_action      = QAction(QIcon(IconPath.Icon_data_process_setting), 'setting', self)
         self.data_process_execute_action      = QAction(QIcon(IconPath.Icon_data_process_execute), 'execute', self)

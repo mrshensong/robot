@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import SleepAction
+from GlobalVar import SleepAction, GloVar
 
 # 动作添加控件
 class AddSleepTab(QWidget):
@@ -44,7 +44,7 @@ class AddSleepTab(QWidget):
 
         self.setLayout(self.general_layout)
         # 设置字体
-        self.setFont(QFont('Times New Roman', 11))
+        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(300)
 

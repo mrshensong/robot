@@ -3,6 +3,8 @@ from other.operate_config import ConfigWithComment
 
 # 文件之间参数传递
 class GloVar:
+    # 字体 'Microsoft YaHei'
+    font = 'Times New Roman'
     # 配置文件路径
     config_file_path = 'config/config.ini'
     # 摄像头校正模型路径
