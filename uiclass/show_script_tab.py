@@ -11,6 +11,7 @@ class ShowScriptTab(QTextEdit):
     def __init__(self, parent):
         super(ShowScriptTab, self).__init__(parent)
         self.parent = parent
+        self.setStyleSheet('font-family : %s; font-size: 13pt' % GloVar.font)
         self.setReadOnly(True)
         # self.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.setWordWrapMode(QTextOption.NoWrap)

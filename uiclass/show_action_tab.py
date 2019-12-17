@@ -3,6 +3,7 @@ import time
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
@@ -15,6 +16,7 @@ class ShowActionTab(QWidget):
     def __init__(self, parent):
         super(ShowActionTab, self).__init__(parent)
         self.parent = parent
+        self.setStyleSheet('font-family : %s; font-size: 13pt' % GloVar.font)
         self.index = -1
         # 自定义控件列表
         self.custom_control_list = []

@@ -18,7 +18,14 @@ class MainShowTabWidget(QTabWidget):
         self.parent = parent
         self.setFont(QFont(GloVar.font, 13))
         self.setTabsClosable(True)
-        self.setStyleSheet('QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + ');}')
+        # 样式设置
+        style_sheet = 'QTabWidget:pane{ border: 1px solid red; top: -1px;}\
+                       QTabBar::tab{height:22px; margin-right: 2px; margin-bottom:-2px;}\
+                       QTabBar::tab:selected{border:1px solid red; background-color:white; border-bottom-color: none;}\
+                       QTabBar::tab:!selected{border-bottom: 3px solid red;}\
+                       QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + '); subcontrol-position: bottom right;}'
+        self.setStyleSheet(style_sheet)
+        # 关闭tab触发事件
         self.tabCloseRequested.connect(self.close_tab)
         # 标签位置放在底部
         # self.setTabPosition(self.South)

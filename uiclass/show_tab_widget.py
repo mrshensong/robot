@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QTabWidget, QMessageBox, QFrame
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
 from uiclass.show_script_tab import ShowScriptTab
@@ -12,7 +13,14 @@ class ShowTabWidget(QTabWidget):
     def __init__(self, parent, action_tab='action', case_tab='case', text_tab='edit'):
         super(ShowTabWidget, self).__init__(parent)
         self.parent = parent
+        self.setFont(QFont(GloVar.font, 13))
         self.setTabPosition(self.South)
+        # 样式设置
+        style_sheet = 'QTabWidget:pane{ border: 1px solid red; top: -1px;}\
+                       QTabBar::tab{height:22px; margin-right: 2px; margin-bottom:-2px;}\
+                       QTabBar::tab:selected{border:1px solid red; background-color:white; border-bottom-color: none;}\
+                       QTabBar::tab:!selected{border-bottom: 3px solid red;}'
+        self.setStyleSheet(style_sheet)
         # tab1
         self.action_tab = ShowActionTab(self)  # 1
         self.action_tab.signal[str].connect(self.recv_action_tab_signal)
