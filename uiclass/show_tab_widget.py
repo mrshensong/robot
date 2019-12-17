@@ -16,7 +16,8 @@ class ShowTabWidget(QTabWidget):
         self.setFont(QFont(GloVar.font, 13))
         self.setTabPosition(self.South)
         # 样式设置
-        style_sheet = 'QTabWidget:pane{ border: 1px; top: -1px;}\
+        style_sheet = 'QTabWidget:pane{ border: 2px; top: -1px;}\
+                       QTabWidget:tab-bar{alignment:right;}\
                        QTabBar::tab{height:25px; margin-right: 0px; margin-bottom:-3px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-top: 2px solid blue;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}'
@@ -39,7 +40,6 @@ class ShowTabWidget(QTabWidget):
         # 准备添加一个底部横线
         # self.bottom_h_line = QFrame(self)
         # self.bottom_h_line.setFrameShape(QFrame.HLine)
-
 
     # 接收从action_tab窗口传来的信号
     def recv_action_tab_signal(self, signal_str):

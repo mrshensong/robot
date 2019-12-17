@@ -34,10 +34,13 @@ class MainShowTabWidget(QTabWidget):
         self.video_tab.signal[str].connect(self.recv_video_tab_signal)
         # 照片页
         self.picture_tab = PictureTab(self)
+        self.picture_tab.signal[str].connect(self.recv_picture_tab_signal)
         # 报告页
         self.report_tab = ReportTab(self)
+        self.report_tab.signal[str].connect(self.recv_report_tab_signal)
         # text页面
         self.text_tab = TextTab(self)
+        self.text_tab.signal[str].connect(self.recv_text_tab_signal)
 
         self.addTab(self.video_tab, 'video')
         self.addTab(self.picture_tab, 'picture')
@@ -46,6 +49,18 @@ class MainShowTabWidget(QTabWidget):
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_tab_signal(self, signal_str):
+        self.signal.emit(signal_str)
+
+    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    def recv_picture_tab_signal(self, signal_str):
+        self.signal.emit(signal_str)
+
+    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    def recv_report_tab_signal(self, signal_str):
+        self.signal.emit(signal_str)
+
+    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    def recv_text_tab_signal(self, signal_str):
         self.signal.emit(signal_str)
 
     # 关闭标签页(需要判断)
@@ -139,6 +154,7 @@ class VideoTab(QWidget):
 
 
     def resizeEvent(self, event):
+        self.signal.emit('resize>')
         # 实时流窗口缩放
         if self.video_label.video_play_flag is False:
             self.video_label_adaptive(self.video_label.real_time_video_width, self.video_label.real_time_video_height)
@@ -308,6 +324,9 @@ class PictureTab(QWidget):
         self.picture_size_label.setText('size: [%d:%d], zoom: [1.0X]' % (self.picture_size_width, self.picture_size_height))
         self.picture_zoom_scale = 1.0
 
+    def resizeEvent(self, event):
+        self.signal.emit('resize>')
+
 
 # 报告tab
 class ReportTab(QWidget):
@@ -401,6 +420,9 @@ class ReportTab(QWidget):
         self.html_path_label.setText(self.report_path)
         # 加载本地html文件
         self.html_show_text.load(QUrl('file:///' + self.report_path))
+
+    def resizeEvent(self, event):
+        self.signal.emit('resize>')
 
 
 # 文本tab
@@ -531,3 +553,6 @@ class TextTab(QWidget):
         # self.text_show_text.setText(text)
         # 展示纯文本(不会渲染html)
         self.text_show_text.setPlainText(text)
+
+    def resizeEvent(self, event):
+        self.signal.emit('resize>')

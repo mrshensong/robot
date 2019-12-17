@@ -116,7 +116,7 @@ class UiMainWindow(QMainWindow):
         self.status_bar_show()
         # 全局竖直布局
         self.general_v_layout = QVBoxLayout(self.central_widget)
-        self.general_v_layout.setContentsMargins(0, 0, 0, 0)
+        self.general_v_layout.setContentsMargins(1, 0, 0, 0)
         # 分割窗口布局
         self.splitter_h_general = QSplitter(Qt.Horizontal)
         self.splitter_h_general.setHandleWidth(0)
@@ -383,6 +383,11 @@ class UiMainWindow(QMainWindow):
                 # 显示模板路径
                 template_name = signal_str.split('draw_frame_finished>')[1]
                 self.show_tab_widget.action_tab.add_action_window.widget.record_tab.select_template.template_path.setText(template_name)
+        # 窗口尺寸变化
+        elif signal_str.startswith('resize>'):
+            # 调整show_tab_widget的tab_bar栏
+            self.adjust_show_tab_widget()
+        # 动作信息传送
         else:
             # 先将字符串转化为list
             # 当list为两个元素时 : 第一个为点击动作类型, 第二个为点击动作坐标
@@ -844,6 +849,20 @@ class UiMainWindow(QMainWindow):
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
             self.live_video_switch_camera_status_action.setToolTip('open_camera')
             self.main_show_tab_widget.video_tab.video_label.data_process_finished()
+
+
+    # 调整show_tab_widget的tab_bar栏
+    def adjust_show_tab_widget(self):
+        width = self.show_tab_widget.width() - 5
+        tab_count = self.show_tab_widget.count()
+        tab_width = int(width / tab_count)
+        # 样式设置
+        style_sheet = 'QTabWidget:pane{ border: 2px; top: -1px;}\
+                       QTabWidget:tab-bar{alignment:right;}\
+                       QTabBar::tab{height:25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:-3px;}\
+                       QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-top: 2px solid blue;}\
+                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}'
+        self.show_tab_widget.setStyleSheet(style_sheet)
 
 
     '''以下重写窗口事件'''
