@@ -20,6 +20,7 @@ class MainShowTabWidget(QTabWidget):
         self.setTabsClosable(True)
         # 样式设置
         style_sheet = 'QTabWidget:pane{ border: 1px; top: -1px;}\
+                       QTabWidget:tab-bar{top: 0px; alignment:left;}\
                        QTabBar::tab{height:25px; margin-right: 0px; margin-bottom:-3px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-bottom: 5px solid blue;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\

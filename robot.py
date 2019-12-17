@@ -137,7 +137,7 @@ class UiMainWindow(QMainWindow):
         self.splitter_v_part_2.setStretchFactor(1, 3)
         self.splitter_h_general.addWidget(self.splitter_v_part_1)
         self.splitter_h_general.addWidget(self.splitter_v_part_2)
-        self.splitter_h_general.setStretchFactor(0, 6)
+        self.splitter_h_general.setStretchFactor(0, 4)
         self.splitter_h_general.setStretchFactor(1, 13)
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
@@ -857,9 +857,9 @@ class UiMainWindow(QMainWindow):
         tab_count = self.show_tab_widget.count()
         tab_width = int(width / tab_count)
         # 样式设置
-        style_sheet = 'QTabWidget:pane{ border: 2px; top: -1px;}\
+        style_sheet = 'QTabWidget:pane{ border: 2px; top: 0px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment:right;}\
-                       QTabBar::tab{height:25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:-3px;}\
+                       QTabBar::tab{height:25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-top: 2px solid blue;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}'
         self.show_tab_widget.setStyleSheet(style_sheet)

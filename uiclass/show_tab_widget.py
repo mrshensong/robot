@@ -15,13 +15,6 @@ class ShowTabWidget(QTabWidget):
         self.parent = parent
         self.setFont(QFont(GloVar.font, 13))
         self.setTabPosition(self.South)
-        # 样式设置
-        style_sheet = 'QTabWidget:pane{ border: 2px; top: -1px;}\
-                       QTabWidget:tab-bar{alignment:right;}\
-                       QTabBar::tab{height:25px; margin-right: 0px; margin-bottom:-3px;}\
-                       QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-top: 2px solid blue;}\
-                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}'
-        self.setStyleSheet(style_sheet)
         # tab1
         self.action_tab = ShowActionTab(self)  # 1
         self.action_tab.signal[str].connect(self.recv_action_tab_signal)
