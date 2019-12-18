@@ -880,7 +880,7 @@ class UiMainWindow(QMainWindow):
         style_sheet = 'QTabWidget:pane{ border: 2px; top: 0px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment: right;}\
                        QTabBar::tab{height: 25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
-                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: blue; background-color: white; border-top: 2px solid blue;}\
+                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: #0099FF; background-color: white; border-top: 2px solid #0099FF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
         self.show_tab_widget.setStyleSheet(style_sheet)

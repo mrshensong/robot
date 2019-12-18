@@ -22,7 +22,7 @@ class MainShowTabWidget(QTabWidget):
         style_sheet = 'QTabWidget:pane{ border: 1px; top: -1px;}\
                        QTabWidget:tab-bar{top: 0px; alignment:left;}\
                        QTabBar::tab{height: 25px; margin-right: 0px; margin-bottom:-3px; padding-left: 5px; padding-right: 5px;}\
-                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: blue; background-color: white; border-bottom: 5px solid blue;}\
+                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: #0099FF; background-color: white; border-bottom: 5px solid #0099FF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}\
                        QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + '); subcontrol-position: bottom right;}\
