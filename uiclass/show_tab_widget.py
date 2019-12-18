@@ -42,11 +42,15 @@ class ShowTabWidget(QTabWidget):
         # 更新action脚本
         elif signal_str.startswith('write_script_tag>'):
             script_text = signal_str.split('write_script_tag>')[1]
-            self.script_tab.setText(script_text)
+            script_title = script_text.split('"')[1] if script_text else '空白'
+            self.script_tab.script_edit.setText(script_text)
+            self.script_tab.script_title.setText(script_title)
         # 保存case
         elif signal_str.startswith('save_case>'):
             script_text = signal_str.split('save_case>')[1]
-            self.script_tab.setText(script_text)
+            script_title = script_text.split('"')[1] if script_text else '空白'
+            self.script_tab.script_edit.setText(script_text)
+            self.script_tab.script_title.setText(script_title)
             # 在case_tab加入新保存的case
             self.case_tab.connect_import_button(case_file=self.action_tab.case_absolute_name)
             self.case_tab.list_widget.setCurrentRow(0)
