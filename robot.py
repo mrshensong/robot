@@ -859,9 +859,9 @@ class UiMainWindow(QMainWindow):
         tab_width = int(width / tab_count)
         # 样式设置
         style_sheet = 'QTabWidget:pane{ border: 2px; top: 0px; bottom: 0px;}\
-                       QTabWidget:tab-bar{alignment:right;}\
-                       QTabBar::tab{height:25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
-                       QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-top: 2px solid blue;}\
+                       QTabWidget:tab-bar{alignment: right;}\
+                       QTabBar::tab{height: 25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
+                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: blue; background-color: white; border-top: 2px solid blue;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}'
         self.show_tab_widget.setStyleSheet(style_sheet)
 

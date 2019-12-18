@@ -21,8 +21,8 @@ class MainShowTabWidget(QTabWidget):
         # 样式设置
         style_sheet = 'QTabWidget:pane{ border: 1px; top: -1px;}\
                        QTabWidget:tab-bar{top: 0px; alignment:left;}\
-                       QTabBar::tab{height:25px; margin-right: 0px; margin-bottom:-3px;}\
-                       QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-bottom: 5px solid blue;}\
+                       QTabBar::tab{height: 25px; margin-right: 0px; margin-bottom:-3px; padding-left: 5px; padding-right: 5px;}\
+                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: blue; background-color: white; border-bottom: 5px solid blue;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + '); subcontrol-position: bottom right;}\
                        QTabBar::close-button:hover {image: url(' + IconPath.Icon_main_tab_widget_close_tab_hover + ');}'
@@ -48,6 +48,10 @@ class MainShowTabWidget(QTabWidget):
         self.addTab(self.picture_tab, 'picture')
         self.addTab(self.report_tab, 'report')
         self.addTab(self.text_tab, 'text')
+        # 设置video栏不可关闭
+        self.tabBar().setTabButton(0, QTabBar.RightSide, None)
+        # 设置自动不显示tab(tab数量小于2个的时候)
+        self.tabBar().setAutoHide(True)
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_tab_signal(self, signal_str):
@@ -66,9 +70,9 @@ class MainShowTabWidget(QTabWidget):
         self.signal.emit(signal_str)
 
     # 关闭标签页(需要判断)
-    def close_tab(self):
-        index = self.currentIndex()
-        print(index)
+    def close_tab(self, index):
+        self.removeTab(index)
+        print('当前剩余tab: ', self.count())
 
 
 # 视频tab
