@@ -135,7 +135,7 @@ class UiMainWindow(QMainWindow):
         self.splitter_v_part_2.addWidget(self.main_show_tab_widget)
         self.splitter_v_part_2.addWidget(self.console)
         self.splitter_v_part_2.setStretchFactor(0, 4)
-        self.splitter_v_part_2.setStretchFactor(1, 3)
+        self.splitter_v_part_2.setStretchFactor(1, 2)
         self.splitter_h_general.addWidget(self.splitter_v_part_1)
         self.splitter_h_general.addWidget(self.splitter_v_part_2)
         self.splitter_h_general.setStretchFactor(0, 4)
@@ -490,7 +490,9 @@ class UiMainWindow(QMainWindow):
             picture_tab.signal[str].connect(self.main_show_tab_widget.recv_picture_tab_signal)
             self.main_show_tab_widget.addTab(picture_tab, picture_title)
             self.main_show_tab_widget.setCurrentWidget(picture_tab)
-            # self.main_show_tab_widget.setTabToolTip()
+            # 设置ToolTip提示
+            index = self.main_show_tab_widget.indexOf(picture_tab)
+            self.main_show_tab_widget.setTabToolTip(index, picture_path)
         # 打开报告(同时打开报告页面和文本页面)
         elif signal_str.startswith('open_report>'):
             # 新建report_tab
@@ -500,6 +502,9 @@ class UiMainWindow(QMainWindow):
             report_tab.signal[str].connect(self.main_show_tab_widget.recv_report_tab_signal)
             self.main_show_tab_widget.addTab(report_tab, report_title)
             self.main_show_tab_widget.setCurrentWidget(report_tab)
+            # 设置ToolTip提示
+            index = self.main_show_tab_widget.indexOf(report_tab)
+            self.main_show_tab_widget.setTabToolTip(index, report_path)
         # 打开文本
         elif signal_str.startswith('open_text>'):
             # 新建text_tab
@@ -509,6 +514,9 @@ class UiMainWindow(QMainWindow):
             text_tab.signal[str].connect(self.main_show_tab_widget.recv_text_tab_signal)
             self.main_show_tab_widget.addTab(text_tab, text_title)
             self.main_show_tab_widget.setCurrentWidget(text_tab)
+            # 设置ToolTip提示
+            index = self.main_show_tab_widget.indexOf(text_tab)
+            self.main_show_tab_widget.setTabToolTip(index, text_path)
 
 
     '''以下内容为实时流工具栏相关操作'''
@@ -873,7 +881,8 @@ class UiMainWindow(QMainWindow):
                        QTabWidget:tab-bar{alignment: right;}\
                        QTabBar::tab{height: 25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; color: blue; background-color: white; border-top: 2px solid blue;}\
-                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}'
+                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
+                       QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
         self.show_tab_widget.setStyleSheet(style_sheet)
 
 
