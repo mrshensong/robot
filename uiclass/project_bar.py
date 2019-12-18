@@ -38,6 +38,7 @@ class ProjectBar(QWidget):
         self.tree.doubleClicked.connect(lambda : self.operation_file(None))
 
         self.info_label = QLineEdit(self)
+        self.info_label.setReadOnly(True)
         self.info_label.setText(self.path)
 
         self.v_layout = QVBoxLayout()

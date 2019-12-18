@@ -71,6 +71,7 @@ class ShowActionTab(QWidget):
         self.draw_frame_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_draw_frame + ')}')
         self.draw_frame_button.clicked.connect(self.connect_draw_frame)
         self.des_text = QLineEdit()
+        self.des_text.setReadOnly(True)
         self.des_text.setMaximumWidth(200)
         self.des_text.setText('空白')
 
