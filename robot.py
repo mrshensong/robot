@@ -16,6 +16,7 @@ from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
 from uarm_action.action import ArmAction
+from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
 
 
 class UiMainWindow(QMainWindow):
@@ -482,22 +483,32 @@ class UiMainWindow(QMainWindow):
     def recv_project_bar_signal(self, signal_str):
         # 打开图片
         if signal_str.startswith('open_picture>'):
-            self.main_show_tab_widget.picture_tab.picture_path = signal_str.split('open_picture>')[1]
-            # 自动跳转到picture页面
-            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.picture_tab)
-            self.main_show_tab_widget.picture_tab.show_picture()
+            # 新建picture_tab
+            picture_path = signal_str.split('open_picture>')[1]
+            picture_title = os.path.split(picture_path)[1]
+            picture_tab = PictureTab(self.main_show_tab_widget, picture_path)
+            picture_tab.signal[str].connect(self.main_show_tab_widget.recv_picture_tab_signal)
+            self.main_show_tab_widget.addTab(picture_tab, picture_title)
+            self.main_show_tab_widget.setCurrentWidget(picture_tab)
+            # self.main_show_tab_widget.setTabToolTip()
         # 打开报告(同时打开报告页面和文本页面)
         elif signal_str.startswith('open_report>'):
-            self.main_show_tab_widget.report_tab.report_path = signal_str.split('open_report>')[1]
-            # 自动跳转到report页面
-            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.report_tab)
-            self.main_show_tab_widget.report_tab.show_html()
+            # 新建report_tab
+            report_path = signal_str.split('open_report>')[1]
+            report_title = os.path.split(report_path)[1]
+            report_tab = ReportTab(self.main_show_tab_widget, report_path)
+            report_tab.signal[str].connect(self.main_show_tab_widget.recv_report_tab_signal)
+            self.main_show_tab_widget.addTab(report_tab, report_title)
+            self.main_show_tab_widget.setCurrentWidget(report_tab)
         # 打开文本
         elif signal_str.startswith('open_text>'):
-            self.main_show_tab_widget.text_tab.text_path = signal_str.split('open_text>')[1]
-            # 自动跳到text页面
-            self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.text_tab)
-            self.main_show_tab_widget.text_tab.show_text()
+            # 新建text_tab
+            text_path = signal_str.split('open_text>')[1]
+            text_title = os.path.split(text_path)[1]
+            text_tab = TextTab(self.main_show_tab_widget, text_path)
+            text_tab.signal[str].connect(self.main_show_tab_widget.recv_text_tab_signal)
+            self.main_show_tab_widget.addTab(text_tab, text_title)
+            self.main_show_tab_widget.setCurrentWidget(text_tab)
 
 
     '''以下内容为实时流工具栏相关操作'''

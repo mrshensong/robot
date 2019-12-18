@@ -34,20 +34,8 @@ class MainShowTabWidget(QTabWidget):
         # 视频页
         self.video_tab = VideoTab(self, camera_width=camera_width, camera_height=camera_height)  # 1
         self.video_tab.signal[str].connect(self.recv_video_tab_signal)
-        # 照片页
-        self.picture_tab = PictureTab(self)
-        self.picture_tab.signal[str].connect(self.recv_picture_tab_signal)
-        # 报告页
-        self.report_tab = ReportTab(self)
-        self.report_tab.signal[str].connect(self.recv_report_tab_signal)
-        # text页面
-        self.text_tab = TextTab(self)
-        self.text_tab.signal[str].connect(self.recv_text_tab_signal)
-
+        # QTabWidget默认只有视频页
         self.addTab(self.video_tab, 'video')
-        self.addTab(self.picture_tab, 'picture')
-        self.addTab(self.report_tab, 'report')
-        self.addTab(self.text_tab, 'text')
         # 设置video栏不可关闭
         self.tabBar().setTabButton(0, QTabBar.RightSide, None)
         # 设置自动不显示tab(tab数量小于2个的时候)
@@ -57,22 +45,22 @@ class MainShowTabWidget(QTabWidget):
     def recv_video_tab_signal(self, signal_str):
         self.signal.emit(signal_str)
 
-    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    # 图片标签控件接收函数(接收到信息后需要进行的操作)
     def recv_picture_tab_signal(self, signal_str):
         self.signal.emit(signal_str)
 
-    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    # 报告标签控件接收函数(接收到信息后需要进行的操作)
     def recv_report_tab_signal(self, signal_str):
         self.signal.emit(signal_str)
 
-    # 视频标签控件接收函数(接收到信息后需要进行的操作)
+    # 文本标签控件接收函数(接收到信息后需要进行的操作)
     def recv_text_tab_signal(self, signal_str):
         self.signal.emit(signal_str)
 
     # 关闭标签页(需要判断)
     def close_tab(self, index):
         self.removeTab(index)
-        print('当前剩余tab: ', self.count())
+        # print('当前剩余tab: ', self.count())
 
 
 # 视频tab
@@ -177,15 +165,16 @@ class PictureTab(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, picture_path):
         super(PictureTab, self).__init__(parent)
         self.parent = parent
         self.setFont(QFont(GloVar.font, 13))
-        self.picture_path = None
+        self.picture_path = picture_path
         self.picture_size_width = None
         self.picture_size_height = None
         self.picture_zoom_scale = 1.0
         self.initUI()
+        self.show_picture()
 
 
     def initUI(self):
@@ -339,12 +328,13 @@ class ReportTab(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, report_path):
         super(ReportTab, self).__init__(parent)
         self.parent = parent
         self.setFont(QFont(GloVar.font, 13))
-        self.report_path = None
+        self.report_path = report_path
         self.initUI()
+        self.show_html()
 
 
     def initUI(self):
@@ -436,12 +426,13 @@ class TextTab(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, text_path):
         super(TextTab, self).__init__(parent)
         self.parent = parent
         self.setFont(QFont(GloVar.font, 13))
-        self.text_path = None
+        self.text_path = text_path
         self.initUI()
+        self.show_text()
 
 
     def initUI(self):
