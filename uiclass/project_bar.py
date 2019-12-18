@@ -35,7 +35,7 @@ class ProjectBar(QWidget):
         self.tree.setHeaderHidden(True)
         self.tree.setRootIndex(self.model.index(self.path))
         self.tree.clicked.connect(self.show_info)
-        self.tree.doubleClicked.connect(self.operation_file)
+        self.tree.doubleClicked.connect(lambda : self.operation_file(None))
 
         self.info_label = QLineEdit(self)
         self.info_label.setText(self.path)
@@ -58,9 +58,12 @@ class ProjectBar(QWidget):
 
 
     # 双击操作
-    def operation_file(self):
-        index = self.tree.currentIndex()
-        file_path = self.model.filePath(index)
+    def operation_file(self, file_path=None):
+        if file_path is None:
+            index = self.tree.currentIndex()
+            file_path = self.model.filePath(index)
+        else:
+            file_path = file_path
         # 判断双击是否为文件(只对文件操作)
         if os.path.isfile(file_path) is True:
             # 展示图片

@@ -36,7 +36,7 @@ class MainShowTabWidget(QTabWidget):
         self.video_tab = VideoTab(self, camera_width=camera_width, camera_height=camera_height)  # 1
         self.video_tab.signal[str].connect(self.recv_video_tab_signal)
         # QTabWidget默认只有视频页
-        self.addTab(self.video_tab, 'video')
+        self.addTab(self.video_tab, '*-video-*')
         # 设置video栏不可关闭
         self.tabBar().setTabButton(0, QTabBar.RightSide, None)
         # 设置自动不显示tab(tab数量小于2个的时候)

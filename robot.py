@@ -85,6 +85,11 @@ class UiMainWindow(QMainWindow):
         # 菜单栏
         self.menu_bar = QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')
+        # 设置菜单栏样式
+        menu_style = 'QMenu::item {background-color: transparent; padding-left: 5px; padding-right: 5px;}\
+                      QMenu::item:selected {background-color: #2dabf9;}'
+        self.menu_bar.setStyleSheet(menu_style)
+        self.menu_bar.setFont(QFont(GloVar.font, 13))
         self.setMenuBar(self.menu_bar)
         # 状态栏 & 状态栏显示
         self.status_bar = QStatusBar(self)
@@ -151,11 +156,12 @@ class UiMainWindow(QMainWindow):
     # 菜单栏
     def menu_bar_show(self):
         # 菜单栏显示
-        self.test_action = QAction('exit', self)
+        self.open_action = QAction('open', self)
+        self.open_action.triggered.connect(self.connect_open_file)
         self.help_action = QAction('help', self)
         self.file_bar = self.menu_bar.addMenu('File')
         self.help_bar = self.menu_bar.addMenu('Help')
-        self.file_bar.addAction(self.test_action)
+        self.file_bar.addAction(self.open_action)
         self.help_bar.addAction(self.help_action)
 
 
@@ -868,6 +874,26 @@ class UiMainWindow(QMainWindow):
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
             self.live_video_switch_camera_status_action.setToolTip('open_camera')
             self.main_show_tab_widget.video_tab.video_label.data_process_finished()
+
+
+    '''菜单栏打开文件调用函数'''
+    # 打开文件(图片)
+    def connect_open_file(self):
+        file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
+        # 文件过滤(所有文件)
+        file_filter = 'All File(*)'
+        # 返回元祖(第一个元素文件路径, 第二个元素文件类型), 这里只需要第一个文件路径
+        file, file_type = QFileDialog.getOpenFileName(self, '选择需要打开的文件', file_path, file_filter)
+        if file:
+            Logger('打开文件: %s' % file)
+            current_file_path = os.path.split(file)[0]
+            # 调用打开文件的函数(调用工程栏的双击打开文件函数)
+            self.project_bar_widget.operation_file(file)
+            # 将当前picture_path路径保存到配置文件
+            if file_path != current_file_path:
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='file_path', value=current_file_path)
+        else:
+            Logger('取消打开文件!')
 
 
     '''分隔符移动触发事件(主要重新设置控件大小以及样式)'''
