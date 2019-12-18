@@ -851,6 +851,7 @@ class UiMainWindow(QMainWindow):
             self.main_show_tab_widget.video_tab.video_label.data_process_finished()
 
 
+    '''分隔符移动触发事件(主要重新设置控件大小以及样式)'''
     # 调整show_tab_widget的tab_bar栏
     def adjust_show_tab_widget(self):
         width = self.show_tab_widget.width() - 5

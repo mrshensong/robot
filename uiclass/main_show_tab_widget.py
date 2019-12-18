@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit, QFrame, QFileDialog
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit, QFrame, QFileDialog, QTabBar
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
@@ -24,7 +24,8 @@ class MainShowTabWidget(QTabWidget):
                        QTabBar::tab{height:25px; margin-right: 0px; margin-bottom:-3px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; background-color:white; border-bottom: 5px solid blue;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
-                       QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + '); subcontrol-position: bottom right;}'
+                       QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + '); subcontrol-position: bottom right;}\
+                       QTabBar::close-button:hover {image: url(' + IconPath.Icon_main_tab_widget_close_tab_hover + ');}'
         self.setStyleSheet(style_sheet)
         # 关闭tab触发事件
         self.tabCloseRequested.connect(self.close_tab)
