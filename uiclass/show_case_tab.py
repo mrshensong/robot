@@ -66,6 +66,7 @@ class ShowCaseTab(QWidget):
         self.execute_times_label = QLabel()
         self.execute_times_label.setText('次数:')
         self.execute_times_control = QSpinBox()
+        self.execute_times_control.setStyleSheet('QSpinBox {background-color:transparent}')
         self.execute_times_control.setRange(1, 10)
         self.execute_times_control.setValue(1)
 

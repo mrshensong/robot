@@ -18,6 +18,7 @@ class ShowScriptTab(QWidget):
     def initUI(self):
         # script_title
         self.script_title = QLineEdit(self)
+        self.script_title.setStyleSheet('background-color:transparent')
         self.script_title.setReadOnly(True)
         self.script_title.setText('空白')
         # script_edit
