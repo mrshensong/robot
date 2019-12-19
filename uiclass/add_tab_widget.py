@@ -15,6 +15,14 @@ class TabWidget(QTabWidget):
         super(TabWidget, self).__init__(parent)
         self.parent = parent
         self.setTabPosition(self.North)
+        # 样式设置
+        style_sheet = 'QTabWidget:pane{ border: 1px solid #0099FF; top: -2px; bottom: 0px;}\
+                       QTabWidget:tab-bar{alignment: right;}\
+                       QTabBar::tab{height: 25px; width:108; margin-right: 0px; margin-bottom:0px;}\
+                       QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: #FFFFFF; border-top: 2px solid #0099FF; border-bottom: 2px solid #FFFFFF;}\
+                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
+                       QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
+        self.setStyleSheet(style_sheet)
         self.action_tab = AddActionTab(self)
         self.record_tab = AddRecordTab(self)
         self.sleep_tab = AddSleepTab(self)

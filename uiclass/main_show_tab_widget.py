@@ -171,18 +171,24 @@ class PictureTab(QWidget):
         self.parent = parent
         self.setFont(QFont(GloVar.font, 13))
         self.picture_path = picture_path
+        # 图片尺寸
         self.picture_size_width = None
         self.picture_size_height = None
+        # 默认原尺寸播放图片
         self.picture_zoom_scale = 1.0
+        # 默认的缩放增减倍数(每次增减在上一次基础上增减0.2倍)
+        self.zoom_factor = 0.2
         self.initUI()
         self.show_picture()
 
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
+        self.general_layout.setSpacing(0)
         self.general_layout.setContentsMargins(0, 3, 0, 0)
         self.picture_h_layout = QHBoxLayout(self)
         self.button_h_layout = QHBoxLayout(self)
+        self.button_h_layout.setContentsMargins(0, 0, 0, 0)
         # 打开文件按钮
         self.open_file_button = QToolButton()
         # 打开文件快捷键
@@ -218,9 +224,13 @@ class PictureTab(QWidget):
         self.picture_size_label.setText('size: [0:0], zoom: [1.0X]')
         self.picture_size_label.setFont(QFont(GloVar.font, 13))
 
+        self.button_h_layout.addSpacing(2)
         self.button_h_layout.addWidget(self.open_file_button)
+        self.button_h_layout.addSpacing(2)
         self.button_h_layout.addWidget(self.zoom_button)
+        self.button_h_layout.addSpacing(2)
         self.button_h_layout.addWidget(self.original_size_button)
+        self.button_h_layout.addSpacing(2)
         self.button_h_layout.addWidget(self.zoom_out_button)
         self.button_h_layout.addStretch(1)
         self.button_h_layout.addWidget(self.picture_path_label)
@@ -238,6 +248,7 @@ class PictureTab(QWidget):
         self.picture_h_layout.addWidget(self.picture_scroll_area)
 
         self.general_layout.addLayout(self.button_h_layout)
+        self.general_layout.addSpacing(2)
         self.general_layout.addLayout(self.picture_h_layout)
 
         self.setLayout(self.general_layout)
@@ -265,7 +276,7 @@ class PictureTab(QWidget):
 
     # 放大操作
     def connect_zoom_button(self):
-        current_zoom_scale = round((self.picture_zoom_scale + 0.5), 1)
+        current_zoom_scale = round((self.picture_zoom_scale + self.zoom_factor), 1)
         width = int(self.picture_size_width * current_zoom_scale)
         height = int(self.picture_size_height * current_zoom_scale)
         # 不用判断(可以无限放大)
@@ -276,7 +287,7 @@ class PictureTab(QWidget):
 
     # 缩小操作
     def connect_zoom_out_button(self):
-        current_zoom_scale = round((self.picture_zoom_scale - 0.5), 1)
+        current_zoom_scale = round((self.picture_zoom_scale - self.zoom_factor), 1)
         width = int(self.picture_size_width * current_zoom_scale)
         height = int(self.picture_size_height * current_zoom_scale)
         # 需要判断(不能小于0)
@@ -302,18 +313,21 @@ class PictureTab(QWidget):
         size = image.shape
         self.picture_size_width = int(size[1])
         self.picture_size_height = int(size[0])
-        if self.picture_size_width < self.picture_scroll_area.width() and self.picture_size_height < self.picture_scroll_area.height():
-            # widget居中显示
-            self.picture_scroll_area.setAlignment(Qt.AlignCenter)
-        elif self.picture_size_width < self.picture_scroll_area.width() and self.picture_size_height >= self.picture_scroll_area.height():
-            # 居中靠上
-            self.picture_scroll_area.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        elif self.picture_size_width >= self.picture_scroll_area.width() and self.picture_size_height < self.picture_scroll_area.height():
-            # 居中中靠左
-            self.picture_scroll_area.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
-        elif self.picture_size_width >= self.picture_scroll_area.width() and self.picture_size_height >= self.picture_scroll_area.height():
-            # 居上靠左
-            self.picture_scroll_area.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        # widget居中显示
+        self.picture_scroll_area.setAlignment(Qt.AlignCenter)
+        # # 通过判断图片尺寸来确认图片放置位置
+        # if self.picture_size_width < self.picture_scroll_area.width() and self.picture_size_height < self.picture_scroll_area.height():
+        #     # widget居中显示
+        #     self.picture_scroll_area.setAlignment(Qt.AlignCenter)
+        # elif self.picture_size_width < self.picture_scroll_area.width() and self.picture_size_height >= self.picture_scroll_area.height():
+        #     # 居中靠上
+        #     self.picture_scroll_area.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        # elif self.picture_size_width >= self.picture_scroll_area.width() and self.picture_size_height < self.picture_scroll_area.height():
+        #     # 居中中靠左
+        #     self.picture_scroll_area.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        # elif self.picture_size_width >= self.picture_scroll_area.width() and self.picture_size_height >= self.picture_scroll_area.height():
+        #     # 居上靠左
+        #     self.picture_scroll_area.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         self.picture_label.setFixedSize(self.picture_size_width, self.picture_size_height)
         self.picture_label.setPixmap(QPixmap(self.picture_path))
         self.picture_path_label.setText(str(self.picture_path))
@@ -340,9 +354,11 @@ class ReportTab(QWidget):
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
+        self.general_layout.setSpacing(0)
         self.general_layout.setContentsMargins(0, 3, 0, 0)
         self.title_h_layout = QHBoxLayout(self)
         self.report_h_layout = QHBoxLayout(self)
+        self.report_h_layout.setContentsMargins(0, 0, 0, 0)
         # 显示html路径
         self.html_path_label = QLabel(self)
         self.html_path_label.setMaximumHeight(25)
@@ -371,9 +387,10 @@ class ReportTab(QWidget):
         # self.right_v_line_frame.setFrameShape(QFrame.VLine)
         # html展示
         self.html_show_text = QWebEngineView()
-        self.html_show_text.setStyleSheet('background-color:blue')
+        self.html_show_text.setStyleSheet('QWebEngineView {background-color: #7A7A7A}')
         # title行布局
         self.title_h_layout.setSpacing(0)
+        self.title_h_layout.addSpacing(2)
         self.title_h_layout.addWidget(self.open_file_button)
         self.title_h_layout.addStretch(1)
         self.title_h_layout.addWidget(self.html_path_label)
@@ -384,7 +401,6 @@ class ReportTab(QWidget):
         self.report_h_layout.addWidget(self.html_show_text)
         # self.report_h_layout.addWidget(self.right_v_line_frame)
         # 全局布局
-        self.general_layout.setSpacing(0)
         self.general_layout.addLayout(self.title_h_layout)
         self.general_layout.addWidget(self.top_h_line_frame)
         self.general_layout.addLayout(self.report_h_layout)
@@ -439,9 +455,11 @@ class TextTab(QWidget):
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
+        self.general_layout.setSpacing(0)
         self.general_layout.setContentsMargins(0, 3, 0, 0)
         self.text_h_layout = QHBoxLayout(self)
         self.title_h_layout = QHBoxLayout(self)
+        self.title_h_layout.setSpacing(0)
         # 显示文本路径
         self.text_path_label = QLabel(self)
         self.text_path_label.setText('None')
@@ -475,8 +493,11 @@ class TextTab(QWidget):
         self.save_text_button.clicked.connect(self.connect_save_text)
 
         # title行布局
+        self.title_h_layout.addSpacing(2)
         self.title_h_layout.addWidget(self.open_file_button)
+        self.title_h_layout.addSpacing(2)
         self.title_h_layout.addWidget(self.edit_text_button)
+        self.title_h_layout.addSpacing(2)
         self.title_h_layout.addWidget(self.save_text_button)
         self.title_h_layout.addStretch(1)
         self.title_h_layout.addWidget(self.text_path_label)
@@ -489,6 +510,7 @@ class TextTab(QWidget):
         self.text_h_layout.addWidget(self.text_show_text)
 
         self.general_layout.addLayout(self.title_h_layout)
+        self.general_layout.addSpacing(2)
         self.general_layout.addLayout(self.text_h_layout)
 
         self.setLayout(self.general_layout)
