@@ -34,32 +34,32 @@ class ShowCaseTab(QWidget):
     def case_tab_init(self):
         self.import_button = QToolButton()
         self.import_button.setShortcut('o')
-        self.import_button.setToolTip('import')
+        self.import_button.setToolTip('导入case')
         self.import_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_import + ')}')
         self.import_button.clicked.connect(lambda : self.connect_import_button(None))
 
         self.add_button = QToolButton()
-        self.add_button.setToolTip('add')
+        self.add_button.setToolTip('添加case')
         self.add_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_add + ')}')
         self.add_button.clicked.connect(self.connect_add_case_button)
 
         self.delete_button = QToolButton()
-        self.delete_button.setToolTip('delete')
+        self.delete_button.setToolTip('批量删除case')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
         self.delete_button.clicked.connect(self.connect_delete_selected_items)
 
         self.select_all_button = QToolButton()
-        self.select_all_button.setToolTip('select_all')
+        self.select_all_button.setToolTip('全部选中')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         self.select_all_button.clicked.connect(self.connect_select_all_items)
         self.execute_button = QToolButton()
-        self.execute_button.setToolTip('execute')
+        self.execute_button.setToolTip('批量执行case')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_items)
         # 切换按钮(是否需要产生报告)
         self.switch_button = QToolButton()
         self.switch_button.setMinimumWidth(40)
-        self.switch_button.setToolTip('switch_off')
+        self.switch_button.setToolTip('关闭处理报告功能')
         self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
         self.switch_button.clicked.connect(self.connect_switch)
         # 次数标签
@@ -159,7 +159,7 @@ class ShowCaseTab(QWidget):
             if exist_items_count < 1:
                 # 全部删除后需要复位全部选中按钮的状态
                 self.select_all_flag = False
-                self.select_all_button.setToolTip('select_all')
+                self.select_all_button.setToolTip('全部选中')
                 self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
                 break
             # 遍历完item后退出
@@ -178,7 +178,7 @@ class ShowCaseTab(QWidget):
             index -= 1
         # 全部删除后需要复位全部选中按钮的状态
         self.select_all_flag = False
-        self.select_all_button.setToolTip('select_all')
+        self.select_all_button.setToolTip('全部选中')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         # 处理出现的选中文本框
         if rewrite_case_name is not None:
@@ -250,12 +250,12 @@ class ShowCaseTab(QWidget):
         # 打开开关
         if GloVar.video_process_switch == 'OFF':
             GloVar.video_process_switch = 'ON'
-            self.switch_button.setToolTip('switch_off')
+            self.switch_button.setToolTip('关闭处理报告功能')
             self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
         # 关闭开关
         else:
             GloVar.video_process_switch = 'OFF'
-            self.switch_button.setToolTip('switch_on')
+            self.switch_button.setToolTip('开启处理报告功能')
             self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
 
 
@@ -357,14 +357,14 @@ class ShowCaseTab(QWidget):
             for i in range(self.index + 1):
                 self.case_control_list[i].check_box.setCheckState(Qt.Checked)
             self.select_all_flag = True
-            self.select_all_button.setToolTip('un_select_all')
+            self.select_all_button.setToolTip('全不选中')
             self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_un_select + ')}')
             Logger('[全部选中]-->所有case')
         else:
             for i in range(self.index + 1):
                 self.case_control_list[i].check_box.setCheckState(Qt.Unchecked)
             self.select_all_flag = False
-            self.select_all_button.setToolTip('select_all')
+            self.select_all_button.setToolTip('全部选中')
             self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
             Logger('[全不选中]-->所有case')
 

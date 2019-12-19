@@ -172,10 +172,10 @@ class UiMainWindow(QMainWindow):
         self.live_video_toolbar_label.setText('实时流:')
         self.live_video_toolbar_label.setStyleSheet('color:blue')
         self.live_video_toolbar_label.setFont(QFont(GloVar.font, 13))
-        self.live_video_setting_action               = QAction(QIcon(IconPath.Icon_live_video_setting), 'setting', self)
-        self.live_video_switch_camera_status_action  = QAction(QIcon(IconPath.Icon_live_video_open_camera), 'open_camera', self)
-        self.live_video_capture_action               = QAction(QIcon(IconPath.Icon_live_video_capture), 'capture', self)
-        self.live_video_box_screen_action            = QAction(QIcon(IconPath.Icon_live_video_box_screen), 'box_screen', self)
+        self.live_video_setting_action               = QAction(QIcon(IconPath.Icon_live_video_setting), '设置', self)
+        self.live_video_switch_camera_status_action  = QAction(QIcon(IconPath.Icon_live_video_open_camera), '打开摄像头', self)
+        self.live_video_capture_action               = QAction(QIcon(IconPath.Icon_live_video_capture), '保存当前帧图像', self)
+        self.live_video_box_screen_action            = QAction(QIcon(IconPath.Icon_live_video_box_screen), '框选车机屏幕', self)
         # 绑定触发函数
         self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
         self.live_video_capture_action.triggered.connect(self.screen_shot)
@@ -186,14 +186,14 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar_label.setText('机械臂:')
         self.robot_toolbar_label.setStyleSheet('color:blue')
         self.robot_toolbar_label.setFont(QFont(GloVar.font, 13))
-        self.robot_click_action        = QAction(QIcon(IconPath.Icon_robot_click), 'click', self)
-        self.robot_double_click_action = QAction(QIcon(IconPath.Icon_robot_double_click), 'double_click', self)
-        self.robot_long_click_action   = QAction(QIcon(IconPath.Icon_robot_long_click), 'long_click', self)
-        self.robot_slide_action        = QAction(QIcon(IconPath.Icon_robot_slide), 'slide', self)
-        self.robot_lock_action         = QAction(QIcon(IconPath.Icon_robot_lock), 'lock', self)
-        self.robot_unlock_action       = QAction(QIcon(IconPath.Icon_robot_unlock), 'unlock', self)
-        self.robot_get_base_position_action = QAction(QIcon(IconPath.Icon_robot_get_base_position), 'get_position', self)
-        self.robot_with_record_action  = QAction(QIcon(IconPath.Icon_robot_with_record), 'with_record', self)
+        self.robot_click_action        = QAction(QIcon(IconPath.Icon_robot_click), '单击', self)
+        self.robot_double_click_action = QAction(QIcon(IconPath.Icon_robot_double_click), '双击', self)
+        self.robot_long_click_action   = QAction(QIcon(IconPath.Icon_robot_long_click), '长按', self)
+        self.robot_slide_action        = QAction(QIcon(IconPath.Icon_robot_slide), '滑动', self)
+        self.robot_lock_action         = QAction(QIcon(IconPath.Icon_robot_lock), '锁定机械臂', self)
+        self.robot_unlock_action       = QAction(QIcon(IconPath.Icon_robot_unlock), '解锁机械臂', self)
+        self.robot_get_base_position_action = QAction(QIcon(IconPath.Icon_robot_get_base_position), '获取机械臂当前位置', self)
+        self.robot_with_record_action  = QAction(QIcon(IconPath.Icon_robot_with_record), '录制脚本', self)
         # 绑定触发函数
         self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_click))
         self.robot_double_click_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_double_click))
@@ -208,8 +208,8 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar_label.setText('本地视频:')
         self.local_video_toolbar_label.setStyleSheet('color:blue')
         self.local_video_toolbar_label.setFont(QFont(GloVar.font, 13))
-        self.local_video_import_video_action = QAction(QIcon(IconPath.Icon_local_import_video), 'import_video', self)
-        self.local_video_setting_action      = QAction(QIcon(IconPath.Icon_local_video_setting), 'setting', self)
+        self.local_video_import_video_action = QAction(QIcon(IconPath.Icon_local_import_video), '导入视频', self)
+        self.local_video_setting_action      = QAction(QIcon(IconPath.Icon_local_video_setting), '设置', self)
         self.local_video_setting_action.setEnabled(False)
         # 绑定函数
         self.local_video_import_video_action.triggered.connect(self.import_local_video)
@@ -219,9 +219,9 @@ class UiMainWindow(QMainWindow):
         self.data_process_toolbar_label.setText('数据处理:')
         self.data_process_toolbar_label.setStyleSheet('color:blue')
         self.data_process_toolbar_label.setFont(QFont(GloVar.font, 13))
-        self.data_process_import_video_action = QAction(QIcon(IconPath.Icon_data_process_import_video), 'import_video', self)
-        self.data_process_setting_action      = QAction(QIcon(IconPath.Icon_data_process_setting), 'setting', self)
-        self.data_process_execute_action      = QAction(QIcon(IconPath.Icon_data_process_execute), 'execute', self)
+        self.data_process_import_video_action = QAction(QIcon(IconPath.Icon_data_process_import_video), '导入视频', self)
+        self.data_process_setting_action      = QAction(QIcon(IconPath.Icon_data_process_setting), '设置', self)
+        self.data_process_execute_action      = QAction(QIcon(IconPath.Icon_data_process_execute), '计算数据', self)
         self.data_process_setting_action.setEnabled(False)
         self.data_process_execute_action.setEnabled(False)
         # 绑定函数
@@ -547,7 +547,7 @@ class UiMainWindow(QMainWindow):
             self.local_video_setting_action.setEnabled(False)
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_close_camera))
             # 设置提示
-            self.live_video_switch_camera_status_action.setToolTip('close_camera')
+            self.live_video_switch_camera_status_action.setToolTip('关闭摄像头')
         else:
             # 关闭此时不能打开的控件
             self.robot_toolbar.setEnabled(False)
@@ -556,7 +556,7 @@ class UiMainWindow(QMainWindow):
             self.live_video_setting_action.setEnabled(False)
             self.show_tab_widget.setEnabled(False)
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-            self.live_video_switch_camera_status_action.setToolTip('open_camera')
+            self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
         self.main_show_tab_widget.video_tab.video_label.switch_camera_status()
 
 
@@ -652,13 +652,13 @@ class UiMainWindow(QMainWindow):
         if RobotArmAction.uArm_with_record is False:
             RobotArmAction.uArm_with_record = True
             self.robot_with_record_action.setIcon(QIcon(IconPath.Icon_robot_without_record))
-            self.robot_with_record_action.setToolTip('without_record')
+            self.robot_with_record_action.setToolTip('不录制脚本')
             if self.main_show_tab_widget.video_tab.video_label.video_play_flag is False:
                 Logger('<脚本录制打开--以下操作将会被保存为action>')
         else:
             RobotArmAction.uArm_with_record = False
             self.robot_with_record_action.setIcon(QIcon(IconPath.Icon_robot_with_record))
-            self.robot_with_record_action.setToolTip('with_record')
+            self.robot_with_record_action.setToolTip('录制脚本')
             if self.main_show_tab_widget.video_tab.video_label.video_play_flag is False:
                 Logger('<脚本录制关闭--以下操作将不会被保存为action>')
 
@@ -795,7 +795,7 @@ class UiMainWindow(QMainWindow):
                 self.data_process_execute_action.setEnabled(True)
                 self.data_process_setting_action.setEnabled(False)
                 self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-                self.live_video_switch_camera_status_action.setToolTip('open_camera')
+                self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
                 self.main_show_tab_widget.video_tab.video_label.import_data_process_without_video()
         else:
             Logger('没有选择视频路径, 数据处理取消!')
@@ -812,7 +812,7 @@ class UiMainWindow(QMainWindow):
         # 先关掉正在播放的视频
         self.main_show_tab_widget.video_tab.video_label.timer_video.stop()
         self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-        self.live_video_switch_camera_status_action.setToolTip('open_camera')
+        self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
         # 调用video_label中的数据执行操作
         self.main_show_tab_widget.video_tab.video_label.data_process_execute()
         # 此处调用数据处理函数
@@ -852,7 +852,7 @@ class UiMainWindow(QMainWindow):
             self.data_process_execute_action.setEnabled(True)
             self.data_process_setting_action.setEnabled(False)
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-            self.live_video_switch_camera_status_action.setToolTip('open_camera')
+            self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
             self.main_show_tab_widget.video_tab.video_label.import_data_process_without_video()
 
 
@@ -872,7 +872,7 @@ class UiMainWindow(QMainWindow):
             self.data_process_execute_action.setEnabled(False)
             self.data_process_setting_action.setEnabled(False)
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-            self.live_video_switch_camera_status_action.setToolTip('open_camera')
+            self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
             self.main_show_tab_widget.video_tab.video_label.data_process_finished()
 
 

@@ -46,28 +46,28 @@ class ShowActionTab(QWidget):
 
     def action_tab_init(self):
         self.add_button = QToolButton()
-        self.add_button.setToolTip('add')
+        self.add_button.setToolTip('添加动作')
         self.add_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_add + ')}')
         self.add_button.clicked.connect(self.connect_add_action_button)
         self.delete_button = QToolButton()
-        self.delete_button.setToolTip('delete')
+        self.delete_button.setToolTip('批量删除动作')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
         self.delete_button.clicked.connect(self.connect_delete_selected_items)
         self.select_all_button = QToolButton()
-        self.select_all_button.setToolTip('select_all')
+        self.select_all_button.setToolTip('全部选中')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         self.select_all_button.clicked.connect(self.connect_select_all_items)
         self.execute_button = QToolButton()
-        self.execute_button.setToolTip('execute')
+        self.execute_button.setToolTip('批量执行动作')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_actions)
         self.save_script_tag_button = QToolButton()
-        self.save_script_tag_button.setToolTip('save_tag')
+        self.save_script_tag_button.setToolTip('保存为case')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_save + ')}')
         self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
         self.draw_frame_button = QToolButton()
         self.draw_frame_button.setShortcut('q')
-        self.draw_frame_button.setToolTip('draw_frame')
+        self.draw_frame_button.setToolTip('框选视频对比模板')
         self.draw_frame_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_draw_frame + ')}')
         self.draw_frame_button.clicked.connect(self.connect_draw_frame)
         self.des_text = QLineEdit()
@@ -134,7 +134,7 @@ class ShowActionTab(QWidget):
             if exist_items_count < 1:
                 # 全部删除后需要复位全部选中按钮的状态
                 self.select_all_flag = False
-                self.select_all_button.setToolTip('select_all')
+                self.select_all_button.setToolTip('全部选中')
                 self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
                 GloVar.actions_saved_to_case = True
                 self.case_file_name = ''
@@ -156,7 +156,7 @@ class ShowActionTab(QWidget):
             index -= 1
         # 全部删除后需要复位全部选中按钮的状态
         self.select_all_flag = False
-        self.select_all_button.setToolTip('select_all')
+        self.select_all_button.setToolTip('全部选中')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         # 处理出现的选中文本框
         if rewrite_info is not None:
@@ -191,14 +191,14 @@ class ShowActionTab(QWidget):
             for i in range(self.index + 1):
                 self.custom_control_list[i].check_box.setCheckState(Qt.Checked)
             self.select_all_flag = True
-            self.select_all_button.setToolTip('un_select_all')
+            self.select_all_button.setToolTip('全不选中')
             self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_un_select + ')}')
             Logger('[全部选中]-->所有动作')
         else:
             for i in range(self.index + 1):
                 self.custom_control_list[i].check_box.setCheckState(Qt.Unchecked)
             self.select_all_flag = False
-            self.select_all_button.setToolTip('select_all')
+            self.select_all_button.setToolTip('全部选中')
             self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
             Logger('[全不选中]-->所有动作')
 

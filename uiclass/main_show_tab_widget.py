@@ -19,10 +19,10 @@ class MainShowTabWidget(QTabWidget):
         self.setFont(QFont(GloVar.font, 13))
         self.setTabsClosable(True)
         # 样式设置
-        style_sheet = 'QTabWidget:pane{ border: 1px; top: -1px; border-top: 1px solid #7A7A7A;}\
+        style_sheet = 'QTabWidget:pane{ border: 1px solid #7A7A7A; top: -1px;}\
                        QTabWidget:tab-bar{border: 1px solid blue; top: 0px; alignment:left; background: blue}\
                        QTabBar::tab{height: 25px; margin-right: 0px; margin-bottom:-3px; padding-left: 5px; padding-right: 5px;}\
-                       QTabBar::tab:selected{border: 1px solid #7A7A7A; color: #0099FF; background-color: white; border-top: 1px solid #0099FF; border-bottom: 5px solid #0099FF;}\
+                       QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: white; border-top: 1px solid #0099FF; border-bottom: 5px solid #0099FF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}\
                        QTabBar::close-button {image: url(' + IconPath.Icon_main_tab_widget_close_tab + '); subcontrol-position: bottom right;}\
@@ -187,26 +187,26 @@ class PictureTab(QWidget):
         self.open_file_button = QToolButton()
         # 打开文件快捷键
         self.open_file_button.setShortcut('o')
-        self.open_file_button.setEnabled(True)
-        self.open_file_button.setToolTip('open_file(o)')
+        self.open_file_button.setEnabled(False)
+        self.open_file_button.setToolTip('打开文件(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
         # 放大按钮
         self.zoom_button = QToolButton()
         self.zoom_button.setEnabled(False)
-        self.zoom_button.setToolTip('zoom')
+        self.zoom_button.setToolTip('放大')
         self.zoom_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_picture + ')}')
         self.zoom_button.clicked.connect(self.connect_zoom_button)
         # 原图按钮
         self.original_size_button = QToolButton()
         self.original_size_button.setEnabled(False)
-        self.original_size_button.setToolTip('original_size')
+        self.original_size_button.setToolTip('恢复原尺寸')
         self.original_size_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_original_size_picture + ')}')
         self.original_size_button.clicked.connect(self.connect_original_size_button)
         # 缩小按钮
         self.zoom_out_button = QToolButton()
         self.zoom_out_button.setEnabled(False)
-        self.zoom_out_button.setToolTip('zoom_out')
+        self.zoom_out_button.setToolTip('缩小')
         self.zoom_out_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_zoom_out_picture + ')}')
         self.zoom_out_button.clicked.connect(self.connect_zoom_out_button)
         # 显示图片路径
@@ -352,22 +352,23 @@ class ReportTab(QWidget):
         self.open_file_button = QToolButton()
         # 打开文件快捷键
         self.open_file_button.setShortcut('o')
-        self.open_file_button.setEnabled(True)
-        self.open_file_button.setToolTip('open_file(o)')
+        self.open_file_button.setEnabled(False)
+        self.open_file_button.setToolTip('打开文件(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
         # 使用QFrame画出一条顶部横隔离线
         self.top_h_line_frame = QFrame(self)
         self.top_h_line_frame.setFrameShape(QFrame.HLine)
-        # 使用QFrame画出一条底部横隔离线
-        self.bottom_h_line_frame = QFrame(self)
-        self.bottom_h_line_frame.setFrameShape(QFrame.HLine)
-        # 使用QFrame画出一条左边竖隔离线
-        self.left_v_line_frame = QFrame(self)
-        self.left_v_line_frame.setFrameShape(QFrame.VLine)
-        # 使用QFrame画出一条左边竖隔离线
-        self.right_v_line_frame = QFrame(self)
-        self.right_v_line_frame.setFrameShape(QFrame.VLine)
+        # 只需要用到上隔离线来隔离 QWebEngineView控件
+        # # 使用QFrame画出一条底部横隔离线
+        # self.bottom_h_line_frame = QFrame(self)
+        # self.bottom_h_line_frame.setFrameShape(QFrame.HLine)
+        # # 使用QFrame画出一条左边竖隔离线
+        # self.left_v_line_frame = QFrame(self)
+        # self.left_v_line_frame.setFrameShape(QFrame.VLine)
+        # # 使用QFrame画出一条左边竖隔离线
+        # self.right_v_line_frame = QFrame(self)
+        # self.right_v_line_frame.setFrameShape(QFrame.VLine)
         # html展示
         self.html_show_text = QWebEngineView()
         self.html_show_text.setStyleSheet('background-color:blue')
@@ -379,15 +380,15 @@ class ReportTab(QWidget):
         self.title_h_layout.addStretch(1)
         # report布局
         self.report_h_layout.setSpacing(0)
-        self.report_h_layout.addWidget(self.left_v_line_frame)
+        # self.report_h_layout.addWidget(self.left_v_line_frame)
         self.report_h_layout.addWidget(self.html_show_text)
-        self.report_h_layout.addWidget(self.right_v_line_frame)
+        # self.report_h_layout.addWidget(self.right_v_line_frame)
         # 全局布局
         self.general_layout.setSpacing(0)
         self.general_layout.addLayout(self.title_h_layout)
         self.general_layout.addWidget(self.top_h_line_frame)
         self.general_layout.addLayout(self.report_h_layout)
-        self.general_layout.addWidget(self.bottom_h_line_frame)
+        # self.general_layout.addWidget(self.bottom_h_line_frame)
         self.setLayout(self.general_layout)
 
 
@@ -450,8 +451,8 @@ class TextTab(QWidget):
         self.open_file_button = QToolButton()
         # 打开文件快捷键
         self.open_file_button.setShortcut('o')
-        self.open_file_button.setEnabled(True)
-        self.open_file_button.setToolTip('open_file(o)')
+        self.open_file_button.setEnabled(False)
+        self.open_file_button.setToolTip('打开文件(o)')
         self.open_file_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_open_file + ')}')
         self.open_file_button.clicked.connect(self.connect_open_file)
 
@@ -460,7 +461,7 @@ class TextTab(QWidget):
         # 编辑快捷键
         self.edit_text_button.setShortcut('e')
         self.edit_text_button.setEnabled(False)
-        self.edit_text_button.setToolTip('edit(e)')
+        self.edit_text_button.setToolTip('编辑(e)')
         self.edit_text_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_edit_text + ')}')
         self.edit_text_button.clicked.connect(self.connect_edit_text)
 
@@ -469,7 +470,7 @@ class TextTab(QWidget):
         # 保存快捷键
         self.save_text_button.setShortcut('ctrl+s')
         self.save_text_button.setEnabled(False)
-        self.save_text_button.setToolTip('save(ctrl+s)')
+        self.save_text_button.setToolTip('保存(ctrl+s)')
         self.save_text_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_main_tab_widget_save_text + ')}')
         self.save_text_button.clicked.connect(self.connect_save_text)
 
