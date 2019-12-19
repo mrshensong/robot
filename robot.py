@@ -344,7 +344,7 @@ class UiMainWindow(QMainWindow):
         # 字体型号
         self.console.setFont(QFont('monospaced', 13))
         # 字体粗细
-        self.console.setStyleSheet('font-weight:bold')
+        self.console.setStyleSheet('font-weight:bold; background-color:transparent')
 
 
     # 更新控制台内容
