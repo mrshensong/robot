@@ -176,8 +176,8 @@ class VideoLabel(QLabel):
         self.video_progress_bar.setEnabled(False)
         progress_bar_style = 'QSlider {border-color: #BCBCBC;}\
                               QSlider::groove:horizontal {border: 1px solid #999999; height: 1px; margin: 0px 0; left: 0px; right: 0px;}\
-                              QSlider::handle:horizontal {border: 0px; width: 10px; margin: -5px 0px -5px 0px; border-radius: 5px; background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #FFFFFF, stop:0.8 #FFFFFF);}\
-                              QSlider::handle:horizontal:hover {border: 0px; width: 16px; margin: -8px 0px -8px 0px; border-radius: 8px; background: qradialgradient(spread:pad,cx:0.5,cy:0.5,radius:0.5,fx:0.5,fy:0.5,stop:0.6 #3090C0,stop:0.8 #3090C0);}\
+                              QSlider::handle:horizontal {border: 0px; width: 10px; margin: -5px 0px -5px 0px; border-radius: 5px; background: qradialgradient(spread:pad, cx:0, cy:0, radius:5, fx:0, fy:0, stop:0.6 #FFFFFF, stop:0.8 #FFFFFF);}\
+                              QSlider::handle:horizontal:hover {border: 0px; width: 16px; margin: -8px 0px -8px 0px; border-radius: 8px; background: qradialgradient(spread:pad, cx:0, cy:5, radius:8, fx:0, fy:0, stop:0.6 #3090C0, stop:0.8 #3090C0);}\
                               QSlider::add-page:horizontal {background: qlineargradient(spread: pad, x1:0, y1:1, x2:0, y2:0, stop:0 #BCBCBC, stop:0.25 #BCBCBC, stop:0.5 #BCBCBC, stop:1 #BCBCBC);}\
                               QSlider::sub-page:horizontal {background: qlineargradient(spread: pad, x1:0, y1:1, x2:0, y2:0, stop:0 #439cf3, stop:0.25 #439cf3, stop:0.5 #439cf3, stop:1 #439cf3);}'
         self.video_progress_bar.setStyleSheet(progress_bar_style)
