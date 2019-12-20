@@ -9,6 +9,8 @@ class GloVar:
     config_file_path = 'config/config.ini'
     # 摄像头校正模型路径
     correction_model_path = 'config/calibrate_1600x1000.npz'
+    # 文件系统需要调用中文文件
+    qt_zh_CN_file_path = 'config/qt_zh_CN.qm'
     # 当前工程根目录
     project_path = None
     # 当前工程产生视频目录
@@ -270,5 +272,6 @@ class MergePath:
 
 # 样式
 class BeautifyStyle:
-    font = 'font-family: Times New Roman; font-size: 13pt;'
-    file_dialog_qss = 'QFileDialog {background-color:white;}'
+    font_family = 'font-family: Times New Roman;'
+    font_size = 'font-size: 13pt;'
+    file_dialog_qss = 'QFileDialog {background-color: beige;}'

@@ -17,7 +17,7 @@ class ShowActionTab(QWidget):
         super(ShowActionTab, self).__init__(parent)
         self.parent = parent
         # 样式美化
-        style = BeautifyStyle.font + BeautifyStyle.file_dialog_qss
+        style = BeautifyStyle.font_family + BeautifyStyle.font_size + BeautifyStyle.file_dialog_qss
         self.setStyleSheet(style)
         self.index = -1
         # 自定义控件列表

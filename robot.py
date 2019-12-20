@@ -11,7 +11,7 @@ from uiclass.show_tab_widget import ShowTabWidget
 from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtCore import QSize, Qt, QTranslator
 from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
@@ -28,7 +28,7 @@ class UiMainWindow(QMainWindow):
 
     def setupUi(self):
         # 样式美化
-        main_ui_style = BeautifyStyle.font + BeautifyStyle.file_dialog_qss
+        main_ui_style = BeautifyStyle.font_family + BeautifyStyle.font_size + BeautifyStyle.file_dialog_qss
         self.setStyleSheet(main_ui_style)
         """初始化参数"""
         # 摄像机图像尺寸
@@ -949,7 +949,11 @@ class UiMainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    # 导入系统中文
+    tran = QTranslator()
+    tran.load(GloVar.qt_zh_CN_file_path)
     app = QApplication(sys.argv)
+    app.installTranslator(tran)
     gui = UiMainWindow()
     gui.setupUi()
     gui.show()
