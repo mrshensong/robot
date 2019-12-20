@@ -4,7 +4,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam
+from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam, BeautifyStyle
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 from uiclass.list_widget import ListWidget
@@ -16,7 +16,9 @@ class ShowActionTab(QWidget):
     def __init__(self, parent):
         super(ShowActionTab, self).__init__(parent)
         self.parent = parent
-        self.setStyleSheet('font-family : %s; font-size: 13pt' % GloVar.font)
+        # 样式美化
+        style = BeautifyStyle.font + BeautifyStyle.file_dialog_qss
+        self.setStyleSheet(style)
         self.index = -1
         # 自定义控件列表
         self.custom_control_list = []
@@ -254,20 +256,25 @@ class ShowActionTab(QWidget):
 
 
     # 保存标签工具栏操作(save_button)
-    def save_script_tag(self):
+    def connect_save_script_tag(self):
         if len(self.list_widget) > 0:
             script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
-            filename = QFileDialog.getSaveFileName(self, 'save script', script_path, 'script file(*.xml)')
-            if filename[0]:
-                current_path = '/'.join(filename[0].split('/')[:-1])
+            filename = QFileDialog.getSaveFileName(self, '保存case', script_path, 'script file(*.xml)', options=QFileDialog.DontUseNativeDialog)
+            xml_file = filename[0]
+            if xml_file:
+                if xml_file.endswith('.xml'):
+                    xml_file = xml_file
+                else:
+                    xml_file = xml_file + '.xml'
+                current_path = '/'.join(xml_file.split('/')[:-1])
                 if current_path != script_path:
                     Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=current_path)
-                with open(filename[0], 'w', encoding='utf-8') as f:
-                    self.case_absolute_name = filename[0]
-                    self.case_file_name = filename[0].split('/')[-1]
+                with open(xml_file, 'w', encoding='utf-8') as f:
+                    self.case_absolute_name = xml_file
+                    self.case_file_name = xml_file.split('/')[-1]
                     script_tag = self.merge_to_script(''.join(self.tag_list))
                     f.write(script_tag)
-                    Logger('[保存的脚本标签名为]: %s' % filename[0])
+                    Logger('[保存的脚本标签名为]: %s' % xml_file)
                     # 保存case命令
                     self.signal.emit('save_case>' + script_tag)
                     WindowStatus.action_tab_status = '%s>已保存!' % self.case_absolute_name
@@ -277,11 +284,6 @@ class ShowActionTab(QWidget):
                 Logger('[取消保存脚本标签!]')
         else:
             Logger('[没有要保存的脚本标签!]')
-
-
-    # 另起线程(保证主线程不受到破坏)
-    def connect_save_script_tag(self):
-        Thread(target=self.save_script_tag, args=()).start()
 
 
     # 框选模板

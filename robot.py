@@ -12,9 +12,9 @@ from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit
-from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, RecordAction, SleepAction, MergePath, WindowStatus, Profile
+from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
 from uarm_action.action import ArmAction
 from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
 
@@ -27,6 +27,9 @@ class UiMainWindow(QMainWindow):
 
 
     def setupUi(self):
+        # 样式美化
+        main_ui_style = BeautifyStyle.font + BeautifyStyle.file_dialog_qss
+        self.setStyleSheet(main_ui_style)
         """初始化参数"""
         # 摄像机图像尺寸
         # self.camera_image_width = 1280
@@ -143,7 +146,7 @@ class UiMainWindow(QMainWindow):
         self.splitter_v_part_2.setStretchFactor(1, 2)
         self.splitter_h_general.addWidget(self.splitter_v_part_1)
         self.splitter_h_general.addWidget(self.splitter_v_part_2)
-        self.splitter_h_general.setStretchFactor(0, 4)
+        self.splitter_h_general.setStretchFactor(0, 7)
         self.splitter_h_general.setStretchFactor(1, 13)
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
@@ -680,7 +683,7 @@ class UiMainWindow(QMainWindow):
             camera_opened_flag = True
             self.switch_camera_status()
         if video_file is None:
-            self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
+            self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path, options=QFileDialog.DontUseNativeDialog)
             if self.get_path:
                 if self.videos_path != self.get_path:
                     # 保存此次打开的路径(路径默认上一次)
@@ -755,7 +758,7 @@ class UiMainWindow(QMainWindow):
             camera_opened_flag = True
             self.switch_camera_status()
         # 获取需要处理的视频所在路径
-        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
+        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path, options=QFileDialog.DontUseNativeDialog)
         if self.get_path:
             if self.videos_path != self.get_path:
                 # 保存此次打开的路径(路径默认上一次)
@@ -901,7 +904,7 @@ class UiMainWindow(QMainWindow):
         # 文件过滤(所有文件)
         file_filter = 'All File(*)'
         # 返回元祖(第一个元素文件路径, 第二个元素文件类型), 这里只需要第一个文件路径
-        file, file_type = QFileDialog.getOpenFileName(self, '选择需要打开的文件', file_path, file_filter)
+        file, file_type = QFileDialog.getOpenFileName(self, '选择需要打开的文件', file_path, file_filter, options=QFileDialog.DontUseNativeDialog)
         if file:
             Logger('打开文件: %s' % file)
             current_file_path = os.path.split(file)[0]

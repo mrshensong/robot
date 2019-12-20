@@ -266,3 +266,9 @@ class MergePath:
             self.merged_path = merged_path.replace('//', '/')
         else:
             self.merged_path = merged_path
+
+
+# 样式
+class BeautifyStyle:
+    font = 'font-family: Times New Roman; font-size: 13pt;'
+    file_dialog_qss = 'QFileDialog {background-color:white;}'

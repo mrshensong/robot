@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam
+from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
 from uiclass.controls import CaseControl
 
 class ShowCaseTab(QWidget):
@@ -15,6 +15,9 @@ class ShowCaseTab(QWidget):
     def __init__(self, parent):
         super(ShowCaseTab, self).__init__(parent)
         self.parent = parent
+        # 样式美化
+        style = BeautifyStyle.font + BeautifyStyle.file_dialog_qss
+        self.setStyleSheet(style)
         self.setStyleSheet('font-family : %s; font-size: 13pt' % GloVar.font)
         self.index = -1
         # case控件列表
@@ -96,7 +99,7 @@ class ShowCaseTab(QWidget):
         if case_file is None:
             # 通过选择框导入case
             script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
-            files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)")
+            files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)", options=QFileDialog.DontUseNativeDialog)
             if ok:
                 # 如果打开路径和配置文件路径不一样, 就将当前script路径保存到配置文件
                 case_folder = os.path.split(files[0])[0]
@@ -126,7 +129,7 @@ class ShowCaseTab(QWidget):
     def connect_add_case_button(self):
         # 通过选择框导入case
         script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
-        files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)")
+        files, ok = QFileDialog.getOpenFileNames(self, "选择case", script_path, "标签文件 (*.xml)", options=QFileDialog.DontUseNativeDialog)
         if ok:
             # 如果打开路径和配置文件路径不一样, 就将当前script路径保存到配置文件
             case_folder = os.path.split(files[0])[0]
