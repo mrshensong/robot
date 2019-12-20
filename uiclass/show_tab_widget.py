@@ -13,7 +13,6 @@ class ShowTabWidget(QTabWidget):
     def __init__(self, parent, action_tab='action', case_tab='case', text_tab='edit'):
         super(ShowTabWidget, self).__init__(parent)
         self.parent = parent
-        self.setFont(QFont(GloVar.font, 13))
         self.setTabPosition(self.South)
         # tab1
         self.action_tab = ShowActionTab(self)  # 1

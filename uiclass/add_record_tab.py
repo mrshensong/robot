@@ -75,8 +75,6 @@ class AddRecordTab(QWidget):
         self.general_layout.addLayout(self.button_layout)
 
         self.setLayout(self.general_layout)
-        # 设置字体
-        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(300)
 

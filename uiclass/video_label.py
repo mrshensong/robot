@@ -16,8 +16,6 @@ class VideoLabel(QLabel):
     def __init__(self, parent, camera_width, camera_height):
         super(VideoLabel, self).__init__(parent)
         self.parent = parent
-        # 使用字体
-        self.font = GloVar.font
         # 鼠标拖动的起始和终止x/y
         self.x0, self.y0, self.x1, self.y1 = 0, 0, 0, 0
         # 鼠标是否按下标志
@@ -174,7 +172,6 @@ class VideoLabel(QLabel):
         self.label_frame_show.setObjectName("label_frame_show")
         self.label_frame_show.setAlignment(Qt.AlignCenter)
         self.label_frame_show.setText('')
-        self.label_frame_show.setFont(QFont(self.font, 12))
         self.label_frame_show.setAlignment(Qt.AlignCenter)
         self.label_frame_show.setStyleSheet('color:black')
         # 显示视频名字
@@ -183,7 +180,6 @@ class VideoLabel(QLabel):
         self.label_video_title.setAlignment(Qt.AlignCenter)
         self.label_video_title.setStyleSheet('color:white')
         self.label_video_title.setText('[实时视频流]')
-        self.label_video_title.setFont(QFont(self.font, 15))
         # 视频进度条
         self.video_progress_bar = QSlider(Qt.Horizontal, self)
         self.video_progress_bar.setEnabled(False)

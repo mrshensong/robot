@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, Logger, GloVar, MergePath, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
+from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
 from uiclass.controls import CaseControl
 
 class ShowCaseTab(QWidget):

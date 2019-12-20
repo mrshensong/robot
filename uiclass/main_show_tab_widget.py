@@ -16,7 +16,6 @@ class MainShowTabWidget(QTabWidget):
     def __init__(self, parent, camera_width, camera_height):
         super(MainShowTabWidget, self).__init__(parent)
         self.parent = parent
-        self.setFont(QFont(GloVar.font, 13))
         self.setTabsClosable(True)
         # 样式设置
         style_sheet = 'QTabWidget:pane{ border: 1px solid #7A7A7A; top: -1px;}\
@@ -169,7 +168,6 @@ class PictureTab(QWidget):
     def __init__(self, parent, picture_path):
         super(PictureTab, self).__init__(parent)
         self.parent = parent
-        self.setFont(QFont(GloVar.font, 13))
         self.picture_path = picture_path
         # 图片尺寸
         self.picture_size_width = None
@@ -218,11 +216,9 @@ class PictureTab(QWidget):
         # 显示图片路径
         self.picture_path_label = QLabel(self)
         self.picture_path_label.setText('None')
-        self.picture_path_label.setFont(QFont(GloVar.font, 13))
         # 显示照片尺寸
         self.picture_size_label = QLabel(self)
         self.picture_size_label.setText('size: [0:0], zoom: [1.0X]')
-        self.picture_size_label.setFont(QFont(GloVar.font, 13))
 
         self.button_h_layout.addSpacing(2)
         self.button_h_layout.addWidget(self.open_file_button)
@@ -346,7 +342,6 @@ class ReportTab(QWidget):
     def __init__(self, parent, report_path):
         super(ReportTab, self).__init__(parent)
         self.parent = parent
-        self.setFont(QFont(GloVar.font, 13))
         self.report_path = report_path
         self.initUI()
         self.show_html()
@@ -363,7 +358,6 @@ class ReportTab(QWidget):
         self.html_path_label = QLabel(self)
         self.html_path_label.setMaximumHeight(25)
         self.html_path_label.setText('None')
-        self.html_path_label.setFont(QFont(GloVar.font, 13))
         # 打开文件按钮
         self.open_file_button = QToolButton()
         # 打开文件快捷键
@@ -450,7 +444,6 @@ class TextTab(QWidget):
     def __init__(self, parent, text_path):
         super(TextTab, self).__init__(parent)
         self.parent = parent
-        self.setFont(QFont(GloVar.font, 13))
         self.text_path = text_path
         self.initUI()
         self.show_text()
@@ -466,7 +459,6 @@ class TextTab(QWidget):
         # 显示文本路径
         self.text_path_label = QLabel(self)
         self.text_path_label.setText('None')
-        self.text_path_label.setFont(QFont(GloVar.font, 13))
 
         # 打开文件按钮
         self.open_file_button = QToolButton()

@@ -2,7 +2,7 @@ import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import RobotArmAction, MotionAction, GloVar
+from GlobalVar import RobotArmAction, MotionAction
 
 # 动作添加控件
 class AddActionTab(QWidget):
@@ -79,8 +79,6 @@ class AddActionTab(QWidget):
         self.general_layout.addLayout(self.button_layout)
 
         self.setLayout(self.general_layout)
-        # 设置字体
-        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(300)
 

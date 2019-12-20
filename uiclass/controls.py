@@ -3,7 +3,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton, QFileDialog
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile, WindowStatus
+from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile
 
 # 自定义动作展示控件(action)
 class ActionControl(QWidget):
@@ -434,8 +434,6 @@ class CameraParamAdjustControl(QDialog):
         self.general_layout.addSpacing(40)
         self.general_layout.addLayout(self.sure_button_layout)
         self.setLayout(self.general_layout)
-        # 设置字体
-        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setFixedWidth(500)
@@ -525,8 +523,6 @@ class FrameRateAdjustControl(QDialog):
         self.general_layout.addLayout(self.sure_button_h_layout)
 
         self.setLayout(self.general_layout)
-        # 设置字体
-        self.setFont(QFont(GloVar.font, 11))
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setWindowTitle('离线视频帧率参数')

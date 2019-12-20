@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit
 from PyQt5.QtCore import pyqtSignal
-from GlobalVar import Logger, GloVar
+from GlobalVar import Logger
 
 
 class ProjectBar(QWidget):
@@ -11,7 +11,7 @@ class ProjectBar(QWidget):
 
     def __init__(self, parent, path):
         super(ProjectBar, self).__init__(parent)
-        self.setStyleSheet('font-family: '+ GloVar.font +'; font-size: 13pt; background-color:transparent;')
+        self.setStyleSheet('background-color:transparent;')
         self.parent = parent
         self.path = path
 
