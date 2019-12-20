@@ -18,7 +18,6 @@ class ShowCaseTab(QWidget):
         # 样式美化
         style = BeautifyStyle.font_family + BeautifyStyle.font_size + BeautifyStyle.file_dialog_qss
         self.setStyleSheet(style)
-        self.setStyleSheet('font-family : %s; font-size: 13pt' % GloVar.font)
         self.index = -1
         # case控件列表
         self.case_control_list = []

@@ -26,7 +26,6 @@ class ShowScriptTab(QWidget):
         # self.script_edit.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.script_edit.setWordWrapMode(QTextOption.NoWrap)
         self.script_edit.setStyleSheet('background-color:#C0D8F0')
-        self.script_edit.setFont(QFont(GloVar.font, 13))
         # 布局
         self.general_layout = QVBoxLayout(self)
         self.general_layout.setSpacing(0)
