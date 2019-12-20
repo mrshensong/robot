@@ -91,6 +91,8 @@ class VideoLabel(QLabel):
         self.current_frame = 0
         # 当前视频总帧数
         self.frame_count = 0
+        # 视频title的序列号([1/5]点击.mp4)
+        self.video_title_serial_show = ''
         # 滑动条标志位(如果有滑动动作标志为True, 否则为False)
         self.slider_flag = False
         # 读取配置文件中车机真实尺寸
@@ -532,7 +534,7 @@ class VideoLabel(QLabel):
             # 设置视频进度滑动条范围
             self.video_progress_bar.setRange(0, self.frame_count - 1)
             # 设置视频title
-            self.label_video_title.setText('[' + str(self.current_video + 1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
+            self.label_video_title.setText(self.set_video_title(self.current_video, self.videos, self.videos_title))
             self.label_video_title.setStyleSheet('color:white')
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
@@ -579,7 +581,7 @@ class VideoLabel(QLabel):
             # 设置视频进度滑动条范围
             self.video_progress_bar.setRange(0, self.frame_count - 1)
             # 设置视频title
-            self.label_video_title.setText('[' + str(self.current_video+1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
+            self.label_video_title.setText(self.set_video_title(self.current_video, self.videos, self.videos_title))
             self.label_video_title.setStyleSheet('color:white')
             self.last_frame_button.setEnabled(True)
             self.next_frame_button.setEnabled(True)
@@ -671,7 +673,7 @@ class VideoLabel(QLabel):
         self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_play + ')}')
         self.status_video_button.setToolTip(self.video_status_play_tip)
         # 设置视频title
-        self.label_video_title.setText('[' + str(self.current_video + 1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
+        self.label_video_title.setText(self.set_video_title(self.current_video, self.videos, self.videos_title))
         self.label_video_title.setStyleSheet('color:white')
         # 获取第一帧
         _, self.image = self.video_cap.read()
@@ -715,7 +717,7 @@ class VideoLabel(QLabel):
         self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_play + ')}')
         self.status_video_button.setToolTip(self.video_status_play_tip)
         # 设置视频title
-        self.label_video_title.setText('[' + str(self.current_video + 1) + '/' + str(len(self.videos)) + ']' + self.videos_title[self.current_video])
+        self.label_video_title.setText(self.set_video_title(self.current_video, self.videos, self.videos_title))
         self.label_video_title.setStyleSheet('color:white')
         # 获取第一帧
         _, self.image = self.video_cap.read()
@@ -853,6 +855,17 @@ class VideoLabel(QLabel):
         self.signal.emit('reset_video_label_size>local_video')
         # 铺设背景图
         self.setPixmap(QPixmap(IconPath.data_process_finished_file))
+
+
+    # 返回视频title
+    def set_video_title(self, current_video, videos, videos_title):
+        videos_num = len(videos)
+        if videos_num > 1:
+            self.video_title_serial_show = '[' + str(current_video + 1) + '/' + str(videos_num) + ']'
+        else:
+            self.video_title_serial_show = ''
+        video_title = self.video_title_serial_show + videos_title[current_video]
+        return video_title
 
 
     # 鼠标点击事件

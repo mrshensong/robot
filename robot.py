@@ -170,7 +170,7 @@ class UiMainWindow(QMainWindow):
         # 实时流相关action
         self.live_video_toolbar_label = QLabel(self)
         self.live_video_toolbar_label.setText('实时流:')
-        self.live_video_toolbar_label.setStyleSheet('color:blue')
+        self.live_video_toolbar_label.setStyleSheet('color:#0099FF')
         self.live_video_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.live_video_setting_action               = QAction(QIcon(IconPath.Icon_live_video_setting), '设置', self)
         self.live_video_switch_camera_status_action  = QAction(QIcon(IconPath.Icon_live_video_open_camera), '打开摄像头', self)
@@ -184,7 +184,7 @@ class UiMainWindow(QMainWindow):
         # robot相关action
         self.robot_toolbar_label = QLabel(self)
         self.robot_toolbar_label.setText('机械臂:')
-        self.robot_toolbar_label.setStyleSheet('color:blue')
+        self.robot_toolbar_label.setStyleSheet('color:#0099FF')
         self.robot_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.robot_click_action        = QAction(QIcon(IconPath.Icon_robot_click), '单击', self)
         self.robot_double_click_action = QAction(QIcon(IconPath.Icon_robot_double_click), '双击', self)
@@ -206,18 +206,18 @@ class UiMainWindow(QMainWindow):
         # 视频播放工具栏
         self.local_video_toolbar_label = QLabel(self)
         self.local_video_toolbar_label.setText('本地视频:')
-        self.local_video_toolbar_label.setStyleSheet('color:blue')
+        self.local_video_toolbar_label.setStyleSheet('color:#0099FF')
         self.local_video_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.local_video_import_video_action = QAction(QIcon(IconPath.Icon_local_import_video), '导入视频', self)
         self.local_video_setting_action      = QAction(QIcon(IconPath.Icon_local_video_setting), '设置', self)
         self.local_video_setting_action.setEnabled(False)
         # 绑定函数
-        self.local_video_import_video_action.triggered.connect(self.import_local_video)
+        self.local_video_import_video_action.triggered.connect(lambda : self.import_local_video(None))
         self.local_video_setting_action.triggered.connect(self.set_frame_rate)
         # 数据处理工具栏
         self.data_process_toolbar_label = QLabel(self)
         self.data_process_toolbar_label.setText('数据处理:')
-        self.data_process_toolbar_label.setStyleSheet('color:blue')
+        self.data_process_toolbar_label.setStyleSheet('color:#0099FF')
         self.data_process_toolbar_label.setFont(QFont(GloVar.font, 13))
         self.data_process_import_video_action = QAction(QIcon(IconPath.Icon_data_process_import_video), '导入视频', self)
         self.data_process_setting_action      = QAction(QIcon(IconPath.Icon_data_process_setting), '设置', self)
@@ -523,6 +523,10 @@ class UiMainWindow(QMainWindow):
             # 设置ToolTip提示
             index = self.main_show_tab_widget.indexOf(text_tab)
             self.main_show_tab_widget.setTabToolTip(index, text_path)
+        # 打开视频文件
+        elif signal_str.startswith('open_video>'):
+            video_file = signal_str.split('open_video>')[1]
+            self.import_local_video(video_file)
 
 
     '''以下内容为实时流工具栏相关操作'''
@@ -665,7 +669,7 @@ class UiMainWindow(QMainWindow):
 
     '''本地视频播放工具栏相关操作'''
     # 本地视频播放
-    def import_local_video(self):
+    def import_local_video(self, video_file=None):
         # 先停掉视频
         self.main_show_tab_widget.video_tab.video_label.timer_video.stop()
         # 在选择视频的时候判断此时实时流是否开启, 如果为True说明开启着, 如果False说明关闭着
@@ -675,52 +679,61 @@ class UiMainWindow(QMainWindow):
         if self.main_show_tab_widget.video_tab.video_label.camera_status == self.main_show_tab_widget.video_tab.video_label.camera_opened:
             camera_opened_flag = True
             self.switch_camera_status()
-        self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
-        if self.get_path:
-            if self.videos_path != self.get_path:
-                # 保存此次打开的路径(路径默认上一次)
-                self.videos_path = self.get_path
-                Profile(type='write', file=GloVar.config_file_path, section='param', option='videos_path', value=self.get_path)
+        if video_file is None:
+            self.get_path = QFileDialog.getExistingDirectory(self, '选择文件夹', self.videos_path)
+            if self.get_path:
+                if self.videos_path != self.get_path:
+                    # 保存此次打开的路径(路径默认上一次)
+                    self.videos_path = self.get_path
+                    Profile(type='write', file=GloVar.config_file_path, section='param', option='videos_path', value=self.get_path)
+                RobotArmAction.uArm_action_type = None
+                videos, videos_title = [], []
+                for home, dirs, files in os.walk(self.get_path):
+                    for file in files:
+                        # 判断视频文件(通过后缀名)
+                        (file_text, extension) = os.path.splitext(file)
+                        if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
+                            # 文件名列表, 包含完整路径
+                            file = MergePath([home, file]).merged_path
+                            videos.append(file)
+                            videos_title.append(file)
+            else:
+                Logger('没有选择视频路径!')
+                # 如果没有选择路径, 实时视频流恢复之前状态
+                if camera_opened_flag is True:
+                    self.switch_camera_status()
+                # 如果没有选择路径, 定时器恢复之前状态
+                if self.main_show_tab_widget.video_tab.video_label.video_status == self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING:
+                    self.main_show_tab_widget.video_tab.video_label.timer_video.start()
+                return
+        # 直接传入视频文件参数(打开一个视频文件)
+        else:
             RobotArmAction.uArm_action_type = None
             videos, videos_title = [], []
-            for home, dirs, files in os.walk(self.get_path):
-                for file in files:
-                    # 判断视频文件(通过后缀名)
-                    (file_text, extension) = os.path.splitext(file)
-                    if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
-                        # 文件名列表, 包含完整路径
-                        file = MergePath([home, file]).merged_path
-                        videos.append(file)
-                        videos_title.append(file)
-            # 传入videos & videos_title
-            self.main_show_tab_widget.video_tab.video_label.videos = videos
-            self.main_show_tab_widget.video_tab.video_label.videos_title = videos_title
-            # 关闭此时不能打开的控件
-            self.robot_toolbar.setEnabled(False)
-            self.live_video_box_screen_action.setEnabled(False)
-            self.live_video_capture_action.setEnabled(False)
-            self.live_video_setting_action.setEnabled(False)
-            self.show_tab_widget.setEnabled(False)
+            videos.append(video_file)
+            videos_title.append(video_file)
+        # 传入videos & videos_title
+        self.main_show_tab_widget.video_tab.video_label.videos = videos
+        self.main_show_tab_widget.video_tab.video_label.videos_title = videos_title
+        # 关闭此时不能打开的控件
+        self.robot_toolbar.setEnabled(False)
+        self.live_video_box_screen_action.setEnabled(False)
+        self.live_video_capture_action.setEnabled(False)
+        self.live_video_setting_action.setEnabled(False)
+        self.show_tab_widget.setEnabled(False)
 
-            self.local_video_setting_action.setEnabled(True)
-            # 此时可以非使能设置按钮和执行数据处理按钮
-            self.data_process_execute_action.setEnabled(False)
-            self.data_process_setting_action.setEnabled(False)
-            # 是否需要进行数据检测的标志位复位
-            self.need_detect_data_flag = False
-
-            # 强制关闭脚本录制状态
-            self.switch_uArm_with_record_status(record_status=False)
-            # 离线视频播放
-            self.main_show_tab_widget.video_tab.video_label.import_local_video()
-        else:
-            Logger('没有选择视频路径!')
-            # 如果没有选择路径, 实时视频流恢复之前状态
-            if camera_opened_flag is True:
-                self.switch_camera_status()
-            # 如果没有选择路径, 定时器恢复之前状态
-            if self.main_show_tab_widget.video_tab.video_label.video_status == self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING:
-                self.main_show_tab_widget.video_tab.video_label.timer_video.start()
+        self.local_video_setting_action.setEnabled(True)
+        # 此时可以非使能设置按钮和执行数据处理按钮
+        self.data_process_execute_action.setEnabled(False)
+        self.data_process_setting_action.setEnabled(False)
+        # 是否需要进行数据检测的标志位复位
+        self.need_detect_data_flag = False
+        # 强制关闭脚本录制状态
+        self.switch_uArm_with_record_status(record_status=False)
+        # 离线视频播放
+        self.main_show_tab_widget.video_tab.video_label.import_local_video()
+        # 切换到video页面
+        self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.video_tab)
 
 
     # 设置本地视频帧率
@@ -748,21 +761,6 @@ class UiMainWindow(QMainWindow):
                 # 保存此次打开的路径(路径默认上一次)
                 self.videos_path = self.get_path
                 Profile(type='write', file=GloVar.config_file_path, section='param', option='videos_path', value=self.get_path)
-            RobotArmAction.uArm_action_type = None
-            # 设置不可框选模板&鼠标变为标准鼠标
-            self.main_show_tab_widget.video_tab.video_label.setCursor(Qt.ArrowCursor)
-            GloVar.select_template_flag = False
-            # 关闭此时不能打开的控件
-            self.robot_toolbar.setEnabled(False)
-            self.live_video_box_screen_action.setEnabled(False)
-            self.live_video_capture_action.setEnabled(False)
-            self.live_video_setting_action.setEnabled(False)
-            self.show_tab_widget.setEnabled(False)
-            self.local_video_setting_action.setEnabled(False)
-            self.data_process_setting_action.setEnabled(True)
-            self.data_process_execute_action.setEnabled(False)
-            # 是否需要进行数据检测的标志位复位
-            self.need_detect_data_flag = False
             # 获取需要展示出来的视频
             videos, videos_title, videos_without_template = [], [], []
             for home, dirs, files in os.walk(self.get_path):
@@ -771,32 +769,7 @@ class UiMainWindow(QMainWindow):
                     file = MergePath([home, '1.mp4']).merged_path
                     videos.append(file)
                     videos_title.append(file)
-            # 遍历出来没有对应模板的视频文件
-            for video in videos:
-                template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
-                # 模板图片不存在
-                if os.path.exists(template_path) is False:
-                    videos_without_template.append(video)
-            if len(videos_without_template) > 0:
-                # 将videos_without_template作为videos
-                self.main_show_tab_widget.video_tab.video_label.videos = videos_without_template
-                self.main_show_tab_widget.video_tab.video_label.videos_title = videos_without_template
-                self.main_show_tab_widget.video_tab.video_label.import_data_process_with_video()
-                # 强制关闭脚本录制状态
-                self.switch_uArm_with_record_status(record_status=False)
-                # 同时启动模板检测
-                self.need_detect_data_flag = True
-                # 打开数据处理标志位
-                GloVar.data_process_flag = True
-                Thread(target=self.detect_data_is_ready, args=()).start()
-            else:
-                Logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
-                # 此时可以使能执行数据处理按钮
-                self.data_process_execute_action.setEnabled(True)
-                self.data_process_setting_action.setEnabled(False)
-                self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-                self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
-                self.main_show_tab_widget.video_tab.video_label.import_data_process_without_video()
+        # 没有选择路径
         else:
             Logger('没有选择视频路径, 数据处理取消!')
             # 如果没有选择路径, 实时视频流恢复之前状态
@@ -805,6 +778,51 @@ class UiMainWindow(QMainWindow):
             # 如果没有选择路径, 定时器恢复之前状态
             if self.main_show_tab_widget.video_tab.video_label.video_status == self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING:
                 self.main_show_tab_widget.video_tab.video_label.timer_video.start()
+            return
+        # 对路径进行处理
+        RobotArmAction.uArm_action_type = None
+        # 设置不可框选模板&鼠标变为标准鼠标
+        self.main_show_tab_widget.video_tab.video_label.setCursor(Qt.ArrowCursor)
+        GloVar.select_template_flag = False
+        # 关闭此时不能打开的控件
+        self.robot_toolbar.setEnabled(False)
+        self.live_video_box_screen_action.setEnabled(False)
+        self.live_video_capture_action.setEnabled(False)
+        self.live_video_setting_action.setEnabled(False)
+        self.show_tab_widget.setEnabled(False)
+        self.local_video_setting_action.setEnabled(False)
+        self.data_process_setting_action.setEnabled(True)
+        self.data_process_execute_action.setEnabled(False)
+        # 是否需要进行数据检测的标志位复位
+        self.need_detect_data_flag = False
+        # 遍历出来没有对应模板的视频文件
+        for video in videos:
+            template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+            # 模板图片不存在
+            if os.path.exists(template_path) is False:
+                videos_without_template.append(video)
+        # 切到视频页面
+        self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.video_tab)
+        if len(videos_without_template) > 0:
+            # 将videos_without_template作为videos
+            self.main_show_tab_widget.video_tab.video_label.videos = videos_without_template
+            self.main_show_tab_widget.video_tab.video_label.videos_title = videos_without_template
+            self.main_show_tab_widget.video_tab.video_label.import_data_process_with_video()
+            # 强制关闭脚本录制状态
+            self.switch_uArm_with_record_status(record_status=False)
+            # 同时启动模板检测
+            self.need_detect_data_flag = True
+            # 打开数据处理标志位
+            GloVar.data_process_flag = True
+            Thread(target=self.detect_data_is_ready, args=()).start()
+        else:
+            Logger('所有视频都有其对应的模板图片, 可以开始处理数据!')
+            # 此时可以使能执行数据处理按钮
+            self.data_process_execute_action.setEnabled(True)
+            self.data_process_setting_action.setEnabled(False)
+            self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
+            self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
+            self.main_show_tab_widget.video_tab.video_label.import_data_process_without_video()
 
 
     # 数据处理执行函数
