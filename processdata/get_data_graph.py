@@ -30,6 +30,7 @@ class GenerateDataGraph:
         case_num = len(case_list)
         # 画布大小根据case数量来
         plt.figure(figsize=(12, case_num + 2))
+        # plt.set_facecolor('blueviolet')
         # 根据在标准值和测试值中取最大值再加上20, 作为表的宽度
         chat_width = max(actual_value_list + standard_list) + 100
         # 设置x & y 轴范围

@@ -20,10 +20,12 @@ class GenerateReport:
 
     # 通过柱形图表来生成html中的一部分
     def generate_html_by_graph(self, graph):
+        # 居左必须加此句
+        # '<p style="text-align:left"><img src="'+ graph +'"/></p>\n'
         case_type = graph.split('.')[0]
         text = '<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>\n' + \
                '<hr/>\n' +\
-               '<p style="text-align:left"><img src="'+ graph +'"/></p>\n'
+               '<p align="center"><img src="'+ graph +'"/></p>\n'
         return text
 
 
@@ -80,31 +82,63 @@ class GenerateReport:
 
 
     # 获取报告描述
-    def get_description(self):
+    def get_description_chart(self):
         # 报告路径
         report_path = self.report_name
         # 开始时间
         start_time = '-'.join(os.path.split(self.report_name)[0].split('/')[-2:])
-        # 获取报告状态(pass/failed)
-        failures = 0
+        # case总数
+        case_totle_num = 0
+        # 成功case个数
+        case_success_num = 0
+        # 失败case个数
+        case_fail_num = 0
+        # 成功率
+        case_success_rate = 0.0
         for key, data in self.data_dict.items():
             data_length = len(data)
             for i in range(data_length):
-                if data[i][7] == 'failed':
-                    failures += 1
-        report_status = 'pass' if failures == 0 else 'failed'
-        html_description = '<p>\n' +\
-            '<span style="font-family:arial;font-size:20px;font-weight:bold">报告路径: </span>\n' +\
-            '<span style="font-size:20px">' + report_path + '</span>\n' +\
-            '</p>\n' +\
-            '<p>\n' +\
-            '<span style="font-family:arial;font-size:20px;font-weight:bold">开始时间: </span>\n' +\
-            '<span style="font-size:20px">' + start_time + '</span>\n' +\
-            '</p>\n' +\
-            '<p>\n' +\
-            '<span style="font-family:arial;font-size:20px;font-weight:bold">测试结果: </span>\n' +\
-            '<span style="font-size:20px">' + report_status + '</span>\n' +\
-            '</p>\n'
+                case_totle_num += 1
+                if data[i][7] == 'pass':
+                    case_success_num += 1
+        case_fail_num = case_totle_num - case_success_num
+        case_success_rate = '%.0f%%' % ((case_success_num / case_totle_num) * 100)
+        report_status = 'pass' if case_fail_num == 0 else 'failed'
+        result_status_color = '#18C0A8' if report_status == 'pass' else '#FF3030'
+        # html_description = '<p>\n' +\
+        #     '<span style="font-family:arial;font-size:20px;font-weight:bold">报告路径: </span>\n' +\
+        #     '<span style="font-size:20px">' + report_path + '</span>\n' +\
+        #     '</p>\n' +\
+        #     '<p>\n' +\
+        #     '<span style="font-family:arial;font-size:20px;font-weight:bold">开始时间: </span>\n' +\
+        #     '<span style="font-size:20px">' + start_time + '</span>\n' +\
+        #     '</p>\n' +\
+        #     '<p>\n' +\
+        #     '<span style="font-family:arial;font-size:20px;font-weight:bold">测试结果: </span>\n' +\
+        #     '<span style="font-size:20px">' + report_status + '</span>\n' +\
+        #     '</p>\n'
+        html_description = '<p style="font-family:arial;font-size:20px;font-weight:bold">'+ str(start_time) +'/测试报告详情如下: </p>\
+                            <hr/>\
+                            <table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\
+                            <tr height="50" align="center" style="font-weight: bold">\
+                            <td width="30%"><font color="#606060">报告路径</font></td>\
+                            <td width="20%"><font color="#606060">开始时间</font></td>\
+                            <td width="10%"><font color="#606060">成功</font></td>\
+                            <td width="10%"><font color="#606060">失败</font></td>\
+                            <td width="10%"><font color="#606060">总计</font></td>\
+                            <td width="10%"><font color="#606060">成功率</font></td>\
+                            <td width="10%"><font color="#606060">状态</font></td>\
+                            </tr>\
+                            <tr height="30" align="center">\
+                            <td><font color="#60A8D8">'+ str(report_path) +'</font></td>\
+                            <td><font color="#30D878">'+ str(start_time) +'</font></td>\
+                            <td><font color="#1890C0">'+ str(case_success_num) +'</font></td>\
+                            <td><font color="#30D8D8">'+ str(case_fail_num) +'</font></td>\
+                            <td><font color="#0078C0">'+ str(case_totle_num) +'</font></td>\
+                            <td><font color="#996699">'+ str(case_success_rate) +'</font></td>\
+                            <td style="font-weight: bold"><font color="'+ str(result_status_color) +'">'+ str(report_status) +'</font></td>\
+                            </tr>\
+                            </table>'
         return html_description
 
 
@@ -115,11 +149,11 @@ class GenerateReport:
                '<head>\n' +\
                '<meta charset="utf-8">\n' +\
                '</head>\n' +\
-               '<body>\n'
+               '<body bgcolor="#F0F0F0">\n'
         html_tail = '\n</body>' +\
                     '\n</html>'
         # 获取报告开头描述
-        html_description = self.get_description()
+        html_description = self.get_description_chart()
         # 获取图表
         html_body = self.get_table_chart_report()
         # 获取html_body内容
