@@ -31,39 +31,39 @@ class GenerateReport:
     def get_table_chart_report(self):
         html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">用例执行情况如下: </p>\n' +\
                     '<hr/>\n' +\
-                    '<table border="1" cellspacing="0">\n' +\
-                    '<tr bgcolor="gray" height="50" align="center">\n' +\
-                    '<td width="250">类型</td>\n' +\
-                    '<td width="500">用例</td>\n' +\
-                    '<td width="100">次数</td>\n' +\
-                    '<td width="100">标准(ms)</td>\n' +\
-                    '<td width="100">平均值(ms)</td>\n' +\
-                    '<td width="100">状态</td>\n' +\
+                    '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' +\
+                    '<tr height="50" align="center" style="font-weight: bold">\n' +\
+                    '<td width="10%"><font color="#606060">类型</font></td>\n' +\
+                    '<td width="50%"><font color="#606060">用例</font></td>\n' +\
+                    '<td width="10%"><font color="#606060">次数</font></td>\n' +\
+                    '<td width="10%"><font color="#606060">标准(ms)</font></td>\n' +\
+                    '<td width="10%"><font color="#606060">平均值(ms)</font></td>\n' +\
+                    '<td width="10%"><font color="#606060">状态</font></td>\n' +\
                     '</tr>\n'
         for key, data in self.data_dict.items():
             data_length = len(data)
             for i in range(data_length):
                 if data[i][7] == 'failed':
-                    background_color = 'red'
+                    result_color = '#FF3030'
                 else:
-                    background_color = 'green'
+                    result_color = '#18C0A8'
                 # 第一个需要合并单元格(展示测试类型)
                 if i == 0:
-                    html_chat += '<tr bgcolor="'+ background_color +'" height="30" align="center">\n' +\
-                                 '<td bgcolor="blue" rowspan="'+ str(data_length) +'">'+ str(key) +'</td>\n' +\
-                                 '<td align="left">'+ str(data[i][0]) +'</td>\n' +\
-                                 '<td>'+ str(data[i][1]) +'</td>\n' +\
-                                 '<td>'+ str(data[i][4]) +'</td>\n' +\
-                                 '<td>'+ str(data[i][6]) +'</td>\n' +\
-                                 '<td>'+ str(data[i][7]) +'</td>\n' +\
+                    html_chat += '<tr height="30" align="center">\n' +\
+                                 '<td rowspan="' + str(data_length) + '"><font color="#60A8D8">' + str(key) + '</font></td>\n' +\
+                                 '<td><font color="#30D878">' + str(data[i][0]) +'</font></td>\n' +\
+                                 '<td><font color="#1890C0">' + str(data[i][1]) +'</font></td>\n' +\
+                                 '<td><font color="#30D8D8">' + str(data[i][4]) +'</font></td>\n' +\
+                                 '<td><font color="#FFA860">' + str(data[i][6]) +'</font></td>\n' +\
+                                 '<td style="font-weight: bold"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' +\
                                  '</tr>\n'
                 else:
-                    html_chat += '<tr bgcolor="'+ background_color +'" height="30" align="center">\n' + \
-                                 '<td align="left">' + str(data[i][0]) + '</td>\n' + \
-                                 '<td>' + str(data[i][1]) + '</td>\n' + \
-                                 '<td>' + str(data[i][4]) + '</td>\n' + \
-                                 '<td>' + str(data[i][6]) + '</td>\n' + \
-                                 '<td>' + str(data[i][7]) + '</td>\n' + \
+                    html_chat += '<tr height="30" align="center">\n' + \
+                                 '<td><font color="#30D878">' + str(data[i][0]) + '</font></td>\n' + \
+                                 '<td><font color="#1890C0">' + str(data[i][1]) + '</font></td>\n' + \
+                                 '<td><font color="#30D8D8">' + str(data[i][4]) + '</font></td>\n' + \
+                                 '<td><font color="#FFA860">' + str(data[i][6]) + '</font></td>\n' + \
+                                 '<td style="font-weight: bold"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' + \
                                  '</tr>\n'
         html_chat += '</table>\n'
         return html_chat

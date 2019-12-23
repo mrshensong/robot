@@ -36,10 +36,11 @@ class GenerateDataGraph:
         plt.axis([10, chat_width, -1, case_num + 1])
         # 画条形(真实数据, 横向展示)
         y_list = [num + 0.2 for num in range(case_num)]
-        plt.barh(y=y_list, width=actual_value_list, label='测试时间', height=0.4, color='purple', alpha=0.5)
+        plt.barh(y=y_list, width=actual_value_list, label='测试时间', height=0.4, color='#18C0A8', alpha=1.0)
+        # plt.barh(y=y_list, width=actual_value_list, label='测试时间', height=0.4, color='#00C0C0', alpha=0.6)
         # 画条形(标准数据, 紧挨着真实数据)
         y_list = [num - 0.2 for num in range(case_num)]
-        plt.barh(y=y_list, width=standard_list, label='标准时间', height=0.4, color='steelblue', alpha=0.7)
+        plt.barh(y=y_list, width=standard_list, label='标准时间', height=0.4, color='#FFA860', alpha=1.0)
         # 显示case名
         plt.yticks(range(case_num), case_list)
         # 柱形图标注
@@ -52,9 +53,9 @@ class GenerateDataGraph:
         # 标注pass/failed
         for num, status in enumerate(status_list):
             if status == 'failed':
-                plt.text(chat_width - 40, num - 0.1, 'failed', size=16, color='red', ha='center', va='bottom')
+                plt.text(chat_width - 40, num - 0.1, 'failed', size=16, color='#FF3030', ha='center', va='bottom')
             else:
-                plt.text(chat_width - 40, num - 0.1, 'pass', size=16, color='green', ha='center', va='bottom')
+                plt.text(chat_width - 40, num - 0.1, 'pass', size=16, color='#18C0A8', ha='center', va='bottom')
         # 获取图片title
         title = file_name.split('/')[-1].split('.')[0]
         plt.title('[' + title + ']' + '-->流畅度测试')
