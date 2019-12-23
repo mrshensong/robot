@@ -34,15 +34,21 @@ class GenerateReport:
                     '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' +\
                     '<tr height="50" align="center" style="font-weight: bold">\n' +\
                     '<td width="10%"><font color="#606060">类型</font></td>\n' +\
-                    '<td width="50%"><font color="#606060">用例</font></td>\n' +\
+                    '<td width="30%"><font color="#606060">用例</font></td>\n' +\
                     '<td width="10%"><font color="#606060">次数</font></td>\n' +\
                     '<td width="10%"><font color="#606060">标准(ms)</font></td>\n' +\
                     '<td width="10%"><font color="#606060">平均值(ms)</font></td>\n' +\
+                    '<td width="10%"><font color="#606060">最大值(ms)</font></td>\n' +\
+                    '<td width="10%"><font color="#606060">最小值(ms)</font></td>\n' +\
                     '<td width="10%"><font color="#606060">状态</font></td>\n' +\
                     '</tr>\n'
         for key, data in self.data_dict.items():
             data_length = len(data)
             for i in range(data_length):
+                # 计算耗时最大值和最小值
+                time_consume_list = [execute_info['耗时'] for execute_info in data[i][2]]
+                time_consume_max_value = max(time_consume_list)
+                time_consume_min_value = min(time_consume_list)
                 if data[i][7] == 'failed':
                     result_color = '#FF3030'
                 else:
@@ -55,6 +61,8 @@ class GenerateReport:
                                  '<td><font color="#1890C0">' + str(data[i][1]) +'</font></td>\n' +\
                                  '<td><font color="#30D8D8">' + str(data[i][4]) +'</font></td>\n' +\
                                  '<td><font color="#FFA860">' + str(data[i][6]) +'</font></td>\n' +\
+                                 '<td><font color="#0078C0">' + str(time_consume_max_value) +'</font></td>\n' +\
+                                 '<td><font color="#996699">' + str(time_consume_min_value) +'</font></td>\n' +\
                                  '<td style="font-weight: bold"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' +\
                                  '</tr>\n'
                 else:
@@ -63,6 +71,8 @@ class GenerateReport:
                                  '<td><font color="#1890C0">' + str(data[i][1]) + '</font></td>\n' + \
                                  '<td><font color="#30D8D8">' + str(data[i][4]) + '</font></td>\n' + \
                                  '<td><font color="#FFA860">' + str(data[i][6]) + '</font></td>\n' + \
+                                 '<td><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' + \
+                                 '<td><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' + \
                                  '<td style="font-weight: bold"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' + \
                                  '</tr>\n'
         html_chat += '</table>\n'
