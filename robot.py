@@ -64,7 +64,7 @@ class UiMainWindow(QMainWindow):
         self.setGeometry(260, 70, 1400, 900)
         # self.resize(1400, 900)
         self.setMinimumSize(QSize(1200, 700))
-        self.setWindowTitle("Auto Robot")
+        self.setWindowTitle("流畅度测试工具(逐鹿)")
         self.setWindowIcon(QIcon(self.icon_file))
         # 中间widget区域
         self.central_widget = QWidget(self)
@@ -153,11 +153,11 @@ class UiMainWindow(QMainWindow):
     # 菜单栏
     def menu_bar_show(self):
         # 菜单栏显示
-        self.open_action = QAction('open', self)
+        self.open_action = QAction('打开文件', self)
         self.open_action.triggered.connect(self.connect_open_file)
-        self.help_action = QAction('help', self)
-        self.file_bar = self.menu_bar.addMenu('File')
-        self.help_bar = self.menu_bar.addMenu('Help')
+        self.help_action = QAction('操作说明', self)
+        self.file_bar = self.menu_bar.addMenu('文件')
+        self.help_bar = self.menu_bar.addMenu('帮助')
         self.file_bar.addAction(self.open_action)
         self.help_bar.addAction(self.help_action)
 
