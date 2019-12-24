@@ -61,7 +61,7 @@ class GetStartupTime:
                 else:
                     start_threshold_list.append(0)
                 # 终点
-                # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点)
+                # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点每个边大20像素)
                 # 行起点
                 row_start = (end_mask_gray[0][0] * 10 - end_mask_height)
                 if row_start < 0:
@@ -250,8 +250,6 @@ class GetStartupTime:
             if case_type not in list(case_type_dict.keys()):
                 case_type_dict[case_type] = []
             case_type_dict[case_type].append(case_data)
-        # 将数据处理完成标志位置位
-        GloVar.data_process_finished_flag = True
         # 返回(如:{'滑动':[[桌面滑动], [设置滑动]], '点击':[[点击设置], [点击地图]]})
         return case_type_dict
 
@@ -433,6 +431,8 @@ class GetStartupTime:
         self.get_graph_data(graph_path=self.report_path, case_date_dict=case_data_dict)
         # # 生成html并保存
         self.get_report(report_path=self.report_path, case_data_dict=case_data_dict)
+        # 将数据处理完成标志位置位
+        GloVar.data_process_finished_flag = True
         Logger('data process finished!')
         WindowStatus.operating_status = '空闲状态/测试结束'
 
