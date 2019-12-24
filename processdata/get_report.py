@@ -8,6 +8,11 @@ class GenerateReport:
         self.report_path = report_path
         self.data_dict = data_dict
         self.report_name = '/'.join([report_path, 'report.html'])
+        self.body_background_color = '#F0F0F0'
+        self.chart_background_color = '#D8F0D8'
+        self.chart_border_color = '#A8A8A8'
+        self.chart_skip_line_color = '#FFF0D8'
+        self.chart_hover_line_color = '#99CC99'
 
     # 获取report路径下的所有report图片(.png)
     def get_report_graph(self):
@@ -33,7 +38,7 @@ class GenerateReport:
     def get_table_chart_report(self):
         html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">用例执行详细情况如下: </p>\n' \
                     '<hr/>\n' \
-                    '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' \
+                    '<table width="100%" border= "1px solid '+ self.chart_border_color +'" cellspacing="0">\n' \
                     '<tr height="50" align="center" style="font-weight: bold">\n' \
                     '<td width="10%"><font color="#606060">类型</font></td>\n' \
                     '<td width="30%"><font color="#606060">用例</font></td>\n' \
@@ -105,21 +110,9 @@ class GenerateReport:
         case_success_rate = '%.0f%%' % ((case_success_num / case_totle_num) * 100)
         report_status = 'pass' if case_fail_num == 0 else 'failed'
         result_status_color = '#18C0A8' if report_status == 'pass' else '#FF3030'
-        # html_description = '<p>\n' +\
-        #     '<span style="font-family:arial;font-size:20px;font-weight:bold">报告路径: </span>\n' +\
-        #     '<span style="font-size:20px">' + report_path + '</span>\n' +\
-        #     '</p>\n' +\
-        #     '<p>\n' +\
-        #     '<span style="font-family:arial;font-size:20px;font-weight:bold">开始时间: </span>\n' +\
-        #     '<span style="font-size:20px">' + start_time + '</span>\n' +\
-        #     '</p>\n' +\
-        #     '<p>\n' +\
-        #     '<span style="font-family:arial;font-size:20px;font-weight:bold">测试结果: </span>\n' +\
-        #     '<span style="font-size:20px">' + report_status + '</span>\n' +\
-        #     '</p>\n'
         html_description = '<p style="font-family:arial;font-size:20px;font-weight:bold"><i>'+ str(start_time) +'</i>/测试报告详情如下: </p>\n' \
                         '<hr/>\n' \
-                        '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' \
+                        '<table width="100%" border= "1px solid '+ self.chart_border_color +'" cellspacing="0">\n' \
                         '<tr height="50" align="center" style="font-weight: bold">\n' \
                         '<td width="30%"><font color="#606060">报告路径</font></td>\n' \
                         '<td width="20%"><font color="#606060">开始时间</font></td>\n' \
@@ -149,13 +142,13 @@ class GenerateReport:
                 '<head>\n' \
                 '<meta charset="utf-8">\n' \
                 '<style type="text/css">\n' \
-                'table{ border-collapse:collapse; border-spacing:0; border:1 px solid #F0F0F0}\n' \
-                'table{width: 100%; background-color: #D8F0D8;}\n' \
-                'table tr:nth-child(2n){background-color: #FFF0D8}\n' \
-                'table tr:hover{background-color: #99CC99}\n' \
+                'table{ border-collapse:collapse; border-spacing:0; border:1 px solid '+ self.body_background_color +'}\n' \
+                'table{width: 100%; background-color: '+ self.chart_background_color +';}\n' \
+                'table tr:nth-child(2n){background-color: '+ self.chart_skip_line_color +'}\n' \
+                'table tr:hover{background-color: '+ self.chart_hover_line_color +'}\n' \
                 '</style>\n' \
                 '</head>\n' \
-                '<body bgcolor="#F0F0F0">\n'
+                '<body bgcolor='+ self.body_background_color +'>\n'
         html_tail = '</body>\n</html>'
         # 获取报告开头描述
         html_description = self.get_description_chart()
