@@ -23,26 +23,26 @@ class GenerateReport:
         # 居左必须加此句
         # '<p style="text-align:left"><img src="'+ graph +'"/></p>\n'
         case_type = graph.split('.')[0]
-        text = '<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>\n' + \
-               '<hr/>\n' +\
+        text = '<h3 style="text-align:left">【'+ case_type +'】类测试结果如下: </h3>\n' \
+               '<hr/>\n' \
                '<p align="center"><img src="'+ graph +'"/></p>\n'
         return text
 
 
     # 获取表图报告
     def get_table_chart_report(self):
-        html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">用例执行情况如下: </p>\n' +\
-                    '<hr/>\n' +\
-                    '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' +\
-                    '<tr height="50" align="center" style="font-weight: bold">\n' +\
-                    '<td width="10%"><font color="#606060">类型</font></td>\n' +\
-                    '<td width="30%"><font color="#606060">用例</font></td>\n' +\
-                    '<td width="10%"><font color="#606060">次数</font></td>\n' +\
-                    '<td width="10%"><font color="#606060">标准(ms)</font></td>\n' +\
-                    '<td width="10%"><font color="#606060">平均值(ms)</font></td>\n' +\
-                    '<td width="10%"><font color="#606060">最大值(ms)</font></td>\n' +\
-                    '<td width="10%"><font color="#606060">最小值(ms)</font></td>\n' +\
-                    '<td width="10%"><font color="#606060">状态</font></td>\n' +\
+        html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">用例执行详细情况如下: </p>\n' \
+                    '<hr/>\n' \
+                    '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' \
+                    '<tr height="50" align="center" style="font-weight: bold">\n' \
+                    '<td width="10%"><font color="#606060">类型</font></td>\n' \
+                    '<td width="30%"><font color="#606060">用例</font></td>\n' \
+                    '<td width="10%"><font color="#606060">次数</font></td>\n' \
+                    '<td width="10%"><font color="#606060">标准(ms)</font></td>\n' \
+                    '<td width="10%"><font color="#606060">平均值(ms)</font></td>\n' \
+                    '<td width="10%"><font color="#606060">最大值(ms)</font></td>\n' \
+                    '<td width="10%"><font color="#606060">最小值(ms)</font></td>\n' \
+                    '<td width="10%"><font color="#606060">状态</font></td>\n' \
                     '</tr>\n'
         for key, data in self.data_dict.items():
             data_length = len(data)
@@ -57,25 +57,25 @@ class GenerateReport:
                     result_color = '#18C0A8'
                 # 第一个需要合并单元格(展示测试类型)
                 if i == 0:
-                    html_chat += '<tr height="30" align="center">\n' +\
-                                 '<td rowspan="' + str(data_length) + '"><font color="#60A8D8">' + str(key) + '</font></td>\n' +\
-                                 '<td><font color="#30D878">' + str(data[i][0]) +'</font></td>\n' +\
-                                 '<td><font color="#1890C0">' + str(data[i][1]) +'</font></td>\n' +\
-                                 '<td><font color="#30D8D8">' + str(data[i][4]) +'</font></td>\n' +\
-                                 '<td><font color="#FFA860">' + str(data[i][6]) +'</font></td>\n' +\
-                                 '<td><font color="#0078C0">' + str(time_consume_max_value) +'</font></td>\n' +\
-                                 '<td><font color="#996699">' + str(time_consume_min_value) +'</font></td>\n' +\
-                                 '<td style="font-weight: bold"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' +\
+                    html_chat += '<tr height="30" align="center">\n' \
+                                 '<td rowspan="' + str(data_length) + '" bgcolor="99CC99"><font color="#60A8D8">' + str(key) + '</font></td>\n' \
+                                 '<td><font color="#30D878">' + str(data[i][0]) +'</font></td>\n' \
+                                 '<td><font color="#1890C0">' + str(data[i][1]) +'</font></td>\n' \
+                                 '<td><font color="#30D8D8">' + str(data[i][4]) +'</font></td>\n' \
+                                 '<td><font color="#FFA860">' + str(data[i][6]) +'</font></td>\n' \
+                                 '<td><font color="#0078C0">' + str(time_consume_max_value) +'</font></td>\n' \
+                                 '<td><font color="#996699">' + str(time_consume_min_value) +'</font></td>\n' \
+                                 '<td style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' \
                                  '</tr>\n'
                 else:
-                    html_chat += '<tr height="30" align="center">\n' + \
-                                 '<td><font color="#30D878">' + str(data[i][0]) + '</font></td>\n' + \
-                                 '<td><font color="#1890C0">' + str(data[i][1]) + '</font></td>\n' + \
-                                 '<td><font color="#30D8D8">' + str(data[i][4]) + '</font></td>\n' + \
-                                 '<td><font color="#FFA860">' + str(data[i][6]) + '</font></td>\n' + \
-                                 '<td><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' + \
-                                 '<td><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' + \
-                                 '<td style="font-weight: bold"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' + \
+                    html_chat += '<tr height="30" align="center">\n' \
+                                 '<td><font color="#30D878">' + str(data[i][0]) + '</font></td>\n' \
+                                 '<td><font color="#1890C0">' + str(data[i][1]) + '</font></td>\n' \
+                                 '<td><font color="#30D8D8">' + str(data[i][4]) + '</font></td>\n' \
+                                 '<td><font color="#FFA860">' + str(data[i][6]) + '</font></td>\n' \
+                                 '<td><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' \
+                                 '<td><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' \
+                                 '<td style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' \
                                  '</tr>\n'
         html_chat += '</table>\n'
         return html_chat
@@ -117,41 +117,46 @@ class GenerateReport:
         #     '<span style="font-family:arial;font-size:20px;font-weight:bold">测试结果: </span>\n' +\
         #     '<span style="font-size:20px">' + report_status + '</span>\n' +\
         #     '</p>\n'
-        html_description = '<p style="font-family:arial;font-size:20px;font-weight:bold">'+ str(start_time) +'/测试报告详情如下: </p>\
-                            <hr/>\
-                            <table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\
-                            <tr height="50" align="center" style="font-weight: bold">\
-                            <td width="30%"><font color="#606060">报告路径</font></td>\
-                            <td width="20%"><font color="#606060">开始时间</font></td>\
-                            <td width="10%"><font color="#606060">成功</font></td>\
-                            <td width="10%"><font color="#606060">失败</font></td>\
-                            <td width="10%"><font color="#606060">总计</font></td>\
-                            <td width="10%"><font color="#606060">成功率</font></td>\
-                            <td width="10%"><font color="#606060">状态</font></td>\
-                            </tr>\
-                            <tr height="30" align="center">\
-                            <td><font color="#60A8D8">'+ str(report_path) +'</font></td>\
-                            <td><font color="#30D878">'+ str(start_time) +'</font></td>\
-                            <td><font color="#1890C0">'+ str(case_success_num) +'</font></td>\
-                            <td><font color="#30D8D8">'+ str(case_fail_num) +'</font></td>\
-                            <td><font color="#0078C0">'+ str(case_totle_num) +'</font></td>\
-                            <td><font color="#996699">'+ str(case_success_rate) +'</font></td>\
-                            <td style="font-weight: bold"><font color="'+ str(result_status_color) +'">'+ str(report_status) +'</font></td>\
-                            </tr>\
-                            </table>'
+        html_description = '<p style="font-family:arial;font-size:20px;font-weight:bold"><i>'+ str(start_time) +'</i>/测试报告详情如下: </p>\n' \
+                        '<hr/>\n' \
+                        '<table width="100%" border= "1px solid #A8A8A8" cellspacing="0">\n' \
+                        '<tr height="50" align="center" style="font-weight: bold">\n' \
+                        '<td width="30%"><font color="#606060">报告路径</font></td>\n' \
+                        '<td width="20%"><font color="#606060">开始时间</font></td>\n' \
+                        '<td width="10%"><font color="#606060">成功</font></td>\n' \
+                        '<td width="10%"><font color="#606060">失败</font></td>\n' \
+                        '<td width="10%"><font color="#606060">总计</font></td>\n' \
+                        '<td width="10%"><font color="#606060">成功率</font></td>\n' \
+                        '<td width="10%"><font color="#606060">状态</font></td>\n' \
+                        '</tr>\n' \
+                        '<tr height="30" align="center">\n' \
+                        '<td><font color="#60A8D8">'+ str(report_path) +'</font></td>\n' \
+                        '<td><font color="#30D878">'+ str(start_time) +'</font></td>\n' \
+                        '<td><font color="#1890C0">'+ str(case_success_num) +'</font></td>\n' \
+                        '<td><font color="#30D8D8">'+ str(case_fail_num) +'</font></td>\n' \
+                        '<td><font color="#0078C0">'+ str(case_totle_num) +'</font></td>\n' \
+                        '<td><font color="#996699">'+ str(case_success_rate) +'</font></td>\n' \
+                        '<td style="font-weight: bold; font-size: 16pt"><font color="'+ str(result_status_color) +'">'+ str(report_status) +'</font></td>\n' \
+                        '</tr>\n' \
+                        '</table>\n'
         return html_description
 
 
     # 保存生成的html代码
     def save_html(self):
-        html_head = '<!DOCTYPE HTML>\n' +\
-               '<html>\n' +\
-               '<head>\n' +\
-               '<meta charset="utf-8">\n' +\
-               '</head>\n' +\
-               '<body bgcolor="#F0F0F0">\n'
-        html_tail = '\n</body>' +\
-                    '\n</html>'
+        html_head = '<!DOCTYPE HTML>\n' \
+                '<html>\n' \
+                '<head>\n' \
+                '<meta charset="utf-8">\n' \
+                '<style type="text/css">\n' \
+                'table{ border-collapse:collapse; border-spacing:0; border:1 px solid #F0F0F0}\n' \
+                'table{width: 100%; background-color: #D8F0D8;}\n' \
+                'table tr:nth-child(2n){background-color: #FFF0D8}\n' \
+                'table tr:hover{background-color: #99CC99}\n' \
+                '</style>\n' \
+                '</head>\n' \
+                '<body bgcolor="#F0F0F0">\n'
+        html_tail = '</body>\n</html>'
         # 获取报告开头描述
         html_description = self.get_description_chart()
         # 获取图表
