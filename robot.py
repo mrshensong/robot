@@ -516,6 +516,10 @@ class UiMainWindow(QMainWindow):
         elif signal_str.startswith('open_video>'):
             video_file = signal_str.split('open_video>')[1]
             self.import_local_video(video_file)
+        # 打开excel文件
+        elif signal_str.startswith('open_excel>'):
+            excel_file = signal_str.split('open_excel>')[1]
+            Thread(target=self.open_system_file, args=(excel_file,)).start()
 
 
     '''以下内容为实时流工具栏相关操作'''
@@ -885,6 +889,11 @@ class UiMainWindow(QMainWindow):
             # 自动打开报告
             report_path = MergePath([self.get_path.replace('video', 'report'), 'report.html']).merged_path
             self.project_bar_widget.operation_file(file_path=report_path)
+
+
+    # 打开系统文件
+    def open_system_file(self, file):
+        os.system(file)
 
 
     '''菜单栏打开文件调用函数'''

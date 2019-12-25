@@ -22,7 +22,7 @@ class ProjectBar(QWidget):
         # 文件过滤
         # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
         # 需要显示的文件
-        filters = ['*.mp4', '*.avi', '*.mov', '*.flv', '*.html', '*.jpg', '*.png', '*.xlsx', '*.xml', '*.txt', '*.ini']
+        filters = ['*.mp4', '*.avi', '*.mov', '*.flv', '*.html', '*.jpg', '*.png', '*.xls', '*.xlsx', '*.xml', '*.txt', '*.ini']
         self.model.setNameFilters(filters)
         self.model.setNameFilterDisables(False)
 
@@ -80,6 +80,9 @@ class ProjectBar(QWidget):
             # 播放视频
             elif file_path.split('.')[1] in ['mp4', 'MP4', 'avi', 'AVI', 'mov', 'MOV', 'flv', 'FLV']:
                 self.signal.emit('open_video>' + str(file_path))
+            # 展示excel文件
+            elif file_path.split('.')[1] in ['xls', 'xlsx', 'XLS', 'XLSX']:
+                self.signal.emit('open_excel>' + str(file_path))
             else:
                 Logger('暂不支持此类型文件!!!')
         else:
