@@ -85,7 +85,7 @@ class UiMainWindow(QMainWindow):
         self.menu_bar.setObjectName('menu_bar')
         # 设置菜单栏样式
         menu_style = 'QMenu::item {background-color: transparent; padding-left: 5px; padding-right: 5px;}\
-                      QMenu::item:selected {background-color: #2dabf9;}'
+                      QMenu::item:selected {background-color: #2DABF9;}'
         self.menu_bar.setStyleSheet(menu_style)
         self.setMenuBar(self.menu_bar)
         # 状态栏 & 状态栏显示
@@ -464,13 +464,9 @@ class UiMainWindow(QMainWindow):
                     Logger('此次测试没有产生视频, 不用进行数据处理!')
                     return
                 Logger('此次测试完成, 开始进行数据处理!')
-                WindowStatus.operating_status = '使用状态/数据处理中...'
-                # 暂停视频流(减小CPU占用, 数据处理可以更快)
-                self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
-                self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
-                # 此处调用数据处理函数
-                test = GetStartupTime(video_path=video_path)
-                Thread(target=test.data_processing, args=()).start()
+                # 调用数据处理函数
+                self.get_path = video_path
+                self.data_process_execute()
             # 打印测试结束信息
             else:
                 Logger('此次测试完成, 不需要进行数据处理!')
@@ -826,6 +822,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
         # 调用video_label中的数据执行操作
         self.main_show_tab_widget.video_tab.video_label.data_process_execute()
+        WindowStatus.operating_status = '使用状态/数据处理中...'
         # 此处调用数据处理函数
         video_path = self.get_path
         test = GetStartupTime(video_path=video_path)
@@ -885,6 +882,9 @@ class UiMainWindow(QMainWindow):
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
             self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
             self.main_show_tab_widget.video_tab.video_label.data_process_finished()
+            # 自动打开报告
+            report_path = MergePath([self.get_path.replace('video', 'report'), 'report.html']).merged_path
+            self.project_bar_widget.operation_file(file_path=report_path)
 
 
     '''菜单栏打开文件调用函数'''

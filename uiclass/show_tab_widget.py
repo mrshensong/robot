@@ -42,6 +42,7 @@ class ShowTabWidget(QTabWidget):
         elif signal_str.startswith('write_script_tag>'):
             script_text = signal_str.split('write_script_tag>')[1]
             script_title = script_text.split('"')[1] if script_text else '空白'
+            script_title = '空白' if script_title == '' else script_title
             self.script_tab.script_edit.setText(script_text)
             self.script_tab.script_title.setText(script_title)
         # 保存case

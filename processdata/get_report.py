@@ -36,7 +36,7 @@ class GenerateReport:
 
     # 获取表图报告
     def get_table_chart_report(self):
-        html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">用例执行详细情况如下: </p>\n' \
+        html_chat = '<p style="font-family:arial;font-size:20px;font-weight:bold">测试用例执行详细情况如下: </p>\n' \
                     '<hr/>\n' \
                     '<table width="100%" border= "1px solid '+ self.chart_border_color +'" cellspacing="0">\n' \
                     '<tr height="50" align="center" style="font-weight: bold">\n' \
