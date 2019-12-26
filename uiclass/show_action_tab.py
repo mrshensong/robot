@@ -33,11 +33,17 @@ class ShowActionTab(QWidget):
         self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
         # 是否全部选中状态(False:没有全部选中, True:全部选中)
         self.select_all_flag = False
-        # 插入动作的index位置(不插入的话值为-1, 其他值则为插入地方)
-        self.insert_item_index = -1
         # 当前所有action需要保存的文件名(或者打开case时现实的case文件名)
         self.case_file_name = ''
         self.case_absolute_name = ''
+        # 插入动作的index位置(不插入的话值为-1, 其他值则为插入地方)
+        self.insert_item_index = -1
+        # action插入位置变量
+        self.insert_item_position = None
+        # 插入选中位置上方
+        self.insert_up_position = 'UP'
+        # 插入选中位置下方
+        self.insert_down_position = 'DOWN'
         """
         1.用来解决在一个list_widget中出现多次视频的问题(视频名后以序号区分)
         2.需要保存record_start的视频类型和名字(最近的record_stop需要共用同一个类型和名字)
@@ -56,11 +62,11 @@ class ShowActionTab(QWidget):
         self.insert_above_button = QToolButton()
         self.insert_above_button.setToolTip('上方插入动作')
         self.insert_above_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_insert_above + ')}')
-        self.insert_above_button.clicked.connect(self.connect_insert_above_button)
+        self.insert_above_button.clicked.connect(lambda : self.connect_insert_button(self.insert_up_position))
         self.insert_below_button = QToolButton()
         self.insert_below_button.setToolTip('下方插入动作')
         self.insert_below_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_insert_below + ')}')
-        self.insert_below_button.clicked.connect(self.connect_insert_above_button)
+        self.insert_below_button.clicked.connect(lambda : self.connect_insert_button(self.insert_down_position))
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('批量删除动作')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
@@ -134,12 +140,13 @@ class ShowActionTab(QWidget):
             return
 
 
-    # 在选中行上方插入动作
-    def connect_insert_above_button(self):
+    # 插入动作触发函数
+    def connect_insert_button(self, insert_position):
+        self.insert_item_position = insert_position
         item_num = len(self.item_list)
         insert_index = -1
         if item_num < 1:
-            QMessageBox.about(self, "警告", "插入动作位置未知")
+            QMessageBox.about(self, "警告", "插入动作位置未知/请选中插入位置")
             return
         else:
             for i in range(item_num):
@@ -149,7 +156,7 @@ class ShowActionTab(QWidget):
                 else:
                     insert_index = -1
         if insert_index == -1:
-            QMessageBox.about(self, "警告", "插入动作位置未知")
+            QMessageBox.about(self, "警告", "插入动作位置未知/请选中插入位置")
             return
         # 插入标志位
         self.insert_item_index = insert_index
@@ -376,19 +383,38 @@ class ShowActionTab(QWidget):
 
     # 插入item(action/video/sleep可以共用)
     def insert_item(self, item, obj, info_dict, item_type):
-
-        self.list_widget.insertItem(self.insert_item_index, item)
-        self.list_widget.setItemWidget(item, obj)
-        self.item_list.insert(self.insert_item_index, item)
-        self.custom_control_list.insert(self.insert_item_index, obj)
-        self.info_list.insert(self.insert_item_index, info_dict)
-
-        if item_type == 'action':
-            self.tag_list.insert(self.insert_item_index, self.generate_action_tag(info_dict))
-        elif item_type == 'record':
-            self.tag_list.insert(self.insert_item_index, self.generate_record_tag(info_dict))
-        elif item_type == 'sleep':
-            self.tag_list.insert(self.insert_item_index, self.generate_sleep_tag(info_dict))
+        # 上方插入
+        if self.insert_item_position == self.insert_up_position:
+            self.list_widget.insertItem(self.insert_item_index, item)
+            self.list_widget.setItemWidget(item, obj)
+            self.item_list.insert(self.insert_item_index, item)
+            self.custom_control_list.insert(self.insert_item_index, obj)
+            self.info_list.insert(self.insert_item_index, info_dict)
+            if item_type == 'action':
+                self.tag_list.insert(self.insert_item_index, self.generate_action_tag(info_dict))
+            elif item_type == 'record':
+                self.tag_list.insert(self.insert_item_index, self.generate_record_tag(info_dict))
+            elif item_type == 'sleep':
+                self.tag_list.insert(self.insert_item_index, self.generate_sleep_tag(info_dict))
+            # 重新拍每个custom_control_list的id
+            for index in range(self.insert_item_index, self.index + 1):
+                self.custom_control_list[index].id = index
+        # 下方插入
+        elif self.insert_item_position == self.insert_down_position:
+            self.list_widget.insertItem(self.insert_item_index + 1, item)
+            self.list_widget.setItemWidget(item, obj)
+            self.item_list.insert(self.insert_item_index + 1, item)
+            self.custom_control_list.insert(self.insert_item_index + 1, obj)
+            self.info_list.insert(self.insert_item_index + 1, info_dict)
+            if item_type == 'action':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_action_tag(info_dict))
+            elif item_type == 'record':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_record_tag(info_dict))
+            elif item_type == 'sleep':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_sleep_tag(info_dict))
+            # 重新拍每个custom_control_list的id
+            for index in range(self.insert_item_index + 1, self.index + 1):
+                self.custom_control_list[index].id = index
         # 发送需要显示的脚本标签
         self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         # 更新状态栏(case以及action信息)
@@ -399,11 +425,9 @@ class ShowActionTab(QWidget):
         else:  # case新增action
             WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
             self.des_text.setText(self.case_file_name)
-        # 重新拍每个custom_control_list的id
-        for index in range(self.insert_item_index, self.index+1):
-            self.custom_control_list[index].id = index
         # 插入位置复位
         self.insert_item_index = -1
+        self.insert_item_position = None
         # 滚动条滚动到当前item
         self.list_widget.scrollToItem(item)
 

@@ -925,7 +925,7 @@ class UiMainWindow(QMainWindow):
         # 样式设置
         style_sheet = 'QTabWidget:pane{ border: 2px; top: 0px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment: right;}\
-                       QTabBar::scroller{width: 0}\
+                       QTabBar::scroller{width: 0;}\
                        QTabBar::tab{height: 25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; color: #0099FF; background-color: white; border-top: 2px solid #0099FF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
