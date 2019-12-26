@@ -381,10 +381,6 @@ class ReportTab(QWidget):
         # self.right_v_line_frame.setFrameShape(QFrame.VLine)
         # html展示
         self.html_show_text = QWebEngineView()
-        # 使用默认背景就好(使用qss样式设置不了背景, 不知为何:无所谓,不影响)
-        # self.html_show_text.page().setBackgroundColor(Qt.transparent)
-        # self.html_show_text.setStyleSheet('background-color: transparent')
-        # self.html_show_text.setStyleSheet('QWebEngineView::page {background-color: transparent}')
         # title行布局
         self.title_h_layout.setSpacing(0)
         self.title_h_layout.addSpacing(2)
