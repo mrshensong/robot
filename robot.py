@@ -140,8 +140,8 @@ class UiMainWindow(QMainWindow):
         self.splitter_v_part_2.setStretchFactor(1, 2)
         self.splitter_h_general.addWidget(self.splitter_v_part_1)
         self.splitter_h_general.addWidget(self.splitter_v_part_2)
-        self.splitter_h_general.setStretchFactor(0, 7)
-        self.splitter_h_general.setStretchFactor(1, 13)
+        self.splitter_h_general.setStretchFactor(0, 8)
+        self.splitter_h_general.setStretchFactor(1, 11)
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
 
