@@ -33,6 +33,8 @@ class ShowActionTab(QWidget):
         self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
         # 是否全部选中状态(False:没有全部选中, True:全部选中)
         self.select_all_flag = False
+        # 插入动作的index位置(不插入的话值为-1, 其他值则为插入地方)
+        self.insert_item_index = -1
         # 当前所有action需要保存的文件名(或者打开case时现实的case文件名)
         self.case_file_name = ''
         self.case_absolute_name = ''
@@ -145,9 +147,10 @@ class ShowActionTab(QWidget):
         if insert_index == -1:
             QMessageBox.about(self, "警告", "插入动作位置未知")
             return
-        # 插入动作
-
-
+        # 插入标志位
+        self.insert_item_index = insert_index
+        # 调出动作窗口
+        self.connect_add_action_button()
 
 
 
@@ -338,8 +341,8 @@ class ShowActionTab(QWidget):
 
 
     # 添加item(action/video/sleep可以共用)
-    def add_item(self, item, obj, info_dict, new_case_flag, item_type):
-        # item:条目对象/obj:控件对象/info_dict:传入的字典参数/new_case_flag:是否真正的新建控件(而非case导入)
+    def add_item(self, item, obj, info_dict, new_control_flag, item_type):
+        # item:条目对象/obj:控件对象/info_dict:传入的字典参数/new_control_flag:是否真正的新建控件(而非case导入)
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, obj)
         self.item_list.append(item)
@@ -353,7 +356,7 @@ class ShowActionTab(QWidget):
             self.tag_list.append(self.generate_sleep_tag(info_dict))
         # 发送需要显示的脚本标签
         self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
-        if new_case_flag is True:
+        if new_control_flag is True:
             GloVar.actions_saved_to_case = False
             if self.case_file_name == '':  # 空白新建action
                 WindowStatus.action_tab_status = '新case>未保存!'
@@ -368,50 +371,103 @@ class ShowActionTab(QWidget):
 
 
     # 插入item(action/video/sleep可以共用)
-    def insert_item(self, item, obj, info_dict, new_case_flag, item_type):
-        pass
+    def insert_item(self, item, obj, info_dict, item_type):
+
+        self.list_widget.insertItem(self.insert_item_index, item)
+        self.list_widget.setItemWidget(item, obj)
+        self.item_list.insert(self.insert_item_index, item)
+        self.custom_control_list.insert(self.insert_item_index, obj)
+        self.info_list.insert(self.insert_item_index, info_dict)
+
+        if item_type == 'action':
+            self.tag_list.insert(self.insert_item_index, self.generate_action_tag(info_dict))
+        elif item_type == 'record':
+            self.tag_list.insert(self.insert_item_index, self.generate_record_tag(info_dict))
+        elif item_type == 'sleep':
+            self.tag_list.insert(self.insert_item_index, self.generate_sleep_tag(info_dict))
+        # 发送需要显示的脚本标签
+        self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
+        # 更新状态栏(case以及action信息)
+        GloVar.actions_saved_to_case = False
+        if self.case_file_name == '':  # 空白新建action
+            WindowStatus.action_tab_status = '新case>未保存!'
+            self.des_text.setText('空白')
+        else:  # case新增action
+            WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
+            self.des_text.setText(self.case_file_name)
+        # 重新拍每个custom_control_list的id
+        for index in range(self.insert_item_index, self.index+1):
+            self.custom_control_list[index].id = index
+        # 插入位置复位
+        self.insert_item_index = -1
+        # 滚动条滚动到当前item
+        self.list_widget.scrollToItem(item)
 
 
     # 添加action动作控件
-    def add_action_item(self, info_dict, new_case_flag=True, insert_flag=False):
+    def add_action_item(self, info_dict, new_control_flag=True):
         # 给动作设置id
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 120))
-        obj = ActionControl(parent=None, id=self.index, info_dict=info_dict, new_case_flag=new_case_flag)
+        obj = ActionControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_action_control_signal)
-        if insert_flag is False:
-            self.add_item(item, obj, info_dict, new_case_flag, item_type='action')
-        else:
-            self.insert_item(item, obj, info_dict, new_case_flag, item_type='action')
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='action')
 
 
-    # 添加video动作控件
-    def add_record_item(self, info_dict, new_case_flag=True, insert_flag=False):
-        # 给video动作设置id
+    # 插入action动作控件
+    def insert_action_item(self, info_dict):
+        # 给action动作设置id
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 120))
-        obj = RecordControl(parent=None, id=self.index, info_dict=info_dict, new_case_flag=new_case_flag)
+        obj = ActionControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_action_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='action')
+
+
+    # 添加record动作控件
+    def add_record_item(self, info_dict, new_control_flag=True):
+        # 给record动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 120))
+        obj = RecordControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_record_control_signal)
-        if insert_flag is False:
-            self.add_item(item, obj, info_dict, new_case_flag, item_type='record')
-        else:
-            self.insert_item(item, obj, info_dict, new_case_flag, item_type='record')
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='record')
+
+
+    # 插入record动作控件
+    def insert_record_item(self, info_dict):
+        # 给record动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 120))
+        obj = RecordControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_record_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='record')
 
 
     # 添加sleep动作控件
-    def add_sleep_item(self, info_dict, new_case_flag=True, insert_flag=False):
-        # 给video动作设置id
+    def add_sleep_item(self, info_dict, new_control_flag=True):
+        # 给sleep动作设置id
         self.index += 1
         item = QListWidgetItem()
         item.setSizeHint(QSize(330, 60))
-        obj = SleepControl(parent=None, id=self.index, info_dict=info_dict, new_case_flag=new_case_flag)
+        obj = SleepControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_sleep_control_signal)
-        if insert_flag is False:
-            self.add_item(item, obj, info_dict, new_case_flag, item_type='sleep')
-        else:
-            self.insert_item(item, obj, info_dict, new_case_flag, item_type='sleep')
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='sleep')
+
+
+    # 插入sleep动作控件
+    def insert_sleep_item(self, info_dict):
+        # 给sleep动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = SleepControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_sleep_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='sleep')
 
 
     # 接收action控件传来的删除和执行信号
@@ -477,15 +533,24 @@ class ShowActionTab(QWidget):
         # 按下action_tab页面确定按钮后, 添加控件
         if signal_str.startswith('action_tab_sure>'):
             info_dict = json.loads(signal_str.split('action_tab_sure>')[1])
-            self.add_action_item(info_dict)
+            if self.insert_item_index == -1:
+                self.add_action_item(info_dict)
+            else:
+                self.insert_action_item(info_dict)
         # 按下video_tab页面确认按钮
         elif signal_str.startswith('record_tab_sure>'):
             info_dict = json.loads(signal_str.split('record_tab_sure>')[1])
-            self.add_record_item(info_dict)
+            if self.insert_item_index == -1:
+                self.add_record_item(info_dict)
+            else:
+                self.insert_record_item(info_dict)
         # 按下sleep_tab页面确认按钮
         elif signal_str.startswith('sleep_tab_sure>'):
             info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
-            self.add_sleep_item(info_dict)
+            if self.insert_item_index == -1:
+                self.add_sleep_item(info_dict)
+            else:
+                self.insert_sleep_item(info_dict)
         # 接收到框选模板信号
         elif signal_str.startswith('select_template>'):
             self.signal.emit('draw_frame>')
