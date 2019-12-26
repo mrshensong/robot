@@ -2,7 +2,7 @@ import os
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit, QFrame
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
@@ -71,8 +71,14 @@ class ShowCaseTab(QWidget):
         self.execute_times_control.setStyleSheet('QSpinBox {background-color:transparent}')
         self.execute_times_control.setRange(1, 10)
         self.execute_times_control.setValue(1)
+        # case所在文件夹
+        self.case_folder_text = QLineEdit()
+        self.case_folder_text.setStyleSheet('background-color:transparent')
+        self.case_folder_text.setReadOnly(True)
+        self.case_folder_text.setText('空白')
 
         h_box = QHBoxLayout()
+        h_box.setSpacing(5)
         h_box.addWidget(self.import_button)
         h_box.addWidget(self.add_button)
         h_box.addWidget(self.delete_button)
@@ -86,9 +92,13 @@ class ShowCaseTab(QWidget):
         self.list_widget.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
         self.list_widget.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
         v_box = QVBoxLayout()
+        v_box.setSpacing(0)
         # 左上右下
-        v_box.setContentsMargins(0, 5, 0, 0)
+        v_box.setContentsMargins(0, 0, 0, 0)
+        v_box.addWidget(self.case_folder_text)
+        v_box.addSpacing(3)
         v_box.addLayout(h_box)
+        v_box.addSpacing(3)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
 

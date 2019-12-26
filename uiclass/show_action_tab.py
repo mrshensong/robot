@@ -7,7 +7,7 @@ from PyQt5.QtGui import *
 from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam, BeautifyStyle
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
-from uiclass.list_widget import ListWidget
+
 
 class ShowActionTab(QWidget):
 
@@ -57,6 +57,10 @@ class ShowActionTab(QWidget):
         self.insert_above_button.setToolTip('上方插入动作')
         self.insert_above_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_insert_above + ')}')
         self.insert_above_button.clicked.connect(self.connect_insert_above_button)
+        self.insert_below_button = QToolButton()
+        self.insert_below_button.setToolTip('下方插入动作')
+        self.insert_below_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_insert_below + ')}')
+        self.insert_below_button.clicked.connect(self.connect_insert_above_button)
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('批量删除动作')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
@@ -81,26 +85,22 @@ class ShowActionTab(QWidget):
         self.des_text = QLineEdit()
         self.des_text.setStyleSheet('background-color:transparent')
         self.des_text.setReadOnly(True)
-        self.des_text.setMaximumWidth(200)
         self.des_text.setText('空白')
 
         h_box = QHBoxLayout()
+        h_box.setSpacing(5)
         h_box.addWidget(self.add_button)
         h_box.addWidget(self.insert_above_button)
+        h_box.addWidget(self.insert_below_button)
         h_box.addWidget(self.delete_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
         h_box.addWidget(self.save_script_tag_button)
         h_box.addWidget(self.draw_frame_button)
-        h_box.addWidget(self.des_text)
+        # h_box.addWidget(self.des_text)
         h_box.addStretch(1)
         # 原生QListWidget
         self.list_widget = QListWidget()
-        # 自定义QListWidget & 接收位置交换信号
-        # self.list_widget = ListWidget(None)
-        # self.list_widget.signal[str].connect(self.item_position_exchange)
-        # self.list_widget.setMovement(QListWidget.Free)
-        # self.list_widget.setDragEnabled(True)
         # 将滚动条变细
         self.list_widget.verticalScrollBar().setStyleSheet("QScrollBar{width:10px;}")
         self.list_widget.horizontalScrollBar().setStyleSheet("QScrollBar{height:10px;}")
@@ -109,8 +109,12 @@ class ShowActionTab(QWidget):
         # # 取消竖向滚动条
         # self.list_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         v_box = QVBoxLayout()
-        v_box.setContentsMargins(0, 5, 0, 0)
+        v_box.setSpacing(0)
+        v_box.setContentsMargins(0, 0, 0, 0)
+        v_box.addWidget(self.des_text)
+        v_box.addSpacing(3)
         v_box.addLayout(h_box)
+        v_box.addSpacing(3)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
 
