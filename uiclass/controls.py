@@ -10,7 +10,7 @@ class ActionControl(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, id, info_dict, flag=True):
+    def __init__(self, parent, id, info_dict, new_case_flag=True):
         super(ActionControl, self).__init__(parent)
         self.parent = parent
         self.id = id
@@ -28,8 +28,8 @@ class ActionControl(QWidget):
             self.points_text = '(0.0, 0.0)'
         # 描述text
         self.des_text = info_dict[MotionAction.des_text]
-        # 判断是真的新建action还是通过脚本导入的case(flag:True新建, False导入)
-        self.flag = flag
+        # 判断是真的新建action还是通过脚本导入的case(new_case_flag:True新建, False导入)
+        self.new_case_flag = new_case_flag
         self.initUI()
         self.describe_action()
 
@@ -114,7 +114,7 @@ class ActionControl(QWidget):
     # 打印控件信息
     def describe_action(self):
         # 如果确实是添加动作(而非导入case中的动作)
-        if self.flag is True:
+        if self.new_case_flag is True:
             # 打印新建动作信息
             if self.des_text == '':
                 Logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), self.points_text))
@@ -126,12 +126,12 @@ class RecordControl(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, id, info_dict, flag=True):
+    def __init__(self, parent, id, info_dict, new_case_flag=True):
         super(RecordControl, self).__init__(parent)
         self.parent = parent
         self.id = id
-        # 判断是真的新建record还是通过脚本导入的case(flag:True新建, False导入)
-        self.flag = flag
+        # 判断是真的新建record还是通过脚本导入的case(new_case_flag:True新建, False导入)
+        self.new_case_flag = new_case_flag
         # 视频绝对路径
         self.video_type = info_dict[RecordAction.video_type]
         # 视频名称
@@ -220,7 +220,7 @@ class RecordControl(QWidget):
 
     # 打印控件信息
     def describe_record(self):
-        if self.flag is True:
+        if self.new_case_flag is True:
             # 打印新建video动作信息
             Logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(RecordAction.record_status), self.str_decorate(self.record_type)))
 
@@ -229,12 +229,12 @@ class SleepControl(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, id, info_dict, flag=True):
+    def __init__(self, parent, id, info_dict, new_case_flag=True):
         super(SleepControl, self).__init__(parent)
         self.parent = parent
         self.id = id
-        # 判断是真的新建record还是通过脚本导入的case(flag:True新建, False导入)
-        self.flag = flag
+        # 判断是真的新建record还是通过脚本导入的case(new_case_flag:True新建, False导入)
+        self.new_case_flag = new_case_flag
         self.sleep_time = info_dict[SleepAction.sleep_time]
         self.initUI()
         self.describe_sleep()
@@ -296,7 +296,7 @@ class SleepControl(QWidget):
 
     # 打印控件信息
     def describe_sleep(self):
-        if self.flag is True:
+        if self.new_case_flag is True:
             # 打印新建video动作信息
             Logger('新建-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id), self.str_decorate(SleepAction.sleep_time), self.str_decorate(self.sleep_time)))
 

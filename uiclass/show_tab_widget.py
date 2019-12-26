@@ -87,15 +87,15 @@ class ShowTabWidget(QTabWidget):
                         # 有points元素为action控件
                         # 将字典中的'(0, 0)'转为元祖(0, 0)
                         dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                        self.action_tab.add_action_item(dict_info_list[id], flag=False)
+                        self.action_tab.add_action_item(dict_info_list[id], new_case_flag=False)
                     # 为record或者sleep控件
                     else:
                         # 为record控件
                         if RecordAction.record_status in dict_info_list[id]:
-                            self.action_tab.add_record_item(dict_info_list[id], flag=False)
+                            self.action_tab.add_record_item(dict_info_list[id], new_case_flag=False)
                         # 为sleep控件
                         elif SleepAction.sleep_time in dict_info_list[id]:
-                            self.action_tab.add_sleep_item(dict_info_list[id], flag=False)
+                            self.action_tab.add_sleep_item(dict_info_list[id], new_case_flag=False)
                 self.action_tab.des_text.setText(self.action_tab.case_file_name)
                 WindowStatus.action_tab_status = '%s' % self.action_tab.case_absolute_name
         # 执行单个case
