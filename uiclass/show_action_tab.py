@@ -51,6 +51,10 @@ class ShowActionTab(QWidget):
         self.add_button.setToolTip('添加动作')
         self.add_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_add + ')}')
         self.add_button.clicked.connect(self.connect_add_action_button)
+        self.insert_above_button = QToolButton()
+        self.insert_above_button.setToolTip('上方插入动作')
+        self.insert_above_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_insert_above + ')}')
+        self.insert_above_button.clicked.connect(self.connect_insert_above_button)
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('批量删除动作')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
@@ -80,6 +84,7 @@ class ShowActionTab(QWidget):
 
         h_box = QHBoxLayout()
         h_box.addWidget(self.add_button)
+        h_box.addWidget(self.insert_above_button)
         h_box.addWidget(self.delete_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
@@ -108,7 +113,7 @@ class ShowActionTab(QWidget):
         self.setLayout(v_box)
 
 
-    '''以下为五个按钮事件(添加/删除/全选/执行/保存)'''
+    '''以下为按钮事件(添加/上方插入/删除/全选/执行/保存)'''
     # 展示添加动作子窗口(add_button)
     def connect_add_action_button(self):
         if GloVar.add_action_button_flag is True:
@@ -121,6 +126,11 @@ class ShowActionTab(QWidget):
         else:
             QMessageBox.about(self, "提示", "请先框选屏幕大小")
             return
+
+
+    # 在选中行上方插入动作
+    def connect_insert_above_button(self):
+        pass
 
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
