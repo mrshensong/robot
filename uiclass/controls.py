@@ -369,12 +369,14 @@ class CameraParamAdjustControl(QDialog):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, use_external_camera_flag):
         super(CameraParamAdjustControl, self).__init__(parent)
         self.parent = parent
+        self.use_external_camera_flag = use_external_camera_flag
         self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').value
         self.exposure_time_value = 1000
         self.gain_value = 0
+        self.stable_frame_rate_flag = True
         self.initUI()
 
 
@@ -399,8 +401,8 @@ class CameraParamAdjustControl(QDialog):
         self.exposure_time_slider.setEnabled(False)
         self.exposure_time_spinbox.setEnabled(False)
         self.grid_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
-        self.grid_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 4)
-        self.grid_layout.addWidget(self.exposure_time_spinbox, 0, 5, 1, 1)
+        self.grid_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 5)
+        self.grid_layout.addWidget(self.exposure_time_spinbox, 0, 6, 1, 1)
         # 设置增益
         self.gain_label = QLabel(self)
         self.gain_label.setText('增益: ')
@@ -410,19 +412,39 @@ class CameraParamAdjustControl(QDialog):
         self.gain_spinbox = QSpinBox(self)
         self.gain_spinbox.setRange(0, 24)
         self.gain_spinbox.valueChanged.connect(self.connect_gain_spinbox)
+        if self.use_external_camera_flag is True:
+            self.gain_slider.setEnabled(True)
+            self.gain_spinbox.setEnabled(True)
+        else:
+            self.gain_slider.setEnabled(False)
+            self.gain_spinbox.setEnabled(False)
         self.grid_layout.addWidget(self.gain_label, 1, 0, 1, 1)
-        self.grid_layout.addWidget(self.gain_slider, 1, 1, 1, 4)
-        self.grid_layout.addWidget(self.gain_spinbox, 1, 5, 1, 1)
+        self.grid_layout.addWidget(self.gain_slider, 1, 1, 1, 5)
+        self.grid_layout.addWidget(self.gain_spinbox, 1, 6, 1, 1)
+        # 设置case执行过程中是否需要关闭界面实时流(关闭实时流可以保证录制视频不丢帧)
+        self.stable_frame_rate_label = QLabel(self)
+        self.stable_frame_rate_label.setText('稳定帧率: ')
+        self.stable_frame_rate_des = QLineEdit(self)
+        self.stable_frame_rate_des.setReadOnly(True)
+        self.stable_frame_rate_des.setText('开启状态,执行case过程中会暂停实时流,帧率稳定')
+        self.stable_frame_rate_button = QPushButton(self)
+        self.stable_frame_rate_button.setMaximumWidth(40)
+        self.stable_frame_rate_button.clicked.connect(self.change_stable_frame_rate_status)
+        self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+        self.grid_layout.addWidget(self.stable_frame_rate_label, 2, 0, 1, 1)
+        self.grid_layout.addWidget(self.stable_frame_rate_des, 2, 1, 1, 5)
+        self.grid_layout.addWidget(self.stable_frame_rate_button, 2, 6, 1, 1)
         # 设置图片路径
         self.picture_path_show_label = QLabel(self)
         self.picture_path_show_label.setText('图片路径: ')
         self.picture_path_show_edit = QLineEdit(self)
+        self.picture_path_show_edit.setReadOnly(True)
         self.picture_path_show_edit.setText(self.picture_path)
         self.picture_path_change_button = QPushButton('更改')
         self.picture_path_change_button.clicked.connect(self.connect_change_picture_path)
-        self.grid_layout.addWidget(self.picture_path_show_label, 2, 0, 1, 1)
-        self.grid_layout.addWidget(self.picture_path_show_edit, 2, 1, 1, 4)
-        self.grid_layout.addWidget(self.picture_path_change_button, 2, 5, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_label, 3, 0, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_edit, 3, 1, 1, 5)
+        self.grid_layout.addWidget(self.picture_path_change_button, 3, 6, 1, 1)
         # 确定按钮
         self.sure_button = QPushButton('确定')
         self.sure_button.clicked.connect(self.connect_sure_button)
@@ -436,7 +458,7 @@ class CameraParamAdjustControl(QDialog):
         self.setLayout(self.general_layout)
         # 设置最小尺寸
         self.setMinimumWidth(400)
-        self.setFixedWidth(500)
+        self.setFixedWidth(750)
         self.setWindowTitle('摄像头参数')
 
 
@@ -462,9 +484,20 @@ class CameraParamAdjustControl(QDialog):
         self.gain_slider.setValue(self.gain_value)
 
 
+    def change_stable_frame_rate_status(self):
+        if self.stable_frame_rate_flag is True:
+            self.stable_frame_rate_flag = False
+            self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.stable_frame_rate_des.setText('关闭状态,执行case过程中会播放实时流,帧率不稳定')
+        else:
+            self.stable_frame_rate_flag = True
+            self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.stable_frame_rate_des.setText('打开状态,执行case过程中会暂停实时流,帧率稳定')
+
+
     def connect_change_picture_path(self):
         # 如果取消为''值
-        self.picture_path = QFileDialog.getExistingDirectory(self, "浏览", self.picture_path)
+        self.picture_path = QFileDialog.getExistingDirectory(self, "浏览", self.picture_path, options=QFileDialog.DontUseNativeDialog)
         if self.picture_path:
             self.picture_path_show_edit.setText(self.picture_path)
             Profile(type='write', file=GloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)

@@ -31,9 +31,9 @@ class UiMainWindow(QMainWindow):
         main_ui_style = BeautifyStyle.font_family + BeautifyStyle.font_size + BeautifyStyle.file_dialog_qss
         self.setStyleSheet(main_ui_style)
         """初始化参数"""
+        # 如果为True则使用外接相机, False使用电脑内置相机
+        self.use_external_camera_flag = str(Profile(type='read', file=GloVar.config_file_path, section='param', option='use_external_camera').value)
         # 摄像机图像尺寸
-        # self.camera_image_width = 1280
-        # self.camera_image_height = 720
         self.camera_image_width = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_width').value)
         self.camera_image_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_height').value)
         # 从配置文件中读取基准点
@@ -103,7 +103,7 @@ class UiMainWindow(QMainWindow):
         # 数据处理工具栏
         self.data_process_toolbar = self.addToolBar('data_process_toolbar')
         # 视频实时流参数设置框
-        self.camera_param_setting_widget = CameraParamAdjustControl(self)
+        self.camera_param_setting_widget = CameraParamAdjustControl(self, self.use_external_camera_flag)
         self.camera_param_setting_widget.signal[str].connect(self.recv_camera_param_setting_widget)
         # 本地视频帧率调节
         self.frame_rate_adjust_widget = FrameRateAdjustControl(self)
@@ -144,9 +144,8 @@ class UiMainWindow(QMainWindow):
         self.splitter_h_general.setStretchFactor(1, 11)
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
-
         # 机械臂处理
-        self.robot = ArmAction(camera_width=self.camera_image_width, camera_height=self.camera_image_height)
+        self.robot = ArmAction(use_external_camera_flag=self.use_external_camera_flag, camera_width=self.camera_image_width, camera_height=self.camera_image_height)
 
 
     '''以下部分为界面各个控件信息'''
@@ -453,6 +452,14 @@ class UiMainWindow(QMainWindow):
             # 需要暂停视频流(进行框选)
             self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
             self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+        # 准备开始执行测试用例
+        elif signal_str.startswith('ready_execute_case>'):
+            if self.camera_param_setting_widget.stable_frame_rate_flag is True:
+                # 通过模拟点击来暂停实时流(达到稳定帧率的目的)
+                self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
+                self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+            else:
+                pass
         # 测试结束
         elif signal_str.startswith('test_finished>'):
             # 调用视频处理函数

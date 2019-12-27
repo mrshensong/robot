@@ -34,20 +34,22 @@ class ShowCaseTab(QWidget):
 
 
     def case_tab_init(self):
+        # 添加case
         self.add_button = QToolButton()
         self.add_button.setToolTip('添加case')
         self.add_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_add + ')}')
         self.add_button.clicked.connect(lambda : self.connect_import_button(None))
-
+        # 批量删除case
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('批量删除case')
         self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_delete + ')}')
         self.delete_button.clicked.connect(self.connect_delete_selected_items)
-
+        # 全部选中(不选中)
         self.select_all_button = QToolButton()
         self.select_all_button.setToolTip('全部选中')
         self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
         self.select_all_button.clicked.connect(self.connect_select_all_items)
+        # 批量执行
         self.execute_button = QToolButton()
         self.execute_button.setToolTip('批量执行case')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
@@ -70,7 +72,7 @@ class ShowCaseTab(QWidget):
         self.case_folder_text.setStyleSheet('background-color:transparent')
         self.case_folder_text.setReadOnly(True)
         self.case_folder_text.setText('空白')
-
+        # 布局
         h_box = QHBoxLayout()
         h_box.setSpacing(5)
         h_box.addWidget(self.add_button)
@@ -201,6 +203,8 @@ class ShowCaseTab(QWidget):
         if GloVar.request_status is None:
             Logger('[当前还有正在执行的动作, 请稍后执行!]')
             return
+        self.signal.emit('ready_execute_case>')
+        time.sleep(0.3)
         for i in range(self.index+1):
             if self.case_control_list[i].check_box.checkState() == Qt.Checked:
                 # 根据执行次数执行

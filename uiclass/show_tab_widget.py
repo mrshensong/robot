@@ -101,6 +101,9 @@ class ShowTabWidget(QTabWidget):
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
             self.signal.emit(signal_str)
+        # 开始执行case命令
+        elif signal_str.startswith('ready_execute_case>'):
+            self.signal.emit(signal_str)
         # 测试结束命令
         elif signal_str.startswith('test_finished>'):
             self.signal.emit(signal_str)
