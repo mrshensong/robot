@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit, QMenu, QAction, QInputDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -23,7 +24,8 @@ class ProjectBar(QWidget):
         # 文件过滤
         # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
         # 需要显示的文件
-        filters = ['*.mp4', '*.avi', '*.mov', '*.flv', '*.html', '*.jpg', '*.png', '*.xls', '*.xlsx', '*.xml', '*.txt', '*.ini']
+        # filters = ['*.mp4', '*.avi', '*.mov', '*.flv', '*.html', '*.jpg', '*.png', '*.xls', '*.xlsx', '*.xml', '*.txt', '*.ini']
+        filters = ['*']
         self.model.setNameFilters(filters)
         self.model.setNameFilterDisables(False)
 
@@ -56,12 +58,19 @@ class ProjectBar(QWidget):
 
 
     def show_menu(self, point):
-        # 当前节点路径以及名字
-        index = self.tree.currentIndex()
-        node_name = self.model.fileName(index)
-        node_name = node_name if node_name else os.path.split(self.path)[1]
-        node_path = self.model.filePath(index)
-        node_path = node_path if node_path else self.path
+        index = self.tree.indexAt(point)
+        # 如果点击的非空白区域
+        if index.isValid():
+            # 当前节点路径以及名字
+            # index = self.tree.currentIndex()
+            node_name = self.model.fileName(index)
+            node_path = self.model.filePath(index)
+        # 点击空白区域
+        else:
+            self.tree.clearSelection()
+            node_name = os.path.split(self.path)[1]
+            node_path = self.path
+        # 更新显示标签
         self.info_label.setText(node_path)
         # 菜单样式
         menu_qss = "QMenu{color: #E8E8E8; background: #4D4D4D; margin: 2px;}\
@@ -73,10 +82,10 @@ class ProjectBar(QWidget):
         self.menu.setStyleSheet(menu_qss)
         # 新建文件
         self.new_file_action = QAction('新建文件', self)
-        self.new_file_action.triggered.connect(lambda : self.new_file_dialog(node_path))
+        self.new_file_action.triggered.connect(lambda : self.new_file_dialog(index, node_path))
         # 新建文件夹
         self.new_folder_action = QAction('新建文件夹', self)
-        self.new_folder_action.triggered.connect(lambda : self.new_folder_dialog(node_path))
+        self.new_folder_action.triggered.connect(lambda : self.new_folder_dialog(index, node_path))
         # 重命名
         self.rename_action = QAction('重命名', self)
         self.rename_action.triggered.connect(lambda : self.rename_dialog(node_path, node_name))
@@ -92,27 +101,32 @@ class ProjectBar(QWidget):
 
 
     # 新建文件
-    def new_file_dialog(self, node_path):
+    def new_file_dialog(self, index, node_path):
         title, prompt_text, default_name = '新建文件', '请输入文件名', ''
         file_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:
             if os.path.isdir(node_path) is True:
                 root_path = node_path
+                # 展开文件夹
+                self.tree.setExpanded(index, True)
             else:
                 root_path = os.path.dirname(node_path)
             file_path = MergePath([root_path, file_name]).merged_path
             f =  open(file_path, 'w', encoding='utf-8')
             f.close()
             Logger('新建文件: %s' % file_path)
+            # self.tree.setCurrentIndex()
 
 
     # 新建文件夹
-    def new_folder_dialog(self, node_path):
+    def new_folder_dialog(self, index, node_path):
         title, prompt_text, default_name = '新建文件夹', '请输入文件夹名', ''
         folder_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:
             if os.path.isdir(node_path) is True:
                 root_path = node_path
+                # 展开文件夹
+                self.tree.setExpanded(index, True)
             else:
                 root_path = os.path.dirname(node_path)
             folder_path = MergePath([root_path, folder_name]).merged_path
@@ -147,8 +161,10 @@ class ProjectBar(QWidget):
                 os.remove(node_path)
                 Logger('删除文件: %s' % node_path)
             else:
-                os.removedirs(node_path)
+                shutil.rmtree(node_path)
                 Logger('删除文件夹: %s' % node_path)
+            self.tree.clearSelection()
+            self.info_label.setText(self.path)
 
 
     # 更新文件名字显示
