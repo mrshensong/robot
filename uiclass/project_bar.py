@@ -1,8 +1,10 @@
 import os
-import shutil
 import sys
+import time
+import shutil
+from threading import Thread
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit, QMenu, QAction, QInputDialog, QMessageBox
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSignal, Qt, QDir
 from GlobalVar import Logger, MergePath
 
 
@@ -20,12 +22,12 @@ class ProjectBar(QWidget):
         self.model = QFileSystemModel(self)
         # 改表头名字(无效)
         # self.model.setHeaderData(0, Qt.Horizontal, "123455")
-        self.model.setRootPath(self.path)
         # 文件过滤
         # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
         # 需要显示的文件
         # filters = ['*.mp4', '*.avi', '*.mov', '*.flv', '*.html', '*.jpg', '*.png', '*.xls', '*.xlsx', '*.xml', '*.txt', '*.ini']
         filters = ['*']
+        self.model.setRootPath(self.path)
         self.model.setNameFilters(filters)
         self.model.setNameFilterDisables(False)
 
@@ -65,11 +67,13 @@ class ProjectBar(QWidget):
             # index = self.tree.currentIndex()
             node_name = self.model.fileName(index)
             node_path = self.model.filePath(index)
+            blank_click_flag = False
         # 点击空白区域
         else:
             self.tree.clearSelection()
             node_name = os.path.split(self.path)[1]
             node_path = self.path
+            blank_click_flag = True
         # 更新显示标签
         self.info_label.setText(node_path)
         # 菜单样式
@@ -82,16 +86,16 @@ class ProjectBar(QWidget):
         self.menu.setStyleSheet(menu_qss)
         # 新建文件
         self.new_file_action = QAction('新建文件', self)
-        self.new_file_action.triggered.connect(lambda : self.new_file_dialog(index, node_path))
+        self.new_file_action.triggered.connect(lambda : self.new_file_dialog(index, node_path, blank_click_flag))
         # 新建文件夹
         self.new_folder_action = QAction('新建文件夹', self)
-        self.new_folder_action.triggered.connect(lambda : self.new_folder_dialog(index, node_path))
+        self.new_folder_action.triggered.connect(lambda : self.new_folder_dialog(index, node_path, blank_click_flag))
         # 重命名
         self.rename_action = QAction('重命名', self)
-        self.rename_action.triggered.connect(lambda : self.rename_dialog(node_path, node_name))
+        self.rename_action.triggered.connect(lambda : self.rename_dialog(node_path, node_name, blank_click_flag))
         # 删除
         self.delete_action = QAction('删除', self)
-        self.delete_action.triggered.connect(lambda : self.delete_dialog(node_path))
+        self.delete_action.triggered.connect(lambda : self.delete_dialog(node_path, blank_click_flag))
         # 菜单添加action
         self.menu.addAction(self.new_file_action)
         self.menu.addAction(self.new_folder_action)
@@ -101,7 +105,7 @@ class ProjectBar(QWidget):
 
 
     # 新建文件
-    def new_file_dialog(self, index, node_path):
+    def new_file_dialog(self, index, node_path, blank_click_flag):
         title, prompt_text, default_name = '新建文件', '请输入文件名', ''
         file_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:
@@ -112,14 +116,21 @@ class ProjectBar(QWidget):
             else:
                 root_path = os.path.dirname(node_path)
             file_path = MergePath([root_path, file_name]).merged_path
-            f =  open(file_path, 'w', encoding='utf-8')
+            f = open(file_path, 'w', encoding='utf-8')
             f.close()
             Logger('新建文件: %s' % file_path)
-            # self.tree.setCurrentIndex()
+            # 判断是否在空白区域
+            if blank_click_flag is True:
+                # index = self.model.index(QDir.currentPath())
+                # index = self.model.index(file_path)
+                Thread(target=self.update_selecte_item, args=(file_path,)).start()
+            else:
+                # 更新选中item
+                Thread(target=self.update_selecte_item, args=(file_path,)).start()
 
 
     # 新建文件夹
-    def new_folder_dialog(self, index, node_path):
+    def new_folder_dialog(self, index, node_path, blank_click_flag):
         title, prompt_text, default_name = '新建文件夹', '请输入文件夹名', ''
         folder_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:
@@ -132,10 +143,19 @@ class ProjectBar(QWidget):
             folder_path = MergePath([root_path, folder_name]).merged_path
             os.makedirs(folder_path)
             Logger('新建文件夹: %s' % folder_path)
+            # 判断是否在空白区域
+            if blank_click_flag is True:
+                # index = self.model.index(QDir.currentPath())
+                Thread(target=self.update_selecte_item, args=(folder_path,)).start()
+            else:
+                # 更新选中item
+                Thread(target=self.update_selecte_item, args=(folder_path,)).start()
 
 
     # 重命名
-    def rename_dialog(self, node_path, node_name):
+    def rename_dialog(self, node_path, node_name, blank_click_flag):
+        if blank_click_flag is True:
+            return
         title, prompt_text, default_name = '重命名', '请输入新文件名', node_name
         new_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:
@@ -143,10 +163,13 @@ class ProjectBar(QWidget):
             new_name_path = MergePath([root_path, new_name]).merged_path
             os.rename(node_path, new_name_path)
             Logger('重命名 %s 为: %s' % (node_path, new_name_path))
+            Thread(target=self.update_selecte_item, args=(new_name_path,)).start()
 
 
     # 删除文件
-    def delete_dialog(self, node_path):
+    def delete_dialog(self, node_path, blank_click_flag):
+        if blank_click_flag is True:
+            return
         # file_flag判断是文件还是文件夹(文件为True,文件夹为False)
         if os.path.isdir(node_path) is True:
             file_flag = False
@@ -157,22 +180,38 @@ class ProjectBar(QWidget):
         # 判断是否确定删除
         reply = QMessageBox.question(self, '删除栏', prompt_text, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            # 获取删除项下一项名字
+            name = self.tree.indexBelow(self.model.index(node_path)).data()
+            parent_path = os.path.split(node_path)[0]
+            # 确保路径存在
+            selected_path = parent_path if name is None else MergePath([parent_path, name]).merged_path
+            if os.path.exists(selected_path) is False:
+                selected_path = parent_path
+            Thread(target=self.update_selecte_item, args=(selected_path,)).start()
+            self.info_label.setText(selected_path)
             if file_flag is True:
                 os.remove(node_path)
                 Logger('删除文件: %s' % node_path)
             else:
                 shutil.rmtree(node_path)
                 Logger('删除文件夹: %s' % node_path)
-            self.tree.clearSelection()
-            self.info_label.setText(self.path)
+
+
+    # 更新选中item(必须异步线程才能选中, 也就是等待文件model更新完成, 延时时间不能太短)
+    def update_selecte_item(self, path):
+        time.sleep(0.04)
+        new_index = self.model.index(path)
+        self.tree.setCurrentIndex(new_index)
+        self.info_label.setText(path)
 
 
     # 更新文件名字显示
     def show_info(self):  # 4
         index = self.tree.currentIndex()
-        file_name = self.model.fileName(index)
-        file_path = self.model.filePath(index)
-        self.info_label.setText(file_path)
+        if index.isValid():
+            file_name = self.model.fileName(index)
+            file_path = self.model.filePath(index)
+            self.info_label.setText(file_path)
 
 
     # 双击操作

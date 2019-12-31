@@ -28,7 +28,7 @@ class ArmAction:
         self.swift.set_servo_attach()
         # 如果为True则使用外接相机, False使用电脑内置相机
         # 视频线程
-        if use_external_camera_flag == 'True':
+        if use_external_camera_flag is True:
             self.video = ExternalCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
         else:
             self.video = SystemCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
