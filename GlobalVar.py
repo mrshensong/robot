@@ -49,6 +49,8 @@ class GloVar:
     draw_frame_flag = False
     # 添加动作打开标志位
     add_action_window_opened_flag = False
+    # 机械臂是否伴随新建动作运动(默认打开)
+    robot_follow_action_flag = True
 
 
 # Icon路径

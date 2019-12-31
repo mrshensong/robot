@@ -565,6 +565,15 @@ class ShowActionTab(QWidget):
                 self.add_action_item(info_dict)
             else:
                 self.insert_action_item(info_dict)
+            # 判断是否需要执行当前action
+            if GloVar.robot_follow_action_flag is True:
+                info_dict['execute_action'] = 'motion_action'
+                info_dict['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+                GloVar.post_info_list = []
+                GloVar.post_info_list.append('start')
+                GloVar.post_info_list.append(info_dict)
+                GloVar.post_info_list.append('stop')
+                self.signal.emit('play_actions>')
         # 按下video_tab页面确认按钮
         elif signal_str.startswith('record_tab_sure>'):
             info_dict = json.loads(signal_str.split('record_tab_sure>')[1])

@@ -816,6 +816,8 @@ class VideoLabel(QLabel):
 
 
     def data_process_finished(self):
+        # 停掉gif动图
+        self.data_processing_gif.stop()
         # 此时什么都不播放(状态为None)
         self.video_play_flag = None
         # 进度条设置

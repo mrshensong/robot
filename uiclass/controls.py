@@ -434,6 +434,19 @@ class CameraParamAdjustControl(QDialog):
         self.grid_layout.addWidget(self.stable_frame_rate_label, 2, 0, 1, 1)
         self.grid_layout.addWidget(self.stable_frame_rate_des, 2, 1, 1, 5)
         self.grid_layout.addWidget(self.stable_frame_rate_button, 2, 6, 1, 1)
+        # 设置新建动作过程中机械臂是否随着动作的新建而动
+        self.robot_follow_action_flag_label = QLabel(self)
+        self.robot_follow_action_flag_label.setText('动作跟随:')
+        self.robot_follow_action_flag_des = QLineEdit(self)
+        self.robot_follow_action_flag_des.setReadOnly(True)
+        self.robot_follow_action_flag_des.setText('打开状态,新建机械臂动作过程中,机械臂会随之而动')
+        self.robot_follow_action_flag_button = QPushButton(self)
+        self.robot_follow_action_flag_button.setMaximumWidth(40)
+        self.robot_follow_action_flag_button.clicked.connect(self.change_robot_follow_action_flag)
+        self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+        self.grid_layout.addWidget(self.robot_follow_action_flag_label, 3, 0, 1, 1)
+        self.grid_layout.addWidget(self.robot_follow_action_flag_des, 3, 1, 1, 5)
+        self.grid_layout.addWidget(self.robot_follow_action_flag_button, 3, 6, 1, 1)
         # 设置图片路径
         self.picture_path_show_label = QLabel(self)
         self.picture_path_show_label.setText('图片路径: ')
@@ -442,9 +455,9 @@ class CameraParamAdjustControl(QDialog):
         self.picture_path_show_edit.setText(self.picture_path)
         self.picture_path_change_button = QPushButton('更改')
         self.picture_path_change_button.clicked.connect(self.connect_change_picture_path)
-        self.grid_layout.addWidget(self.picture_path_show_label, 3, 0, 1, 1)
-        self.grid_layout.addWidget(self.picture_path_show_edit, 3, 1, 1, 5)
-        self.grid_layout.addWidget(self.picture_path_change_button, 3, 6, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_label, 4, 0, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_edit, 4, 1, 1, 5)
+        self.grid_layout.addWidget(self.picture_path_change_button, 4, 6, 1, 1)
         # 确定按钮
         self.sure_button = QPushButton('确定')
         self.sure_button.clicked.connect(self.connect_sure_button)
@@ -488,11 +501,22 @@ class CameraParamAdjustControl(QDialog):
         if self.stable_frame_rate_flag is True:
             self.stable_frame_rate_flag = False
             self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
-            self.stable_frame_rate_des.setText('关闭状态,执行case过程中会播放实时流,帧率不稳定')
+            self.stable_frame_rate_des.setText('关闭状态,新建机械臂动作过程中,机械臂不会随之而动')
         else:
             self.stable_frame_rate_flag = True
             self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
-            self.stable_frame_rate_des.setText('打开状态,执行case过程中会暂停实时流,帧率稳定')
+            self.stable_frame_rate_des.setText('打开状态,新建机械臂动作过程中,机械臂会随之而动')
+
+
+    def change_robot_follow_action_flag(self):
+        if GloVar.robot_follow_action_flag is True:
+            GloVar.robot_follow_action_flag = False
+            self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.robot_follow_action_flag_des.setText('关闭状态,执行case过程中会播放实时流,帧率不稳定')
+        else:
+            GloVar.robot_follow_action_flag = True
+            self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.robot_follow_action_flag_des.setText('打开状态,执行case过程中会暂停实时流,帧率稳定')
 
 
     def connect_change_picture_path(self):
