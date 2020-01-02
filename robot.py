@@ -147,7 +147,7 @@ class UiMainWindow(QMainWindow):
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
         # 机械臂处理
-        self.robot = ArmAction(use_external_camera_flag=self.use_external_camera_flag, camera_width=self.camera_image_width, camera_height=self.camera_image_height)
+        Thread(target=self.robot_thread, args=()).start()
 
 
     '''以下部分为界面各个控件信息'''
@@ -529,6 +529,11 @@ class UiMainWindow(QMainWindow):
         elif signal_str.startswith('open_excel>'):
             excel_file = signal_str.split('open_excel>')[1]
             Thread(target=self.open_system_file, args=(excel_file,)).start()
+
+
+    # 机械臂动作和摄像头录像线程
+    def robot_thread(self):
+        self.robot = ArmAction(use_external_camera_flag=self.use_external_camera_flag, camera_width=self.camera_image_width, camera_height=self.camera_image_height)
 
 
     '''以下内容为实时流工具栏相关操作'''

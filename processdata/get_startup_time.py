@@ -21,10 +21,33 @@ class GetStartupTime:
         self.report_excel = self.report_path + '/' + 'report.xlsx'
         # 模板匹配率
         self.match_threshold = 0.93
+        # 模板对比的目标图片比模板稍大一点(默认大10像素)
+        self.template_edge = 5
         # 待处理的视频列表
         self.videos_list = []
 
 
+    def match_template(self, source_img, target_img):
+        '''
+        :param source_img: 源图像(大图)
+        :param target_img: 靶子图像(小图)
+        :param match_rate: 匹配率
+        :return:
+        '''
+        if type(source_img) is str:
+            source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
+        if type(target_img) is str:
+            target_img = cv2.imdecode(np.fromfile(target_img, dtype=np.uint8), -1)
+        # 匹配方法
+        match_method = cv2.TM_CCOEFF_NORMED
+        # 模板匹配
+        match_result = cv2.matchTemplate(source_img, target_img, match_method)
+        # 查找匹配度和坐标位置
+        min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
+        # 返回最大匹配率
+        return max_threshold
+
+    # 计算开始和结束位置
     def get_start_and_end_match_threshold(self, end_mask, video_file):
         """
         获取起止点的匹配率列表
@@ -32,160 +55,110 @@ class GetStartupTime:
         :param video_file: 视频文件
         :return: 开始点匹配率列表, 稳定点匹配率列表
         """
-        match_methods = [cv2.TM_SQDIFF_NORMED, cv2.TM_CCORR_NORMED, cv2.TM_CCOEFF_NORMED]
-        current_match_method = match_methods[2]
-        # 放置开始点和稳定点的list容器
-        start_threshold_list = []
-        end_threshold_list = []
         # 获取视频对象
         video_cap = cv2.VideoCapture(video_file)
-        # 获取视频帧率
-        self.frame_rate = int(video_cap.get(cv2.CAP_PROP_FPS))
-        # cv2.IMREAD_COLOR: 读入一副彩色图片
-        # cv2.IMREAD_GRAYSCALE: 以灰度模式读入图片
-        # cv2.IMREAD_UNCHANGED: 读入一幅图片，并包括其alpha通道
+        # 帧编号
+        frame_id = 0
+        # 起点结果是否找到标志位
+        start_point_exist_flag = False
+        # 模板出现标志
+        template_appear_flag = False
+        # 上一帧图片(前后两帧需要对比)
+        last_picture = None
+        # 匹配率连续大于0.99的次数(只要中断就从零计算)/原理:连续十帧匹配率大于0.99就可以认为此帧为稳定帧
+        stability_num = 0
+        # 上一循环是否匹配率大于0.99的标志
+        cycle_flag = False
+        # 起始帧和结束帧结果(frame_id, match_rate), (frame_id, match_rate)
+        start_point_result = (1, 1.0)
+        end_point_result = (1, 0.0)
+        # 计算待检测模板在整帧中的位置(需要截取出来)
+        # 获取视频的尺寸
+        frame_height = video_cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        frame_width = video_cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         # 获取模板的灰度图
         end_mask_gray = cv2.imdecode(np.fromfile(end_mask, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
         # 模板的尺寸
         end_mask_height, end_mask_width = end_mask_gray.shape
+        # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点每个边大20像素)
+        # 行起点
+        # row_start = (end_mask_gray[0][0] * 10 - end_mask_height)
+        row_start = (end_mask_gray[0][0] * 10 - self.template_edge)
+        row_start = 0 if row_start < 0 else row_start
+        # 行终点
+        # row_end = (end_mask_gray[0][1] * 10 + end_mask_height)
+        row_end = (end_mask_gray[0][1] * 10 + self.template_edge)
+        row_end = frame_height - 1 if row_end >= frame_height else row_end
+        # 列起点
+        # column_start = (end_mask_gray[0][2] * 10 - end_mask_width)
+        column_start = (end_mask_gray[0][2] * 10 - self.template_edge)
+        column_start = 0 if column_start < 0 else column_start
+        # 列终点
+        # column_end = (end_mask_gray[0][3] * 10 + end_mask_width)
+        column_end = (end_mask_gray[0][3] * 10 + self.template_edge)
+        column_end = frame_width - 1 if column_end >= frame_width else column_end
         # 视频读取
         while video_cap.isOpened():
+            # 帧从1开始
+            frame_id += 1
             successfully_read, frame = video_cap.read()
             if successfully_read is True:
+                # 灰度化
                 frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                frame_height, frame_width = frame_gray.shape
-                # 起点
-                # 如果图像第一行像素为白色
-                if frame[0].mean() > 235:
-                    start_threshold_list.append(1.0)
-                else:
-                    start_threshold_list.append(0)
-                # 终点
-                # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点每个边大20像素)
-                # 行起点
-                row_start = (end_mask_gray[0][0] * 10 - end_mask_height)
-                if row_start < 0:
-                    row_start = 0
-                else:
-                    row_start = row_start
-                # 行终点
-                row_end = (end_mask_gray[0][1] * 10 + end_mask_height)
-                if row_end >= frame_height:
-                    row_end = frame_height - 1
-                else:
-                    row_end = row_end
-                # 列起点
-                column_start = (end_mask_gray[0][2] * 10 - end_mask_width)
-                if column_start < 0:
-                    column_start = 0
-                else:
-                    column_start = column_start
-                # 列终点
-                column_end = (end_mask_gray[0][3] * 10 + end_mask_width)
-                if column_end >= frame_width:
-                    column_end = frame_width - 1
-                else:
-                    column_end = column_end
                 # 目标图片(待匹配)
                 target = frame_gray[row_start: row_end, column_start: column_end]
-                # 模板匹配
-                match_result = cv2.matchTemplate(target, end_mask_gray, current_match_method)
-                # 查找匹配度和坐标位置
-                min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
-                end_threshold_list.append(max_threshold)
+                # 起点
+                if start_point_exist_flag is False:
+                    # 如果图像第一行像素为白色
+                    if frame[0].mean() > 245:
+                        start_point_result = (frame_id, 1.0)
+                        start_point_exist_flag = True
+                    # 先寻找起点(没有找到起点进行下一循环)
+                    continue
+                # 起点之后寻找模板出现的帧
+                elif template_appear_flag is False:
+                    threshold = self.match_template(target, end_mask_gray)
+                    if threshold >= self.match_threshold:
+                        template_appear_flag = True
+                        last_picture = target
+                    else:
+                        continue
+                # 终点(稳定点)
+                if template_appear_flag is True:
+                    match_rate = self.match_template(target, last_picture)
+                    print(match_rate)
+                    if cycle_flag is True:
+                        if match_rate > 0.98:
+                            cycle_flag = True
+                            stability_num += 1
+                            if stability_num == 10:
+                                end_point_result = (frame_id - 10, 0.98)
+                                break
+                        else:
+                            cycle_flag = False
+                            stability_num = 0
+                            last_picture = target
+                    else:
+                        if match_rate > 0.98:
+                            cycle_flag = True
+                            stability_num = 1
+                        else:
+                            cycle_flag = False
+                            stability_num = 0
+                            last_picture = target
             else:
                 break
         video_cap.release()
-        return start_threshold_list, end_threshold_list
+        return start_point_result, end_point_result
 
-
-    def detect_start_point(self, start_threshold_list):
-        """
-        计算起点(返回可能是起点的所有帧序号, 以及当前帧匹配率)
-        :param start_threshold_list: 开始点匹配率列表
-        :return: 返回是起点的帧序号以及当前帧匹配率
-        """
-        frame_serial_number = 0
-        frame_threshold = 0
-        length = len(start_threshold_list)
-        for i in range(1, (length - 1)):
-            if start_threshold_list[i-1] == 0 and start_threshold_list[i] == 1.0:
-                frame_serial_number = i
-                frame_threshold = start_threshold_list[i]
-                break
-        return frame_serial_number, frame_threshold
-
-
-    def detect_end_point(self, end_threshold_list):
-        """
-        计算终点(返回可能是终点的所有帧序号, 以及当前帧匹配率)
-        :param end_threshold_list: 稳定点匹配率列表
-        :return: 返回是终点的帧序号以及当前帧匹配率
-        """
-        # 找出所有大于match_threshold的帧匹配率
-        match_threshold_expected_list = []
-        for threshold in end_threshold_list:
-            if threshold > self.match_threshold:
-                match_threshold_expected_list.append(threshold)
-            else:
-                match_threshold_expected_list.append(0)
-
-        # 更进一步筛选可能成为终点的帧
-        frame_serial_number = 0
-        frame_threshold = 0
-        for i in range(1, len(match_threshold_expected_list)):
-            # 前一帧不可能为终止点, 当前帧有可能为终止点
-            if match_threshold_expected_list[i - 1] == 0 and match_threshold_expected_list[i] > 0:
-                # 取连续十帧匹配率
-                temp_list1 = []
-                # 如果当前帧大于第十帧(取当前往前连续连续)
-                if i > 10:
-                    for k in range(i - 11, i - 1):
-                        temp_list1.append(match_threshold_expected_list[k])
-                # 可能的终点帧在前十帧(取前一帧十次)
-                else:
-                    for k in range(10):
-                        temp_list1.append(match_threshold_expected_list[i - 1])
-
-                temp_list2 = []
-                # 如果当前帧不在最后十帧(取连续向后十帧)
-                if i < len(match_threshold_expected_list) - 10:
-                    for k in range(i, i + 10):
-                        temp_list2.append(match_threshold_expected_list[k])
-                # 如果当前帧在最后十帧(取当前帧十次)
-                else:
-                    for k in range(10):
-                        temp_list2.append(match_threshold_expected_list[i])
-                # 当前帧的往前十帧中匹配率为0的次数多余5次&往后十帧中匹配率为0的次数小于5次(判定为有更大可能为终点)
-                if temp_list1.count(0) > 5 > temp_list2.count(0):
-                    frame_serial_number = i
-                    frame_threshold = match_threshold_expected_list[i]
-                    break
-        # 对目前找到的这个帧进行再判断(从此帧往后找到匹配率最大的帧停止>这一段的帧就是可能出现的所有帧)-->求出这段匹配率平均数
-        average_threshold = match_threshold_expected_list[frame_serial_number]
-        for frame_id in range(frame_serial_number, len(match_threshold_expected_list)-10):
-            if match_threshold_expected_list[frame_id+1] > match_threshold_expected_list[frame_id]:
-                before_sum = average_threshold * (frame_id - frame_serial_number + 1)
-                average_threshold = (before_sum + match_threshold_expected_list[frame_id + 1]) / (frame_id - frame_serial_number + 2)
-            else:
-                break
-        # 在此处判断(当前帧匹配率大于平均匹配率就行)
-        for i in range(frame_serial_number, len(match_threshold_expected_list)):
-            if match_threshold_expected_list[i] > average_threshold:
-                frame_serial_number = i
-                frame_threshold = match_threshold_expected_list[i]
-                break
-        return frame_serial_number, round(frame_threshold, 4)
 
     # 处理视频, 从视频中获取处理信息
     def process_video(self, video_id, file, end_mask):
         Logger('正在计算<%s>起止点...' % file)
-        start_threshold_list, end_threshold_list = self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=file)
-        # 起始帧和停止帧(因这里帧数从零开始, 故而帧数增加一个)
-        start_frame, start_threshold = self.detect_start_point(start_threshold_list)
-        end_frame, end_threshold = self.detect_end_point(end_threshold_list)
-        start_frame = start_frame + 1
-        end_frame = end_frame + 1
+        # 计算起始帧和停止帧
+        (start_frame, start_threshold), (end_frame, end_threshold) = self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=file)
+        start_frame = start_frame
+        end_frame = end_frame
         frame_gap = end_frame - start_frame
         time_gap = int(frame_gap * (1000 / 120))
         Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (file, start_frame, start_threshold))
@@ -439,6 +412,7 @@ class GetStartupTime:
 
 if __name__=='__main__':
     # video_path = 'D:/Code/robot/video/2019-10-15'
-    video_path = 'D:/Code/robot/video/2019-12-03/点击/点击设置'
+    # video_path = 'D:/Code/robot/video/2019-12-03/点击/点击设置'
+    video_path = 'D:/Code/robot/video/2020-01-02/15-03-06'
     test = GetStartupTime(video_path=video_path)
     test.data_processing()
