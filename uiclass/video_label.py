@@ -1018,11 +1018,15 @@ class VideoLabel(QLabel):
                     if GloVar.data_process_flag is True:
                         # 将模板灰度化/并在模板起始位置打标记
                         rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
-                        # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
-                        rect_image[0][0] = y0 // 10
-                        rect_image[0][1] = y1 // 10
-                        rect_image[0][2] = x0 // 10
-                        rect_image[0][3] = x1 // 10
+                        # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置, 每一列前四个像素分别代表 千/百/十/个 位)
+                        # rect_image[0][0] = y0 // 10
+                        # rect_image[0][1] = y1 // 10
+                        # rect_image[0][2] = x0 // 10
+                        # rect_image[0][3] = x1 // 10
+                        rect_image = self.write_position_info_to_roi(rect_image, 0, y0)
+                        rect_image = self.write_position_info_to_roi(rect_image, 1, y1)
+                        rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
+                        rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
                         cut_img = rect_image
                         # 模板存放位置
                         mask_path = mask_path
@@ -1051,10 +1055,14 @@ class VideoLabel(QLabel):
                                     # 将模板灰度化/并在模板起始位置打标记
                                     rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
                                     # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
-                                    rect_image[0][0] = y0 // 10
-                                    rect_image[0][1] = y1 // 10
-                                    rect_image[0][2] = x0 // 10
-                                    rect_image[0][3] = x1 // 10
+                                    # rect_image[0][0] = y0 // 10
+                                    # rect_image[0][1] = y1 // 10
+                                    # rect_image[0][2] = x0 // 10
+                                    # rect_image[0][3] = x1 // 10
+                                    rect_image = self.write_position_info_to_roi(rect_image, 0, y0)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 1, y1)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
                                     cut_img = rect_image
                                     template_name = MergePath([mask_path, value.split('/')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
@@ -1093,6 +1101,28 @@ class VideoLabel(QLabel):
                     Logger('[框选动作取消!]')
             # 保存完图片后, 让红色框消失
             self.x0, self.y0, self.x1, self.y1 = 0, 0, 0, 0
+
+
+    # 在模板图片中的前4行4列写入位置信息(roi图片/column列数,从0-3/num坐标信息)
+    def write_position_info_to_roi(self, roi, column, num):
+        num_length = len(str(num))
+        if num_length == 4:
+            str_num = str(num)
+        elif num_length == 3:
+            str_num = str(0) + str(num)
+        elif num_length == 2:
+            str_num = str(00) + str(num)
+        elif num_length == 1:
+            str_num = str(000) + str(num)
+        else:
+            str_num = '1234'
+        position_info = [int(list(str_num)[0]), int(list(str_num)[1]), int(list(str_num)[2]), int(list(str_num)[3])]
+        roi[0][column] = position_info[0]
+        roi[1][column] = position_info[1]
+        roi[2][column] = position_info[2]
+        roi[3][column] = position_info[3]
+        print(str_num)
+        return roi
 
 
     # 计算传入机械臂的坐标
