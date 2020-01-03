@@ -412,11 +412,15 @@ class ReportTab(QWidget):
             Logger('打开文件: %s' % report_path)
             # 展示报告
             self.report_path = report_path
-            self.show_html()
             current_file_path = os.path.split(report_path)[0]
             # 将当前report_path路径保存到配置文件
             if file_path != current_file_path:
                 Profile(type='write', file=GloVar.config_file_path, section='param', option='file_path', value=current_file_path)
+            try:
+                self.show_html()
+            except Exception as e:
+                Logger(e)
+
         else:
             Logger('取消打开文件!')
 
@@ -427,6 +431,7 @@ class ReportTab(QWidget):
         self.html_path_label.setText(self.report_path)
         # 加载本地html文件
         self.html_show_text.load(QUrl('file:///' + self.report_path))
+        # self.html_show_text.load(QUrl(self.report_path))
 
     def resizeEvent(self, event):
         self.signal.emit('resize>')
