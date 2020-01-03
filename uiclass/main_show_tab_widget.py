@@ -16,6 +16,8 @@ class MainShowTabWidget(QTabWidget):
     def __init__(self, parent, camera_width, camera_height):
         super(MainShowTabWidget, self).__init__(parent)
         self.parent = parent
+        # 打开的文件列表(第一个默认视频tab)
+        self.file_list = ['video']
         self.setTabsClosable(True)
         # 样式设置
         style_sheet = 'QTabWidget:pane{ border: 1px solid #7A7A7A; top: -1px;}\
@@ -60,6 +62,7 @@ class MainShowTabWidget(QTabWidget):
     # 关闭标签页(需要判断)
     def close_tab(self, index):
         self.removeTab(index)
+        self.file_list.pop(index)
         # print('当前剩余tab: ', self.count())
 
 

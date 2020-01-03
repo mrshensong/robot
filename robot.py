@@ -3,6 +3,7 @@ import sys
 import cv2
 import time
 import datetime
+import subprocess
 from threading import Thread
 from processdata.get_startup_time import GetStartupTime
 from uiclass.stream import Stream
@@ -489,38 +490,53 @@ class UiMainWindow(QMainWindow):
         if signal_str.startswith('open_picture>'):
             # 新建picture_tab
             picture_path = signal_str.split('open_picture>')[1]
-            picture_title = os.path.split(picture_path)[1]
-            picture_tab = PictureTab(self.main_show_tab_widget, picture_path)
-            picture_tab.signal[str].connect(self.main_show_tab_widget.recv_picture_tab_signal)
-            self.main_show_tab_widget.addTab(picture_tab, picture_title)
-            self.main_show_tab_widget.setCurrentWidget(picture_tab)
-            # 设置ToolTip提示
-            index = self.main_show_tab_widget.indexOf(picture_tab)
-            self.main_show_tab_widget.setTabToolTip(index, picture_path)
+            if picture_path in self.main_show_tab_widget.file_list:
+                index = self.main_show_tab_widget.file_list.index(picture_path)
+                self.main_show_tab_widget.setCurrentIndex(index)
+            else:
+                self.main_show_tab_widget.file_list.append(picture_path)
+                picture_title = os.path.split(picture_path)[1]
+                picture_tab = PictureTab(self.main_show_tab_widget, picture_path)
+                picture_tab.signal[str].connect(self.main_show_tab_widget.recv_picture_tab_signal)
+                self.main_show_tab_widget.addTab(picture_tab, picture_title)
+                self.main_show_tab_widget.setCurrentWidget(picture_tab)
+                # 设置ToolTip提示
+                index = self.main_show_tab_widget.indexOf(picture_tab)
+                self.main_show_tab_widget.setTabToolTip(index, picture_path)
         # 打开报告(同时打开报告页面和文本页面)
         elif signal_str.startswith('open_report>'):
             # 新建report_tab
             report_path = signal_str.split('open_report>')[1]
-            report_title = os.path.split(report_path)[1]
-            report_tab = ReportTab(self.main_show_tab_widget, report_path)
-            report_tab.signal[str].connect(self.main_show_tab_widget.recv_report_tab_signal)
-            self.main_show_tab_widget.addTab(report_tab, report_title)
-            self.main_show_tab_widget.setCurrentWidget(report_tab)
-            # 设置ToolTip提示
-            index = self.main_show_tab_widget.indexOf(report_tab)
-            self.main_show_tab_widget.setTabToolTip(index, report_path)
+            if report_path in self.main_show_tab_widget.file_list:
+                index = self.main_show_tab_widget.file_list.index(report_path)
+                self.main_show_tab_widget.setCurrentIndex(index)
+            else:
+                self.main_show_tab_widget.file_list.append(report_path)
+                report_title = os.path.split(report_path)[1]
+                report_tab = ReportTab(self.main_show_tab_widget, report_path)
+                report_tab.signal[str].connect(self.main_show_tab_widget.recv_report_tab_signal)
+                self.main_show_tab_widget.addTab(report_tab, report_title)
+                self.main_show_tab_widget.setCurrentWidget(report_tab)
+                # 设置ToolTip提示
+                index = self.main_show_tab_widget.indexOf(report_tab)
+                self.main_show_tab_widget.setTabToolTip(index, report_path)
         # 打开文本
         elif signal_str.startswith('open_text>'):
             # 新建text_tab
             text_path = signal_str.split('open_text>')[1]
-            text_title = os.path.split(text_path)[1]
-            text_tab = TextTab(self.main_show_tab_widget, text_path)
-            text_tab.signal[str].connect(self.main_show_tab_widget.recv_text_tab_signal)
-            self.main_show_tab_widget.addTab(text_tab, text_title)
-            self.main_show_tab_widget.setCurrentWidget(text_tab)
-            # 设置ToolTip提示
-            index = self.main_show_tab_widget.indexOf(text_tab)
-            self.main_show_tab_widget.setTabToolTip(index, text_path)
+            if text_path in self.main_show_tab_widget.file_list:
+                index = self.main_show_tab_widget.file_list.index(text_path)
+                self.main_show_tab_widget.setCurrentIndex(index)
+            else:
+                self.main_show_tab_widget.file_list.append(text_path)
+                text_title = os.path.split(text_path)[1]
+                text_tab = TextTab(self.main_show_tab_widget, text_path)
+                text_tab.signal[str].connect(self.main_show_tab_widget.recv_text_tab_signal)
+                self.main_show_tab_widget.addTab(text_tab, text_title)
+                self.main_show_tab_widget.setCurrentWidget(text_tab)
+                # 设置ToolTip提示
+                index = self.main_show_tab_widget.indexOf(text_tab)
+                self.main_show_tab_widget.setTabToolTip(index, text_path)
         # 打开视频文件
         elif signal_str.startswith('open_video>'):
             video_file = signal_str.split('open_video>')[1]
@@ -915,7 +931,10 @@ class UiMainWindow(QMainWindow):
 
     # 打开系统文件
     def open_system_file(self, file):
-        os.system(file)
+        # 带cmd黑框
+        # os.system(file)
+        # 不带cmd黑框
+        subprocess.run(file, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
     '''菜单栏打开文件调用函数'''
