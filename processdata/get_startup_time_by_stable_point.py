@@ -28,6 +28,7 @@ class GetStartupTime:
         self.report_excel = self.report_path + '/' + 'report.xlsx'
         # 模板匹配率
         self.match_threshold = 0.93
+        self.template_edge = 10
         # 待处理的视频列表
         self.videos_list = []
 
@@ -54,7 +55,7 @@ class GetStartupTime:
 
 
 
-    def get_start_and_end_match_threshold(self, video_file):
+    def get_start_and_end_match_threshold(self, end_mask, video_file):
         """
         获取起止点的匹配率列表
         :param end_mask: 稳定点模板
@@ -67,6 +68,8 @@ class GetStartupTime:
         frame_id = 0
         # 起点结果是否找到标志位
         start_point_exist_flag = False
+        # 模板出现标志
+        template_appear_flag = False
         # 上一帧图片(前后两帧需要对比)
         last_picture = None
         # 匹配率连续大于0.99的次数(只要中断就从零计算)/原理:连续十帧匹配率大于0.99就可以认为此帧为稳定帧
@@ -76,6 +79,31 @@ class GetStartupTime:
         # 起始帧和结束帧结果(frame_id, match_rate), (frame_id, match_rate)
         start_point_result = ()
         end_point_result = ()
+        # 计算待检测模板在整帧中的位置(需要截取出来)
+        # 获取视频的尺寸
+        frame_height = video_cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        frame_width = video_cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        # 获取模板的灰度图
+        end_mask_gray = cv2.imdecode(np.fromfile(end_mask, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+        # 模板的尺寸
+        end_mask_height, end_mask_width = end_mask_gray.shape
+        # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点每个边大20像素)
+        # 行起点
+        # row_start = (end_mask_gray[0][0] * 10 - end_mask_height)
+        row_start = (end_mask_gray[0][0] * 10 - self.template_edge)
+        row_start = 0 if row_start < 0 else row_start
+        # 行终点
+        # row_end = (end_mask_gray[0][1] * 10 + end_mask_height)
+        row_end = (end_mask_gray[0][1] * 10 + self.template_edge)
+        row_end = frame_height - 1 if row_end >= frame_height else row_end
+        # 列起点
+        # column_start = (end_mask_gray[0][2] * 10 - end_mask_width)
+        column_start = (end_mask_gray[0][2] * 10 - self.template_edge)
+        column_start = 0 if column_start < 0 else column_start
+        # 列终点
+        # column_end = (end_mask_gray[0][3] * 10 + end_mask_width)
+        column_end = (end_mask_gray[0][3] * 10 + self.template_edge)
+        column_end = frame_width - 1 if column_end >= frame_width else column_end
         # 视频读取
         while video_cap.isOpened():
             # 帧从1开始
@@ -84,33 +112,47 @@ class GetStartupTime:
             if successfully_read is True:
                 # 灰度化
                 frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                # 目标图片(待匹配)
+                target = frame_gray[row_start: row_end, column_start: column_end]
                 # 起点
                 if start_point_exist_flag is False:
                     # 如果图像第一行像素为白色
                     if frame[0].mean() > 245:
                         start_point_result = (frame_id, 1.0)
                         start_point_exist_flag = True
-                        last_picture = frame_gray
                     # 先寻找起点(没有找到起点进行下一循环)
                     continue
+                # 起点之后寻找模板出现的帧
+                elif template_appear_flag is False:
+                    threshold = self.match_template(target, end_mask_gray)
+                    if threshold >= self.match_threshold:
+                        template_appear_flag = True
+                        last_picture = target
+                    else:
+                        continue
                 # 终点(稳定点)
-                else:
-                    match_rate = self.match_template(last_picture, frame_gray)
+                if template_appear_flag is True:
+                    match_rate = self.match_template(target, last_picture)
                     print(match_rate)
                     if cycle_flag is True:
                         if match_rate > 0.99:
                             cycle_flag = True
                             stability_num += 1
-                            if stability_num == 10:
-                                end_point_result = (frame_id - 10, 0.99)
+                            if stability_num == 15:
+                                end_point_result = (frame_id - 15, 0.99)
                                 break
                         else:
                             cycle_flag = False
                             stability_num = 0
+                            last_picture = target
                     else:
                         if match_rate > 0.99:
                             cycle_flag = True
                             stability_num = 1
+                        else:
+                            cycle_flag = False
+                            stability_num = 0
+                            last_picture = target
             else:
                 break
         video_cap.release()
@@ -312,4 +354,6 @@ if __name__ == '__main__':
     video_path = 'D:/Code/robot/video/2019-10-15'
     test = GetStartupTime(video_path=video_path)
     # test.data_processing()
-    print(test.get_start_and_end_match_threshold('D:/Test/Python/TestVideo/video/test_.mp4'))
+    # print(test.get_start_and_end_match_threshold('D:/Test/Python/TestVideo/video/test_.mp4'))
+    # print(test.get_start_and_end_match_threshold('D:/Code/robot/picture/template/启动/音乐.jpg', 'D:/Code/robot/video/2019-12-31/17-04-00/启动/音乐/1.mp4'))
+    print(test.get_start_and_end_match_threshold('D:/Code/robot/picture/template/启动/音乐.jpg', 'D:/Code/robot/video/2019-12-31/16-50-53/启动/音乐/1.mp4'))

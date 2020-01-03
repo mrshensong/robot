@@ -95,19 +95,15 @@ class GetStartupTime:
         end_mask_gray = cv2.imdecode(np.fromfile(end_mask, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
         # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点每个边大20像素)
         # 行起点
-        # row_start = (end_mask_gray[0][0] * 10 - self.template_edge)
         row_start = self.get_position_info_from_roi(end_mask_gray, 0) - self.template_edge
         row_start = 0 if row_start < 0 else row_start
         # 行终点
-        # row_end = (end_mask_gray[0][1] * 10 + self.template_edge)
         row_end = self.get_position_info_from_roi(end_mask_gray, 1) + self.template_edge
         row_end = frame_height - 1 if row_end >= frame_height else row_end
         # 列起点
-        # column_start = (end_mask_gray[0][2] * 10 - self.template_edge)
         column_start = self.get_position_info_from_roi(end_mask_gray, 2) - self.template_edge
         column_start = 0 if column_start < 0 else column_start
         # 列终点
-        # column_end = (end_mask_gray[0][3] * 10 + self.template_edge)
         column_end = self.get_position_info_from_roi(end_mask_gray, 3) + self.template_edge
         column_end = frame_width - 1 if column_end >= frame_width else column_end
         # 视频读取
@@ -185,7 +181,7 @@ class GetStartupTime:
         case_name = video_name_path.split('/')[-1]
         video_name_path_cut_list = video_name_path.split('/')
         new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
-        end_mask = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.jpg'
+        end_mask = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.bmp'
         # 通过读取配置文件获取标准耗时(单位/ms)
         option = '/'.join(video_name_path_cut_list[-2:])
         # standard_time_gap = 800

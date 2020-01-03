@@ -1032,8 +1032,8 @@ class VideoLabel(QLabel):
                         mask_path = mask_path
                         if os.path.exists(mask_path) is False:
                             os.makedirs(mask_path)
-                        template_name = MergePath([mask_path, value + '.jpg']).merged_path
-                        cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                        template_name = MergePath([mask_path, value + '.bmp']).merged_path
+                        cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
                     # 非数据处理情况
                     else:
                         # 如果输入的参数中带有'-'代表需要分级保存, 并需要新建文件夹
@@ -1064,8 +1064,8 @@ class VideoLabel(QLabel):
                                     rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
                                     rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
                                     cut_img = rect_image
-                                    template_name = MergePath([mask_path, value.split('/')[-1] + '.jpg']).merged_path
-                                    cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+                                    template_name = MergePath([mask_path, value.split('/')[-1] + '.bmp']).merged_path
+                                    cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
                                     # 视频动作中模板框选完成
                                     self.signal.emit('draw_frame_finished>' + template_name)
                                 else:
@@ -1121,7 +1121,6 @@ class VideoLabel(QLabel):
         roi[1][column] = position_info[1]
         roi[2][column] = position_info[2]
         roi[3][column] = position_info[3]
-        print(str_num)
         return roi
 
 

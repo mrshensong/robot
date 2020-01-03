@@ -804,7 +804,7 @@ class UiMainWindow(QMainWindow):
         self.need_detect_data_flag = False
         # 遍历出来没有对应模板的视频文件
         for video in videos:
-            template_path = video.replace('/video/', '/picture/').split('.')[0] + '.jpg'
+            template_path = video.replace('/video/', '/picture/').split('.')[0] + '.bmp'
             # 模板图片不存在
             if os.path.exists(template_path) is False:
                 videos_without_template.append(video)
@@ -860,7 +860,7 @@ class UiMainWindow(QMainWindow):
                 # 检查模板图片是否存在
                 video_name_path_cut_list = os.path.split(video)[0].split('/')
                 new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
-                template_path = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.jpg'
+                template_path = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.bmp'
                 # 模板图片不存在
                 if os.path.exists(template_path) is False:
                     videos_without_template.append(video)
