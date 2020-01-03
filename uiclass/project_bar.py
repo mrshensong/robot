@@ -224,7 +224,7 @@ class ProjectBar(QWidget):
         # 判断双击是否为文件(只对文件操作)
         if os.path.isfile(file_path) is True:
             # 展示图片
-            if file_path.endswith('.jpg') or file_path.endswith('.png'):
+            if file_path.endswith('.jpg') or file_path.endswith('.png') or file_path.endswith('.bmp'):
                 self.signal.emit('open_picture>' + str(file_path))
             # 展示报告
             elif file_path.endswith('.html'):
