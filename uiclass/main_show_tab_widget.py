@@ -430,8 +430,9 @@ class ReportTab(QWidget):
         # 展示文件路径
         self.html_path_label.setText(self.report_path)
         # 加载本地html文件
+        # self.html_show_text.stop()
         self.html_show_text.load(QUrl('file:///' + self.report_path))
-        # self.html_show_text.load(QUrl(self.report_path))
+        # self.html_show_text.show()
 
     def resizeEvent(self, event):
         self.signal.emit('resize>')
