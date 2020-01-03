@@ -13,8 +13,8 @@ from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt, QTranslator
-from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
-from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit
+from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor, QMovie, QPixmap
+from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit, QSplashScreen, qApp
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
 from uarm_action.action import ArmAction
 from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
@@ -1000,4 +1000,5 @@ if __name__ == "__main__":
     gui = UiMainWindow()
     gui.setupUi()
     gui.show()
+    # 系统退出
     sys.exit(app.exec_())

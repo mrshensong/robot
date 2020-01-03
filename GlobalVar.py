@@ -59,6 +59,8 @@ class GloVar:
 class IconPath:
     # 应用窗口图标
     Icon_file       = 'config/Icon/other_icon/Icon.jpg'
+    # 启动动画
+    startup_file    = 'config/Icon/other_icon/startup.gif'
     # 视频栏背景图标
     background_file = 'config/Icon/other_icon/background.jpg'
     # 分割线图标
