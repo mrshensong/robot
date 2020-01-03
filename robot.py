@@ -856,6 +856,8 @@ class UiMainWindow(QMainWindow):
         # 用来判断数据是否准备完毕(也就是视频对应的模板图片是否全部存在)
         flag = False
         while self.need_detect_data_flag is True:
+            if GloVar.exit_thread_flag is True:
+                break
             # 没有相应模板的视频文件列表(用来判断是否可以进行数据处理)
             videos_without_template = []
             # 遍历出来没有对应模板的视频文件
@@ -888,6 +890,9 @@ class UiMainWindow(QMainWindow):
     # 数据处理结束
     def data_process_finished(self):
         while True:
+            if GloVar.exit_thread_flag is True:
+                flag = False
+                break
             if GloVar.data_process_finished_flag is True:
                 flag = True
                 GloVar.data_process_finished_flag = False
@@ -955,6 +960,8 @@ class UiMainWindow(QMainWindow):
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '本程序', '是否要退出程序?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            # 退出线程标志
+            GloVar.exit_thread_flag = True
             # 关闭摄像头
             self.robot.video.stop_record_thread()
             self.main_show_tab_widget.video_tab.video_label.timer_camera_image.stop()
