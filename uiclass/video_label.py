@@ -2,8 +2,8 @@ import os
 import cv2
 import sys
 import time
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QPushButton, QFrame, QLabel, QSlider, QApplication, QInputDialog
-from PyQt5.QtGui import QMovie, QPixmap, QImage, QPainter, QPen, QPolygon
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QFrame, QLabel, QSlider, QApplication, QInputDialog, QPushButton
+from PyQt5.QtGui import QMovie, QPixmap, QImage, QPainter, QPen, QPolygon, QCursor
 from PyQt5.QtCore import pyqtSignal, Qt, QPoint, QRect
 from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile, RecordAction
 from uiclass.timer import Timer
@@ -123,16 +123,17 @@ class VideoLabel(QLabel):
         self.button_h_layout = QHBoxLayout(self)
         # 暂停按钮/空格键
         self.status_video_button = QPushButton(self)
+        self.status_video_button.setCursor(QCursor(Qt.ArrowCursor))
         self.status_video_button.setObjectName('status_video_button')
         self.status_video_button.setToolTip(self.video_status_play_tip)
         self.status_video_button.setFixedSize(self.media_button_size, self.media_button_size)
-        # 图片铺满按钮背景
         self.status_video_button.setStyleSheet('QPushButton{border-image: url('+ IconPath.Icon_player_play + ')}')
         self.status_video_button.setShortcut(Qt.Key_Space)
         self.status_video_button.clicked.connect(self.switch_video)
         self.status_video_button.setEnabled(False)
         # 上一个视频
         self.last_video_button = QPushButton(self)
+        self.last_video_button.setCursor(QCursor(Qt.ArrowCursor))
         self.last_video_button.setObjectName('last_video_button')
         self.last_video_button.setToolTip('上一个视频')
         self.last_video_button.setFixedSize(self.media_button_size, self.media_button_size)
@@ -142,6 +143,7 @@ class VideoLabel(QLabel):
         self.last_video_button.setEnabled(True)
         # 下一个视频
         self.next_video_button = QPushButton(self)
+        self.next_video_button.setCursor(QCursor(Qt.ArrowCursor))
         self.next_video_button.setObjectName('next_video_button')
         self.next_video_button.setToolTip('下一个视频')
         self.next_video_button.setFixedSize(self.media_button_size, self.media_button_size)
@@ -151,6 +153,7 @@ class VideoLabel(QLabel):
         self.next_video_button.setEnabled(False)
         # 上一帧
         self.last_frame_button = QPushButton(self)
+        self.last_frame_button.setCursor(QCursor(Qt.ArrowCursor))
         self.last_frame_button.setObjectName('last_frame_button')
         self.last_frame_button.setToolTip('上一帧图像')
         self.last_frame_button.setFixedSize(self.media_button_size, self.media_button_size)
@@ -160,6 +163,7 @@ class VideoLabel(QLabel):
         self.last_frame_button.setEnabled(False)
         # 下一帧
         self.next_frame_button = QPushButton(self)
+        self.next_frame_button.setCursor(QCursor(Qt.ArrowCursor))
         self.next_frame_button.setObjectName('next_frame_button')
         self.next_frame_button.setToolTip('下一帧图像')
         self.next_frame_button.setFixedSize(self.media_button_size, self.media_button_size)
@@ -182,6 +186,7 @@ class VideoLabel(QLabel):
         self.label_video_title.setText('[实时视频流]')
         # 视频进度条
         self.video_progress_bar = QSlider(Qt.Horizontal, self)
+        self.video_progress_bar.setCursor(QCursor(Qt.ArrowCursor))
         self.video_progress_bar.setEnabled(False)
         progress_bar_style = 'QSlider {border-color: #BCBCBC;}\
                               QSlider::groove:horizontal {border: 1px solid #999999; height: 1px; margin: 0px 0; left: 0px; right: 0px;}\
