@@ -1,7 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QDialog, QApplication
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtCore import pyqtSignal, Qt
 from uiclass.add_action_tab import AddActionTab
 from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab

@@ -1,16 +1,14 @@
-import matplotlib
 import matplotlib.pyplot as plt
 from GlobalVar import Logger, MergePath
 # 设置中文字体和负号正常显示
-matplotlib.rcParams['font.sans-serif'] = ['SimHei']
-matplotlib.rcParams['axes.unicode_minus'] = False
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
 
 
 class GenerateDataGraph:
     def __init__(self, graph_path, data_dict):
         self.graph_path = graph_path
         self.data_dict = data_dict
-        # self.standard_value = int(Profile(type='read', file=GloVar.config_file_path, section='standard', option='critical_value').value)
         self.standard_value = 100
 
 

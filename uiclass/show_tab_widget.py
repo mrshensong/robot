@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QTabWidget, QMessageBox, QFrame
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QTabWidget, QMessageBox
+from PyQt5.QtCore import pyqtSignal
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
 from uiclass.show_script_tab import ShowScriptTab

@@ -2,9 +2,9 @@ import os
 import cv2
 import numpy as np
 from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QTextEdit, QFrame, QFileDialog, QTabBar
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtCore import pyqtSignal, Qt, QUrl
+from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from uiclass.video_label import VideoLabel
 from GlobalVar import IconPath, GloVar, Profile, Logger
 

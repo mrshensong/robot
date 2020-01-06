@@ -4,7 +4,7 @@ import time
 import shutil
 from threading import Thread
 from PyQt5.QtWidgets import QApplication, QWidget, QTreeView, QVBoxLayout, QFileSystemModel, QLineEdit, QMenu, QAction, QInputDialog, QMessageBox
-from PyQt5.QtCore import pyqtSignal, Qt, QDir
+from PyQt5.QtCore import pyqtSignal, Qt
 from GlobalVar import Logger, MergePath
 
 

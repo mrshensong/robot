@@ -1,8 +1,8 @@
 import time
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton, QFileDialog
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import pyqtSignal, Qt
 from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile
 
 # 自定义动作展示控件(action)

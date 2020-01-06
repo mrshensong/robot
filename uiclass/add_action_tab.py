@@ -1,7 +1,6 @@
 import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal, Qt
 from GlobalVar import RobotArmAction, MotionAction
 
 # 动作添加控件

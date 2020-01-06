@@ -2,11 +2,11 @@ import os
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit, QFrame
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit
+from PyQt5.QtCore import pyqtSignal, Qt, QSize
 from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
 from uiclass.controls import CaseControl
+
 
 class ShowCaseTab(QWidget):
 

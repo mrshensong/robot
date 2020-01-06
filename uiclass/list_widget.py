@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QListWidget
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal
 
 class ListWidget(QListWidget):
 

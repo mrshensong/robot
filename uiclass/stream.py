@@ -1,4 +1,4 @@
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal, QObject
 
 # 发射控制台内容
 class Stream(QObject):

@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QTextEdit, QLineEdit, QWidget, QVBoxLayout
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from GlobalVar import GloVar
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QTextOption
 
 
 class ShowScriptTab(QWidget):

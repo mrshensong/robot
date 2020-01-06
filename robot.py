@@ -14,7 +14,7 @@ from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt, QTranslator
 from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor, QMovie, QPixmap
-from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit, QSplashScreen, qApp
+from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QSplashScreen
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
 from uarm_action.action import ArmAction
 from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
@@ -997,8 +997,23 @@ if __name__ == "__main__":
     tran.load(GloVar.qt_zh_CN_file_path)
     app = QApplication(sys.argv)
     app.installTranslator(tran)
+    # 程序启动
+    splash_pix = QPixmap(IconPath.startup_file)
+    startup_gif = QMovie(IconPath.startup_file)
+    startup_label = QLabel()
+    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+    splash.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+    splash.setEnabled(False)
+    startup_label.setMovie(startup_gif)
+    startup_gif.start()
+    splash.show()
+    app.processEvents()
+    # 打开界面
     gui = UiMainWindow()
     gui.setupUi()
     gui.show()
+    # 界面打开标志位
+    startup_gif.stop()
+    splash.finish(gui)
     # 系统退出
     sys.exit(app.exec_())

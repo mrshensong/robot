@@ -3,8 +3,8 @@ import cv2
 import sys
 import time
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QPushButton, QFrame, QLabel, QSlider, QApplication, QInputDialog
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtGui import QMovie, QPixmap, QImage, QPainter, QPen, QPolygon
+from PyQt5.QtCore import pyqtSignal, Qt, QPoint, QRect
 from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile, RecordAction
 from uiclass.timer import Timer
 

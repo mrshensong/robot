@@ -1,5 +1,5 @@
 import time
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QMutexLocker
 
 # 定时器
 class Timer(QThread):

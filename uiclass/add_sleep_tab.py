@@ -1,7 +1,6 @@
 import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QPushButton
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal, Qt
 from GlobalVar import SleepAction
 
 # 动作添加控件

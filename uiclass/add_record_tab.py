@@ -1,8 +1,7 @@
 import json
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QLineEdit, QPushButton
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal, Qt
 from GlobalVar import RecordAction, Logger, Profile, GloVar
 from uiclass.controls import SelectTemplateControl
 
