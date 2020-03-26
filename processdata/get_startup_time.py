@@ -118,8 +118,8 @@ class GetStartupTime:
                 target = frame_gray[row_start: row_end, column_start: column_end]
                 # 起点
                 if start_point_exist_flag is False:
-                    # 如果图像第一行像素为白色
-                    if frame[0].mean() > 245:
+                    # 如果图像第一行像素为白色(排除前十帧可能出现的乱帧)
+                    if frame[0].mean() > 245 and frame_id > 10:
                         start_point_result = (frame_id, 1.0)
                         start_point_exist_flag = True
                     # 先寻找起点(没有找到起点进行下一循环)
@@ -420,6 +420,6 @@ class GetStartupTime:
 if __name__=='__main__':
     # video_path = 'D:/Code/robot/video/2019-10-15'
     # video_path = 'D:/Code/robot/video/2019-12-03/点击/点击设置'
-    video_path = 'D:/Code/robot/video/2020-01-02/14-59-53/启动/电台'
+    video_path = 'D:/Code/robot_exe/video/2020-03-23/15-13-51/启动/启动音乐'
     test = GetStartupTime(video_path=video_path)
     test.data_processing()

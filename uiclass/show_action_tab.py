@@ -1,8 +1,10 @@
+import os
 import json
 import time
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
-from PyQt5.QtCore import pyqtSignal, Qt, QSize
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam, BeautifyStyle
 from uiclass.controls import ActionControl, RecordControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
@@ -27,9 +29,6 @@ class ShowActionTab(QWidget):
         self.info_list = []
         # 脚本标签
         self.tag_list = []
-        # 添加动作窗口
-        self.add_action_window = AddTabWidget(self)
-        self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
         # 是否全部选中状态(False:没有全部选中, True:全部选中)
         self.select_all_flag = False
         # 当前所有action需要保存的文件名(或者打开case时现实的case文件名)
@@ -123,7 +122,6 @@ class ShowActionTab(QWidget):
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
 
-
     '''以下为按钮事件(添加/上方插入/删除/全选/执行/保存)'''
     # 展示添加动作子窗口(add_button)
     def connect_add_action_button(self):
@@ -132,6 +130,13 @@ class ShowActionTab(QWidget):
             GloVar.add_action_window_opened_flag = True
             # 默认是单击动作
             RobotArmAction.uArm_action_type = RobotArmAction.uArm_click
+            # 添加动作窗口
+            if self.case_absolute_name is not None or self.case_absolute_name != '':
+                case_name = os.path.split(self.case_absolute_name)[1].split('.')[0]
+            else:
+                case_name = '默认(name)'
+            self.add_action_window = AddTabWidget(self, case_name=case_name)
+            self.add_action_window.signal[str].connect(self.recv_add_action_window_signal)
             self.add_action_window.show()
             self.add_action_window.exec()
         else:
@@ -295,11 +300,12 @@ class ShowActionTab(QWidget):
         GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         Thread(target=self.execute_selected_actions, args=()).start()
 
-
     # 保存标签工具栏操作(save_button)
     def connect_save_script_tag(self):
-        if len(self.list_widget) > 0:
-            script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
+        script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
+        if len(self.case_absolute_name) > 0:
+            xml_file = self.case_absolute_name
+        else:
             filename = QFileDialog.getSaveFileName(self, '保存case', script_path, 'script file(*.xml)', options=QFileDialog.DontUseNativeDialog)
             xml_file = filename[0]
             if xml_file:
@@ -307,24 +313,23 @@ class ShowActionTab(QWidget):
                     xml_file = xml_file
                 else:
                     xml_file = xml_file + '.xml'
-                current_path = '/'.join(xml_file.split('/')[:-1])
-                if current_path != script_path:
-                    Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=current_path)
-                with open(xml_file, 'w', encoding='utf-8') as f:
-                    self.case_absolute_name = xml_file
-                    self.case_file_name = xml_file.split('/')[-1]
-                    script_tag = self.merge_to_script(''.join(self.tag_list))
-                    f.write(script_tag)
-                    Logger('[保存的脚本标签名为]: %s' % xml_file)
-                    # 保存case命令
-                    self.signal.emit('save_case>' + script_tag)
-                    WindowStatus.action_tab_status = '%s>已保存!' % self.case_absolute_name
-                    self.des_text.setText(self.case_file_name)
-                    GloVar.actions_saved_to_case = True
             else:
                 Logger('[取消保存脚本标签!]')
-        else:
-            Logger('[没有要保存的脚本标签!]')
+                return
+        current_path = '/'.join(xml_file.split('/')[:-1])
+        if current_path != script_path:
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=current_path)
+        with open(xml_file, 'w', encoding='utf-8') as f:
+            self.case_absolute_name = xml_file
+            self.case_file_name = xml_file.split('/')[-1]
+            script_tag = self.merge_to_script(''.join(self.tag_list))
+            f.write(script_tag)
+            Logger('[保存的脚本标签名为]: %s' % xml_file)
+            # 保存case命令
+            self.signal.emit('save_case>' + script_tag)
+            WindowStatus.action_tab_status = '%s>已保存!' % self.case_absolute_name
+            self.des_text.setText(self.case_file_name)
+            GloVar.actions_saved_to_case = True
 
 
     # 框选模板
@@ -430,7 +435,6 @@ class ShowActionTab(QWidget):
         # 滚动条滚动到当前item
         self.list_widget.scrollToItem(item)
 
-
     # 添加action动作控件
     def add_action_item(self, info_dict, new_control_flag=True):
         # 给动作设置id
@@ -440,7 +444,8 @@ class ShowActionTab(QWidget):
         obj = ActionControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_action_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='action')
-
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 插入action动作控件
     def insert_action_item(self, info_dict):
@@ -451,7 +456,8 @@ class ShowActionTab(QWidget):
         obj = ActionControl(parent=None, id=self.index, info_dict=info_dict)
         obj.signal[str].connect(self.recv_action_control_signal)
         self.insert_item(item, obj, info_dict, item_type='action')
-
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 添加record动作控件
     def add_record_item(self, info_dict, new_control_flag=True):
@@ -462,7 +468,8 @@ class ShowActionTab(QWidget):
         obj = RecordControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_record_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='record')
-
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 插入record动作控件
     def insert_record_item(self, info_dict):
@@ -473,7 +480,8 @@ class ShowActionTab(QWidget):
         obj = RecordControl(parent=None, id=self.index, info_dict=info_dict)
         obj.signal[str].connect(self.recv_record_control_signal)
         self.insert_item(item, obj, info_dict, item_type='record')
-
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 添加sleep动作控件
     def add_sleep_item(self, info_dict, new_control_flag=True):
@@ -484,7 +492,8 @@ class ShowActionTab(QWidget):
         obj = SleepControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_sleep_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='sleep')
-
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 插入sleep动作控件
     def insert_sleep_item(self, info_dict):
@@ -495,7 +504,8 @@ class ShowActionTab(QWidget):
         obj = SleepControl(parent=None, id=self.index, info_dict=info_dict)
         obj.signal[str].connect(self.recv_sleep_control_signal)
         self.insert_item(item, obj, info_dict, item_type='sleep')
-
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 接收action控件传来的删除和执行信号
     def recv_action_control_signal(self, signal_str):

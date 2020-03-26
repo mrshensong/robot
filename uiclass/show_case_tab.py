@@ -2,11 +2,11 @@ import os
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit
-from PyQt5.QtCore import pyqtSignal, Qt, QSize
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit, QFrame
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
 from uiclass.controls import CaseControl
-
 
 class ShowCaseTab(QWidget):
 
@@ -280,25 +280,30 @@ class ShowCaseTab(QWidget):
     # 返回list为每个action的信息(字典形式)>>list第一个参数为case文件名, 后面参数为每个action的信息存储字典
     def read_script_tag(self, id):
         case_file = self.case_file_list[id]
-        tree = ET.ElementTree(file=case_file)
-        root = tree.getroot()
-        dict_list, new_dict_info = [], []
-        new_dict_info.append(root.attrib['name']) # 文件名
-        new_dict_info.append(self.case_file_list[id]) # 完整路径
-        for child_of_root in root:
-            child_info_list = []
-            if child_of_root.tag == 'action':
-                child_info_list.append(child_of_root.attrib)
-                for child_child_of_root in child_of_root:
-                    dict_info = {child_child_of_root.attrib['name']: child_child_of_root.text}
-                    child_info_list.append(dict_info)
-                dict_list.append(child_info_list)
-        for info in dict_list:
-            dict_buffer = {}
-            for dict_info in info:
-                dict_buffer.update(dict_info)
-            new_dict_info.append(dict_buffer)
-        return new_dict_info
+        try:
+            tree = ET.ElementTree(file=case_file)
+            root = tree.getroot()
+            dict_list, new_dict_info = [], []
+            new_dict_info.append(root.attrib['name']) # 文件名
+            new_dict_info.append(self.case_file_list[id]) # 完整路径
+            for child_of_root in root:
+                child_info_list = []
+                if child_of_root.tag == 'action':
+                    child_info_list.append(child_of_root.attrib)
+                    for child_child_of_root in child_of_root:
+                        dict_info = {child_child_of_root.attrib['name']: child_child_of_root.text}
+                        child_info_list.append(dict_info)
+                    dict_list.append(child_info_list)
+            for info in dict_list:
+                dict_buffer = {}
+                for dict_info in info:
+                    dict_buffer.update(dict_info)
+                new_dict_info.append(dict_buffer)
+            return new_dict_info
+        except:
+            file_name = os.path.split(case_file)[1]
+            new_dict_info = [file_name, case_file]
+            return new_dict_info
 
 
     # 执行单个case(参数为从xml中读出来的)

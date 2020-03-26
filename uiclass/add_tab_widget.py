@@ -1,6 +1,8 @@
+import os
 import sys
 from PyQt5.QtWidgets import QTabWidget, QVBoxLayout, QDialog, QApplication
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab
 from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
@@ -10,7 +12,7 @@ class TabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, action_tab='action', video_tab='video', sleep_tab='sleep'):
+    def __init__(self, parent=None, case_name=None, action_tab='action', video_tab='video', sleep_tab='sleep'):
         super(TabWidget, self).__init__(parent)
         self.parent = parent
         self.setTabPosition(self.North)
@@ -23,7 +25,7 @@ class TabWidget(QTabWidget):
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
         self.setStyleSheet(style_sheet)
         self.action_tab = AddActionTab(self)
-        self.record_tab = AddRecordTab(self)
+        self.record_tab = AddRecordTab(self, case_name)
         self.sleep_tab = AddSleepTab(self)
         self.addTab(self.action_tab, action_tab)
         self.addTab(self.record_tab, video_tab)
@@ -34,10 +36,11 @@ class AddTabWidget(QDialog):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent=None, case_name=None):
         super(AddTabWidget, self).__init__(parent)
         self.parent = parent
-        self.widget = TabWidget(self)
+        self.case_name = case_name
+        self.widget = TabWidget(self, case_name)
         self.general_layout = QVBoxLayout()
         self.general_layout.setContentsMargins(0, 0, 0, 0)
         self.general_layout.addWidget(self.widget)
@@ -48,7 +51,6 @@ class AddTabWidget(QDialog):
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(330)
-
 
     # 接收action_tab传来的信号
     def recv_action_tab_signal(self, signal_str):
@@ -64,7 +66,6 @@ class AddTabWidget(QDialog):
             GloVar.add_action_window_opened_flag = False
             self.close()
 
-
     # 接收video_tab传来的信号
     def recv_record_tab_signal(self, signal_str):
         # 框选模板(隐藏当前窗口)
@@ -77,14 +78,12 @@ class AddTabWidget(QDialog):
             GloVar.add_action_window_opened_flag = False
             self.close()
 
-
     # 接收sleep_tab传来的信号
     def recv_sleep_tab_signal(self, signal_str):
         if signal_str.startswith('sleep_tab_sure>'):
             self.signal.emit(signal_str)
             GloVar.add_action_window_opened_flag = False
             self.close()
-
 
     def closeEvent(self, event):
         # 如果取消则恢复默认
@@ -113,7 +112,8 @@ class AddTabWidget(QDialog):
         self.widget.record_tab.video_type_edit.setText('')
         self.widget.record_tab.video_type_edit.setPlaceholderText('默认(启动)')
         self.widget.record_tab.video_name_edit.setText('')
-        self.widget.record_tab.video_name_edit.setPlaceholderText('默认(name)')
+        # self.widget.record_tab.video_name_edit.setPlaceholderText('默认(name)')
+        self.widget.record_tab.video_name_edit.setPlaceholderText(self.case_name)
         self.widget.record_tab.standard_time_edit.setText('')
         self.widget.record_tab.standard_time_edit.setPlaceholderText('默认800(单位ms)')
         # sleep_tab复位

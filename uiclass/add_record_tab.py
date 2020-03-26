@@ -1,25 +1,28 @@
+import os
 import json
 from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QLineEdit, QPushButton
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from GlobalVar import RecordAction, Logger, Profile, GloVar
 from uiclass.controls import SelectTemplateControl
+
 
 # 动作添加控件
 class AddRecordTab(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent=None, case_name=None):
         super(AddRecordTab, self).__init__(parent)
         self.parent = parent
+        self.case_name = case_name
         # 视频录像状态
-        self.info_dict = {RecordAction.record_status : '',
+        self.info_dict = {RecordAction.record_status: '',
                           RecordAction.video_type: '',
                           RecordAction.video_name: '',
                           RecordAction.standard_time: ''}
         self.initUI()
-
 
     # 初始化
     def initUI(self):
@@ -48,7 +51,7 @@ class AddRecordTab(QWidget):
         self.video_type_edit.setEnabled(False)
         # 视频名称
         self.video_name_edit = QLineEdit(self)
-        self.video_name_edit.setPlaceholderText('默认(name)')
+        self.video_name_edit.setPlaceholderText(self.case_name)
         self.video_name_edit.setEnabled(False)
         # 标准时间(用来判断测试时间是否在预期内)
         self.standard_time_edit = QLineEdit(self)
@@ -77,7 +80,6 @@ class AddRecordTab(QWidget):
         # 设置最小尺寸
         self.setMinimumWidth(300)
 
-
     def connect_start_record_video(self):
         if self.start_record_video.checkState() == Qt.Checked:
             self.stop_record_video.setCheckState(Qt.Unchecked)
@@ -86,7 +88,7 @@ class AddRecordTab(QWidget):
             self.video_name_edit.setEnabled(True)
             self.standard_time_edit.setEnabled(True)
             RecordAction.current_video_type = '启动'
-            RecordAction.current_video_name = 'name'
+            RecordAction.current_video_name = self.case_name
             RecordAction.current_standard_time = '800'
         elif self.start_record_video.checkState() == Qt.Unchecked:
             self.stop_record_video.setCheckState(Qt.Unchecked)
@@ -94,7 +96,6 @@ class AddRecordTab(QWidget):
             self.video_type_edit.setEnabled(False)
             self.video_name_edit.setEnabled(False)
             self.standard_time_edit.setEnabled(False)
-
 
     def connect_stop_record_video(self):
         if self.stop_record_video.checkState() == Qt.Checked:
@@ -112,15 +113,12 @@ class AddRecordTab(QWidget):
             self.video_name_edit.clear()
             self.standard_time_edit.clear()
 
-
     def connect_select_template(self, signal_str):
         if signal_str.startswith('checked_check_box'):
             # 发送信号(隐藏当前窗口, 框选模板)
             self.signal.emit('select_template>')
         elif signal_str.startswith('unchecked_check_box'):
             pass
-
-
 
     # 按下确认按钮
     def connect_sure(self):
@@ -146,7 +144,6 @@ class AddRecordTab(QWidget):
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('record_tab_sure>' + signal)
-
 
     def write_standard_time(self):
         option = RecordAction.current_video_type + '/' + RecordAction.current_video_name
