@@ -14,7 +14,7 @@ from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import QSize, Qt, QTranslator
 from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
-from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QStackedWidget, QPushButton
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
 from uarm_action.action import ArmAction
 from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
@@ -96,6 +96,7 @@ class UiMainWindow(QMainWindow):
         self.status_bar.setContentsMargins(0, 0, 0, 0)
         self.setStatusBar(self.status_bar)
         # 工具栏
+        self.total_toolbar = self.addToolBar('total_toolbar')
         # 实时流工具栏
         self.live_video_toolbar = self.addToolBar('live_video_toolbar')
         # 机械臂工具栏
@@ -125,17 +126,11 @@ class UiMainWindow(QMainWindow):
         # 分割窗口布局
         self.splitter_h_general = QSplitter(Qt.Horizontal)
         self.splitter_h_general.setHandleWidth(0)
-        self.splitter_v_part_1 = QSplitter(Qt.Vertical)
-        self.splitter_v_part_1.setHandleWidth(0)
+        self.splitter_v_part_1 = QStackedWidget()
+        self.splitter_v_part_1.addWidget(self.show_tab_widget)
+        self.splitter_v_part_1.addWidget(self.project_bar_widget)
         self.splitter_v_part_2 = QSplitter(Qt.Vertical)
         self.splitter_v_part_2.setHandleWidth(0)
-        self.splitter_v_part_1.addWidget(self.project_bar_widget)
-        self.splitter_v_part_1.addWidget(self.show_tab_widget)
-        # 设置QSplitter中的两个widget的高度(第一个不显示, 剩余高度全部显示第二个)
-        self.splitter_v_part_1.setSizes([0, 100])
-        # 通过比例显示QSplitter中的两个widget的所占比例
-        # self.splitter_v_part_1.setStretchFactor(0, 0)
-        # self.splitter_v_part_1.setStretchFactor(1, 1)
         self.splitter_v_part_2.addWidget(self.main_show_tab_widget)
         self.splitter_v_part_2.addWidget(self.console)
         self.splitter_v_part_2.setStretchFactor(0, 4)
@@ -163,6 +158,9 @@ class UiMainWindow(QMainWindow):
 
     # 工具栏
     def tool_bar_show(self):
+        # 总工具栏
+        self.total_toolbar_switch_tree_action = QAction(QIcon(IconPath.Icon_switch_tree), '显示树目录', self)
+        self.total_toolbar_switch_tree_action.triggered.connect(self.connect_switch_tree)
         # 实时流相关action
         self.live_video_toolbar_label = QLabel(self)
         self.live_video_toolbar_label.setText('实时流:')
@@ -222,6 +220,8 @@ class UiMainWindow(QMainWindow):
         self.data_process_import_video_action.triggered.connect(self.data_process_import_video)
         self.data_process_setting_action.triggered.connect(self.set_frame_rate)
         self.data_process_execute_action.triggered.connect(self.data_process_execute)
+        # 总工具栏
+        self.total_toolbar.addAction(self.total_toolbar_switch_tree_action)
         # 实时流工具栏
         self.live_video_toolbar.addWidget(self.live_video_toolbar_label)
         self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
@@ -542,6 +542,15 @@ class UiMainWindow(QMainWindow):
     # 重新连接机械臂
     def reconnect_robot(self):
         Thread(target=self.robot.connect_robot, args=()).start()
+
+    # 左侧工作栏切换事件
+    def connect_switch_tree(self):
+        if self.splitter_v_part_1.currentWidget() is self.project_bar_widget:
+            self.splitter_v_part_1.setCurrentWidget(self.show_tab_widget)
+            self.total_toolbar_switch_tree_action.setToolTip('显示树目录')
+        else:
+            self.splitter_v_part_1.setCurrentWidget(self.project_bar_widget)
+            self.total_toolbar_switch_tree_action.setToolTip('显示工作区')
 
     '''以下内容为实时流工具栏相关操作'''
     # 切换摄像头状态

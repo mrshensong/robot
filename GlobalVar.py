@@ -133,6 +133,8 @@ class IconPath:
     Icon_main_tab_widget_save_text = 'config/Icon/main_tab_widget_icon/save_text.png'
     Icon_main_tab_widget_close_tab = 'config/Icon/main_tab_widget_icon/close_tab.png'
     Icon_main_tab_widget_close_tab_hover = 'config/Icon/main_tab_widget_icon/close_tab_hover.png'
+    # 切换目录树图标
+    Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
 
 
 class RobotArmAction:
