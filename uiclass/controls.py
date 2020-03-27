@@ -3,7 +3,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton, QFileDialog
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import pyqtSignal, Qt
-from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile
+from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile, RobotArmParam
 
 # 自定义动作展示控件(action)
 class ActionControl(QWidget):
@@ -447,6 +447,33 @@ class CameraParamAdjustControl(QDialog):
         self.grid_layout.addWidget(self.robot_follow_action_flag_label, 3, 0, 1, 1)
         self.grid_layout.addWidget(self.robot_follow_action_flag_des, 3, 1, 1, 5)
         self.grid_layout.addWidget(self.robot_follow_action_flag_button, 3, 6, 1, 1)
+        # 机械臂动作默认收回与否
+        self.robot_action_take_back_label = QLabel(self)
+        self.robot_action_take_back_label.setText('动作收回:')
+        self.robot_action_take_back_des = QLineEdit(self)
+        self.robot_action_take_back_des.setReadOnly(True)
+        self.robot_action_take_back_des.setText('关闭状态,新建机械臂动作默认操作完后不会收回到原点')
+        self.robot_action_take_back_flag_button = QPushButton(self)
+        self.robot_action_take_back_flag_button.setMaximumWidth(40)
+        self.robot_action_take_back_flag_button.clicked.connect(self.change_robot_action_take_back_flag)
+        self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+        self.grid_layout.addWidget(self.robot_action_take_back_label, 4, 0, 1, 1)
+        self.grid_layout.addWidget(self.robot_action_take_back_des, 4, 1, 1, 5)
+        self.grid_layout.addWidget(self.robot_action_take_back_flag_button, 4, 6, 1, 1)
+        # 设置屏幕真实尺寸
+        self.screen_size_label = QLabel(self)
+        self.screen_size_label.setText('屏幕尺寸:')
+        self.screen_size_line_edit = QLineEdit(self)
+        self.screen_size_line_edit.setReadOnly(True)
+        screen_width = Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_width').value
+        screen_height = Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_height').value
+        screen_size_line_edit_text = '(' + screen_width + ',' + screen_height + ')'
+        self.screen_size_line_edit.setText(screen_size_line_edit_text)
+        self.screen_size_button = QPushButton('修改')
+        self.screen_size_button.clicked.connect(self.change_screen_size)
+        self.grid_layout.addWidget(self.screen_size_label, 5, 0, 1, 1)
+        self.grid_layout.addWidget(self.screen_size_line_edit, 5, 1, 1, 5)
+        self.grid_layout.addWidget(self.screen_size_button, 5, 6, 1, 1)
         # 设置图片路径
         self.picture_path_show_label = QLabel(self)
         self.picture_path_show_label.setText('图片路径: ')
@@ -455,9 +482,9 @@ class CameraParamAdjustControl(QDialog):
         self.picture_path_show_edit.setText(self.picture_path)
         self.picture_path_change_button = QPushButton('更改')
         self.picture_path_change_button.clicked.connect(self.connect_change_picture_path)
-        self.grid_layout.addWidget(self.picture_path_show_label, 4, 0, 1, 1)
-        self.grid_layout.addWidget(self.picture_path_show_edit, 4, 1, 1, 5)
-        self.grid_layout.addWidget(self.picture_path_change_button, 4, 6, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_label, 6, 0, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_edit, 6, 1, 1, 5)
+        self.grid_layout.addWidget(self.picture_path_change_button, 6, 6, 1, 1)
         # 确定按钮
         self.sure_button = QPushButton('确定')
         self.sure_button.clicked.connect(self.connect_sure_button)
@@ -518,6 +545,27 @@ class CameraParamAdjustControl(QDialog):
             self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
             self.robot_follow_action_flag_des.setText('打开状态,执行case过程中会暂停实时流,帧率稳定')
 
+    def change_robot_action_take_back_flag(self):
+        if GloVar.robot_action_take_back_flag is True:
+            GloVar.robot_action_take_back_flag = False
+            self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.robot_action_take_back_des.setText('关闭状态,新建机械臂动作默认操作完后不会收回到原点')
+        else:
+            GloVar.robot_action_take_back_flag = True
+            self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.robot_action_take_back_des.setText('打开状态,新建机械臂动作默认操作完后会收回到原点')
+
+    def change_screen_size(self):
+        if self.screen_size_button.text() == '修改':
+            self.screen_size_line_edit.setReadOnly(False)
+            self.screen_size_button.setText('保存')
+        elif self.screen_size_button.text() == '保存':
+            self.screen_size_line_edit.setReadOnly(True)
+            self.screen_size_button.setText('修改')
+            # 395, 110
+            RobotArmParam.actual_screen_width, RobotArmParam.actual_screen_height = eval(self.screen_size_line_edit.text())
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='actual_screen_width', value=RobotArmParam.actual_screen_width)
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='actual_screen_height', value=RobotArmParam.actual_screen_height)
 
     def connect_change_picture_path(self):
         # 如果取消为''值

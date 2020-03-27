@@ -4,7 +4,6 @@ from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QMutexLocker
 # 定时器
 class Timer(QThread):
 
-    # timeSignal = Communicate()
     timeSignal = pyqtSignal(str)
 
     def __init__(self, frequent=30):
@@ -20,7 +19,6 @@ class Timer(QThread):
         while True:
             if self.stopped:
                 return
-            # self.timeSignal.signal.emit("1")
             self.timeSignal.emit("1")
             time.sleep(1 / self.frequent)
 

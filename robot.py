@@ -844,8 +844,8 @@ class UiMainWindow(QMainWindow):
         video_path = self.get_path
         test = GetStartupTime(video_path=video_path)
         Thread(target=test.data_processing, args=()).start()
-        # 监控数据处理完成没有
-        self.monitor = Timer(frequent=3)
+        # 监控数据处理完成没有(一秒钟检测一次数据处理是否执行完成)
+        self.monitor = Timer(frequent=1)
         self.monitor.timeSignal[str].connect(self.data_process_finished)
         self.monitor.start()
 

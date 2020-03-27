@@ -1,7 +1,8 @@
 import json
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton
 from PyQt5.QtCore import pyqtSignal, Qt
-from GlobalVar import RobotArmAction, MotionAction
+from GlobalVar import RobotArmAction, MotionAction, GloVar
+
 
 # 动作添加控件
 class AddActionTab(QWidget):
@@ -11,14 +12,13 @@ class AddActionTab(QWidget):
     def __init__(self, parent):
         super(AddActionTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {MotionAction.des_text    : None,
-                          MotionAction.action_type : RobotArmAction.uArm_click,
-                          MotionAction.speed       : 150,
-                          MotionAction.points      : None,
-                          MotionAction.leave       : 1,
-                          MotionAction.trigger     : 0}
+        self.info_dict = {MotionAction.des_text: None,
+                          MotionAction.action_type: RobotArmAction.uArm_click,
+                          MotionAction.speed: 150,
+                          MotionAction.points: None,
+                          MotionAction.leave: 0,
+                          MotionAction.trigger: 0}
         self.initUI()
-
 
     # 初始化
     def initUI(self):
@@ -49,7 +49,10 @@ class AddActionTab(QWidget):
         self.points.setPlaceholderText('自动获取(不填)')
         # 是否收回
         self.leave_check_box = QCheckBox(self)
-        self.leave_check_box.setCheckState(Qt.Checked)
+        if GloVar.robot_action_take_back_flag is False:
+            self.leave_check_box.setCheckState(Qt.Unchecked)
+        else:
+            self.leave_check_box.setCheckState(Qt.Checked)
         # 是否触发相机录像标记
         self.camera_trigger_check_box = QCheckBox(self)
         self.camera_trigger_check_box.setCheckState(Qt.Unchecked)
@@ -97,8 +100,8 @@ class AddActionTab(QWidget):
         self.info_dict[MotionAction.speed] = self.speed_text.text() if self.speed_text.text() != '' else '150'
         # 坐标信息需要通过主窗口传递过来
         # self.info_dict[add_action_window.points] = None
-        self.info_dict[MotionAction.leave] = '1' if self.leave_check_box.checkState()==Qt.Checked else '0'
-        self.info_dict[MotionAction.trigger] = '1' if self.camera_trigger_check_box.checkState()==Qt.Checked else '0'
+        self.info_dict[MotionAction.leave] = '1' if self.leave_check_box.checkState() == Qt.Checked else '0'
+        self.info_dict[MotionAction.trigger] = '1' if self.camera_trigger_check_box.checkState() == Qt.Checked else '0'
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
         self.signal.emit('action_tab_sure>' + signal)

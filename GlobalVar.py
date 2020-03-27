@@ -53,6 +53,8 @@ class GloVar:
     add_action_window_opened_flag = False
     # 机械臂是否伴随新建动作运动(默认打开)
     robot_follow_action_flag = True
+    # 机械臂是否收回(默认关闭,不收回)
+    robot_action_take_back_flag = False
     # 退出所有线程标志
     exit_thread_flag = False
 
