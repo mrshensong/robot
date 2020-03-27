@@ -30,7 +30,6 @@ class GetStartupTime:
         # 待处理的视频列表
         self.videos_list = []
 
-
     def match_template(self, source_img, target_img):
         '''
         :param source_img: 源图像(大图)
@@ -51,7 +50,6 @@ class GetStartupTime:
         # 返回最大匹配率
         return max_threshold
 
-
     # 获取roi模板的位置信息(roi图片/column行数,0-3)
     def get_position_info_from_roi(self, roi, column):
         thousands = roi[0][column] * 1000
@@ -60,7 +58,6 @@ class GetStartupTime:
         single = roi[3][column] * 1
         num = thousands + hundred + ten + single
         return num
-
 
     # 计算开始和结束位置
     def get_start_and_end_match_threshold(self, end_mask, video_file):
@@ -158,7 +155,6 @@ class GetStartupTime:
                 break
         video_cap.release()
         return start_point_result, end_point_result
-
 
     # 处理视频, 从视频中获取处理信息
     def process_video(self, video_id, file, end_mask):

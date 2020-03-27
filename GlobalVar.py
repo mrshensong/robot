@@ -2,6 +2,7 @@ import time
 from other.operate_config import ConfigWithComment
 import configparser
 
+
 # 文件之间参数传递
 class GloVar:
     # 配置文件路径
@@ -59,7 +60,7 @@ class GloVar:
 # Icon路径
 class IconPath:
     # 应用窗口图标
-    Icon_file       = 'config/Icon/other_icon/Icon.jpg'
+    Icon_file = 'config/Icon/other_icon/Icon.jpg'
     # 视频栏背景图标
     background_file = 'config/Icon/other_icon/background.jpg'
     # 分割线图标
@@ -71,64 +72,65 @@ class IconPath:
     # 数据处理结束
     data_process_finished_file = 'config/Icon/other_icon/data_process_finished.jpg'
     # 视频栏播放器图标
-    Icon_player_play       = 'config/Icon/video_label_icon/play.png'
-    Icon_player_replay     = 'config/Icon/video_label_icon/replay.png'
-    Icon_player_pause      = 'config/Icon/video_label_icon/pause.png'
+    Icon_player_play = 'config/Icon/video_label_icon/play.png'
+    Icon_player_replay = 'config/Icon/video_label_icon/replay.png'
+    Icon_player_pause = 'config/Icon/video_label_icon/pause.png'
     Icon_player_last_video = 'config/Icon/video_label_icon/last_video.png'
     Icon_player_next_video = 'config/Icon/video_label_icon/next_video.png'
     Icon_player_last_frame = 'config/Icon/video_label_icon/last_frame.png'
     Icon_player_next_frame = 'config/Icon/video_label_icon/next_frame.png'
     # 实时流工具栏相关action图标
-    Icon_live_video_setting      = 'config/Icon/live_video_toolbar_icon/setting.png'
-    Icon_live_video_open_camera  = 'config/Icon/live_video_toolbar_icon/open_camera.png'
+    Icon_live_video_setting = 'config/Icon/live_video_toolbar_icon/setting.png'
+    Icon_live_video_open_camera = 'config/Icon/live_video_toolbar_icon/open_camera.png'
     Icon_live_video_close_camera = 'config/Icon/live_video_toolbar_icon/close_camera.png'
-    Icon_live_video_capture      = 'config/Icon/live_video_toolbar_icon/capture.png'
-    Icon_live_video_box_screen   = 'config/Icon/live_video_toolbar_icon/box_screen.png'
-    Icon_live_video_folder_go    = 'config/Icon/live_video_toolbar_icon/folder_go.png'
+    Icon_live_video_capture = 'config/Icon/live_video_toolbar_icon/capture.png'
+    Icon_live_video_box_screen = 'config/Icon/live_video_toolbar_icon/box_screen.png'
+    Icon_live_video_folder_go = 'config/Icon/live_video_toolbar_icon/folder_go.png'
     # robot工具栏相关action图标
-    Icon_robot_click          = 'config/Icon/robot_toolbar_icon/click.png'
-    Icon_robot_double_click   = 'config/Icon/robot_toolbar_icon/double_click.png'
-    Icon_robot_long_click     = 'config/Icon/robot_toolbar_icon/long_click.png'
-    Icon_robot_slide          = 'config/Icon/robot_toolbar_icon/slide.png'
-    Icon_robot_lock           = 'config/Icon/robot_toolbar_icon/lock.png'
-    Icon_robot_unlock         = 'config/Icon/robot_toolbar_icon/unlock.png'
-    Icon_robot_get_base_position   = 'config/Icon/robot_toolbar_icon/get_base_position.png'
-    Icon_robot_with_record    = 'config/Icon/robot_toolbar_icon/with_record.png'
+    Icon_robot_click = 'config/Icon/robot_toolbar_icon/click.png'
+    Icon_robot_double_click = 'config/Icon/robot_toolbar_icon/double_click.png'
+    Icon_robot_long_click = 'config/Icon/robot_toolbar_icon/long_click.png'
+    Icon_robot_slide = 'config/Icon/robot_toolbar_icon/slide.png'
+    Icon_robot_lock = 'config/Icon/robot_toolbar_icon/lock.png'
+    Icon_robot_unlock = 'config/Icon/robot_toolbar_icon/unlock.png'
+    Icon_robot_get_base_position = 'config/Icon/robot_toolbar_icon/get_base_position.png'
+    Icon_robot_with_record = 'config/Icon/robot_toolbar_icon/with_record.png'
     Icon_robot_without_record = 'config/Icon/robot_toolbar_icon/without_record.png'
+    Icon_robot_restart = 'config/Icon/robot_toolbar_icon/restart.png'
     # 本地视频播放工具栏相关图标
-    Icon_local_import_video       = 'config/Icon/local_video_toolbar_icon/import_video.png'
-    Icon_local_video_setting      = 'config/Icon/local_video_toolbar_icon/setting.png'
+    Icon_local_import_video = 'config/Icon/local_video_toolbar_icon/import_video.png'
+    Icon_local_video_setting = 'config/Icon/local_video_toolbar_icon/setting.png'
     # 视频处理工具栏相关图标
-    Icon_data_process_import_video= 'config/Icon/data_process_toolbar_icon/import_video.png'
-    Icon_data_process_setting     = 'config/Icon/data_process_toolbar_icon/setting.png'
-    Icon_data_process_execute     = 'config/Icon/data_process_toolbar_icon/data_process_execute.png'
+    Icon_data_process_import_video = 'config/Icon/data_process_toolbar_icon/import_video.png'
+    Icon_data_process_setting = 'config/Icon/data_process_toolbar_icon/setting.png'
+    Icon_data_process_execute = 'config/Icon/data_process_toolbar_icon/data_process_execute.png'
     # 自定义控件相关图标
-    Icon_custom_delete            = 'config/Icon/custom_widget_icon/delete.png'
-    Icon_custom_play              = 'config/Icon/custom_widget_icon/play.png'
-    Icon_custom_video_camera      = 'config/Icon/custom_widget_icon/video_camera.png'
-    Icon_custom_sleep             = 'config/Icon/custom_widget_icon/sleep.png'
-    Icon_custom_case              = 'config/Icon/custom_widget_icon/case.png'
-    Icon_tab_widget_add           = 'config/Icon/tab_widget_icon/add.png'
-    Icon_tab_widget_delete        = 'config/Icon/tab_widget_icon/delete.png'
-    Icon_tab_widget_insert_above  = 'config/Icon/tab_widget_icon/insert_above.png'
-    Icon_tab_widget_insert_below  = 'config/Icon/tab_widget_icon/insert_below.png'
-    Icon_tab_widget_all_select    = 'config/Icon/tab_widget_icon/all_select.png'
+    Icon_custom_delete = 'config/Icon/custom_widget_icon/delete.png'
+    Icon_custom_play = 'config/Icon/custom_widget_icon/play.png'
+    Icon_custom_video_camera = 'config/Icon/custom_widget_icon/video_camera.png'
+    Icon_custom_sleep = 'config/Icon/custom_widget_icon/sleep.png'
+    Icon_custom_case = 'config/Icon/custom_widget_icon/case.png'
+    Icon_tab_widget_add = 'config/Icon/tab_widget_icon/add.png'
+    Icon_tab_widget_delete = 'config/Icon/tab_widget_icon/delete.png'
+    Icon_tab_widget_insert_above = 'config/Icon/tab_widget_icon/insert_above.png'
+    Icon_tab_widget_insert_below = 'config/Icon/tab_widget_icon/insert_below.png'
+    Icon_tab_widget_all_select = 'config/Icon/tab_widget_icon/all_select.png'
     Icon_tab_widget_all_un_select = 'config/Icon/tab_widget_icon/all_un_select.png'
-    Icon_tab_widget_execute       = 'config/Icon/tab_widget_icon/execute.png'
-    Icon_tab_widget_import        = 'config/Icon/tab_widget_icon/import.png'
-    Icon_tab_widget_save          = 'config/Icon/tab_widget_icon/save.png'
-    Icon_tab_widget_draw_frame    = 'config/Icon/tab_widget_icon/draw_frame.png'
-    Icon_tab_widget_switch_on     = 'config/Icon/tab_widget_icon/switch_on.png'
-    Icon_tab_widget_switch_off    = 'config/Icon/tab_widget_icon/switch_off.png'
+    Icon_tab_widget_execute = 'config/Icon/tab_widget_icon/execute.png'
+    Icon_tab_widget_import = 'config/Icon/tab_widget_icon/import.png'
+    Icon_tab_widget_save = 'config/Icon/tab_widget_icon/save.png'
+    Icon_tab_widget_draw_frame = 'config/Icon/tab_widget_icon/draw_frame.png'
+    Icon_tab_widget_switch_on = 'config/Icon/tab_widget_icon/switch_on.png'
+    Icon_tab_widget_switch_off = 'config/Icon/tab_widget_icon/switch_off.png'
     # 视频和照片展示栏相关图标
-    Icon_main_tab_widget_zoom_picture          = 'config/Icon/main_tab_widget_icon/zoom.png'
-    Icon_main_tab_widget_zoom_out_picture      = 'config/Icon/main_tab_widget_icon/zoom_out.png'
+    Icon_main_tab_widget_zoom_picture = 'config/Icon/main_tab_widget_icon/zoom.png'
+    Icon_main_tab_widget_zoom_out_picture = 'config/Icon/main_tab_widget_icon/zoom_out.png'
     Icon_main_tab_widget_original_size_picture = 'config/Icon/main_tab_widget_icon/original_size.png'
-    Icon_main_tab_widget_open_file             = 'config/Icon/main_tab_widget_icon/open_file.png'
-    Icon_main_tab_widget_edit_text             = 'config/Icon/main_tab_widget_icon/edit_text.png'
-    Icon_main_tab_widget_save_text             = 'config/Icon/main_tab_widget_icon/save_text.png'
-    Icon_main_tab_widget_close_tab             = 'config/Icon/main_tab_widget_icon/close_tab.png'
-    Icon_main_tab_widget_close_tab_hover       = 'config/Icon/main_tab_widget_icon/close_tab_hover.png'
+    Icon_main_tab_widget_open_file = 'config/Icon/main_tab_widget_icon/open_file.png'
+    Icon_main_tab_widget_edit_text = 'config/Icon/main_tab_widget_icon/edit_text.png'
+    Icon_main_tab_widget_save_text = 'config/Icon/main_tab_widget_icon/save_text.png'
+    Icon_main_tab_widget_close_tab = 'config/Icon/main_tab_widget_icon/close_tab.png'
+    Icon_main_tab_widget_close_tab_hover = 'config/Icon/main_tab_widget_icon/close_tab_hover.png'
 
 
 class RobotArmAction:
@@ -150,7 +152,7 @@ class RobotArmParam:
     base_x_point = 0.0
     base_y_point = 0.0
     base_z_point = 0.0
-    actual_screen_width  = 0
+    actual_screen_width = 0
     actual_screen_height = 0
     port_address = 'http://localhost:8000/'
 
@@ -174,17 +176,17 @@ class MotionAction:
     add_action_flag = False
     # 添加动作子窗口的信息选项名称
     # 机械臂动作描述
-    des_text    = 'des_text'
+    des_text = 'des_text'
     # 机械臂动作类型
     action_type = 'action_type'
     # 机械臂速度
-    speed       = 'speed'
+    speed = 'speed'
     # 机械臂操作坐标
-    points      = 'points'
+    points = 'points'
     # 机械臂收回
-    leave       = 'leave'
+    leave = 'leave'
     # 相机录像触发标记(给视频打标记)
-    trigger     = 'trigger'
+    trigger = 'trigger'
 
 
 # 视频录制相关操作(如开关录像)

@@ -78,7 +78,6 @@ class VideoTab(QWidget):
         self.camera_height = camera_height
         self.initUI()
 
-
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
         self.general_layout.setContentsMargins(0, 0, 0, 0)
@@ -101,7 +100,6 @@ class VideoTab(QWidget):
 
         self.setLayout(self.general_layout)
 
-
     # 接收到video_label的信息
     def recv_video_label_signal(self, signal_str):
         if signal_str.startswith('reset_video_label_size>local_video'):
@@ -117,7 +115,6 @@ class VideoTab(QWidget):
             self.signal.emit(signal_str)
         else:
             pass
-
 
     # 视频标签自适应
     def video_label_adaptive(self, video_width, video_height):
@@ -148,7 +145,6 @@ class VideoTab(QWidget):
             self.video_label.box_screen_size[1] = int(self.video_label.height() * self.video_label.box_screen_scale[1])
             self.video_label.box_screen_size[2] = int(self.video_label.width()  * (self.video_label.box_screen_scale[2] - self.video_label.box_screen_scale[0]))
             self.video_label.box_screen_size[3] = int(self.video_label.height() * (self.video_label.box_screen_scale[3] - self.video_label.box_screen_scale[1]))
-
 
     def resizeEvent(self, event):
         self.signal.emit('resize>')
@@ -181,7 +177,6 @@ class PictureTab(QWidget):
         self.zoom_factor = 0.2
         self.initUI()
         self.show_picture()
-
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
@@ -252,7 +247,6 @@ class PictureTab(QWidget):
 
         self.setLayout(self.general_layout)
 
-
     # 打开文件(图片)
     def connect_open_file(self):
         file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
@@ -272,7 +266,6 @@ class PictureTab(QWidget):
         else:
             Logger('取消打开文件!')
 
-
     # 放大操作
     def connect_zoom_button(self):
         current_zoom_scale = round((self.picture_zoom_scale + self.zoom_factor), 1)
@@ -282,7 +275,6 @@ class PictureTab(QWidget):
         self.picture_zoom_scale = current_zoom_scale
         self.picture_label.setFixedSize(width, height)
         self.picture_size_label.setText('size: [%d:%d], zoom: [%.1fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
-
 
     # 缩小操作
     def connect_zoom_out_button(self):
@@ -295,13 +287,11 @@ class PictureTab(QWidget):
             self.picture_label.setFixedSize(width, height)
             self.picture_size_label.setText('size: [%d:%d], zoom: [%.1fX]' % (self.picture_size_width, self.picture_size_height, self.picture_zoom_scale))
 
-
     # 原图操作
     def connect_original_size_button(self):
         self.picture_zoom_scale = 1.0
         self.picture_label.setFixedSize(self.picture_size_width, self.picture_size_height)
         self.picture_size_label.setText('size: [%d:%d], zoom: [1.0X]' % (self.picture_size_width, self.picture_size_height))
-
 
     # 图片展示操作
     def show_picture(self):
@@ -348,7 +338,6 @@ class ReportTab(QWidget):
         self.report_path = report_path
         self.initUI()
         self.show_html()
-
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
@@ -403,7 +392,6 @@ class ReportTab(QWidget):
         # self.general_layout.addWidget(self.bottom_h_line_frame)
         self.setLayout(self.general_layout)
 
-
     # 打开文件
     def connect_open_file(self):
         file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
@@ -426,7 +414,6 @@ class ReportTab(QWidget):
 
         else:
             Logger('取消打开文件!')
-
 
     # html展示操作
     def show_html(self):
@@ -452,7 +439,6 @@ class TextTab(QWidget):
         self.text_path = text_path
         self.initUI()
         self.show_text()
-
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
@@ -515,7 +501,6 @@ class TextTab(QWidget):
 
         self.setLayout(self.general_layout)
 
-
     # 打开文件
     def connect_open_file(self):
         file_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='file_path').value
@@ -540,7 +525,6 @@ class TextTab(QWidget):
         else:
             Logger('取消打开文件!')
 
-
     # 编辑文本
     def connect_edit_text(self):
         Logger('编辑当前文件: %s' % self.text_path)
@@ -548,7 +532,6 @@ class TextTab(QWidget):
         self.text_show_text.setReadOnly(False)
         # 更改背景
         self.text_show_text.setStyleSheet('background-color:#C0D8F0')
-
 
     # 保存文本
     def connect_save_text(self):
@@ -561,7 +544,6 @@ class TextTab(QWidget):
         self.text_show_text.setReadOnly(True)
         # 恢复背景颜色
         self.text_show_text.setStyleSheet('background-color:white')
-
 
     # text展示操作
     def show_text(self):

@@ -8,6 +8,7 @@ from PyQt5.QtCore import pyqtSignal, Qt, QPoint, QRect
 from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile, RecordAction
 from uiclass.timer import Timer
 
+
 # 动作添加控件
 class VideoLabel(QLabel):
 
@@ -98,7 +99,6 @@ class VideoLabel(QLabel):
         RobotArmParam.actual_screen_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_height').value)
         # 控件初始化
         self.initUI()
-
 
     def initUI(self):
         # 视频标签
@@ -217,7 +217,6 @@ class VideoLabel(QLabel):
         # 重置控件布局
         self.setLayout(self.label_v_layout)
 
-
     '''以下内容为实时流工具栏相关操作'''
     # 切换摄像头状态
     def switch_camera_status(self):
@@ -276,7 +275,6 @@ class VideoLabel(QLabel):
             self.setPixmap(QPixmap(IconPath.background_file))
             self.status_video_button.setEnabled(False)
 
-
     '''以下内容为视频进度栏的刷新'''
     # 连接到刷新视频进度栏
     def connect_video_progress_bar(self):
@@ -284,7 +282,6 @@ class VideoLabel(QLabel):
         self.label_frame_show.setText(str(self.current_frame + 1) + 'F/' + str(self.frame_count))
         self.label_frame_show.setStyleSheet('color:white')
         self.slider_flag = True
-
 
     # 本地视频进度条刷新
     def slider_refresh(self):
@@ -311,11 +308,9 @@ class VideoLabel(QLabel):
                 Logger('[当前视频播放完毕]')
             self.slider_flag = False
 
-
     # 定时器获取实时流摄像头图片(代替展示摄像头)
     def get_camera_image(self):
         self.image = GloVar.camera_image.copy()
-
 
     '''以下为视频展示相关操作(如播放/暂停/前后视频/前后帧等等)'''
     # 展示视频函数
@@ -373,7 +368,6 @@ class VideoLabel(QLabel):
             self.label_video_title.setText('')
         # QApplication.processEvents() # 界面刷新
 
-
     # 暂停视频后的模板框选准备
     def template_label(self):
         time.sleep(0.3)
@@ -397,7 +391,6 @@ class VideoLabel(QLabel):
                 GloVar.mask_path = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/')
             else:
                 GloVar.mask_path = MergePath([GloVar.project_picture_path, '框选图']).merged_path
-
 
     # 空格键 播放/暂停/重播
     def switch_video(self):
@@ -500,7 +493,6 @@ class VideoLabel(QLabel):
         time.sleep(0.1)  # 延时防抖
         self.status_video_button.setEnabled(True)
 
-
     # 切换到上个视频
     def last_video(self):
         # 防抖(首末行)
@@ -546,7 +538,6 @@ class VideoLabel(QLabel):
         # 调整视频尺寸
         self.signal.emit('reset_video_label_size>local_video')
         self.last_video_button.setEnabled(True)
-
 
     # 切换到下个视频
     def next_video(self):
@@ -594,7 +585,6 @@ class VideoLabel(QLabel):
         self.signal.emit('reset_video_label_size>local_video')
         self.next_video_button.setEnabled(True)
 
-
     # 切换到上一帧(不能防抖, 如果防抖的话就不能左右键快速播帧)
     def last_frame(self):
         # self.last_frame_button.setEnabled(False)
@@ -628,7 +618,6 @@ class VideoLabel(QLabel):
             self.video_cap = cv2.VideoCapture(self.videos[self.current_video])
         # self.last_frame_button.setEnabled(True)
 
-
     # 切换到下一帧(不能防抖, 如果防抖的话就不能左右键快速播帧)
     def next_frame(self):
         # self.next_frame_button.setEnabled(False)
@@ -654,7 +643,6 @@ class VideoLabel(QLabel):
             self.status_video_button.setToolTip(self.video_status_replay_tip)
             self.video_progress_bar.setValue(self.frame_count-1)
         # self.next_frame_button.setEnabled(True)
-
 
     # 导入本地视频操作
     def import_local_video(self):
@@ -699,7 +687,6 @@ class VideoLabel(QLabel):
         # 调整视频尺寸
         self.signal.emit('reset_video_label_size>local_video')
 
-
     # 导入视频处理视频
     def import_data_process_with_video(self):
         self.x0, self.y0 = self.x1, self.y1
@@ -741,7 +728,6 @@ class VideoLabel(QLabel):
         # 调整视频尺寸
         self.signal.emit('reset_video_label_size>local_video')
 
-
     # 数据处理导入视频(没有需要数据处理的视频)
     def import_data_process_without_video(self):
         # 关闭视频展示定时器
@@ -781,7 +767,6 @@ class VideoLabel(QLabel):
         # 铺设背景图
         self.setPixmap(QPixmap(IconPath.data_is_ready_file))
 
-
     # 运行数据处理的时候需要进行的操作
     def data_process_execute(self):
         # 此时什么都不播放(状态为None)
@@ -818,7 +803,6 @@ class VideoLabel(QLabel):
         # 播放正在进行数据处理的gif图
         self.setMovie(self.data_processing_gif)
         self.data_processing_gif.start()
-
 
     def data_process_finished(self):
         # 停掉gif动图
@@ -859,7 +843,6 @@ class VideoLabel(QLabel):
         # 铺设背景图
         self.setPixmap(QPixmap(IconPath.data_process_finished_file))
 
-
     # 返回视频title
     def set_video_title(self, current_video, videos, videos_title):
         videos_num = len(videos)
@@ -870,7 +853,6 @@ class VideoLabel(QLabel):
         video_title = self.video_title_serial_show + videos_title[current_video]
         return video_title
 
-
     # 鼠标点击事件
     def mousePressEvent(self, event):
         self.mouse_press_flag = True
@@ -878,7 +860,6 @@ class VideoLabel(QLabel):
         self.y0 = event.y()
         self.x0 = self.x0
         self.y1 = self.y0
-
 
     # 鼠标释放事件
     def mouseReleaseEvent(self, event):
@@ -932,7 +913,6 @@ class VideoLabel(QLabel):
         self.mouse_press_flag = False
         self.mouse_move_flag = False
 
-
     # 鼠标移动事件
     def mouseMoveEvent(self, event):
         if self.mouse_press_flag is True:
@@ -940,7 +920,6 @@ class VideoLabel(QLabel):
             self.x1 = event.x()
             self.y1 = event.y()
             self.update()
-
 
     # 绘制事件
     def paintEvent(self, event):
@@ -979,7 +958,6 @@ class VideoLabel(QLabel):
             if self.video_play_flag is False:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
                 painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
-
 
     # 保存模板
     def save_template(self):
@@ -1107,7 +1085,6 @@ class VideoLabel(QLabel):
             # 保存完图片后, 让红色框消失
             self.x0, self.y0, self.x1, self.y1 = 0, 0, 0, 0
 
-
     # 在模板图片中的前4行4列写入位置信息(roi图片/column列数,从0-3/num坐标信息)
     def write_position_info_to_roi(self, roi, column, num):
         num_length = len(str(num))
@@ -1127,7 +1104,6 @@ class VideoLabel(QLabel):
         roi[2][column] = position_info[2]
         roi[3][column] = position_info[3]
         return roi
-
 
     # 计算传入机械臂的坐标
     def calculating_point(self, x, y):

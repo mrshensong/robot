@@ -8,6 +8,17 @@ from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile, MergePath
 
 class ArmAction:
     def __init__(self, use_external_camera_flag, camera_width, camera_height):
+        # 连接机械臂
+        self.connect_robot()
+        # 如果为True则使用外接相机, False使用电脑内置相机
+        # 视频线程
+        if use_external_camera_flag is True:
+            self.video = ExternalCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
+        else:
+            self.video = SystemCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
+
+    # 重新连接机械臂
+    def connect_robot(self):
         self.speed_opt = 150
         self.cmd_g1 = "G1"
         self.cmd_g0 = "G0"
@@ -26,12 +37,6 @@ class ArmAction:
         self.swift.flush_cmd()
         # 锁定机械臂
         self.swift.set_servo_attach()
-        # 如果为True则使用外接相机, False使用电脑内置相机
-        # 视频线程
-        if use_external_camera_flag is True:
-            self.video = ExternalCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
-        else:
-            self.video = SystemCameraVideo(video_path=None, video_width=camera_width, video_height=camera_height)
 
     def stop(self):
         self.set_position(50, 100, 40)

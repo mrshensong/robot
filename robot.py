@@ -26,7 +26,6 @@ class UiMainWindow(QMainWindow):
     # background文件
     background_file = IconPath.background_file
 
-
     def setupUi(self):
         # 样式美化
         main_ui_style = BeautifyStyle.font_family + BeautifyStyle.font_size + BeautifyStyle.file_dialog_qss
@@ -150,7 +149,6 @@ class UiMainWindow(QMainWindow):
         # 机械臂处理
         Thread(target=self.robot_thread, args=()).start()
 
-
     '''以下部分为界面各个控件信息'''
     # 菜单栏
     def menu_bar_show(self):
@@ -162,7 +160,6 @@ class UiMainWindow(QMainWindow):
         self.help_bar = self.menu_bar.addMenu('帮助')
         self.file_bar.addAction(self.open_action)
         self.help_bar.addAction(self.help_action)
-
 
     # 工具栏
     def tool_bar_show(self):
@@ -191,6 +188,7 @@ class UiMainWindow(QMainWindow):
         self.robot_unlock_action       = QAction(QIcon(IconPath.Icon_robot_unlock), '解锁机械臂', self)
         self.robot_get_base_position_action = QAction(QIcon(IconPath.Icon_robot_get_base_position), '获取机械臂当前位置', self)
         self.robot_with_record_action  = QAction(QIcon(IconPath.Icon_robot_with_record), '录制脚本', self)
+        self.robot_restart_action = QAction(QIcon(IconPath.Icon_robot_restart), '重新连接机械臂', self)
         # 绑定触发函数
         self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_click))
         self.robot_double_click_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_double_click))
@@ -200,6 +198,7 @@ class UiMainWindow(QMainWindow):
         self.robot_unlock_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_unlock))
         self.robot_get_base_position_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_get_position))
         self.robot_with_record_action.triggered.connect(lambda: self.switch_uArm_with_record_status(record_status=None))
+        self.robot_restart_action.triggered.connect(self.reconnect_robot)
         # 视频播放工具栏
         self.local_video_toolbar_label = QLabel(self)
         self.local_video_toolbar_label.setText('本地视频:')
@@ -232,6 +231,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_toolbar.addSeparator()
         # robot工具栏
         self.robot_toolbar.addWidget(self.robot_toolbar_label)
+        self.robot_toolbar.addAction(self.robot_restart_action)
         self.robot_toolbar.addAction(self.robot_lock_action)
         self.robot_toolbar.addAction(self.robot_unlock_action)
         self.robot_toolbar.addAction(self.robot_get_base_position_action)
@@ -254,7 +254,6 @@ class UiMainWindow(QMainWindow):
         self.live_video_box_screen_action.setEnabled(False)
         self.live_video_capture_action.setEnabled(False)
         self.live_video_setting_action.setEnabled(False)
-
 
     # 状态栏
     def status_bar_show(self):
@@ -297,7 +296,6 @@ class UiMainWindow(QMainWindow):
         self.status_bar.addPermanentWidget(self.operating_status_title, stretch=0)
         self.status_bar.addPermanentWidget(self.operating_status_label, stretch=0)
 
-
     # 展示窗口状态栏
     def show_window_status(self):
         self.robot_connect_status_label.setText('[' + WindowStatus.robot_connect_status + ']')
@@ -306,12 +304,10 @@ class UiMainWindow(QMainWindow):
         self.case_tab_status_label.setText('[' + WindowStatus.case_tab_status + ']')
         self.operating_status_label.setText(WindowStatus.operating_status)
 
-
     # 视频播放框架
     def video_play_frame(self):
         self.main_show_tab_widget = MainShowTabWidget(self.central_widget, camera_width=self.camera_image_width, camera_height=self.camera_image_height)
         self.main_show_tab_widget.signal[str].connect(self.recv_video_label_signal)
-
 
     # case展示
     def show_case(self):
@@ -319,12 +315,10 @@ class UiMainWindow(QMainWindow):
         self.show_tab_widget.setEnabled(False)
         self.show_tab_widget.signal[str].connect(self.recv_show_tab_widget_signal)
 
-
     # 工程栏
     def project_bar(self):
         self.project_bar_widget = ProjectBar(self.central_widget, GloVar.project_path)
         self.project_bar_widget.signal[str].connect(self.recv_project_bar_signal)
-
 
     # 控制台输出
     def output_text(self):
@@ -341,7 +335,6 @@ class UiMainWindow(QMainWindow):
         # 字体粗细
         self.console.setStyleSheet('font-weight:bold; background-color:transparent')
 
-
     # 更新控制台内容
     def update_text(self, text):
         cursor = self.console.textCursor()
@@ -349,7 +342,6 @@ class UiMainWindow(QMainWindow):
         cursor.insertText(text)
         self.console.setTextCursor(cursor)
         self.console.ensureCursorVisible()
-
 
     # 接收实时流的相关参数调整(暂时没有用到)
     def recv_camera_param_setting_widget(self, signal_str):
@@ -363,14 +355,12 @@ class UiMainWindow(QMainWindow):
             self.main_show_tab_widget.video_tab.video_label.picture_path = self.picture_path
             GloVar.project_picture_path = self.picture_path
 
-
     # 接收本地视频帧率调整的信号
     def recv_frame_rate_adjust_widget(self, signal_str):
         if signal_str.startswith('frame_rate_adjust>'):
             frame_rate = int(signal_str.split('frame_rate_adjust>')[1])
             self.main_show_tab_widget.video_tab.video_label.timer_video.frequent = frame_rate
             WindowStatus.video_frame_rate = str(frame_rate) + 'fps'
-
 
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_label_signal(self, signal_str):
@@ -431,7 +421,6 @@ class UiMainWindow(QMainWindow):
                 GloVar.post_info_list.append('stop')
                 Thread(target=self.robot.execute_actions, args=(GloVar.post_info_list,)).start()
 
-
     # 接收show_tab_widget的信号
     def recv_show_tab_widget_signal(self, signal_str):
         # 执行选中所有动作动作
@@ -458,9 +447,10 @@ class UiMainWindow(QMainWindow):
         # 准备开始执行测试用例
         elif signal_str.startswith('ready_execute_case>'):
             if self.camera_param_setting_widget.stable_frame_rate_flag is True:
-                # 通过模拟点击来暂停实时流(达到稳定帧率的目的)
+                # 通过模拟点击来暂停实时流(达到稳定帧率的目的, 并暂时不让视频状态按钮使能)
                 self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
                 self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+                self.main_show_tab_widget.video_tab.video_label.status_video_button.setEnabled(False)
             else:
                 pass
         # 测试结束
@@ -482,7 +472,6 @@ class UiMainWindow(QMainWindow):
                 Logger('此次测试完成, 不需要进行数据处理!')
         else:
             pass
-
 
     # 接收工具栏信号
     def recv_project_bar_signal(self, signal_str):
@@ -546,11 +535,13 @@ class UiMainWindow(QMainWindow):
             excel_file = signal_str.split('open_excel>')[1]
             Thread(target=self.open_system_file, args=(excel_file,)).start()
 
-
     # 机械臂动作和摄像头录像线程
     def robot_thread(self):
         self.robot = ArmAction(use_external_camera_flag=self.use_external_camera_flag, camera_width=self.camera_image_width, camera_height=self.camera_image_height)
 
+    # 重新连接机械臂
+    def reconnect_robot(self):
+        Thread(target=self.robot.connect_robot, args=()).start()
 
     '''以下内容为实时流工具栏相关操作'''
     # 切换摄像头状态
@@ -586,7 +577,6 @@ class UiMainWindow(QMainWindow):
             self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
         self.main_show_tab_widget.video_tab.video_label.switch_camera_status()
 
-
     # 拍照/截屏 动作
     def screen_shot(self):
         # 视频流未打开时不允许拍照
@@ -594,7 +584,6 @@ class UiMainWindow(QMainWindow):
             QMessageBox.warning(self, "警告", "还没有开启视频流! 请打开视频流!", QMessageBox.Yes | QMessageBox.No)
         else:
             Thread(target=self.screen_capture_thread, args=()).start()
-
 
     # 摄像头截屏线程
     def screen_capture_thread(self, capture_type='jpg'):
@@ -606,7 +595,6 @@ class UiMainWindow(QMainWindow):
         image = self.main_show_tab_widget.video_tab.video_label.image.copy()
         cv2.imencode('.' + capture_type, image)[1].tofile(capture_name)
         Logger('[截取的图片为]: %s' % capture_name)
-
 
     # 框选车机屏幕大小
     def box_screen(self):
@@ -624,12 +612,10 @@ class UiMainWindow(QMainWindow):
                 GloVar.box_screen_flag = True
                 RobotArmAction.uArm_action_type = None
 
-
     # 设置实时流相机参数
     def set_camera_param(self):
         self.camera_param_setting_widget.show()
         self.camera_param_setting_widget.exec()
-
 
     '''以下为机械臂工具栏相关操作'''
     # 机械臂动作线程
@@ -660,7 +646,6 @@ class UiMainWindow(QMainWindow):
         else:
             Logger('当前不支持[%s]这个动作' % action)
 
-
     # 机械臂动作事件(需要先框选屏幕大小)
     def uArm_action_event(self, action):
         if sum(self.main_show_tab_widget.video_tab.video_label.box_screen_size) == 0:
@@ -668,7 +653,6 @@ class UiMainWindow(QMainWindow):
             return
         else:
             Thread(target=self.uArm_action_event_thread, args=(action,)).start()
-
 
     # 正在进行的操作是否需要录入脚本(默认参数为None; 当有参数时, 将record_status的状态传给uArm_action.uArm_with_record)
     def switch_uArm_with_record_status(self, record_status=None):
@@ -688,7 +672,6 @@ class UiMainWindow(QMainWindow):
             self.robot_with_record_action.setToolTip('录制脚本')
             if self.main_show_tab_widget.video_tab.video_label.video_play_flag is False:
                 Logger('<脚本录制关闭--以下操作将不会被保存为action>')
-
 
     '''本地视频播放工具栏相关操作'''
     # 本地视频播放
@@ -758,12 +741,10 @@ class UiMainWindow(QMainWindow):
         # 切换到video页面
         self.main_show_tab_widget.setCurrentWidget(self.main_show_tab_widget.video_tab)
 
-
     # 设置本地视频帧率
     def set_frame_rate(self):
         self.frame_rate_adjust_widget.show()
         self.frame_rate_adjust_widget.exec()
-
 
     '''数据处理相关操作'''
     # 数据处理导入视频
@@ -850,22 +831,23 @@ class UiMainWindow(QMainWindow):
             self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
             self.main_show_tab_widget.video_tab.video_label.import_data_process_without_video()
 
-
     # 数据处理执行函数
     def data_process_execute(self):
-        # 先关掉正在播放的视频
-        self.main_show_tab_widget.video_tab.video_label.timer_video.stop()
-        self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-        self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
-        # 调用video_label中的数据执行操作
-        self.main_show_tab_widget.video_tab.video_label.data_process_execute()
+        # # 先关掉正在播放的视频
+        # self.main_show_tab_widget.video_tab.video_label.timer_video.stop()
+        # self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
+        # self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
+        # # 调用video_label中的数据执行操作
+        # self.main_show_tab_widget.video_tab.video_label.data_process_execute()
         WindowStatus.operating_status = '使用状态/数据处理中...'
         # 此处调用数据处理函数
         video_path = self.get_path
         test = GetStartupTime(video_path=video_path)
         Thread(target=test.data_processing, args=()).start()
-        Thread(target=self.data_process_finished, args=()).start()
-
+        # 监控数据处理完成没有
+        self.monitor = Timer(frequent=3)
+        self.monitor.timeSignal[str].connect(self.data_process_finished)
+        self.monitor.start()
 
     # 检测数据有没有准备(准备好就可以开始执行数据处理)
     def detect_data_is_ready(self):
@@ -902,32 +884,25 @@ class UiMainWindow(QMainWindow):
             self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
             self.main_show_tab_widget.video_tab.video_label.import_data_process_without_video()
 
-
     # 数据处理结束
     def data_process_finished(self):
-        while True:
-            if GloVar.exit_thread_flag is True:
-                flag = False
-                break
-            if GloVar.data_process_finished_flag is True:
-                flag = True
-                GloVar.data_process_finished_flag = False
-                break
-            else:
-                time.sleep(0.2)
-        if flag is True:
-            # 关闭视频展示定时器
-            self.main_show_tab_widget.video_tab.video_label.timer_video.stop()
-            # 此时可以使能执行数据处理按钮
-            self.data_process_execute_action.setEnabled(False)
-            self.data_process_setting_action.setEnabled(False)
-            self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
-            self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
-            self.main_show_tab_widget.video_tab.video_label.data_process_finished()
-            # 自动打开报告
-            report_path = MergePath([self.get_path.replace('video', 'report'), 'report.html']).merged_path
-            self.project_bar_widget.operation_file(file_path=report_path)
-
+        if GloVar.data_process_finished_flag is True:
+            GloVar.data_process_finished_flag = False
+        else:
+            return
+        # 此时可以使能执行数据处理按钮
+        self.data_process_execute_action.setEnabled(False)
+        self.data_process_setting_action.setEnabled(False)
+        # self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
+        # self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
+        # self.main_show_tab_widget.video_tab.video_label.data_process_finished()
+        # 自动打开报告
+        report_path = MergePath([self.get_path.replace('video', 'report'), 'report.html']).merged_path
+        self.project_bar_widget.operation_file(file_path=report_path)
+        # 通过模拟点击来恢复实时流(达到稳定帧率的目的, 需要先使能视频状态按钮)
+        self.main_show_tab_widget.video_tab.video_label.status_video_button.setEnabled(True)
+        self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+        self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
 
     # 打开系统文件
     def open_system_file(self, file):
@@ -935,7 +910,6 @@ class UiMainWindow(QMainWindow):
         # os.system(file)
         # 不带cmd黑框
         subprocess.run(file, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
 
     '''菜单栏打开文件调用函数'''
     # 打开文件(图片)
@@ -956,7 +930,6 @@ class UiMainWindow(QMainWindow):
         else:
             Logger('取消打开文件!')
 
-
     '''分隔符移动触发事件(主要重新设置控件大小以及样式)'''
     # 调整show_tab_widget的tab_bar栏
     def adjust_show_tab_widget(self):
@@ -967,12 +940,11 @@ class UiMainWindow(QMainWindow):
         style_sheet = 'QTabWidget:pane{ border: 2px; top: 0px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment: right;}\
                        QTabBar::scroller{width: 0;}\
-                       QTabBar::tab{height: 25px; width:'+ str(tab_width) +'; margin-right: 0px; margin-bottom:0px;}\
+                       QTabBar::tab{height: 25px; width:' + str(tab_width) + '; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; color: #0099FF; background-color: white; border-top: 2px solid #0099FF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
         self.show_tab_widget.setStyleSheet(style_sheet)
-
 
     '''以下重写窗口事件'''
     # 重写窗口关闭时间
