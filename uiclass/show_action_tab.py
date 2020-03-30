@@ -131,7 +131,7 @@ class ShowActionTab(QWidget):
             # 默认是单击动作
             RobotArmAction.uArm_action_type = RobotArmAction.uArm_click
             # 添加动作窗口
-            if self.case_absolute_name is not None or self.case_absolute_name != '':
+            if self.case_absolute_name is not None and self.case_absolute_name != '':
                 case_name = os.path.split(self.case_absolute_name)[1].split('.')[0]
             else:
                 case_name = '默认(name)'
@@ -483,6 +483,14 @@ class ShowActionTab(QWidget):
         if len(self.case_absolute_name) > 0:
             self.connect_save_script_tag()
 
+    # 添加assert断言动作
+    def add_assert_item(self, info_dict, new_control_flag=True):
+        pass
+
+    # 插入assert断言动作
+    def insert_assert_item(self, info_dict):
+        pass
+
     # 添加sleep动作控件
     def add_sleep_item(self, info_dict, new_control_flag=True):
         # 给sleep动作设置id
@@ -590,6 +598,13 @@ class ShowActionTab(QWidget):
                 self.add_record_item(info_dict)
             else:
                 self.insert_record_item(info_dict)
+        # 按下assert_tab页面确认按钮
+        elif signal_str.startswith('assert_tab_sure>'):
+            info_dict = json.loads(signal_str.split('assert_tab_sure>')[1])
+            if self.insert_item_index == -1:
+                self.add_assert_item(info_dict)
+            else:
+                self.insert_assert_item(info_dict)
         # 按下sleep_tab页面确认按钮
         elif signal_str.startswith('sleep_tab_sure>'):
             info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
@@ -598,8 +613,11 @@ class ShowActionTab(QWidget):
             else:
                 self.insert_sleep_item(info_dict)
         # 接收到框选模板信号
-        elif signal_str.startswith('select_template>'):
-            self.signal.emit('draw_frame>')
+        elif signal_str.startswith(GloVar.result_template):
+            self.signal.emit(signal_str)
+        # 接收到断言模板
+        elif signal_str.startswith(GloVar.assert_template):
+            self.signal.emit(signal_str)
         # 切换动作信号(点击/双击/长按/滑动)
         elif signal_str.startswith('action_tab_action>'):
             self.signal.emit(signal_str)

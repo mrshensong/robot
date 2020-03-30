@@ -365,7 +365,7 @@ class UiMainWindow(QMainWindow):
     # 视频标签控件接收函数(接收到信息后需要进行的操作)
     def recv_video_label_signal(self, signal_str):
         # 新建录像动作时的框选视频模板完成
-        if signal_str.startswith('draw_frame_finished>'):
+        if signal_str.startswith(GloVar.result_template_finished):
             # 视频流重新打开
             # self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
             self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
@@ -373,8 +373,19 @@ class UiMainWindow(QMainWindow):
             if GloVar.add_action_window_opened_flag is True:
                 self.show_tab_widget.action_tab.add_action_window.setHidden(False)
                 # 显示模板路径
-                template_name = signal_str.split('draw_frame_finished>')[1]
+                template_name = signal_str.split(GloVar.result_template_finished + '>')[1]
                 self.show_tab_widget.action_tab.add_action_window.widget.record_tab.select_template.template_path.setText(template_name)
+        # 断言模板完成
+        elif signal_str.startswith(GloVar.assert_template_finished):
+            # 视频流重新打开
+            # self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+            self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+            # 重新显示窗口(添加窗口中添加的动作才会重新显示, 其余情况不会)
+            if GloVar.add_action_window_opened_flag is True:
+                self.show_tab_widget.action_tab.add_action_window.setHidden(False)
+                # 显示模板路径
+                template_name = signal_str.split(GloVar.assert_template_finished + '>')[1]
+                self.show_tab_widget.action_tab.add_action_window.widget.assert_tab.template_name_edit.setText(template_name)
         # 窗口尺寸变化
         elif signal_str.startswith('resize>'):
             # 调整show_tab_widget的tab_bar栏
@@ -438,9 +449,16 @@ class UiMainWindow(QMainWindow):
             self.main_show_tab_widget.video_tab.video_label.y1 = self.main_show_tab_widget.video_tab.video_label.y0
             RobotArmAction.uArm_action_type = signal_str.split('>')[1]
         # 框选模板(case中录像action的模板图片)
-        elif signal_str.startswith('draw_frame>'):
+        elif signal_str.startswith(GloVar.result_template):
             # case中框选标志位
-            GloVar.draw_frame_flag = True
+            GloVar.draw_frame_flag = GloVar.result_template
+            # 需要暂停视频流(进行框选)
+            self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
+            self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+        # 框选断言模板
+        elif signal_str.startswith(GloVar.assert_template):
+            # 断言模板框选标志
+            GloVar.draw_frame_flag = GloVar.assert_template
             # 需要暂停视频流(进行框选)
             self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
             self.main_show_tab_widget.video_tab.video_label.status_video_button.click()

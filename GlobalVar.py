@@ -47,8 +47,14 @@ class GloVar:
     actions_saved_to_case = True
     # 数据处理完成标志
     data_process_finished_flag = False
-    # 框选case中录像视频模板
+    # 框选case中录像视频模板(other_template, assert_template, result_template暂时就这三个)
     draw_frame_flag = False
+    '''三个draw_frame类型'''
+    other_template = 'other_template'
+    assert_template = 'assert_template'
+    assert_template_finished = 'assert_template_finished'
+    result_template = 'result_template'
+    result_template_finished = 'result_template_finished'
     # 添加动作打开标志位
     add_action_window_opened_flag = False
     # 机械臂是否伴随新建动作运动(默认打开)
@@ -195,16 +201,22 @@ class MotionAction:
 
 # 视频录制相关操作(如开关录像)
 class RecordAction:
-    record_status= 'record_status'
+    record_status = 'record_status'
     record_start = 'record_start'
-    record_stop  = 'record_stop'
-    video_type   = 'video_type'
-    video_name   = 'video_name'
-    standard_time= 'standard_time'
+    record_stop = 'record_stop'
+    video_type = 'video_type'
+    video_name = 'video_name'
+    standard_time = 'standard_time'
     # 保存开始录像的控件中的(type/name信息)
     current_video_type = '启动'
     current_video_name = 'name'
     current_standard_time = '800'
+
+
+# 断言相关操作
+class AssertAction:
+    assert_template_name = 'assert_template_name'
+
 
 # 延时相关操作
 class SleepAction:

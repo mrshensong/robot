@@ -11,7 +11,7 @@ class AddSleepTab(QWidget):
     def __init__(self, parent):
         super(AddSleepTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {SleepAction.sleep_time    : 1.0}
+        self.info_dict = {SleepAction.sleep_time: 1.0}
         self.initUI()
 
 

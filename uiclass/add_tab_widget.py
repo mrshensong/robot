@@ -6,29 +6,33 @@ from PyQt5.QtGui import *
 from uiclass.add_action_tab import AddActionTab
 from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
+from uiclass.add_assert_tab import AddAssertTab
 from GlobalVar import RobotArmAction, MotionAction, GloVar
+
 
 class TabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent=None, case_name=None, action_tab='action', video_tab='video', sleep_tab='sleep'):
+    def __init__(self, parent=None, case_name=None, action_tab='action', video_tab='video', assert_tab='assert', sleep_tab='sleep'):
         super(TabWidget, self).__init__(parent)
         self.parent = parent
         self.setTabPosition(self.North)
-        # 样式设置
+        # 样式设置 height: 25px; width:108;
         style_sheet = 'QTabWidget:pane{ border: 1px solid #0099FF; top: -2px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment: right;}\
-                       QTabBar::tab{height: 25px; width:108; margin-right: 0px; margin-bottom:0px;}\
+                       QTabBar::tab{height: 25px; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: #FFFFFF; border-top: 2px solid #0099FF; border-bottom: 2px solid #FFFFFF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
         self.setStyleSheet(style_sheet)
         self.action_tab = AddActionTab(self)
         self.record_tab = AddRecordTab(self, case_name)
+        self.assert_tab = AddAssertTab(self, case_name)
         self.sleep_tab = AddSleepTab(self)
         self.addTab(self.action_tab, action_tab)
         self.addTab(self.record_tab, video_tab)
+        self.addTab(self.assert_tab, assert_tab)
         self.addTab(self.sleep_tab, sleep_tab)
 
 
@@ -48,6 +52,7 @@ class AddTabWidget(QDialog):
         self.setWindowTitle('动作设置')
         self.widget.action_tab.signal[str].connect(self.recv_action_tab_signal)
         self.widget.record_tab.signal[str].connect(self.recv_record_tab_signal)
+        self.widget.assert_tab.signal[str].connect(self.recv_assert_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(330)
@@ -69,11 +74,23 @@ class AddTabWidget(QDialog):
     # 接收video_tab传来的信号
     def recv_record_tab_signal(self, signal_str):
         # 框选模板(隐藏当前窗口)
-        if signal_str.startswith('select_template'):
+        if signal_str.startswith(GloVar.result_template):
             # 发送框选信号
             self.signal.emit(signal_str)
             self.setHidden(True)
         elif signal_str.startswith('record_tab_sure>'):
+            self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
+            self.close()
+
+    # 接收assert_tab传来的信号
+    def recv_assert_tab_signal(self, signal_str):
+        # 框选模板(隐藏当前窗口)
+        if signal_str.startswith(GloVar.assert_template):
+            # 发送框选信号
+            self.signal.emit(signal_str)
+            self.setHidden(True)
+        elif signal_str.startswith('assert_tab_sure>'):
             self.signal.emit(signal_str)
             GloVar.add_action_window_opened_flag = False
             self.close()

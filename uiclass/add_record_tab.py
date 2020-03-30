@@ -114,11 +114,9 @@ class AddRecordTab(QWidget):
             self.standard_time_edit.clear()
 
     def connect_select_template(self, signal_str):
-        if signal_str.startswith('checked_check_box'):
+        if signal_str.startswith(GloVar.result_template):
             # 发送信号(隐藏当前窗口, 框选模板)
-            self.signal.emit('select_template>')
-        elif signal_str.startswith('unchecked_check_box'):
-            pass
+            self.signal.emit(signal_str)
 
     # 按下确认按钮
     def connect_sure(self):

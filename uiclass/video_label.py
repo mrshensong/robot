@@ -376,9 +376,12 @@ class VideoLabel(QLabel):
         # 实时流
         if self.video_play_flag is False:
             # 如果是case中框选视频模板动作
-            if GloVar.draw_frame_flag is True:
+            if GloVar.draw_frame_flag == GloVar.result_template:
                 # 此目录必须一直存在(不能被修改(需要进行数据处理))
-                GloVar.mask_path = MergePath([GloVar.project_path, 'picture', 'template']).merged_path
+                GloVar.mask_path = MergePath([GloVar.project_picture_path, 'template']).merged_path
+            elif GloVar.draw_frame_flag == GloVar.assert_template:
+                # assert_template目录
+                GloVar.mask_path = MergePath([GloVar.project_picture_path, 'assert']).merged_path
             # 其余情况
             else:
                 GloVar.mask_path = MergePath([GloVar.project_picture_path, '框选图']).merged_path
@@ -969,11 +972,14 @@ class VideoLabel(QLabel):
             # 直播状态
             if self.video_play_flag is False:
                 # 如果是case中框选视频模板动作
-                if GloVar.draw_frame_flag is True:
+                if GloVar.draw_frame_flag == GloVar.result_template:
                     # 接收模板路径
                     mask_path = GloVar.mask_path
                     # default_name = 'type-name'
                     default_name = RecordAction.current_video_type + '/' + RecordAction.current_video_name
+                elif GloVar.draw_frame_flag == GloVar.assert_template:
+                    mask_path = GloVar.mask_path
+                    default_name = GloVar.assert_template
                 else:
                     # 接收模板路径
                     mask_path = GloVar.mask_path
@@ -1034,7 +1040,7 @@ class VideoLabel(QLabel):
                                 if os.path.exists(mask_path) is False:
                                     os.makedirs(mask_path)
                                 # 如果是框选数据匹配模板的话(框选模板保存为灰度图)
-                                if GloVar.draw_frame_flag is True:
+                                if GloVar.draw_frame_flag == GloVar.result_template:
                                     # 将模板灰度化/并在模板起始位置打标记
                                     rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
                                     # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
@@ -1050,7 +1056,21 @@ class VideoLabel(QLabel):
                                     template_name = MergePath([mask_path, value.split('/')[-1] + '.bmp']).merged_path
                                     cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
                                     # 视频动作中模板框选完成
-                                    self.signal.emit('draw_frame_finished>' + template_name)
+                                    self.signal.emit(GloVar.result_template_finished + '>' + template_name)
+                                # 断言模板
+                                elif GloVar.draw_frame_flag == GloVar.assert_template:
+                                    # 将模板灰度化/并在模板起始位置打标记
+                                    rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
+                                    # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 0, y0)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 1, y1)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
+                                    rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
+                                    cut_img = rect_image
+                                    template_name = MergePath([mask_path, RecordAction.current_video_name, default_name, value + '.bmp']).merged_path
+                                    cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
+                                    # 视频动作中模板框选完成
+                                    self.signal.emit(GloVar.assert_template_finished + '>' + template_name)
                                 else:
                                     template_name = MergePath([mask_path, value.split('/')[-1] + '.jpg']).merged_path
                                     cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
@@ -1075,10 +1095,40 @@ class VideoLabel(QLabel):
                                 mask_path = mask_path
                             if os.path.exists(mask_path) is False:
                                 os.makedirs(mask_path)
-                            template_name = MergePath([mask_path, value + '.jpg']).merged_path
-                            cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
+
+                            # 如果是框选数据匹配模板的话(框选模板保存为灰度图)
+                            if GloVar.draw_frame_flag == GloVar.result_template:
+                                # 将模板灰度化/并在模板起始位置打标记
+                                rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
+                                # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
+                                rect_image = self.write_position_info_to_roi(rect_image, 0, y0)
+                                rect_image = self.write_position_info_to_roi(rect_image, 1, y1)
+                                rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
+                                rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
+                                cut_img = rect_image
+                                template_name = MergePath([mask_path, value.split('/')[-1] + '.bmp']).merged_path
+                                cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
+                                # 视频动作中模板框选完成
+                                self.signal.emit(GloVar.result_template_finished + '>' + template_name)
+                            # 断言模板
+                            elif GloVar.draw_frame_flag == GloVar.assert_template:
+                                # 将模板灰度化/并在模板起始位置打标记
+                                rect_image = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)  # ##灰度化
+                                # 在模板起始位置打标记(以便于模板匹配时快速找到模板位置)
+                                rect_image = self.write_position_info_to_roi(rect_image, 0, y0)
+                                rect_image = self.write_position_info_to_roi(rect_image, 1, y1)
+                                rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
+                                rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
+                                cut_img = rect_image
+                                template_name = MergePath([mask_path, value + '.bmp']).merged_path
+                                cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
+                                # 视频动作中模板框选完成
+                                self.signal.emit(GloVar.assert_template_finished + '>' + template_name)
+                            else:
+                                template_name = MergePath([mask_path, value + '.jpg']).merged_path
+                                cv2.imencode('.jpg', cut_img)[1].tofile(template_name)
                     # case中框选模板标志位复位
-                    GloVar.draw_frame_flag = False
+                    GloVar.draw_frame_flag = GloVar.other_template
                     Logger('[框选的模板保存路径为]: %s' % template_name)
                 else:
                     Logger('[框选动作取消!]')

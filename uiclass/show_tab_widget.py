@@ -5,6 +5,7 @@ from uiclass.show_case_tab import ShowCaseTab
 from uiclass.show_script_tab import ShowScriptTab
 from GlobalVar import GloVar, WindowStatus, RecordAction, SleepAction, Logger, MotionAction
 
+
 class ShowTabWidget(QTabWidget):
 
     signal = pyqtSignal(str)
@@ -58,9 +59,11 @@ class ShowTabWidget(QTabWidget):
         elif signal_str.startswith('play_actions>'):
             self.signal.emit(signal_str)
         # 框选模板(case中录像action的模板图片)
-        elif signal_str.startswith('draw_frame>'):
+        elif signal_str.startswith(GloVar.result_template):
             self.signal.emit(signal_str)
-
+        # 框选断言模板
+        elif signal_str.startswith(GloVar.assert_template):
+            self.signal.emit(signal_str)
 
     # 接收从case_tab窗口传来的信号
     def recv_case_tab_signal(self, signal_str):

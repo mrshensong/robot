@@ -684,9 +684,7 @@ class SelectTemplateControl(QWidget):
 
     def connect_check_box(self):
         if self.check_box.checkState() == Qt.Checked:
-            self.signal.emit('checked_check_box>')
-        elif self.check_box.checkState() == Qt.Unchecked:
-            self.signal.emit('unchecked_check_box>')
+            self.signal.emit(GloVar.result_template + '>')
 
 
     def clear(self):
