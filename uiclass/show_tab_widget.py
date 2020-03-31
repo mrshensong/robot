@@ -82,25 +82,34 @@ class ShowTabWidget(QTabWidget):
                 self.action_tab.case_file_name = dict_info_list[0]
                 self.action_tab.case_absolute_name = dict_info_list[1]
                 Logger('[打开的case路径为]: %s' % dict_info_list[1])
-                # 遍历case中的action
-                for id in range(2, len(dict_info_list)):
-                    # 判断是action/record/sleep控件
-                    if MotionAction.points in dict_info_list[id]:
-                        # 有points元素为action控件
-                        # 将字典中的'(0, 0)'转为元祖(0, 0)
-                        dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                        self.action_tab.add_action_item(dict_info_list[id], new_control_flag=False)
-                    # 为record, assert或者sleep控件
-                    else:
-                        # 为record控件
-                        if RecordAction.record_status in dict_info_list[id]:
-                            self.action_tab.add_record_item(dict_info_list[id], new_control_flag=False)
-                        # assert控件
-                        elif AssertAction.assert_template_name in dict_info_list[id]:
-                            self.action_tab.add_assert_item(dict_info_list[id], new_control_flag=False)
-                        # 为sleep控件
-                        elif SleepAction.sleep_time in dict_info_list[id]:
-                            self.action_tab.add_sleep_item(dict_info_list[id], new_control_flag=False)
+                # 打开的case非空
+                if len(dict_info_list) > 2:
+                    # 遍历case中的action
+                    for id in range(2, len(dict_info_list)):
+                        # 判断是action/record/sleep控件
+                        if MotionAction.points in dict_info_list[id]:
+                            # 有points元素为action控件
+                            # 将字典中的'(0, 0)'转为元祖(0, 0)
+                            dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
+                            self.action_tab.add_action_item(dict_info_list[id], new_control_flag=False)
+                        # 为record, assert或者sleep控件
+                        else:
+                            # 为record控件
+                            if RecordAction.record_status in dict_info_list[id]:
+                                self.action_tab.add_record_item(dict_info_list[id], new_control_flag=False)
+                            # assert控件
+                            elif AssertAction.assert_template_name in dict_info_list[id]:
+                                self.action_tab.add_assert_item(dict_info_list[id], new_control_flag=False)
+                            # 为sleep控件
+                            elif SleepAction.sleep_time in dict_info_list[id]:
+                                self.action_tab.add_sleep_item(dict_info_list[id], new_control_flag=False)
+                # 打开的case为空
+                else:
+                    script_text = '<case name="' + self.action_tab.case_file_name + '">\n</case>'
+                    script_title = script_text.split('"')[1] if script_text else '空白'
+                    script_title = '空白' if script_title == '' else script_title
+                    self.script_tab.script_edit.setText(script_text)
+                    self.script_tab.script_title.setText(script_title)
                 self.action_tab.des_text.setText(self.action_tab.case_file_name)
                 WindowStatus.action_tab_status = '%s' % self.action_tab.case_absolute_name
         # 执行单个case

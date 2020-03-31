@@ -5,7 +5,7 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit, QFrame
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, SleepAction, RobotArmParam, BeautifyStyle
+from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, AssertAction, SleepAction, RobotArmParam, BeautifyStyle
 from uiclass.controls import CaseControl
 
 class ShowCaseTab(QWidget):
@@ -320,6 +320,9 @@ class ShowCaseTab(QWidget):
                     dict_info_list[id]['execute_action'] = 'record_action'
                     # 添加视频存放根目录
                     dict_info_list[id]['video_path'] = GloVar.project_video_path
+                    GloVar.post_info_list.append(dict_info_list[id])
+                elif AssertAction.assert_template_name in dict_info_list[id]:
+                    dict_info_list[id]['execute_action'] = 'assert_action'
                     GloVar.post_info_list.append(dict_info_list[id])
                 # 为sleep控件
                 elif SleepAction.sleep_time in dict_info_list[id]:

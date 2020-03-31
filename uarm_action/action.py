@@ -1,9 +1,11 @@
+import cv2
 import time
+import numpy as np
 from uarm_action.uarm import SwiftAPI
 from GlobalVar import Logger
 from uarm_action.video_of_external_camera import ExternalCameraVideo
 from uarm_action.video_of_system_camera import SystemCameraVideo
-from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile, MergePath
+from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile, MergePath, AssertAction
 
 
 class ArmAction:
@@ -170,6 +172,17 @@ class ArmAction:
         if leave == 1:
             self.set_position(50, 100, 40)
 
+    # 执行机械臂动作
+    def play_motion_action(self, action):
+        if action['action_type'] == 'click':
+            self.play_click_action(action)
+        elif action['action_type'] == 'double_click':
+            self.play_double_click_action(action)
+        elif action['action_type'] == 'long_click':
+            self.play_long_click(action)
+        elif action['action_type'] == 'slide':
+            self.play_slide_action(action)
+
     # 摄像头录制动作
     def play_record_action(self, info_dict):
         data = info_dict
@@ -187,6 +200,21 @@ class ArmAction:
             self.video.stop_record_video()
             while self.video.restart_record_flag is False:
                 time.sleep(0.02)
+
+    # 断言动作
+    def play_assert_action(self, info_dict):
+        data = info_dict
+        template_image = data[AssertAction.assert_template_name]
+        target_image = GloVar.camera_image.copy()
+        # 获取模板的灰度图
+        template_image = cv2.imdecode(np.fromfile(template_image, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+        target_image = cv2.cvtColor(target_image, cv2.COLOR_BGR2GRAY)
+        # 模板匹配
+        threshold = self.match_template(target_image, template_image)
+        if threshold > 0.95:
+            return True
+        else:
+            return False
 
     # 延时动作
     @staticmethod
@@ -216,26 +244,7 @@ class ArmAction:
             data.pop(-1)
             data.pop(0)
             # 开始执行动作
-            for action in data:
-                if action['execute_action'] == 'motion_action':
-                    if action['action_type'] == 'click':
-                        self.play_click_action(action)
-                        time.sleep(0.2)
-                    elif action['action_type'] == 'double_click':
-                        self.play_double_click_action(action)
-                        time.sleep(0.2)
-                    elif action['action_type'] == 'long_click':
-                        self.play_long_click(action)
-                        time.sleep(0.2)
-                    elif action['action_type'] == 'slide':
-                        self.play_slide_action(action)
-                        time.sleep(0.2)
-                elif action['execute_action'] == 'record_action':
-                    self.play_record_action(action)
-                    time.sleep(0.2)
-                elif action['execute_action'] == 'sleep_action':
-                    self.play_sleep_action(action)
-                    time.sleep(0.2)
+            self.split_and_execute_action(data)
             # 打印描述信息
             if description is not None:
                 if description == 'actions':
@@ -248,6 +257,67 @@ class ArmAction:
         #     return HttpResponse("data error")
     # return HttpResponse("ok")
 
+    # 拆解action动作并执行
+    def split_and_execute_action(self, action_list):
+        # 开始执行动作
+        for i in range(len(action_list)):
+            action = action_list[i]
+            if action['execute_action'] == 'motion_action':
+                self.play_motion_action(action)
+                time.sleep(0.2)
+            elif action['execute_action'] == 'record_action':
+                self.play_record_action(action)
+                time.sleep(0.2)
+            elif action['execute_action'] == 'assert_action':
+                go_down_flag = self.play_assert_action(action)
+                if go_down_flag is True:
+                    Logger('预期界面-->匹配正确')
+                else:
+                    Logger('预期界面-->匹配错误')
+                    # 需要重复的动作
+                    again_action = []
+                    for index in range(i-1, -1, -1):
+                        if action_list[index]['execute_action'] == 'motion_action':
+                            again_action = action_list[index]
+                            break
+                    if len(again_action) > 0:
+                        for current_times in range(3):
+                            self.play_motion_action(again_action)
+                            time.sleep(1)
+                            go_down_flag = self.play_assert_action(action)
+                            if go_down_flag is True:
+                                break
+                        if current_times == 2 and go_down_flag is False:
+                            print('当前case执行失败')
+                            break
+                    else:
+                        print('当前case执行失败')
+                        break
+            elif action['execute_action'] == 'sleep_action':
+                self.play_sleep_action(action)
+                time.sleep(0.2)
+
+    # 断言操作需要用到的模板匹配
+    def match_template(self, source_img, target_img):
+        '''
+        :param source_img: 源图像(大图)
+        :param target_img: 靶子图像(小图)
+        :param match_rate: 匹配率
+        :return:
+        '''
+        if type(source_img) is str:
+            source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
+        if type(target_img) is str:
+            target_img = cv2.imdecode(np.fromfile(target_img, dtype=np.uint8), -1)
+        # 匹配方法
+        match_method = cv2.TM_CCOEFF_NORMED
+        # 模板匹配
+        match_result = cv2.matchTemplate(source_img, target_img, match_method)
+        # 查找匹配度和坐标位置
+        min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
+        # 返回最大匹配率
+        return max_threshold
+
 
 '''传入的样例'''
 # start / start>actions /start>D:/Code/robot/case/测试/滑动测试.xml(三种形式分别:单个action/选中的多个actions/一条case)
@@ -256,6 +326,7 @@ class ArmAction:
 # {'des_text': '长按', 'action_type': 'long_click', 'points': [-47.819, 93.744], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
 # {'des_text': '滑动', 'action_type': 'slide', 'points': [-63.5, 87.833, -63.5, 138.843], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
 # {'camera_video': 'record', 'record_status': 'record_start', 'video_type': 'test', 'video_name': 'test', 'execute_action': 'record_action'}
+# {'assert_template': 'picture', 'assert_template_name': 'D:/Code/robot/picture/assert/123.bmp', 'execute_action': 'assert_action'}
 # {'sleep': 'time/s', 'sleep_time': '5.0', 'execute_action': 'sleep_action'}
 # {'camera_video': 'record', 'record_status': 'record_stop', 'video_type': 'test', 'video_name': 'test', 'execute_action': 'record_action'}
 # stop

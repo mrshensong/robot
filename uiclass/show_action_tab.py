@@ -214,6 +214,9 @@ class ShowActionTab(QWidget):
                 elif 'record_status' in rewrite_info:
                     text = self.custom_control_list[current_row].video_type_and_name_text.text()
                     self.custom_control_list[current_row].video_type_and_name_text.setText(text)
+                elif 'assert_template' in rewrite_info:
+                    text = self.custom_control_list[current_row].template_path_text.text()
+                    self.custom_control_list[current_row].template_path_text.setText(text)
                 elif 'sleep_time' in rewrite_info:
                     text = self.custom_control_list[current_row].sleep_des_text.text()
                     self.custom_control_list[current_row].sleep_des_text.setText(text)
@@ -275,6 +278,9 @@ class ShowActionTab(QWidget):
                         self.info_list[index]['execute_action'] = 'record_action'
                         # 添加视频存放根目录
                         self.info_list[index]['video_path'] = GloVar.project_video_path
+                        GloVar.post_info_list.append(self.info_list[index])
+                    elif AssertAction.assert_template_name in self.info_list[index]:
+                        self.info_list[index]['execute_action'] = 'assert_action'
                         GloVar.post_info_list.append(self.info_list[index])
                     # 为sleep控件
                     elif SleepAction.sleep_time in self.info_list[index]:
@@ -553,6 +559,10 @@ class ShowActionTab(QWidget):
     def recv_assert_control_signal(self, signal_str):
         if signal_str.startswith('assert_delete_item>'):
             id = int(signal_str.split('assert_delete_item>')[1])
+            # 删除对应的断言模板图
+            assert_template_picture = self.info_list[id][AssertAction.assert_template_name]
+            if os.path.exists(assert_template_picture):
+                os.remove(assert_template_picture)
             self.delete_item(id)
         elif signal_str.startswith('assert_execute_item>'):
             if GloVar.request_status is None:
@@ -644,6 +654,8 @@ class ShowActionTab(QWidget):
         for i in range(id, self.index):
             self.custom_control_list[i].id = i
         self.index -= 1
+        # 自动保存
+        self.connect_save_script_tag()
         # 发送需要显示的脚本标签
         if len(self.tag_list) > 0:
             GloVar.actions_saved_to_case = False
