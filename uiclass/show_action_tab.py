@@ -5,8 +5,8 @@ from threading import Thread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam, BeautifyStyle
-from uiclass.controls import ActionControl, RecordControl, SleepControl
+from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, AssertAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam, BeautifyStyle
+from uiclass.controls import ActionControl, RecordControl, AssertControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 
 
@@ -50,7 +50,6 @@ class ShowActionTab(QWidget):
         self.video_numbers = -1
         # tab初始化
         self.action_tab_init()
-
 
     def action_tab_init(self):
         self.add_button = QToolButton()
@@ -143,7 +142,6 @@ class ShowActionTab(QWidget):
             QMessageBox.about(self, "提示", "请先框选屏幕大小")
             return
 
-
     # 插入动作触发函数
     def connect_insert_button(self, insert_position):
         self.insert_item_position = insert_position
@@ -166,8 +164,6 @@ class ShowActionTab(QWidget):
         self.insert_item_index = insert_index
         # 调出动作窗口
         self.connect_add_action_button()
-
-
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
     def delete_selected_items(self):
@@ -224,7 +220,6 @@ class ShowActionTab(QWidget):
             except:
                 pass
 
-
     # 删除工具栏操作(delete_button)
     def connect_delete_selected_items(self):
         # 没有item的时候让button无效
@@ -232,7 +227,6 @@ class ShowActionTab(QWidget):
             pass
         else:
             Thread(target=self.delete_selected_items, args=()).start()
-
 
     # 全部选中或者全部不选中items
     def select_or_un_select_all_items(self):
@@ -251,7 +245,6 @@ class ShowActionTab(QWidget):
             self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
             Logger('[全不选中]-->所有动作')
 
-
     # 选择/不选择(所有)工具栏操作(select_all_button)
     def connect_select_all_items(self):
         # 没有item的时候让button无效
@@ -259,7 +252,6 @@ class ShowActionTab(QWidget):
             pass
         else:
             Thread(target=self.select_or_un_select_all_items, args=()).start()
-
 
     # 执行选中actions的具体操作
     def execute_selected_actions(self):
@@ -292,7 +284,6 @@ class ShowActionTab(QWidget):
         GloVar.post_info_list.append('stop')
         # 将GloVar.post_info_list传递出去
         self.signal.emit('play_actions>')
-
 
     # 执行选中的actions(execute_button/单独起线程)
     def connect_execute_selected_actions(self):
@@ -331,12 +322,10 @@ class ShowActionTab(QWidget):
             self.des_text.setText(self.case_file_name)
             GloVar.actions_saved_to_case = True
 
-
     # 框选模板
     def connect_draw_frame(self):
         # 发出框选模板信号
         self.signal.emit('draw_frame>')
-
 
     # 清除所有动作
     def clear_all_items(self):
@@ -354,7 +343,6 @@ class ShowActionTab(QWidget):
         self.case_file_name = ''
         self.case_absolute_name = ''
 
-
     # 添加item(action/video/sleep可以共用)
     def add_item(self, item, obj, info_dict, new_control_flag, item_type):
         # item:条目对象/obj:控件对象/info_dict:传入的字典参数/new_control_flag:是否真正的新建控件(而非case导入)
@@ -367,6 +355,8 @@ class ShowActionTab(QWidget):
             self.tag_list.append(self.generate_action_tag(info_dict))
         elif item_type == 'record':
             self.tag_list.append(self.generate_record_tag(info_dict))
+        elif item_type == 'assert':
+            self.tag_list.append(self.generate_assert_tag(info_dict))
         elif item_type == 'sleep':
             self.tag_list.append(self.generate_sleep_tag(info_dict))
         # 发送需要显示的脚本标签
@@ -383,7 +373,6 @@ class ShowActionTab(QWidget):
             GloVar.actions_saved_to_case = True
         # 滚动条滚动到当前item
         self.list_widget.scrollToItem(item)
-
 
     # 插入item(action/video/sleep可以共用)
     def insert_item(self, item, obj, info_dict, item_type):
@@ -485,7 +474,15 @@ class ShowActionTab(QWidget):
 
     # 添加assert断言动作
     def add_assert_item(self, info_dict, new_control_flag=True):
-        pass
+        # 给record动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 90))
+        obj = AssertControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
+        obj.signal[str].connect(self.recv_assert_control_signal)
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='assert')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 插入assert断言动作
     def insert_assert_item(self, info_dict):
@@ -533,7 +530,6 @@ class ShowActionTab(QWidget):
             GloVar.post_info_list.append('stop')
             self.signal.emit('play_actions>')
 
-
     # 接收record控件传来的删除和执行信号
     def recv_record_control_signal(self, signal_str):
         if signal_str.startswith('record_delete_item>'):
@@ -553,6 +549,22 @@ class ShowActionTab(QWidget):
             GloVar.post_info_list.append('stop')
             self.signal.emit('play_actions>')
 
+    # 接收assert控件传来的删除和执行信号
+    def recv_assert_control_signal(self, signal_str):
+        if signal_str.startswith('assert_delete_item>'):
+            id = int(signal_str.split('assert_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('assert_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
+            id = int(signal_str.split('assert_execute_item>')[1])
+            self.info_list[id]['execute_action'] = 'assert_action'
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
 
     # 接收sleep控件传来的删除和执行信号
     def recv_sleep_control_signal(self, signal_str):
@@ -570,8 +582,6 @@ class ShowActionTab(QWidget):
             GloVar.post_info_list.append(self.info_list[id])
             GloVar.post_info_list.append('stop')
             self.signal.emit('play_actions>')
-
-
 
     # 接收从添加动作子窗口传来的信号
     def recv_add_action_window_signal(self, signal_str):
@@ -624,7 +634,6 @@ class ShowActionTab(QWidget):
         else:
             pass
 
-
     # 删除item
     def delete_item(self, id):
         self.list_widget.takeItem(id)
@@ -651,11 +660,9 @@ class ShowActionTab(QWidget):
             WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
             self.des_text.setText(self.case_file_name)
 
-
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
     def str_decorate(self, origin_str, decorate_str='[]'):
         return str(origin_str).join(decorate_str)
-
 
     # 添加action动作时生成标签
     def generate_action_tag(self, info_dict):
@@ -664,7 +671,7 @@ class ShowActionTab(QWidget):
         speed = str(info_dict[MotionAction.speed])
         leave = str(info_dict[MotionAction.leave])
         trigger = str(info_dict[MotionAction.trigger])
-        points =   str(tuple(info_dict[MotionAction.points]))
+        points = str(tuple(info_dict[MotionAction.points]))
         tag = '\t<action '+MotionAction.des_text+'="' + des_text + '">\n'+\
               '\t\t' + '<param name="'+MotionAction.action_type+'">' +action_type+ '</param>\n'+\
               '\t\t' + '<param name="'+MotionAction.points+'">' +points+ '</param>\n'+\
@@ -674,12 +681,11 @@ class ShowActionTab(QWidget):
               '\t</action>\n'
         return tag
 
-
     # 添加video动作时生成标签
     def generate_record_tag(self, info_dict):
         record_status = info_dict[RecordAction.record_status]
-        video_type    = info_dict[RecordAction.video_type]
-        video_name    = info_dict[RecordAction.video_name]
+        video_type = info_dict[RecordAction.video_type]
+        video_name = info_dict[RecordAction.video_name]
         standard_time = info_dict[RecordAction.standard_time]
         tag = '\t<action ' + 'camera_video' + '="' + 'record' + '">\n' + \
               '\t\t' + '<param name="' + RecordAction.record_status + '">' + record_status + '</param>\n' + \
@@ -689,6 +695,13 @@ class ShowActionTab(QWidget):
               '\t</action>\n'
         return tag
 
+    # 添加assert动作生成标签
+    def generate_assert_tag(self, info_dict):
+        assert_template_path = str(info_dict[AssertAction.assert_template_name])
+        tag = '\t<action ' + 'assert_template' + '="' + 'picture' + '">\n' + \
+              '\t\t' + '<param name="' + AssertAction.assert_template_name + '">' + assert_template_path + '</param>\n' + \
+              '\t</action>\n'
+        return tag
 
     # 添加sleep动作时生成标签
     def generate_sleep_tag(self, info_dict):
@@ -698,10 +711,8 @@ class ShowActionTab(QWidget):
               '\t</action>\n'
         return tag
 
-
-
     # 将所有action合并成为script
     def merge_to_script(self, tag_string):
         script_start = '<case name="'+self.case_file_name+'">\n'
-        script_end   = '</case>'
+        script_end = '</case>'
         return script_start + tag_string + script_end

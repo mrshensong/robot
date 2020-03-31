@@ -12,9 +12,9 @@ from uiclass.show_tab_widget import ShowTabWidget
 from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
 from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
-from PyQt5.QtCore import QSize, Qt, QTranslator
-from PyQt5.QtGui import QFont, QIcon, QTextOption, QTextCursor
-from PyQt5.QtWidgets import QMainWindow, QMenuBar, QStatusBar, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QLabel, QTextEdit, QAction, QApplication, QSplitter, QToolButton, QStackedWidget, QPushButton
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
 from uarm_action.action import ArmAction
 from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
@@ -367,7 +367,7 @@ class UiMainWindow(QMainWindow):
         # 新建录像动作时的框选视频模板完成
         if signal_str.startswith(GloVar.result_template_finished):
             # 视频流重新打开
-            # self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+            self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
             self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
             # 重新显示窗口(添加窗口中添加的动作才会重新显示, 其余情况不会)
             if GloVar.add_action_window_opened_flag is True:
@@ -378,7 +378,7 @@ class UiMainWindow(QMainWindow):
         # 断言模板完成
         elif signal_str.startswith(GloVar.assert_template_finished):
             # 视频流重新打开
-            # self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+            self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
             self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
             # 重新显示窗口(添加窗口中添加的动作才会重新显示, 其余情况不会)
             if GloVar.add_action_window_opened_flag is True:
@@ -386,6 +386,7 @@ class UiMainWindow(QMainWindow):
                 # 显示模板路径
                 template_name = signal_str.split(GloVar.assert_template_finished + '>')[1]
                 self.show_tab_widget.action_tab.add_action_window.widget.assert_tab.template_name_edit.setText(template_name)
+                self.show_tab_widget.action_tab.add_action_window.widget.assert_tab.reload_thumbnail(template_name)
         # 窗口尺寸变化
         elif signal_str.startswith('resize>'):
             # 调整show_tab_widget的tab_bar栏
@@ -967,7 +968,7 @@ class UiMainWindow(QMainWindow):
         style_sheet = 'QTabWidget:pane{ border: 2px; top: 0px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment: right;}\
                        QTabBar::scroller{width: 0;}\
-                       QTabBar::tab{height: 25px; width:' + str(tab_width) + '; margin-right: 0px; margin-bottom:0px;}\
+                       QTabBar::tab{height: 25px; width:' + str(tab_width) + 'px; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #7A7A7A; color: #0099FF; background-color: white; border-top: 2px solid #0099FF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'

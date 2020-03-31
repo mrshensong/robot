@@ -141,6 +141,8 @@ class IconPath:
     Icon_main_tab_widget_close_tab_hover = 'config/Icon/main_tab_widget_icon/close_tab_hover.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
+    # 照片图标
+    Icon_picture = 'config/Icon/other_icon/picture.png'
 
 
 class RobotArmAction:

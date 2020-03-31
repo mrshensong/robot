@@ -97,7 +97,6 @@ class ShowCaseTab(QWidget):
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
 
-
     # 连接导入case按钮
     def connect_import_button(self, case_file=None):
         if case_file is None:
@@ -133,7 +132,6 @@ class ShowCaseTab(QWidget):
             files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
             for file in files:
                 self.add_item(file)
-
 
     # 1.筛选出没有被选中的items, 并将他们的info保存到list 2.使用循环创建没有被选中的items
     def delete_selected_items(self):
@@ -181,7 +179,6 @@ class ShowCaseTab(QWidget):
             except:
                 pass
 
-
     def connect_delete_selected_items(self):
         # 没有item的时候让button无效
         if self.index < 0:
@@ -189,14 +186,12 @@ class ShowCaseTab(QWidget):
         else:
             Thread(target=self.delete_selected_items, args=()).start()
 
-
     def connect_select_all_items(self):
         # 没有item的时候让button无效
         if self.index < 0:
             pass
         else:
             Thread(target=self.select_or_un_select_all_items, args=()).start()
-
 
     # 执行选中的case
     def execute_selected_items(self, execute_times):
@@ -228,7 +223,6 @@ class ShowCaseTab(QWidget):
             else:
                 time.sleep(0.02)
 
-
     # 线程中执行选中的case
     def connect_execute_selected_items(self):
         # 每执行一次都需要获取当前时间(作为文件夹)
@@ -236,7 +230,6 @@ class ShowCaseTab(QWidget):
         # 获取执行次数
         execute_times = self.execute_times_control.value()
         Thread(target=self.execute_selected_items, args=(execute_times,)).start()
-
 
     # 视频处理开关切换
     def connect_switch(self):
@@ -250,7 +243,6 @@ class ShowCaseTab(QWidget):
             GloVar.video_process_switch = 'OFF'
             self.switch_button.setToolTip('开启处理报告功能')
             self.switch_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
-
 
     # 接受case控件发送的信号
     def recv_case_control_signal(self, signal_str):
@@ -274,7 +266,6 @@ class ShowCaseTab(QWidget):
             self.delete_item(id)
         else:
             pass
-
 
     # 读取当前的script_xml文件(通过id可以获取到当前脚本文件)
     # 返回list为每个action的信息(字典形式)>>list第一个参数为case文件名, 后面参数为每个action的信息存储字典
@@ -304,7 +295,6 @@ class ShowCaseTab(QWidget):
             file_name = os.path.split(case_file)[1]
             new_dict_info = [file_name, case_file]
             return new_dict_info
-
 
     # 执行单个case(参数为从xml中读出来的)
     def play_single_case(self, dict_info_list):
@@ -339,7 +329,6 @@ class ShowCaseTab(QWidget):
         # 执行一条case
         # self.signal.emit('sleep_execute_item>' + json.dumps(GloVar.post_info_list))
 
-
     # 清除所有动作
     def clear_all_items(self):
         self.list_widget.clear()
@@ -347,7 +336,6 @@ class ShowCaseTab(QWidget):
         self.case_control_list = []
         self.case_file_list = []
         self.index = -1
-
 
     # 全部选中或者全部不选中items
     def select_or_un_select_all_items(self):
@@ -366,7 +354,6 @@ class ShowCaseTab(QWidget):
             self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
             Logger('[全不选中]-->所有case')
 
-
     # 添加动作控件
     def add_item(self, case_file):
         # 给动作设置id
@@ -380,7 +367,6 @@ class ShowCaseTab(QWidget):
         self.item_list.append(item)
         self.case_control_list.append(obj)
         self.case_file_list.append(case_file)
-
 
     # 删除case
     def delete_item(self, id):

@@ -1,9 +1,9 @@
 import time
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QCheckBox, QLineEdit, QLabel, QToolButton, QSlider, QSpinBox, QPushButton, QFileDialog
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import pyqtSignal, Qt
-from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, SleepAction, Logger, MotionAction, Profile, RobotArmParam
+from PyQt5.QtWidgets import  *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, AssertAction, SleepAction, Logger, MotionAction, Profile, RobotArmParam
 
 # 自定义动作展示控件(action)
 class ActionControl(QWidget):
@@ -121,6 +121,7 @@ class ActionControl(QWidget):
             else:
                 Logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), self.points_text, self.des_text))
 
+
 # 摄像头录制开始和停止动作展示控件(camera_start/camera_stop)
 class RecordControl(QWidget):
 
@@ -142,7 +143,6 @@ class RecordControl(QWidget):
         self.standard_time = info_dict[RecordAction.standard_time]
         self.initUI()
         self.describe_record()
-
 
     def initUI(self):
         # 选择框
@@ -191,11 +191,9 @@ class RecordControl(QWidget):
         self.setLayout(self.h_box)
         self.setMaximumWidth(400)
 
-
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
     def str_decorate(self, origin_str, decorate_str='[]'):
         return str(origin_str).join(decorate_str)
-
 
     # 执行单个动作的具体操作
     def play_record_item(self):
@@ -203,13 +201,11 @@ class RecordControl(QWidget):
         # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
         self.signal.emit('record_execute_item>' + str(self.id))
 
-
     # 执行单个动作(新建线程/控件中的执行按钮)
     def record_execute_item(self):
         # 每执行一次都需要获取当前时间(作为文件夹)
         GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         Thread(target=self.play_record_item, args=()).start()
-
 
     # 删除单个动作(控件中的删除按钮)
     def record_delete_item(self):
@@ -217,12 +213,105 @@ class RecordControl(QWidget):
         Logger('删除-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(RecordAction.record_status), self.str_decorate(self.record_type)))
         self.signal.emit('record_delete_item>' + str(self.id))
 
-
     # 打印控件信息
     def describe_record(self):
         if self.new_control_flag is True:
             # 打印新建video动作信息
             Logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(RecordAction.record_status), self.str_decorate(self.record_type)))
+
+
+# 断言模板图片控件(通过模板判断是否出现预期界面)
+class AssertControl(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent, id, info_dict, new_control_flag=True):
+        super(AssertControl, self).__init__(parent)
+        self.parent = parent
+        self.id = id
+        # 判断是真的新建record还是通过脚本导入的case(new_control_flag:True新建, False导入)
+        self.new_control_flag = new_control_flag
+        # 断言模板绝对路径
+        self.template_path = info_dict[AssertAction.assert_template_name]
+        # 缩略图尺寸
+        self.thumbnail_size = (60, 60)
+        self.initUI()
+        self.describe_assert()
+
+    def initUI(self):
+        # 选择框
+        self.check_box = QCheckBox()
+        # 模板缩略图
+        self.thumbnail_label = QLabel(self)
+        self.thumbnail_label.setAlignment(Qt.AlignCenter)
+        self.thumbnail_label.setFixedSize(self.thumbnail_size[0], self.thumbnail_size[1])
+        self.reload_thumbnail(self.template_path)
+        # 显示模板路径
+        self.template_path_text = QLineEdit(self)
+        self.template_path_text.setReadOnly(True)
+        self.template_path_text.setText(self.template_path)
+        self.template_path_text.setCursorPosition(0)
+        # 按钮
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.assert_execute_item)
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.assert_delete_item)
+        # 横向布局
+        self.h_box = QHBoxLayout()
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.thumbnail_label)
+        self.h_box.addWidget(self.template_path_text)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
+        self.setLayout(self.h_box)
+        self.setMaximumWidth(400)
+
+    # 重新载入缩略图
+    def reload_thumbnail(self, image):
+        origin_image = QImage(image)
+        origin_width = origin_image.width()
+        origin_height = origin_image.height()
+        max_num = max(origin_width, origin_height)
+        if max_num > self.thumbnail_size[0]:
+            scale = self.thumbnail_size[0] / max_num
+        else:
+            scale = 1.0
+        new_size = QSize(origin_width * scale, origin_height * scale)
+        pix_map = QPixmap.fromImage(origin_image.scaled(new_size, Qt.IgnoreAspectRatio))
+        self.thumbnail_label.setPixmap(pix_map)
+
+    # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
+    def str_decorate(self, origin_str, decorate_str='[]'):
+        return str(origin_str).join(decorate_str)
+
+    # 执行单个动作的具体操作
+    def play_assert_item(self):
+        # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
+        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+        self.signal.emit('assert_execute_item>' + str(self.id))
+
+    # 执行单个动作(新建线程/控件中的执行按钮)
+    def assert_execute_item(self):
+        # 每执行一次都需要获取当前时间(作为文件夹)
+        GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
+        Thread(target=self.play_assert_item, args=()).start()
+
+    # 删除单个动作(控件中的删除按钮)
+    def assert_delete_item(self):
+        # 打印删除信息
+        Logger('删除-->id{:-<5}action{:-<16}断言动作模板{}'.format(self.str_decorate(self.id), self.str_decorate(AssertAction.assert_template_name), self.str_decorate(self.template_path)))
+        self.signal.emit('assert_delete_item>' + str(self.id))
+
+    # 打印控件信息
+    def describe_assert(self):
+        if self.new_control_flag is True:
+            # 打印新建video动作信息
+            Logger('新建-->id{:-<5}action{:-<16}断言动作模板{}'.format(self.str_decorate(self.id), self.str_decorate(AssertAction.assert_template_name), self.str_decorate(self.template_path)))
+
 
 # 延时动作展示控件(sleep)
 class SleepControl(QWidget):

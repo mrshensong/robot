@@ -21,7 +21,7 @@ class TabWidget(QTabWidget):
         # 样式设置 height: 25px; width:108;
         style_sheet = 'QTabWidget:pane{ border: 1px solid #0099FF; top: -2px; bottom: 0px;}\
                        QTabWidget:tab-bar{alignment: right;}\
-                       QTabBar::tab{height: 25px; margin-right: 0px; margin-bottom:0px;}\
+                       QTabBar::tab{height: 25px; width:108; margin-right: 0px; margin-bottom:0px;}\
                        QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: #FFFFFF; border-top: 2px solid #0099FF; border-bottom: 2px solid #FFFFFF;}\
                        QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
                        QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
@@ -55,7 +55,7 @@ class AddTabWidget(QDialog):
         self.widget.assert_tab.signal[str].connect(self.recv_assert_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setFixedWidth(330)
+        self.setFixedWidth(440)
 
     # 接收action_tab传来的信号
     def recv_action_tab_signal(self, signal_str):
