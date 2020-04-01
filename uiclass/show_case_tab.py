@@ -54,6 +54,11 @@ class ShowCaseTab(QWidget):
         self.execute_button.setToolTip('批量执行case')
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_items)
+        # 停止执行
+        self.stop_button = QToolButton()
+        self.stop_button.setToolTip('停止执行case')
+        self.stop_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_stop + ')}')
+        self.stop_button.clicked.connect(self.connect_stop_execute_case)
         # 切换按钮(是否需要产生报告)
         self.switch_button = QToolButton()
         self.switch_button.setMinimumWidth(40)
@@ -79,6 +84,7 @@ class ShowCaseTab(QWidget):
         h_box.addWidget(self.delete_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
+        h_box.addWidget(self.stop_button)
         h_box.addWidget(self.switch_button)
         h_box.addWidget(self.execute_times_label)
         h_box.addWidget(self.execute_times_control)
@@ -200,25 +206,39 @@ class ShowCaseTab(QWidget):
             return
         self.signal.emit('ready_execute_case>')
         time.sleep(0.3)
+        # 停止执行标志位复位
+        GloVar.stop_execute_flag = False
+        # 开始执行
         for i in range(self.index+1):
             if self.case_control_list[i].check_box.checkState() == Qt.Checked:
                 # 根据执行次数执行
                 for x in range(execute_times):
                     while True:
-                        if GloVar.request_status == 'ok':
+                        if GloVar.request_status == 'ok' and GloVar.stop_execute_flag is False:
                             GloVar.request_status = None
                             dict_info_list = self.read_script_tag(i)
                             self.play_single_case(dict_info_list)
                             self.signal.emit('play_single_case>')
                             break
+                        # 退出case的执行
+                        elif GloVar.request_status == 'ok' and GloVar.stop_execute_flag is True:
+                            break
                         else:
                             time.sleep(0.002)
                         # 执行每一条case后cpu休息一秒钟
                         time.sleep(1)
+                    # 退出case的执行
+                    if GloVar.stop_execute_flag is True:
+                        break
+                # 退出case的执行
+                if GloVar.stop_execute_flag is True:
+                    break
         # 测试执行结束(改变标志位, 触发数据处理函数)
         while True:
             if GloVar.request_status == 'ok':
                 self.signal.emit('test_finished>')
+                # 退出case的执行标志位复位
+                GloVar.stop_execute_flag = False
                 break
             else:
                 time.sleep(0.02)
@@ -230,6 +250,10 @@ class ShowCaseTab(QWidget):
         # 获取执行次数
         execute_times = self.execute_times_control.value()
         Thread(target=self.execute_selected_items, args=(execute_times,)).start()
+
+    # 停止执行case
+    def connect_stop_execute_case(self):
+        GloVar.stop_execute_flag = True
 
     # 视频处理开关切换
     def connect_switch(self):

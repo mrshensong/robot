@@ -40,14 +40,14 @@ class GenerateReport:
                     '<table width="100%" border= "1px solid ' + self.chart_border_color + '" cellspacing="0">\n' \
                     '<tr height="50" align="center" style="font-weight: bold">\n' \
                     '<td width="10%"><font color="#606060">类型</font></td>\n' \
-                    '<td width="30%"><font color="#606060">用例</font></td>\n' \
-                    '<td width="5%"><font color="#606060">次数</font></td>\n' \
-                    '<td width="5%"><font color="#606060">标准(ms)</font></td>\n' \
-                    '<td width="10%"><font color="#606060">平均值(ms)</font></td>\n' \
-                    '<td width="10%"><font color="#606060">最大值(ms)</font></td>\n' \
-                    '<td width="10%"><font color="#606060">最小值(ms)</font></td>\n' \
-                    '<td width="10%"><font color="#606060">状态</font></td>\n' \
-                    '<td width="10%"><font color="#606060">重新测试(是/否)</font></td>\n' \
+                    '<td width="27%"><font color="#606060">用例</font></td>\n' \
+                    '<td width="9%"><font color="#606060">次数</font></td>\n' \
+                    '<td width="9%"><font color="#606060">标准(ms)</font></td>\n' \
+                    '<td width="9%"><font color="#606060">平均值(ms)</font></td>\n' \
+                    '<td width="9%"><font color="#606060">最大值(ms)</font></td>\n' \
+                    '<td width="9%"><font color="#606060">最小值(ms)</font></td>\n' \
+                    '<td width="9%"><font color="#606060">状态</font></td>\n' \
+                    '<td width="9%"><font color="#606060">重新测试(是/否)</font></td>\n' \
                     '</tr>\n'
         for key, data in self.data_dict.items():
             data_length = len(data)

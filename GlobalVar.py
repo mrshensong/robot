@@ -63,6 +63,8 @@ class GloVar:
     robot_action_take_back_flag = False
     # 退出所有线程标志
     exit_thread_flag = False
+    # 停止执行标志(当前有很多case正在执行, 需要停下来的时候, 改变此标志位)
+    stop_execute_flag = False
 
 
 # Icon路径
@@ -125,6 +127,7 @@ class IconPath:
     Icon_tab_widget_all_select = 'config/Icon/tab_widget_icon/all_select.png'
     Icon_tab_widget_all_un_select = 'config/Icon/tab_widget_icon/all_un_select.png'
     Icon_tab_widget_execute = 'config/Icon/tab_widget_icon/execute.png'
+    Icon_tab_widget_stop = 'config/Icon/tab_widget_icon/stop.png'
     Icon_tab_widget_import = 'config/Icon/tab_widget_icon/import.png'
     Icon_tab_widget_save = 'config/Icon/tab_widget_icon/save.png'
     Icon_tab_widget_draw_frame = 'config/Icon/tab_widget_icon/draw_frame.png'
@@ -141,6 +144,8 @@ class IconPath:
     Icon_main_tab_widget_close_tab_hover = 'config/Icon/main_tab_widget_icon/close_tab_hover.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
+    # case停止执行
+    Icon_stop_execute = 'config/Icon/total_toolbar_icon/stop_execute.png'
     # 照片图标
     Icon_picture = 'config/Icon/other_icon/picture.png'
 

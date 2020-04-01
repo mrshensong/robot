@@ -229,7 +229,8 @@ class ShowActionTab(QWidget):
         if self.index < 0:
             pass
         else:
-            Thread(target=self.delete_selected_items, args=()).start()
+            # Thread(target=self.delete_selected_items, args=()).start()
+            self.delete_selected_items()
 
     # 全部选中或者全部不选中items
     def select_or_un_select_all_items(self):

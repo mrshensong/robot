@@ -165,10 +165,10 @@ class UiMainWindow(QMainWindow):
         self.live_video_toolbar_label = QLabel(self)
         self.live_video_toolbar_label.setText('实时流:')
         self.live_video_toolbar_label.setStyleSheet('color:#0099FF')
-        self.live_video_setting_action               = QAction(QIcon(IconPath.Icon_live_video_setting), '设置', self)
-        self.live_video_switch_camera_status_action  = QAction(QIcon(IconPath.Icon_live_video_open_camera), '打开摄像头', self)
-        self.live_video_capture_action               = QAction(QIcon(IconPath.Icon_live_video_capture), '保存当前帧图像', self)
-        self.live_video_box_screen_action            = QAction(QIcon(IconPath.Icon_live_video_box_screen), '框选车机屏幕', self)
+        self.live_video_setting_action = QAction(QIcon(IconPath.Icon_live_video_setting), '设置', self)
+        self.live_video_switch_camera_status_action = QAction(QIcon(IconPath.Icon_live_video_open_camera), '打开摄像头', self)
+        self.live_video_capture_action = QAction(QIcon(IconPath.Icon_live_video_capture), '保存当前帧图像', self)
+        self.live_video_box_screen_action = QAction(QIcon(IconPath.Icon_live_video_box_screen), '框选车机屏幕', self)
         # 绑定触发函数
         self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
         self.live_video_capture_action.triggered.connect(self.screen_shot)
@@ -178,14 +178,14 @@ class UiMainWindow(QMainWindow):
         self.robot_toolbar_label = QLabel(self)
         self.robot_toolbar_label.setText('机械臂:')
         self.robot_toolbar_label.setStyleSheet('color:#0099FF')
-        self.robot_click_action        = QAction(QIcon(IconPath.Icon_robot_click), '单击', self)
+        self.robot_click_action = QAction(QIcon(IconPath.Icon_robot_click), '单击', self)
         self.robot_double_click_action = QAction(QIcon(IconPath.Icon_robot_double_click), '双击', self)
-        self.robot_long_click_action   = QAction(QIcon(IconPath.Icon_robot_long_click), '长按', self)
-        self.robot_slide_action        = QAction(QIcon(IconPath.Icon_robot_slide), '滑动', self)
-        self.robot_lock_action         = QAction(QIcon(IconPath.Icon_robot_lock), '锁定机械臂', self)
-        self.robot_unlock_action       = QAction(QIcon(IconPath.Icon_robot_unlock), '解锁机械臂', self)
+        self.robot_long_click_action = QAction(QIcon(IconPath.Icon_robot_long_click), '长按', self)
+        self.robot_slide_action = QAction(QIcon(IconPath.Icon_robot_slide), '滑动', self)
+        self.robot_lock_action = QAction(QIcon(IconPath.Icon_robot_lock), '锁定机械臂', self)
+        self.robot_unlock_action = QAction(QIcon(IconPath.Icon_robot_unlock), '解锁机械臂', self)
         self.robot_get_base_position_action = QAction(QIcon(IconPath.Icon_robot_get_base_position), '获取机械臂当前位置', self)
-        self.robot_with_record_action  = QAction(QIcon(IconPath.Icon_robot_with_record), '录制脚本', self)
+        self.robot_with_record_action = QAction(QIcon(IconPath.Icon_robot_with_record), '录制脚本', self)
         self.robot_restart_action = QAction(QIcon(IconPath.Icon_robot_restart), '重新连接机械臂', self)
         # 绑定触发函数
         self.robot_click_action.triggered.connect(lambda: self.uArm_action_event(RobotArmAction.uArm_click))
@@ -202,7 +202,7 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar_label.setText('本地视频:')
         self.local_video_toolbar_label.setStyleSheet('color:#0099FF')
         self.local_video_import_video_action = QAction(QIcon(IconPath.Icon_local_import_video), '导入视频', self)
-        self.local_video_setting_action      = QAction(QIcon(IconPath.Icon_local_video_setting), '设置', self)
+        self.local_video_setting_action = QAction(QIcon(IconPath.Icon_local_video_setting), '设置', self)
         self.local_video_setting_action.setEnabled(False)
         # 绑定函数
         self.local_video_import_video_action.triggered.connect(lambda : self.import_local_video(None))
@@ -481,6 +481,10 @@ class UiMainWindow(QMainWindow):
                 # 视频路径不存在(即没有产生视频, 不用进行数据处理)
                 if os.path.exists(video_path) is False:
                     Logger('此次测试没有产生视频, 不用进行数据处理!')
+                    # 通过模拟点击来恢复实时流(达到稳定帧率的目的, 需要先使能视频状态按钮)
+                    self.main_show_tab_widget.video_tab.video_label.status_video_button.setEnabled(True)
+                    self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+                    self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
                     return
                 Logger('此次测试完成, 开始进行数据处理!')
                 # 调用数据处理函数
