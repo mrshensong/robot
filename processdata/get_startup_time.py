@@ -31,12 +31,11 @@ class GetStartupTime:
         self.videos_list = []
 
     def match_template(self, source_img, target_img):
-        '''
+        """
         :param source_img: 源图像(大图)
         :param target_img: 靶子图像(小图)
-        :param match_rate: 匹配率
         :return:
-        '''
+        """
         if type(source_img) is str:
             source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
         if type(target_img) is str:
@@ -172,6 +171,7 @@ class GetStartupTime:
     # 处理一条case(可能含有多次执行产生的多个视频, 传入的参数为产生的这些视频的当前目录路径)
     def process_case(self, video_name_path):
         video_count = 0
+        video_valid_count = 0
         video_info_list = []
         video_files = os.listdir(video_name_path)
         case_name = video_name_path.split('/')[-1]
@@ -197,12 +197,26 @@ class GetStartupTime:
                 # video_info_list.append(video_info)
                 # 根据视频名的数字插入info(确保视频的先后顺序和info对应)
                 video_info_list.insert(int(file_text), video_info)
-                sum_frame_gap += int(video_info['差帧'])
-        average_frame_gap = int(sum_frame_gap / video_count)
-        average_time_gap = int((sum_frame_gap * (1000 / 120)) / video_count)
-        status = 'failed' if average_time_gap > standard_time_gap else 'pass'
+                if video_info['开始帧'] != 1 and video_info['结束帧'] != 1 and video_info['开始帧'] != video_info['结束帧']:
+                    video_valid_count += 1
+                    sum_frame_gap += int(video_info['差帧'])
+        # 避免分母为0的情况
+        if sum_frame_gap == 0:
+            video_valid_count = 1
+        average_frame_gap = int(sum_frame_gap / video_valid_count)
+        average_time_gap = int((sum_frame_gap * (1000 / 120)) / video_valid_count)
+        # 获取状态
+        if average_frame_gap == 0:
+            status = 'error'
+        else:
+            if average_time_gap > standard_time_gap:
+                status = 'failed'
+            else:
+                status = 'pass'
+        # 当前case中有某次计算出异常的问题, 判断是否需要重新测试
+        retest_flag = 'NO' if video_count == video_valid_count else 'YES'
         # 返回的信息跟excel模型相似(列表第一个参数代表case类型, 也就是sheet名字)
-        return [case_name, video_count, video_info_list, standard_frame_gap, standard_time_gap, average_frame_gap, average_time_gap, status]
+        return [case_name, video_count, video_info_list, standard_frame_gap, standard_time_gap, average_frame_gap, average_time_gap, status, retest_flag]
 
     # 获取起止点以及对应匹配率等等
     def get_all_video_start_and_end_points(self):
@@ -244,13 +258,13 @@ class GetStartupTime:
             # 创建sheet表
             work_sheet = work_book.create_sheet(key)
             # 创建表头
-            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧', '标准耗时', '平均差帧', '平均耗时', '状态']
+            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧', '标准耗时', '平均差帧', '平均耗时', '状态', '重新测试']
             work_sheet.append(head)
             # 表头背景颜色
             for i in range(1, len(head)+1):
                 work_sheet.cell(1, i).alignment = align
                 work_sheet.cell(1, i).fill = gray_background
-            # 当前可用行号
+            # 当前可用行号(第二行可用)
             current_row = 2
             # 背景颜色根据此数来确定(奇数为yellow, 偶数为green)
             background_color_select_num = 1
@@ -337,6 +351,11 @@ class GetStartupTime:
             else:
                 background_color = PatternFill("solid", fgColor=colors.GREEN)
             sheet.cell(current_row, 14).fill = background_color
+            # 是否需要重新测试
+            sheet.merge_cells('O' + str(current_row) + ':' + 'O' + str(next_current_row - 1))
+            sheet.cell(current_row, 15).value = case_data[8]
+            sheet.cell(current_row, 15).alignment = align
+            sheet.cell(current_row, 13).fill = background_color
         # 只有执行了一次的数据
         else:
             sheet.cell(current_row, 1).value = case_data[0]
@@ -385,6 +404,9 @@ class GetStartupTime:
             else:
                 background_color = PatternFill("solid", fgColor=colors.GREEN)
             sheet.cell(current_row, 14).fill = background_color
+            sheet.cell(current_row, 15).value = case_data[8]
+            sheet.cell(current_row, 15).alignment = align
+            sheet.cell(current_row, 15).fill = background_color
         return next_current_row
 
     # 通过excel获取柱形图

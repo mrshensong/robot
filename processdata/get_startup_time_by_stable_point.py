@@ -32,14 +32,13 @@ class GetStartupTime:
         # 待处理的视频列表
         self.videos_list = []
 
-
     def match_template(self, source_img, target_img):
-        '''
+        """
         :param source_img: 源图像(大图)
         :param target_img: 靶子图像(小图)
         :param match_rate: 匹配率
         :return:
-        '''
+        """
         if type(source_img) is str:
             source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
         if type(target_img) is str:
@@ -52,8 +51,6 @@ class GetStartupTime:
         min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
         # 返回最大匹配率
         return max_threshold
-
-
 
     def get_start_and_end_match_threshold(self, end_mask, video_file):
         """
@@ -158,7 +155,6 @@ class GetStartupTime:
         video_cap.release()
         return start_point_result, end_point_result
 
-
     def detect_start_point(self, start_threshold_list):
         """
         计算起点(返回可能是起点的所有帧序号, 以及当前帧匹配率)
@@ -174,7 +170,6 @@ class GetStartupTime:
                 frame_threshold = start_threshold_list[i]
                 break
         return frame_serial_number, frame_threshold
-
 
     def detect_end_point(self, end_threshold_list):
         """
