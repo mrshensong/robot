@@ -11,6 +11,8 @@ class GloVar:
     correction_model_path = 'config/calibrate/calibrate_1600x1000.npz'
     # 文件系统需要调用中文文件
     qt_zh_CN_file_path = 'config/translations/qt_zh_CN.qm'
+    # adb路径
+    adb_command = 'config/platform-tools/adb'
     # 当前工程根目录
     project_path = None
     # 当前工程产生视频目录

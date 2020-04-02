@@ -1,3 +1,4 @@
+import os
 import cv2
 import time
 import numpy as np
@@ -274,25 +275,9 @@ class ArmAction:
                     Logger('预期界面-->匹配正确')
                 else:
                     Logger('预期界面-->匹配错误')
-                    # 需要重复的动作
-                    again_action = []
-                    for index in range(i-1, -1, -1):
-                        if action_list[index]['execute_action'] == 'motion_action':
-                            again_action = action_list[index]
-                            break
-                    if len(again_action) > 0:
-                        for current_times in range(3):
-                            self.play_motion_action(again_action)
-                            time.sleep(1)
-                            go_down_flag = self.play_assert_action(action)
-                            if go_down_flag is True:
-                                break
-                        if current_times == 2 and go_down_flag is False:
-                            print('当前case执行失败')
-                            break
-                    else:
-                        print('当前case执行失败')
-                        break
+                    # 恢复app到桌面
+                    package = self.get_current_package_name()
+                    self.restore_app(package)
             elif action['execute_action'] == 'sleep_action':
                 self.play_sleep_action(action)
                 time.sleep(0.2)
@@ -318,6 +303,18 @@ class ArmAction:
         # 返回最大匹配率
         return max_threshold
 
+    # 获取当前包名
+    @staticmethod
+    def get_current_package_name():
+        result = os.popen(GloVar.adb_command + 'shell dumpsys window | findstr mCurrentFocus')
+        current_package = result.split('}')[0].split('/')[0].split(' ')[-1]
+        return current_package
+
+    # 恢复当前app到初始状态
+    @staticmethod
+    def restore_app(package):
+        os.popen(GloVar.adb_command + 'shell am force-stop ' + package)
+        time.sleep(1)
 
 '''传入的样例'''
 # start / start>actions /start>D:/Code/robot/case/测试/滑动测试.xml(三种形式分别:单个action/选中的多个actions/一条case)
