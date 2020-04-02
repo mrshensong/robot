@@ -38,6 +38,8 @@ class GenerateDataGraph:
         pass_font_color = '#18C0A8'
         # failed字体颜色
         failed_font_color = '#FF3030'
+        # error字体颜色
+        error_font_color = '#CC6699'
         # 画布大小根据case数量来
         fig = plt.figure(figsize=(12, case_num + 2), facecolor=background_color)
         # 设置图表内背景(垂直填充颜色, 输入x轴起始和停止坐标即可填充颜色)
@@ -64,7 +66,9 @@ class GenerateDataGraph:
         for num, status in enumerate(status_list):
             if status == 'failed':
                 plt.text(chart_width - 40, num - 0.1, 'failed', size=16, color=failed_font_color, ha='center', va='bottom')
-            else:
+            elif status == 'error':
+                plt.text(chart_width - 40, num - 0.1, 'error', size=16, color=error_font_color, ha='center', va='bottom')
+            elif status == 'pass':
                 plt.text(chart_width - 40, num - 0.1, 'pass', size=16, color=pass_font_color, ha='center', va='bottom')
         # 获取图片title
         title = file_name.split('/')[-1].split('.')[0]

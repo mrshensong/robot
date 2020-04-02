@@ -206,7 +206,7 @@ class GetStartupTime:
         average_frame_gap = int(sum_frame_gap / video_valid_count)
         average_time_gap = int((sum_frame_gap * (1000 / 120)) / video_valid_count)
         # 获取状态
-        if average_frame_gap == 0:
+        if average_frame_gap == 0 or video_valid_count < video_count:
             status = 'error'
         else:
             if average_time_gap > standard_time_gap:
@@ -214,7 +214,7 @@ class GetStartupTime:
             else:
                 status = 'pass'
         # 当前case中有某次计算出异常的问题, 判断是否需要重新测试
-        retest_flag = 'NO' if video_count == video_valid_count else 'YES'
+        retest_flag = 'YES' if status == 'error' else 'NO'
         # 返回的信息跟excel模型相似(列表第一个参数代表case类型, 也就是sheet名字)
         return [case_name, video_count, video_info_list, standard_frame_gap, standard_time_gap, average_frame_gap, average_time_gap, status, retest_flag]
 
@@ -288,7 +288,7 @@ class GetStartupTime:
         # 如果执行了多次
         if occupied_row > 1:
             # 合并用例
-            sheet.merge_cells('A'+str(current_row) +':' +'A'+str(next_current_row -1))
+            sheet.merge_cells('A'+str(current_row) + ':' + 'A' +str(next_current_row -1))
             # case名
             sheet.cell(current_row, 1).value = case_data[0]
             sheet.cell(current_row, 1).alignment = align
@@ -348,7 +348,9 @@ class GetStartupTime:
             sheet.cell(current_row, 14).alignment = align
             if case_data[7] == 'failed':
                 background_color = PatternFill("solid", fgColor=colors.RED)
-            else:
+            elif case_data[7] == 'error':
+                background_color = PatternFill("solid", fgColor=colors.BLUE)
+            elif case_data[7] == 'pass':
                 background_color = PatternFill("solid", fgColor=colors.GREEN)
             sheet.cell(current_row, 14).fill = background_color
             # 是否需要重新测试
@@ -401,7 +403,9 @@ class GetStartupTime:
             sheet.cell(current_row, 14).alignment = align
             if case_data[7] == 'failed':
                 background_color = PatternFill("solid", fgColor=colors.RED)
-            else:
+            elif case_data[7] == 'error':
+                background_color = PatternFill("solid", fgColor=colors.BLUE)
+            elif case_data[7] == 'pass':
                 background_color = PatternFill("solid", fgColor=colors.GREEN)
             sheet.cell(current_row, 14).fill = background_color
             sheet.cell(current_row, 15).value = case_data[8]

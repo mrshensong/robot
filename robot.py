@@ -212,8 +212,8 @@ class UiMainWindow(QMainWindow):
         self.data_process_toolbar_label.setText('数据处理:')
         self.data_process_toolbar_label.setStyleSheet('color:#0099FF')
         self.data_process_import_video_action = QAction(QIcon(IconPath.Icon_data_process_import_video), '导入视频', self)
-        self.data_process_setting_action      = QAction(QIcon(IconPath.Icon_data_process_setting), '设置', self)
-        self.data_process_execute_action      = QAction(QIcon(IconPath.Icon_data_process_execute), '计算数据', self)
+        self.data_process_setting_action = QAction(QIcon(IconPath.Icon_data_process_setting), '设置', self)
+        self.data_process_execute_action = QAction(QIcon(IconPath.Icon_data_process_execute), '计算数据', self)
         self.data_process_setting_action.setEnabled(False)
         self.data_process_execute_action.setEnabled(False)
         # 绑定函数

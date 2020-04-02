@@ -58,8 +58,15 @@ class GenerateReport:
                 time_consume_min_value = min(time_consume_list)
                 if data[i][7] == 'failed':
                     result_color = '#FF3030'
-                else:
+                elif data[i][7] == 'error':
+                    result_color = '#CC6699'
+                elif data[i][7] == 'pass':
                     result_color = '#18C0A8'
+                # 是否重新测试颜色(YES/NO)
+                if data[i][8] == 'YES':
+                    retest_text_color = '#FF3030'
+                elif data[i][8] == 'NO':
+                    retest_text_color = '#18C0A8'
                 # 第一个需要合并单元格(展示测试类型)
                 if i == 0:
                     html_chat += '<tr height="30" align="center">\n' \
@@ -71,7 +78,7 @@ class GenerateReport:
                                  '<td><font color="#0078C0">' + str(time_consume_max_value) +'</font></td>\n' \
                                  '<td><font color="#996699">' + str(time_consume_min_value) +'</font></td>\n' \
                                  '<td style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' \
-                                 '<td><font color="#996699">' + str(data[i][8]) + '</font></td>\n' \
+                                 '<td><font color="' + retest_text_color + '">' + str(data[i][8]) + '</font></td>\n' \
                                  '</tr>\n'
                 else:
                     html_chat += '<tr height="30" align="center">\n' \
@@ -82,7 +89,7 @@ class GenerateReport:
                                  '<td><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' \
                                  '<td><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' \
                                  '<td style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' \
-                                 '<td><font color="#996699">' + str(data[i][8]) + '</font></td>\n' \
+                                 '<td><font color="' + retest_text_color + '">' + str(data[i][8]) + '</font></td>\n' \
                                  '</tr>\n'
         html_chat += '</table>\n'
         return html_chat
