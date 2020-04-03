@@ -1,4 +1,5 @@
 import os
+import re
 import cv2
 import time
 import numpy as np
@@ -277,19 +278,23 @@ class ArmAction:
                     Logger('预期界面-->匹配错误')
                     # 恢复app到桌面
                     package = self.get_current_package_name()
-                    self.restore_app(package)
+                    if package is not None:
+                        self.restore_app(package)
+                        Logger('恢复当前app为默认状态-->跳出本次测试, 进入下次测试')
+                    else:
+                        Logger('跳出本次测试, 进入下次测试')
+                    break
             elif action['execute_action'] == 'sleep_action':
                 self.play_sleep_action(action)
                 time.sleep(0.2)
 
     # 断言操作需要用到的模板匹配
     def match_template(self, source_img, target_img):
-        '''
+        """
         :param source_img: 源图像(大图)
         :param target_img: 靶子图像(小图)
-        :param match_rate: 匹配率
         :return:
-        '''
+        """
         if type(source_img) is str:
             source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
         if type(target_img) is str:
@@ -307,7 +312,13 @@ class ArmAction:
     @staticmethod
     def get_current_package_name():
         result = os.popen(GloVar.adb_command + 'shell dumpsys window | findstr mCurrentFocus')
-        current_package = result.split('}')[0].split('/')[0].split(' ')[-1]
+        current_package = None
+        # 匹配包名
+        pattern = re.compile(r'mCurrentFocus=Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
+        package_list = pattern.findall(str(result))
+
+        if len(package_list) > 0:
+            current_package = package_list[0].split(' ')[-1].split('/')[0]
         return current_package
 
     # 恢复当前app到初始状态
