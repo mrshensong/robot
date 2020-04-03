@@ -77,9 +77,9 @@ class ShowActionTab(QWidget):
         self.execute_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_execute + ')}')
         self.execute_button.clicked.connect(self.connect_execute_selected_actions)
         self.save_script_tag_button = QToolButton()
-        self.save_script_tag_button.setToolTip('保存为case')
+        self.save_script_tag_button.setToolTip('case另存为')
         self.save_script_tag_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_save + ')}')
-        self.save_script_tag_button.clicked.connect(self.connect_save_script_tag)
+        self.save_script_tag_button.clicked.connect(lambda : self.connect_save_script_tag(save_as_flag=True))
         self.draw_frame_button = QToolButton()
         self.draw_frame_button.setShortcut('q')
         self.draw_frame_button.setToolTip('框选视频对比模板')
@@ -299,11 +299,9 @@ class ShowActionTab(QWidget):
         Thread(target=self.execute_selected_actions, args=()).start()
 
     # 保存标签工具栏操作(save_button)
-    def connect_save_script_tag(self):
+    def connect_save_script_tag(self, save_as_flag=False):
         script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
-        if len(self.case_absolute_name) > 0:
-            xml_file = self.case_absolute_name
-        else:
+        if save_as_flag is True or len(self.case_absolute_name) == 0:
             filename = QFileDialog.getSaveFileName(self, '保存case', script_path, 'script file(*.xml)', options=QFileDialog.DontUseNativeDialog)
             xml_file = filename[0]
             if xml_file:
@@ -314,6 +312,8 @@ class ShowActionTab(QWidget):
             else:
                 Logger('[取消保存脚本标签!]')
                 return
+        elif len(self.case_absolute_name) > 0:
+            xml_file = self.case_absolute_name
         current_path = '/'.join(xml_file.split('/')[:-1])
         if current_path != script_path:
             Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=current_path)
@@ -657,21 +657,6 @@ class ShowActionTab(QWidget):
         self.index -= 1
         # 自动保存
         self.connect_save_script_tag()
-        # 发送需要显示的脚本标签
-        if len(self.tag_list) > 0:
-            GloVar.actions_saved_to_case = False
-            self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
-        else:
-            self.signal.emit('write_script_tag>')
-            self.case_file_name = ''
-            self.case_absolute_name = ''
-            GloVar.actions_saved_to_case = True
-        if self.case_file_name == '':  # 空白新建action
-            WindowStatus.action_tab_status = '空白!'
-            self.des_text.setText('空白')
-        else:  # case新增action
-            WindowStatus.action_tab_status = '%s>有改动!' % self.case_absolute_name
-            self.des_text.setText(self.case_file_name)
 
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
     def str_decorate(self, origin_str, decorate_str='[]'):
@@ -685,12 +670,12 @@ class ShowActionTab(QWidget):
         leave = str(info_dict[MotionAction.leave])
         trigger = str(info_dict[MotionAction.trigger])
         points = str(tuple(info_dict[MotionAction.points]))
-        tag = '\t<action '+MotionAction.des_text+'="' + des_text + '">\n'+\
-              '\t\t' + '<param name="'+MotionAction.action_type+'">' +action_type+ '</param>\n'+\
-              '\t\t' + '<param name="'+MotionAction.points+'">' +points+ '</param>\n'+\
-              '\t\t' + '<param name="'+MotionAction.speed+'">' +speed+ '</param>\n'+\
-              '\t\t' + '<param name="'+MotionAction.leave+'">' +leave+ '</param>\n'+\
-              '\t\t' + '<param name="'+MotionAction.trigger+'">' +trigger+ '</param>\n'+\
+        tag = '\t<action '+MotionAction.des_text+'="' + des_text + '">\n' + \
+              '\t\t' + '<param name="'+MotionAction.action_type+'">' + action_type + '</param>\n' + \
+              '\t\t' + '<param name="'+MotionAction.points+'">' + points + '</param>\n' + \
+              '\t\t' + '<param name="'+MotionAction.speed+'">' + speed + '</param>\n' + \
+              '\t\t' + '<param name="'+MotionAction.leave+'">' + leave + '</param>\n' + \
+              '\t\t' + '<param name="'+MotionAction.trigger+'">' + trigger + '</param>\n' + \
               '\t</action>\n'
         return tag
 

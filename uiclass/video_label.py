@@ -1095,7 +1095,6 @@ class VideoLabel(QLabel):
                                 mask_path = mask_path
                             if os.path.exists(mask_path) is False:
                                 os.makedirs(mask_path)
-
                             # 如果是框选数据匹配模板的话(框选模板保存为灰度图)
                             if GloVar.draw_frame_flag == GloVar.result_template:
                                 # 将模板灰度化/并在模板起始位置打标记

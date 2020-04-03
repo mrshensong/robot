@@ -114,12 +114,13 @@ class ShowCaseTab(QWidget):
                 case_folder = os.path.split(files[0])[0]
                 if case_folder != script_path:
                     Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=case_folder)
-
                 # 文件去重
                 files = self.case_file_list + files
                 files = list(set(files))
                 # 文件按照时间排序(倒序排列)
-                files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
+                # files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
+                # 文件逆序排列(保证加入的case顺序正确, 按照case名排序)
+                files = sorted(files, reverse=False)
                 self.clear_all_items()
                 for file in files:
                     self.add_item(file)
