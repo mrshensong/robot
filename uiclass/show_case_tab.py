@@ -2,11 +2,12 @@ import os
 import time
 import xml.etree.cElementTree as ET
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QToolButton, QListWidgetItem, QSpinBox, QLabel, QLineEdit, QFrame
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import IconPath, Logger, GloVar, WindowStatus, Profile, MotionAction, RecordAction, AssertAction, SleepAction, RobotArmParam, BeautifyStyle
 from uiclass.controls import CaseControl
+
 
 class ShowCaseTab(QWidget):
 
@@ -34,11 +35,15 @@ class ShowCaseTab(QWidget):
 
 
     def case_tab_init(self):
+        self.new_button = QToolButton()
+        self.new_button.setToolTip('新建case')
+        self.new_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_new + ')}')
+        self.new_button.clicked.connect(self.connect_new_button)
         # 添加case
-        self.add_button = QToolButton()
-        self.add_button.setToolTip('添加case')
-        self.add_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_add + ')}')
-        self.add_button.clicked.connect(lambda : self.connect_import_button(None))
+        self.import_button = QToolButton()
+        self.import_button.setToolTip('添加case')
+        self.import_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_import + ')}')
+        self.import_button.clicked.connect(lambda : self.connect_import_button(None))
         # 批量删除case
         self.delete_button = QToolButton()
         self.delete_button.setToolTip('批量删除case')
@@ -80,7 +85,8 @@ class ShowCaseTab(QWidget):
         # 布局
         h_box = QHBoxLayout()
         h_box.setSpacing(5)
-        h_box.addWidget(self.add_button)
+        h_box.addWidget(self.new_button)
+        h_box.addWidget(self.import_button)
         h_box.addWidget(self.delete_button)
         h_box.addWidget(self.select_all_button)
         h_box.addWidget(self.execute_button)
@@ -102,6 +108,25 @@ class ShowCaseTab(QWidget):
         v_box.addSpacing(3)
         v_box.addWidget(self.list_widget)
         self.setLayout(v_box)
+
+    # 连接新建case按钮
+    def connect_new_button(self):
+        script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
+        filename = QFileDialog.getSaveFileName(self, '保存case', script_path, 'script file(*.xml)',
+                                               options=QFileDialog.DontUseNativeDialog)
+        xml_file = filename[0]
+        if xml_file:
+            if xml_file.endswith('.xml'):
+                xml_file = xml_file
+            else:
+                xml_file = xml_file + '.xml'
+            current_path = '/'.join(xml_file.split('/')[:-1])
+            if current_path != script_path:
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path',
+                        value=current_path)
+            self.connect_import_button(case_file=xml_file)
+        else:
+            Logger('[未新建case!]')
 
     # 连接导入case按钮
     def connect_import_button(self, case_file=None):
@@ -136,7 +161,9 @@ class ShowCaseTab(QWidget):
             files = list(set(files))
             self.clear_all_items()
             # 文件按照时间排序(倒序排列)
-            files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
+            # files = sorted(files, key=lambda file: os.path.getmtime(file), reverse=True)
+            # 文件逆序排列(保证加入的case顺序正确, 按照case名排序)
+            files = sorted(files, reverse=False)
             for file in files:
                 self.add_item(file)
 

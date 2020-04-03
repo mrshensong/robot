@@ -12,7 +12,7 @@ class GloVar:
     # 文件系统需要调用中文文件
     qt_zh_CN_file_path = 'config/translations/qt_zh_CN.qm'
     # adb路径
-    adb_command = 'config/platform-tools/adb'
+    adb_command = r'config\platform-tools\adb.exe'
     # 当前工程根目录
     project_path = None
     # 当前工程产生视频目录
@@ -122,6 +122,7 @@ class IconPath:
     Icon_custom_video_camera = 'config/Icon/custom_widget_icon/video_camera.png'
     Icon_custom_sleep = 'config/Icon/custom_widget_icon/sleep.png'
     Icon_custom_case = 'config/Icon/custom_widget_icon/case.png'
+    Icon_tab_widget_new = 'config/Icon/tab_widget_icon/new.png'
     Icon_tab_widget_add = 'config/Icon/tab_widget_icon/add.png'
     Icon_tab_widget_delete = 'config/Icon/tab_widget_icon/delete.png'
     Icon_tab_widget_insert_above = 'config/Icon/tab_widget_icon/insert_above.png'

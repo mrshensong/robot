@@ -271,6 +271,7 @@ class ArmAction:
                 self.play_record_action(action)
                 time.sleep(0.2)
             elif action['execute_action'] == 'assert_action':
+                time.sleep(1)
                 go_down_flag = self.play_assert_action(action)
                 if go_down_flag is True:
                     Logger('预期界面-->匹配正确')
@@ -311,12 +312,11 @@ class ArmAction:
     # 获取当前包名
     @staticmethod
     def get_current_package_name():
-        result = os.popen(GloVar.adb_command + 'shell dumpsys window | findstr mCurrentFocus')
+        result = os.popen(GloVar.adb_command + ' shell dumpsys window | findstr mCurrentFocus').read()
         current_package = None
         # 匹配包名
         pattern = re.compile(r'mCurrentFocus=Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
         package_list = pattern.findall(str(result))
-
         if len(package_list) > 0:
             current_package = package_list[0].split(' ')[-1].split('/')[0]
         return current_package
@@ -324,7 +324,10 @@ class ArmAction:
     # 恢复当前app到初始状态
     @staticmethod
     def restore_app(package):
-        os.popen(GloVar.adb_command + 'shell am force-stop ' + package)
+        if package.startswith('com.chehejia'):
+            os.popen(GloVar.adb_command + ' shell pm clear ' + package)
+        else:
+            os.popen(GloVar.adb_command + ' shell am force-stop ' + package)
         time.sleep(1)
 
 '''传入的样例'''

@@ -394,6 +394,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index, self.generate_action_tag(info_dict))
             elif item_type == 'record':
                 self.tag_list.insert(self.insert_item_index, self.generate_record_tag(info_dict))
+            elif item_type == 'assert':
+                self.tag_list.insert(self.insert_item_index, self.generate_assert_tag(info_dict))
             elif item_type == 'sleep':
                 self.tag_list.insert(self.insert_item_index, self.generate_sleep_tag(info_dict))
             # 重新拍每个custom_control_list的id
@@ -410,6 +412,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_action_tag(info_dict))
             elif item_type == 'record':
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_record_tag(info_dict))
+            elif item_type == 'assert':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_assert_tag(info_dict))
             elif item_type == 'sleep':
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_sleep_tag(info_dict))
             # 重新拍每个custom_control_list的id
@@ -493,7 +497,15 @@ class ShowActionTab(QWidget):
 
     # 插入assert断言动作
     def insert_assert_item(self, info_dict):
-        pass
+        # 给record动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 90))
+        obj = AssertControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_assert_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='assert')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
 
     # 添加sleep动作控件
     def add_sleep_item(self, info_dict, new_control_flag=True):
