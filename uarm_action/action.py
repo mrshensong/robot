@@ -207,6 +207,9 @@ class ArmAction:
     def play_assert_action(self, info_dict):
         data = info_dict
         template_image = data[AssertAction.assert_template_name]
+        if os.path.exists(template_image) is False:
+            Logger('预期模板不存在: ' + template_image)
+            return False
         target_image = GloVar.camera_image.copy()
         # 获取模板的灰度图
         template_image = cv2.imdecode(np.fromfile(template_image, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
@@ -214,8 +217,10 @@ class ArmAction:
         # 模板匹配
         threshold = self.match_template(target_image, template_image)
         if threshold > 0.95:
+            Logger('预期界面-->匹配正确')
             return True
         else:
+            Logger('预期界面-->匹配错误')
             return False
 
     # 延时动作
@@ -274,9 +279,8 @@ class ArmAction:
                 time.sleep(1)
                 go_down_flag = self.play_assert_action(action)
                 if go_down_flag is True:
-                    Logger('预期界面-->匹配正确')
+                    pass
                 else:
-                    Logger('预期界面-->匹配错误')
                     # 恢复app到桌面
                     package = self.get_current_package_name()
                     if package is not None:

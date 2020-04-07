@@ -35,7 +35,7 @@ class AddAssertTab(QWidget):
         self.start_select_assert_template.stateChanged.connect(self.connect_select_assert_template)
         # 视频名称
         self.template_name_edit = QLineEdit(self)
-        template_name = MergePath([GloVar.project_picture_path, 'assert', self.case_name, AssertAction.assert_template_name]).merged_path
+        template_name = MergePath([GloVar.project_picture_path, 'assert', AssertAction.assert_template_name]).merged_path
         self.template_name_edit.setPlaceholderText(template_name)
         self.template_name_edit.setEnabled(False)
         # 表单布局

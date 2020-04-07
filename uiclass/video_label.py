@@ -979,6 +979,7 @@ class VideoLabel(QLabel):
                     default_name = RecordAction.current_video_type + '/' + RecordAction.current_video_name
                 elif GloVar.draw_frame_flag == GloVar.assert_template:
                     mask_path = GloVar.mask_path
+                    # 获取断言模板图片名字
                     default_name = GloVar.assert_template
                 else:
                     # 接收模板路径
