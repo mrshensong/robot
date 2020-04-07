@@ -2,6 +2,7 @@ import os
 import re
 import cv2
 import time
+import subprocess
 import numpy as np
 from uarm_action.uarm import SwiftAPI
 from GlobalVar import Logger
@@ -313,10 +314,19 @@ class ArmAction:
         # 返回最大匹配率
         return max_threshold
 
-    # 获取当前包名
+    # 执行adb命令
     @staticmethod
-    def get_current_package_name():
-        result = os.popen(GloVar.adb_command + ' shell dumpsys window | findstr mCurrentFocus').read()
+    def execute_adb_command(command):
+        pi = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pi.wait()
+        stdout = pi.stdout.read()
+        stdout = stdout.decode('gbk', 'ignore')
+        return stdout
+
+    # 获取当前包名
+    def get_current_package_name(self):
+        command = GloVar.adb_command + ' shell dumpsys window | findstr mCurrentFocus'
+        result = self.execute_adb_command(command)
         current_package = None
         # 匹配包名
         pattern = re.compile(r'mCurrentFocus=Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
@@ -326,12 +336,12 @@ class ArmAction:
         return current_package
 
     # 恢复当前app到初始状态
-    @staticmethod
-    def restore_app(package):
+    def restore_app(self, package):
         if package.startswith('com.chehejia'):
-            os.popen(GloVar.adb_command + ' shell pm clear ' + package)
+            command = GloVar.adb_command + ' shell pm clear ' + package
         else:
-            os.popen(GloVar.adb_command + ' shell am force-stop ' + package)
+            command = GloVar.adb_command + ' shell am force-stop ' + package
+        self.execute_adb_command(command)
         time.sleep(1)
 
 '''传入的样例'''
