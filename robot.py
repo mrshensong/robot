@@ -172,11 +172,13 @@ class UiMainWindow(QMainWindow):
         self.live_video_switch_camera_status_action = QAction(QIcon(IconPath.Icon_live_video_open_camera), '打开摄像头', self)
         self.live_video_capture_action = QAction(QIcon(IconPath.Icon_live_video_capture), '保存当前帧图像', self)
         self.live_video_box_screen_action = QAction(QIcon(IconPath.Icon_live_video_box_screen), '框选车机屏幕', self)
+        self.live_video_reload_action = QAction(QIcon(IconPath.Icon_live_video_reload), '重新加载摄像头', self)
         # 绑定触发函数
         self.live_video_switch_camera_status_action.triggered.connect(self.switch_camera_status)
         self.live_video_capture_action.triggered.connect(self.screen_shot)
         self.live_video_box_screen_action.triggered.connect(self.box_screen)
         self.live_video_setting_action.triggered.connect(self.set_camera_param)
+        self.live_video_reload_action.triggered.connect(self.reload_camera)
         # robot相关action
         self.robot_toolbar_label = QLabel(self)
         self.robot_toolbar_label.setText('机械臂:')
@@ -230,6 +232,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
         self.live_video_toolbar.addAction(self.live_video_box_screen_action)
         self.live_video_toolbar.addAction(self.live_video_capture_action)
+        self.live_video_toolbar.addAction(self.live_video_reload_action)
         self.live_video_toolbar.addAction(self.live_video_setting_action)
         self.live_video_toolbar.addSeparator()
         # robot工具栏
@@ -257,6 +260,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_box_screen_action.setEnabled(False)
         self.live_video_capture_action.setEnabled(False)
         self.live_video_setting_action.setEnabled(False)
+        self.live_video_reload_action.setEnabled(False)
 
     # 状态栏
     def status_bar_show(self):
@@ -595,6 +599,7 @@ class UiMainWindow(QMainWindow):
             self.live_video_box_screen_action.setEnabled(True)
             self.live_video_capture_action.setEnabled(True)
             self.live_video_setting_action.setEnabled(True)
+            self.live_video_reload_action.setEnabled(True)
             # 侧边case框
             self.show_tab_widget.setEnabled(True)
             self.local_video_setting_action.setEnabled(False)
@@ -607,6 +612,7 @@ class UiMainWindow(QMainWindow):
             self.live_video_box_screen_action.setEnabled(False)
             self.live_video_capture_action.setEnabled(False)
             self.live_video_setting_action.setEnabled(False)
+            self.live_video_reload_action.setEnabled(False)
             self.show_tab_widget.setEnabled(False)
             self.live_video_switch_camera_status_action.setIcon(QIcon(IconPath.Icon_live_video_open_camera))
             self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
@@ -651,6 +657,16 @@ class UiMainWindow(QMainWindow):
     def set_camera_param(self):
         self.camera_param_setting_widget.show()
         self.camera_param_setting_widget.exec()
+
+    # 重新加载摄像头
+    def reload_camera(self):
+        self.robot.video.record_flag = False
+        self.robot.video.record_thread_flag = False
+        self.robot.video.allow_start_flag = False
+        self.robot.video.restart_record_flag = True
+        time.sleep(0.5)
+        self.robot.video.load_cam()
+        Logger('重新加载摄像头')
 
     '''以下为机械臂工具栏相关操作'''
     # 机械臂动作线程
@@ -761,6 +777,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_box_screen_action.setEnabled(False)
         self.live_video_capture_action.setEnabled(False)
         self.live_video_setting_action.setEnabled(False)
+        self.live_video_reload_action.setEnabled(False)
         self.show_tab_widget.setEnabled(False)
 
         self.local_video_setting_action.setEnabled(True)
@@ -828,6 +845,7 @@ class UiMainWindow(QMainWindow):
         self.live_video_box_screen_action.setEnabled(False)
         self.live_video_capture_action.setEnabled(False)
         self.live_video_setting_action.setEnabled(False)
+        self.live_video_reload_action.setEnabled(False)
         self.show_tab_widget.setEnabled(False)
         self.local_video_setting_action.setEnabled(False)
         self.data_process_setting_action.setEnabled(True)

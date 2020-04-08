@@ -15,6 +15,10 @@ class ExternalCameraVideo:
         # 视频需要保存的高和宽
         self.video_width = video_width
         self.video_height = video_height
+        self.load_cam()
+
+    # 重新加载cam
+    def load_cam(self):
         # 相机对象
         self.cam = None
         # 帧率
@@ -47,7 +51,6 @@ class ExternalCameraVideo:
         # 开启视频流
         Thread(target=self.video_stream, args=()).start()
 
-
     # 消除畸变函数
     def un_distortion(self, img):
         try:
@@ -71,7 +74,6 @@ class ExternalCameraVideo:
         # if roi != (0, 0, 0, 0):
         #     dst = dst[y:y + h, x:x + w]
         return dst
-
 
     # 视频流线程
     def video_stream(self):
@@ -139,7 +141,6 @@ class ExternalCameraVideo:
         # close device
         self.cam.close_device()
 
-
     # 获取帧(raw_image: 原生帧, start_flag:动作起点标志)
     def get_frame(self, raw_image, allow_start_flag=False):
         # 使用大恒相机方法: 将raw原生图转为RGB(RGB格式open-cv不支持)
@@ -168,7 +169,6 @@ class ExternalCameraVideo:
         # # print height, width, and frame ID of the acquisition image(打印帧信息)
         # # print("Frame ID: %d   Height: %d   Width: %d" % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
 
-
     # 保存视频
     def save_video(self):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -191,8 +191,7 @@ class ExternalCameraVideo:
                 time.sleep(0.001)
         out.release()
         self.restart_record_flag = True
-        Logger('视频保存结束: %s' %self.video_file_name)
-
+        Logger('视频保存结束: %s' % self.video_file_name)
 
     def start_record_video(self, case_type='test', case_name='test'):
         # 判断视频是否保存完成(保存完毕才允许再次开始录像)
@@ -215,17 +214,15 @@ class ExternalCameraVideo:
         '''开始录像(通过标志位)'''
         self.record_flag = True
         Thread(target=self.save_video, args=()).start()
-        Logger('开始录制视频: %s' %self.video_file_name)
-
+        Logger('开始录制视频: %s' % self.video_file_name)
 
     def stop_record_video(self):
         # 多录制一秒钟(预防结束的太早)
         time.sleep(1)
         self.record_flag = False
-        Logger('当前视频总帧数为: %d' %self.frame_id)
+        Logger('当前视频总帧数为: %d' % self.frame_id)
         Logger('正在保存缓存区的视频...')
         self.frame_id = 0
-
 
     def stop_record_thread(self):
         # 判断视频是否保存完成(保存完才能停止线程)
@@ -237,7 +234,7 @@ class ExternalCameraVideo:
         self.record_thread_flag = False
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     video = ExternalCameraVideo(video_path='D:/Code/robot/video', video_width=1600, video_height=800)
     # time.sleep(2)
     time.sleep(5)

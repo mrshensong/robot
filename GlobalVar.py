@@ -93,6 +93,7 @@ class IconPath:
     Icon_player_next_frame = 'config/Icon/video_label_icon/next_frame.png'
     # 实时流工具栏相关action图标
     Icon_live_video_setting = 'config/Icon/live_video_toolbar_icon/setting.png'
+    Icon_live_video_reload = 'config/Icon/live_video_toolbar_icon/reload.png'
     Icon_live_video_open_camera = 'config/Icon/live_video_toolbar_icon/open_camera.png'
     Icon_live_video_close_camera = 'config/Icon/live_video_toolbar_icon/close_camera.png'
     Icon_live_video_capture = 'config/Icon/live_video_toolbar_icon/capture.png'
