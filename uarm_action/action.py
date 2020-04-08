@@ -283,7 +283,7 @@ class ArmAction:
                     pass
                 else:
                     # 恢复app到桌面
-                    package = self.get_current_package_name()
+                    package = self.get_current_package_name(action)
                     if package is not None:
                         self.restore_app(package)
                         Logger('恢复当前app为默认状态-->跳出本次测试, 进入下次测试')
@@ -324,15 +324,25 @@ class ArmAction:
         return stdout
 
     # 获取当前包名
-    def get_current_package_name(self):
+    def get_current_package_name(self, info_dict):
+        screen_type = info_dict[AssertAction.assert_screen_type]
         command = GloVar.adb_command + ' shell dumpsys window | findstr mCurrentFocus'
         result = self.execute_adb_command(command)
         current_package = None
         # 匹配包名
-        pattern = re.compile(r'mCurrentFocus=Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
+        # 中控屏
+        if screen_type == GloVar.screen_type[0]:
+            pattern = re.compile(r'mCurrentFocus=Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
+        # 副驾屏
+        elif screen_type == GloVar.screen_type[1]:
+            pattern = re.compile(r'mCurrentFocusSecondDisplay=Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
+        # 其他
+        else:
+            pattern = re.compile(r'Window\{[\da-zA-Z]+\s+[\da-zA-Z]+\s+\S+/')
         package_list = pattern.findall(str(result))
         if len(package_list) > 0:
             current_package = package_list[0].split(' ')[-1].split('/')[0]
+        Logger('当前package: ' + current_package)
         return current_package
 
     # 恢复当前app到初始状态

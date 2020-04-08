@@ -13,6 +13,8 @@ class GloVar:
     qt_zh_CN_file_path = 'config/translations/qt_zh_CN.qm'
     # adb路径
     adb_command = r'config\platform-tools\adb.exe'
+    # 屏幕类型
+    screen_type = ['中控屏', '副驾屏', '空调屏', '仪表屏']
     # 当前工程根目录
     project_path = None
     # 当前工程产生视频目录
@@ -227,6 +229,7 @@ class RecordAction:
 # 断言相关操作
 class AssertAction:
     assert_template_name = 'assert_template_name'
+    assert_screen_type = 'assert_screen_type'
 
 
 # 延时相关操作

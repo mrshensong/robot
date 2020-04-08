@@ -302,7 +302,8 @@ class ShowActionTab(QWidget):
     def connect_save_script_tag(self, save_as_flag=False):
         script_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='script_path').value
         if save_as_flag is True or len(self.case_absolute_name) == 0:
-            filename = QFileDialog.getSaveFileName(self, '保存case', script_path, 'script file(*.xml)', options=QFileDialog.DontUseNativeDialog)
+            filename = QFileDialog.getSaveFileName(self, '保存case', script_path, 'script file(*.xml)',
+                                                   options=QFileDialog.DontUseNativeDialog)
             xml_file = filename[0]
             if xml_file:
                 if xml_file.endswith('.xml'):
@@ -316,7 +317,8 @@ class ShowActionTab(QWidget):
             xml_file = self.case_absolute_name
         current_path = '/'.join(xml_file.split('/')[:-1])
         if current_path != script_path:
-            Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path', value=current_path)
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path',
+                    value=current_path)
         with open(xml_file, 'w', encoding='utf-8') as f:
             self.case_absolute_name = xml_file
             self.case_file_name = xml_file.split('/')[-1]
@@ -708,8 +710,10 @@ class ShowActionTab(QWidget):
     # 添加assert动作生成标签
     def generate_assert_tag(self, info_dict):
         assert_template_path = str(info_dict[AssertAction.assert_template_name])
+        assert_screen_type = str(info_dict[AssertAction.assert_screen_type])
         tag = '\t<action ' + 'assert_template' + '="' + 'picture' + '">\n' + \
               '\t\t' + '<param name="' + AssertAction.assert_template_name + '">' + assert_template_path + '</param>\n' + \
+              '\t\t' + '<param name="' + AssertAction.assert_screen_type + '">' + assert_screen_type + '</param>\n' + \
               '\t</action>\n'
         return tag
 

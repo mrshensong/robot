@@ -240,6 +240,8 @@ class AssertControl(QWidget):
         self.id = id
         # 判断是真的新建record还是通过脚本导入的case(new_control_flag:True新建, False导入)
         self.new_control_flag = new_control_flag
+        # 断言的屏幕类型
+        self.screen_type = info_dict[AssertAction.assert_screen_type]
         # 断言模板绝对路径
         self.template_path = info_dict[AssertAction.assert_template_name]
         # 缩略图尺寸

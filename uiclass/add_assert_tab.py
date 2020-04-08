@@ -1,6 +1,6 @@
 import os
 import json
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QLineEdit, QPushButton, QLabel
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from GlobalVar import AssertAction, GloVar, MergePath, IconPath
@@ -17,7 +17,8 @@ class AddAssertTab(QWidget):
         # case名字
         self.case_name = case_name
         # 断言状态
-        self.info_dict = {AssertAction.assert_template_name: 'assert_template_name'}
+        self.info_dict = {AssertAction.assert_template_name: 'assert_template_name',
+                          AssertAction.assert_screen_type: 'assert_screen_type'}
         # 缩略图标签
         self.thumbnail_size = (100, 100)
         self.initUI()
@@ -29,17 +30,21 @@ class AddAssertTab(QWidget):
         # 设置标签右对齐, 不设置是默认左对齐
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
         # 设置表单内容
-        # 是否开始录制视频
+        # 是否框选断言模板
         self.start_select_assert_template = QCheckBox(self)
         self.start_select_assert_template.setCheckState(Qt.Unchecked)
         self.start_select_assert_template.stateChanged.connect(self.connect_select_assert_template)
-        # 视频名称
+        # 选择是哪个屏幕(中控屏和副驾屏操作不同)
+        self.screen_type_drop_down_box = QComboBox()
+        self.screen_type_drop_down_box.addItems(GloVar.screen_type)
+        # 模板名称
         self.template_name_edit = QLineEdit(self)
         template_name = MergePath([GloVar.project_picture_path, 'assert', AssertAction.assert_template_name]).merged_path
         self.template_name_edit.setPlaceholderText(template_name)
         self.template_name_edit.setEnabled(False)
         # 表单布局
         self.from_layout.addRow('框选预期模板: ', self.start_select_assert_template)
+        self.from_layout.addRow('选择屏幕类型: ', self.screen_type_drop_down_box)
         self.from_layout.addRow('预期模板名字: ', self.template_name_edit)
         # 缩略图
         self.thumbnail_label = QLabel()
@@ -91,6 +96,7 @@ class AddAssertTab(QWidget):
     # 按下确认按钮
     def connect_sure(self):
         self.info_dict[AssertAction.assert_template_name] = self.template_name_edit.text()
+        self.info_dict[AssertAction.assert_screen_type] = self.screen_type_drop_down_box.currentText()
         # 整理数据
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
