@@ -15,7 +15,7 @@ from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from GlobalVar import GloVar, IconPath, RobotArmAction, RobotArmParam, Logger, MotionAction, MergePath, WindowStatus, Profile, BeautifyStyle
+from GlobalVar import *
 from uarm_action.action import ArmAction
 from uiclass.main_show_tab_widget import PictureTab, ReportTab, TextTab
 
@@ -32,12 +32,15 @@ class UiMainWindow(QMainWindow):
         self.setStyleSheet(main_ui_style)
         """初始化参数"""
         # 如果为True则使用外接相机, False使用电脑内置相机
-        self.use_external_camera_flag = Profile(type='read', file=GloVar.config_file_path, section='param', option='use_external_camera').value
+        self.use_external_camera_flag = Profile(type='read', file=GloVar.config_file_path, section='param',
+                                                option='use_external_camera').value
         # 配置文件读取到的是字符串型
         self.use_external_camera_flag = True if self.use_external_camera_flag == 'True' else False
         # 摄像机图像尺寸
-        self.camera_image_width = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_width').value)
-        self.camera_image_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='camera_size_height').value)
+        self.camera_image_width = int(Profile(type='read', file=GloVar.config_file_path, section='param',
+                                              option='camera_size_width').value)
+        self.camera_image_height = int(Profile(type='read', file=GloVar.config_file_path, section='param',
+                                               option='camera_size_height').value)
         # 从配置文件中读取基准点
         base_point = eval(Profile(type='read', file=GloVar.config_file_path, section='param', option='base_point').value)
         RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point = base_point

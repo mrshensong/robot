@@ -1,9 +1,10 @@
 import time
 from threading import Thread
-from PyQt5.QtWidgets import  *
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from GlobalVar import GloVar, IconPath, RobotArmAction, RecordAction, AssertAction, SleepAction, Logger, MotionAction, Profile, RobotArmParam
+from GlobalVar import *
+
 
 # 自定义动作展示控件(action)
 class ActionControl(QWidget):
@@ -83,11 +84,9 @@ class ActionControl(QWidget):
         self.setLayout(self.h_box)
         self.setMaximumWidth(400)
 
-
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
     def str_decorate(self, origin_str, decorate_str='[]'):
         return str(origin_str).join(decorate_str)
-
 
     # 执行单个动作的具体操作
     def play_action_item(self):
@@ -95,21 +94,23 @@ class ActionControl(QWidget):
         # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
         self.signal.emit('action_execute_item>' + str(self.id))
 
-
     # 执行单个动作(新建线程/控件中的执行按钮)
     def action_execute_item(self):
         Thread(target=self.play_action_item, args=()).start()
-
 
     # 删除单个动作(控件中的删除按钮)
     def action_delete_item(self):
         # 打印删除信息
         if self.des_line_edit.text() == '':
-            Logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), str(self.points_text)))
+            Logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: 无描述信息'.format(self.str_decorate(self.id),
+                                                                            self.str_decorate(self.action_type),
+                                                                            str(self.points_text)))
         else:
-            Logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), str(self.points_text), self.des_line_edit.text()))
+            Logger('删除-->id{:-<5}action{:-<16}坐标信息{:-<30}-->: {}'.format(self.str_decorate(self.id),
+                                                                         self.str_decorate(self.action_type),
+                                                                         str(self.points_text),
+                                                                         self.des_line_edit.text()))
         self.signal.emit('action_delete_item>' + str(self.id))
-
 
     # 打印控件信息
     def describe_action(self):
@@ -117,9 +118,13 @@ class ActionControl(QWidget):
         if self.new_control_flag is True:
             # 打印新建动作信息
             if self.des_text == '':
-                Logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), self.points_text))
+                Logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: 无描述信息'.format(self.str_decorate(self.id),
+                                                                                self.str_decorate(self.action_type),
+                                                                                self.points_text))
             else:
-                Logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(self.id), self.str_decorate(self.action_type), self.points_text, self.des_text))
+                Logger('新建-->id{:-<5}action{:-<16}坐标信息{:-<35}-->: {}'.format(self.str_decorate(self.id),
+                                                                             self.str_decorate(self.action_type),
+                                                                             self.points_text, self.des_text))
 
 
 # 摄像头录制开始和停止动作展示控件(camera_start/camera_stop)
@@ -210,14 +215,18 @@ class RecordControl(QWidget):
     # 删除单个动作(控件中的删除按钮)
     def record_delete_item(self):
         # 打印删除信息
-        Logger('删除-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(RecordAction.record_status), self.str_decorate(self.record_type)))
+        Logger('删除-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
+                                                         self.str_decorate(RecordAction.record_status),
+                                                         self.str_decorate(self.record_type)))
         self.signal.emit('record_delete_item>' + str(self.id))
 
     # 打印控件信息
     def describe_record(self):
         if self.new_control_flag is True:
             # 打印新建video动作信息
-            Logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id), self.str_decorate(RecordAction.record_status), self.str_decorate(self.record_type)))
+            Logger('新建-->id{:-<5}action{:-<16}录像动作{}'.format(self.str_decorate(self.id),
+                                                             self.str_decorate(RecordAction.record_status),
+                                                             self.str_decorate(self.record_type)))
 
 
 # 断言模板图片控件(通过模板判断是否出现预期界面)
@@ -303,14 +312,18 @@ class AssertControl(QWidget):
     # 删除单个动作(控件中的删除按钮)
     def assert_delete_item(self):
         # 打印删除信息
-        Logger('删除-->id{:-<5}action{:-<16}断言动作模板{}'.format(self.str_decorate(self.id), self.str_decorate(AssertAction.assert_template_name), self.str_decorate(self.template_path)))
+        Logger('删除-->id{:-<5}action{:-<16}断言动作模板{}'.format(self.str_decorate(self.id),
+                                                           self.str_decorate(AssertAction.assert_template_name),
+                                                           self.str_decorate(self.template_path)))
         self.signal.emit('assert_delete_item>' + str(self.id))
 
     # 打印控件信息
     def describe_assert(self):
         if self.new_control_flag is True:
             # 打印新建video动作信息
-            Logger('新建-->id{:-<5}action{:-<16}断言动作模板{}'.format(self.str_decorate(self.id), self.str_decorate(AssertAction.assert_template_name), self.str_decorate(self.template_path)))
+            Logger('新建-->id{:-<5}action{:-<16}断言动作模板{}'.format(self.str_decorate(self.id),
+                                                               self.str_decorate(AssertAction.assert_template_name),
+                                                               self.str_decorate(self.template_path)))
 
 
 # 延时动作展示控件(sleep)
@@ -327,7 +340,6 @@ class SleepControl(QWidget):
         self.sleep_time = info_dict[SleepAction.sleep_time]
         self.initUI()
         self.describe_sleep()
-
 
     def initUI(self):
         # 选择框
@@ -358,11 +370,9 @@ class SleepControl(QWidget):
         self.setLayout(self.h_box)
         self.setMaximumWidth(400)
 
-
     # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
     def str_decorate(self, origin_str, decorate_str='[]'):
         return str(origin_str).join(decorate_str)
-
 
     # 执行单个动作的具体操作
     def play_sleep_item(self):
@@ -370,11 +380,9 @@ class SleepControl(QWidget):
         # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
         self.signal.emit('sleep_execute_item>' + str(self.id))
 
-
     # 执行单个动作(新建线程/控件中的执行按钮)
     def sleep_execute_item(self):
         Thread(target=self.play_sleep_item, args=()).start()
-
 
     # 删除单个动作(控件中的删除按钮)
     def sleep_delete_item(self):
@@ -382,12 +390,12 @@ class SleepControl(QWidget):
         Logger('删除-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id), self.str_decorate(SleepAction.sleep_time), self.str_decorate(self.sleep_time)))
         self.signal.emit('sleep_delete_item>' + str(self.id))
 
-
     # 打印控件信息
     def describe_sleep(self):
         if self.new_control_flag is True:
             # 打印新建video动作信息
             Logger('新建-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id), self.str_decorate(SleepAction.sleep_time), self.str_decorate(self.sleep_time)))
+
 
 # 自定义动作展示控件(case)
 class CaseControl(QWidget):
@@ -400,7 +408,6 @@ class CaseControl(QWidget):
         self.id = id
         self.case_file = case_file
         self.initUI()
-
 
     def initUI(self):
         # 选择框
@@ -433,18 +440,15 @@ class CaseControl(QWidget):
         self.setLayout(self.h_box)
         self.setMaximumWidth(350)
 
-
     # 当前控件双击事件后(发送信号到父控件, 发送当前id)
     def mouseDoubleClickEvent(self, event):
         self.signal.emit('open_case>' + str(self.id))
-
 
     # 执行单个case
     def play_single_case(self):
         # 每执行一次都需要获取当前时间(作为文件夹)
         GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         self.signal.emit('play_single_case>' + str(self.id))
-
 
     # 删除单个case
     def delete_case(self):
@@ -467,7 +471,6 @@ class CameraParamAdjustControl(QDialog):
         self.gain_value = 0
         self.stable_frame_rate_flag = True
         self.initUI()
-
 
     def initUI(self):
         # 控件总布局
@@ -552,16 +555,23 @@ class CameraParamAdjustControl(QDialog):
         # 设置屏幕真实尺寸
         self.screen_size_label = QLabel(self)
         self.screen_size_label.setText('屏幕尺寸:')
-        self.screen_size_line_edit = QLineEdit(self)
-        self.screen_size_line_edit.setReadOnly(True)
-        screen_width = Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_width').value
-        screen_height = Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_height').value
-        screen_size_line_edit_text = '(' + screen_width + ',' + screen_height + ')'
-        self.screen_size_line_edit.setText(screen_size_line_edit_text)
+        self.screen_size_drop_down_box = QComboBox()
+        screen_list = Profile().get_config_options(file=GloVar.config_file_path, section='screen_size')
+        self.screen_size_list = []
+        for screen_name in screen_list:
+            screen_size = eval(Profile(type='read', file=GloVar.config_file_path, section='screen_size',
+                                       option=screen_name).value)
+            self.screen_size_list.append(screen_size)
+            self.screen_size_drop_down_box.addItem(screen_name + str(screen_size))
+        current_screen_size = eval(Profile(type='read', file=GloVar.config_file_path, section='param',
+                                           option='actual_screen_size').value)
+        current_screen_size_index = self.screen_size_list.index(current_screen_size)
+        self.screen_size_drop_down_box.setCurrentIndex(current_screen_size_index)
+        self.screen_size_drop_down_box.setEnabled(False)
         self.screen_size_button = QPushButton('修改')
         self.screen_size_button.clicked.connect(self.change_screen_size)
         self.grid_layout.addWidget(self.screen_size_label, 5, 0, 1, 1)
-        self.grid_layout.addWidget(self.screen_size_line_edit, 5, 1, 1, 5)
+        self.grid_layout.addWidget(self.screen_size_drop_down_box, 5, 1, 1, 5)
         self.grid_layout.addWidget(self.screen_size_button, 5, 6, 1, 1)
         # 设置图片路径
         self.picture_path_show_label = QLabel(self)
@@ -590,86 +600,87 @@ class CameraParamAdjustControl(QDialog):
         self.setFixedWidth(750)
         self.setWindowTitle('摄像头参数')
 
-
     def connect_exposure_time_slider(self):
         self.exposure_time_value = int(self.exposure_time_slider.value())
         self.exposure_time_spinbox.setValue(self.exposure_time_value)
         self.signal.emit('exposure_time>' + str(self.exposure_time_value))
 
-
     def connect_exposure_time_spinbox(self):
         self.exposure_time_value = int(self.exposure_time_spinbox.value())
         self.exposure_time_slider.setValue(self.exposure_time_value)
-
 
     def connect_gain_slider(self):
         self.gain_value = int(self.gain_slider.value())
         self.gain_spinbox.setValue(self.gain_value)
         self.signal.emit('gain>' + str(self.gain_value))
 
-
     def connect_gain_spinbox(self):
         self.gain_value = int(self.gain_spinbox.value())
         self.gain_slider.setValue(self.gain_value)
 
-
     def change_stable_frame_rate_status(self):
         if self.stable_frame_rate_flag is True:
             self.stable_frame_rate_flag = False
-            self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                        IconPath.Icon_tab_widget_switch_off + ')}')
             self.stable_frame_rate_des.setText('关闭状态,新建机械臂动作过程中,机械臂不会随之而动')
         else:
             self.stable_frame_rate_flag = True
-            self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                        IconPath.Icon_tab_widget_switch_on + ')}')
             self.stable_frame_rate_des.setText('打开状态,新建机械臂动作过程中,机械臂会随之而动')
-
 
     def change_robot_follow_action_flag(self):
         if GloVar.robot_follow_action_flag is True:
             GloVar.robot_follow_action_flag = False
-            self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                               IconPath.Icon_tab_widget_switch_off + ')}')
             self.robot_follow_action_flag_des.setText('关闭状态,执行case过程中会播放实时流,帧率不稳定')
         else:
             GloVar.robot_follow_action_flag = True
-            self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                               IconPath.Icon_tab_widget_switch_on + ')}')
             self.robot_follow_action_flag_des.setText('打开状态,执行case过程中会暂停实时流,帧率稳定')
 
     def change_robot_action_take_back_flag(self):
         if GloVar.robot_action_take_back_flag is True:
             GloVar.robot_action_take_back_flag = False
-            self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                                  IconPath.Icon_tab_widget_switch_off + ')}')
             self.robot_action_take_back_des.setText('关闭状态,新建机械臂动作默认操作完后不会收回到原点')
         else:
             GloVar.robot_action_take_back_flag = True
-            self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                                  IconPath.Icon_tab_widget_switch_on + ')}')
             self.robot_action_take_back_des.setText('打开状态,新建机械臂动作默认操作完后会收回到原点')
 
     def change_screen_size(self):
         if self.screen_size_button.text() == '修改':
-            self.screen_size_line_edit.setReadOnly(False)
             self.screen_size_button.setText('保存')
+            self.screen_size_drop_down_box.setEnabled(True)
         elif self.screen_size_button.text() == '保存':
-            self.screen_size_line_edit.setReadOnly(True)
+            index = self.screen_size_drop_down_box.currentIndex()
+            RobotArmParam.actual_screen_width, RobotArmParam.actual_screen_height = \
+                current_screen_size = self.screen_size_list[index]
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='actual_screen_size',
+                    value=str(current_screen_size))
             self.screen_size_button.setText('修改')
-            # 395, 110
-            RobotArmParam.actual_screen_width, RobotArmParam.actual_screen_height = eval(self.screen_size_line_edit.text())
-            Profile(type='write', file=GloVar.config_file_path, section='param', option='actual_screen_width', value=RobotArmParam.actual_screen_width)
-            Profile(type='write', file=GloVar.config_file_path, section='param', option='actual_screen_height', value=RobotArmParam.actual_screen_height)
+            self.screen_size_drop_down_box.setEnabled(False)
 
     def connect_change_picture_path(self):
         # 如果取消为''值
-        self.picture_path = QFileDialog.getExistingDirectory(self, "浏览", self.picture_path, options=QFileDialog.DontUseNativeDialog)
+        self.picture_path = QFileDialog.getExistingDirectory(self, "浏览", self.picture_path,
+                                                             options=QFileDialog.DontUseNativeDialog)
         if self.picture_path:
             self.picture_path_show_edit.setText(self.picture_path)
-            Profile(type='write', file=GloVar.config_file_path, section='param', option='picture_path', value=self.picture_path)
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='picture_path',
+                    value=self.picture_path)
             Logger('修改保存图片路径为: %s' % self.picture_path)
             self.signal.emit('picture_path>' + self.picture_path)
-
 
     # 确认按钮按下触发事件
     def connect_sure_button(self):
         self.close()
-
 
     # 重写窗口关闭事件
     def closeEvent(self, event):
@@ -686,7 +697,6 @@ class FrameRateAdjustControl(QDialog):
         self.parent = parent
         self.stable_value = 30
         self.initUI()
-
 
     def initUI(self):
         self.general_layout = QVBoxLayout(self)
@@ -721,21 +731,17 @@ class FrameRateAdjustControl(QDialog):
         self.setMinimumWidth(400)
         self.setWindowTitle('离线视频帧率参数')
 
-
     def connect_frame_rate_slider(self):
         self.stable_value = int(self.frame_rate_slider.value())
         self.frame_rate_spinbox.setValue(self.stable_value)
         self.signal.emit('frame_rate_adjust>' + str(self.stable_value))
 
-
     def connect_frame_rate_spinbox(self):
         self.stable_value = int(self.frame_rate_spinbox.value())
         self.frame_rate_slider.setValue(self.stable_value)
 
-
     def connect_sure_button(self):
         self.close()
-
 
     # 重写关闭窗口时间
     def closeEvent(self, event):
@@ -751,7 +757,6 @@ class SelectTemplateControl(QWidget):
         super(SelectTemplateControl, self).__init__(parent)
         self.parent = parent
         self.initUI()
-
 
     def initUI(self):
         # 单选框
@@ -770,11 +775,9 @@ class SelectTemplateControl(QWidget):
         self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.h_box)
 
-
     def connect_check_box(self):
         if self.check_box.checkState() == Qt.Checked:
             self.signal.emit(GloVar.result_template + '>')
-
 
     def clear(self):
         self.check_box.setCheckState(Qt.Unchecked)

@@ -235,18 +235,20 @@ class SleepAction:
 
 # 配置文件的读取和写入
 class Profile:
-    def __init__(self, type='read', file=None, section=None, option=None, value=None):
+    def __init__(self, type=None, file=None, section=None, option=None, value=None):
         if type == 'read':
             self.value = self.get_config_value(file=file, section=section, option=option)
         if type == 'write':
             self.set_config_value(file=file, section=section, option=option, value=value)
+        else:
+            pass
 
     '''更改配置文件会去掉注释'''
     def get_config_value(self, file, section, option):
         config = configparser.ConfigParser()
         config.read(file, encoding='utf-8')
-        a = config.get(section, option)
-        return config.get(section, option)
+        value = config.get(section, option)
+        return value
 
     # 设置config的参数
     def set_config_value(self, file, section, option, value):
@@ -257,6 +259,13 @@ class Profile:
         config.set(section, option, str(value))
         with open(file, 'w+', encoding='utf-8') as cf:
             config.write(cf)
+
+    # 获取节点options
+    def get_config_options(self, file, section):
+        config = configparser.ConfigParser()
+        config.read(file, encoding='utf-8-sig')
+        options = config.options(section)
+        return options
 
     # '''修改配置文件会保留注释(增加可读性)'''
     # # 获取config的参数
@@ -280,6 +289,7 @@ class Logger:
 # 合并路径(传入要合并的几个部分)
 class MergePath:
     merged_path = None
+
     def __init__(self, section_path):
         path_list = []
         for section in section_path:

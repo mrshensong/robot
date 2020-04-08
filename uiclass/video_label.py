@@ -2,10 +2,10 @@ import os
 import cv2
 import sys
 import time
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLineEdit, QFrame, QLabel, QSlider, QApplication, QInputDialog, QPushButton
-from PyQt5.QtGui import QMovie, QPixmap, QImage, QPainter, QPen, QPolygon, QCursor
-from PyQt5.QtCore import pyqtSignal, Qt, QPoint, QRect
-from GlobalVar import RobotArmAction, IconPath, Logger, GloVar, MergePath, RobotArmParam, Profile, RecordAction
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from GlobalVar import *
 from uiclass.timer import Timer
 
 
@@ -27,7 +27,8 @@ class VideoLabel(QLabel):
         self.x_unit = 1.0
         self.y_unit = 1.0
         # 框选的屏幕起点和终点所占label_video比例
-        self.box_screen_scale = eval(Profile(type='read', file=GloVar.config_file_path, section='param', option='box_screen_scale').value)
+        self.box_screen_scale = eval(Profile(type='read', file=GloVar.config_file_path, section='param',
+                                             option='box_screen_scale').value)
         # 框选的屏幕大小
         self.box_screen_size = [0, 0, 0, 0]
         # False直播/True录播/None什么都不播放状态
@@ -95,8 +96,8 @@ class VideoLabel(QLabel):
         # 滑动条标志位(如果有滑动动作标志为True, 否则为False)
         self.slider_flag = False
         # 读取配置文件中车机真实尺寸
-        RobotArmParam.actual_screen_width = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_width').value)
-        RobotArmParam.actual_screen_height = int(Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_height').value)
+        RobotArmParam.actual_screen_width, RobotArmParam.actual_screen_height = \
+            eval(Profile(type='read', file=GloVar.config_file_path, section='param', option='actual_screen_size').value)
         # 控件初始化
         self.initUI()
 
@@ -302,7 +303,8 @@ class VideoLabel(QLabel):
                     # 当遇到当前视频播放完毕时, 需要将进度条往回拉动的时候
                     if self.video_status == self.STATUS_STOP:
                         self.video_status = self.STATUS_PAUSE
-                        self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_play + ')}')
+                        self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                               IconPath.Icon_player_play + ')}')
                         self.status_video_button.setToolTip(self.video_status_play_tip)
             except Exception as e:
                 Logger('[当前视频播放完毕]')
@@ -339,7 +341,8 @@ class VideoLabel(QLabel):
                     self.video_cap.release()
                     self.video_status = self.STATUS_STOP
                     self.timer_video.stop()
-                    self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_replay + ')}')
+                    self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                           IconPath.Icon_player_replay + ')}')
                     self.status_video_button.setToolTip(self.video_status_replay_tip)
                     # 因为已经读取视频停止, 故而帧数并没有增加(所以显示的也是最后一帧)
                     self.video_progress_bar.setValue(self.frame_count-1)
@@ -352,7 +355,8 @@ class VideoLabel(QLabel):
             else:
                 self.video_status = self.STATUS_STOP
                 self.timer_video.stop()
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_replay + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_replay + ')}')
                 self.status_video_button.setToolTip(self.video_status_replay_tip)
                 self.last_video_button.setEnabled(True)
                 self.next_video_button.setEnabled(True)
@@ -407,7 +411,8 @@ class VideoLabel(QLabel):
                 self.video_status = self.STATUS_PLAYING
                 GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_pause + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_pause + ')}')
                 self.status_video_button.setToolTip(self.video_status_pause_tip)
                 Logger('<打开视频流>')
             elif self.video_status is self.STATUS_PLAYING:
@@ -415,7 +420,8 @@ class VideoLabel(QLabel):
                 self.video_status = self.STATUS_PAUSE
                 GloVar.select_template_flag = True
                 self.setCursor(Qt.CrossCursor)
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_play + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_play + ')}')
                 self.status_video_button.setToolTip(self.video_status_play_tip)
                 self.template_label()
                 self.mask_image = self.image
@@ -426,7 +432,8 @@ class VideoLabel(QLabel):
                 self.video_status = self.STATUS_PLAYING
                 GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_pause + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_pause + ')}')
                 self.status_video_button.setToolTip(self.video_status_pause_tip)
                 Logger('<打开视频流>')
         # 如果是播放本地视频
@@ -439,7 +446,8 @@ class VideoLabel(QLabel):
                 self.next_video_button.setEnabled(False)
                 self.label_video_title.setStyleSheet('color:white')
                 self.video_status = self.STATUS_PLAYING
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_pause + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_pause + ')}')
                 self.status_video_button.setToolTip(self.video_status_pause_tip)
                 GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
@@ -452,7 +460,8 @@ class VideoLabel(QLabel):
                 self.last_video_button.setEnabled(True)
                 self.next_video_button.setEnabled(True)
                 self.video_status = self.STATUS_PAUSE
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_play + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_play + ')}')
                 self.status_video_button.setToolTip(self.video_status_play_tip)
                 GloVar.select_template_flag = True
                 self.setCursor(Qt.CrossCursor)
@@ -467,7 +476,8 @@ class VideoLabel(QLabel):
                 self.next_video_button.setEnabled(False)
                 self.label_video_title.setStyleSheet('color:white')
                 self.video_status = self.STATUS_PLAYING
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_pause + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_pause + ')}')
                 self.status_video_button.setToolTip(self.video_status_pause_tip)
                 GloVar.select_template_flag = False
                 self.setCursor(Qt.ArrowCursor)
@@ -486,7 +496,8 @@ class VideoLabel(QLabel):
                 # 开启视频流
                 self.timer_video.start()
                 self.video_status = self.STATUS_PLAYING
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_pause + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_pause + ')}')
                 self.status_video_button.setToolTip(self.video_status_pause_tip)
                 self.last_video_button.setEnabled(False)
                 self.next_video_button.setEnabled(False)
@@ -608,7 +619,8 @@ class VideoLabel(QLabel):
             # 当遇到当前视频播放完毕时, 需要回退帧的时候
             if self.video_status == self.STATUS_STOP:
                 self.video_status = self.STATUS_PAUSE
-                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_play + ')}')
+                self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                       IconPath.Icon_player_play + ')}')
                 self.status_video_button.setToolTip(self.video_status_play_tip)
         else:
             self.video_cap.release()
@@ -642,7 +654,8 @@ class VideoLabel(QLabel):
             self.video_cap.release()
             self.video_status = self.STATUS_STOP
             self.timer_video.stop()
-            self.status_video_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_player_replay + ')}')
+            self.status_video_button.setStyleSheet('QPushButton{border-image: url(' +
+                                                   IconPath.Icon_player_replay + ')}')
             self.status_video_button.setToolTip(self.video_status_replay_tip)
             self.video_progress_bar.setValue(self.frame_count-1)
         # self.next_frame_button.setEnabled(True)
@@ -880,7 +893,8 @@ class VideoLabel(QLabel):
                 self.box_screen_scale[2] = round(float(self.x1/self.size().width()),  6)
                 self.box_screen_scale[3] = round(float(self.y1/self.size().height()), 6)
                 # 将box_screen_scale尺寸存入配置文件(不需要每次打开都进行框选)
-                Profile(type='write', file=GloVar.config_file_path, section='param', option='box_screen_scale', value=str(self.box_screen_scale))
+                Profile(type='write', file=GloVar.config_file_path, section='param', option='box_screen_scale',
+                        value=str(self.box_screen_scale))
                 GloVar.box_screen_flag = False
                 GloVar.select_template_flag = False
                 GloVar.add_action_button_flag = True
@@ -934,15 +948,18 @@ class VideoLabel(QLabel):
             painter.drawLine(QPoint(self.x0, self.y0), QPoint(self.x1, self.y1))
             if self.video_play_flag is False:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],
+                                       self.box_screen_size[3]))
         # 点击动作画圆显示
-        elif RobotArmAction.uArm_action_type in [RobotArmAction.uArm_click, RobotArmAction.uArm_long_click, RobotArmAction.uArm_double_click]:
+        elif RobotArmAction.uArm_action_type in [RobotArmAction.uArm_click, RobotArmAction.uArm_long_click,
+                                                 RobotArmAction.uArm_double_click]:
             painter = QPainter(self)
             painter.setPen(QPen(Qt.red, 5, Qt.SolidLine))
             painter.drawEllipse(self.x0-5, self.y0-5, 10, 10)
             if self.video_play_flag is False:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],
+                                       self.box_screen_size[3]))
         # 框选动作
         elif GloVar.select_template_flag is True:
             rect = QRect(self.x0, self.y0, abs(self.x1 - self.x0), abs(self.y1 - self.y0))
@@ -951,7 +968,8 @@ class VideoLabel(QLabel):
             painter.drawRect(rect)
             if self.video_play_flag is False:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],
+                                       self.box_screen_size[3]))
         # 其余情况(不绘制图, 一个小点,几乎不能看到)
         else:
             point = [QPoint(self.x0, self.y0)]
@@ -960,7 +978,8 @@ class VideoLabel(QLabel):
             painter.drawPoints(QPolygon(point))
             if self.video_play_flag is False:
                 painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2], self.box_screen_size[3]))
+                painter.drawRect(QRect(self.box_screen_size[0], self.box_screen_size[1], self.box_screen_size[2],
+                                       self.box_screen_size[3]))
 
     # 保存模板
     def save_template(self):
@@ -1068,7 +1087,8 @@ class VideoLabel(QLabel):
                                     rect_image = self.write_position_info_to_roi(rect_image, 2, x0)
                                     rect_image = self.write_position_info_to_roi(rect_image, 3, x1)
                                     cut_img = rect_image
-                                    template_name = MergePath([mask_path, RecordAction.current_video_name, default_name, value + '.bmp']).merged_path
+                                    template_name = MergePath([mask_path, RecordAction.current_video_name, default_name,
+                                                               value + '.bmp']).merged_path
                                     cv2.imencode('.bmp', cut_img)[1].tofile(template_name)
                                     # 视频动作中模板框选完成
                                     self.signal.emit(GloVar.assert_template_finished + '>' + template_name)
