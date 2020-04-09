@@ -2,11 +2,11 @@ import os
 import json
 import time
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QToolButton, QListWidget, QMessageBox, QFileDialog, QListWidgetItem, QLineEdit
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from GlobalVar import IconPath, MotionAction, RobotArmAction, RecordAction, AssertAction, SleepAction, Logger, GloVar, WindowStatus, Profile, RobotArmParam, BeautifyStyle
-from uiclass.controls import ActionControl, RecordControl, AssertControl, SleepControl
+from GlobalVar import *
+from uiclass.controls import ActionControl, RecordControl, AssertControl, RestoreControl, SleepControl
 from uiclass.add_tab_widget import AddTabWidget
 
 
@@ -217,6 +217,9 @@ class ShowActionTab(QWidget):
                 elif 'assert_template' in rewrite_info:
                     text = self.custom_control_list[current_row].template_path_text.text()
                     self.custom_control_list[current_row].template_path_text.setText(text)
+                elif 'restore_screen' in rewrite_info:
+                    text = self.custom_control_list[current_row].restore_des_text.text()
+                    self.custom_control_list[current_row].restore_des_text.setText(text)
                 elif 'sleep_time' in rewrite_info:
                     text = self.custom_control_list[current_row].sleep_des_text.text()
                     self.custom_control_list[current_row].sleep_des_text.setText(text)
@@ -280,8 +283,13 @@ class ShowActionTab(QWidget):
                         # 添加视频存放根目录
                         self.info_list[index]['video_path'] = GloVar.project_video_path
                         GloVar.post_info_list.append(self.info_list[index])
+                    # 为assert控件
                     elif AssertAction.assert_template_name in self.info_list[index]:
                         self.info_list[index]['execute_action'] = 'assert_action'
+                        GloVar.post_info_list.append(self.info_list[index])
+                    # 为restore控件
+                    elif RestoreAction.restore_screen in self.info_list[index]:
+                        self.info_list[index]['execute_action'] = 'restore_action'
                         GloVar.post_info_list.append(self.info_list[index])
                     # 为sleep控件
                     elif SleepAction.sleep_time in self.info_list[index]:
@@ -366,6 +374,8 @@ class ShowActionTab(QWidget):
             self.tag_list.append(self.generate_record_tag(info_dict))
         elif item_type == 'assert':
             self.tag_list.append(self.generate_assert_tag(info_dict))
+        elif item_type == 'restore':
+            self.tag_list.append(self.generate_restore_tag(info_dict))
         elif item_type == 'sleep':
             self.tag_list.append(self.generate_sleep_tag(info_dict))
         # 发送需要显示的脚本标签
@@ -398,9 +408,11 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index, self.generate_record_tag(info_dict))
             elif item_type == 'assert':
                 self.tag_list.insert(self.insert_item_index, self.generate_assert_tag(info_dict))
+            elif item_type == 'restore':
+                self.tag_list.insert(self.insert_item_index, self.generate_restore_tag(info_dict))
             elif item_type == 'sleep':
                 self.tag_list.insert(self.insert_item_index, self.generate_sleep_tag(info_dict))
-            # 重新拍每个custom_control_list的id
+            # 重新排每个custom_control_list的id
             for index in range(self.insert_item_index, self.index + 1):
                 self.custom_control_list[index].id = index
         # 下方插入
@@ -416,6 +428,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_record_tag(info_dict))
             elif item_type == 'assert':
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_assert_tag(info_dict))
+            elif item_type == 'restore':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_restore_tag(info_dict))
             elif item_type == 'sleep':
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_sleep_tag(info_dict))
             # 重新拍每个custom_control_list的id
@@ -509,6 +523,30 @@ class ShowActionTab(QWidget):
         if len(self.case_absolute_name) > 0:
             self.connect_save_script_tag()
 
+    # 添加restore动作控件
+    def add_restore_item(self, info_dict, new_control_flag=True):
+        # 给sleep动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = RestoreControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
+        obj.signal[str].connect(self.recv_restore_control_signal)
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='restore')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
+
+    # 插入restore动作控件
+    def insert_restore_item(self, info_dict):
+        # 给sleep动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = RestoreControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_restore_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='restore')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
+
     # 添加sleep动作控件
     def add_sleep_item(self, info_dict, new_control_flag=True):
         # 给sleep动作设置id
@@ -591,6 +629,23 @@ class ShowActionTab(QWidget):
             GloVar.post_info_list.append('stop')
             self.signal.emit('play_actions>')
 
+    # 接收restore控件传来的删除和执行信号
+    def recv_restore_control_signal(self, signal_str):
+        if signal_str.startswith('restore_delete_item>'):
+            id = int(signal_str.split('restore_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('restore_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
+            id = int(signal_str.split('restore_execute_item>')[1])
+            self.info_list[id]['execute_action'] = 'restore_action'
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
+
     # 接收sleep控件传来的删除和执行信号
     def recv_sleep_control_signal(self, signal_str):
         if signal_str.startswith('sleep_delete_item>'):
@@ -640,6 +695,13 @@ class ShowActionTab(QWidget):
                 self.add_assert_item(info_dict)
             else:
                 self.insert_assert_item(info_dict)
+        # 按下restore_tab页面确认按钮
+        elif signal_str.startswith('restore_tab_sure>'):
+            info_dict = json.loads(signal_str.split('restore_tab_sure>')[1])
+            if self.insert_item_index == -1:
+                self.add_restore_item(info_dict)
+            else:
+                self.insert_restore_item(info_dict)
         # 按下sleep_tab页面确认按钮
         elif signal_str.startswith('sleep_tab_sure>'):
             info_dict = json.loads(signal_str.split('sleep_tab_sure>')[1])
@@ -714,6 +776,14 @@ class ShowActionTab(QWidget):
         tag = '\t<action ' + 'assert_template' + '="' + 'picture' + '">\n' + \
               '\t\t' + '<param name="' + AssertAction.assert_template_name + '">' + assert_template_path + '</param>\n' + \
               '\t\t' + '<param name="' + AssertAction.assert_screen_type + '">' + assert_screen_type + '</param>\n' + \
+              '\t</action>\n'
+        return tag
+
+    # 添加restore动作生成标签
+    def generate_restore_tag(self, info_dict):
+        restore_screen = str(info_dict[RestoreAction.restore_screen])
+        tag = '\t<action ' + 'restore' + '="' + RestoreAction.restore_screen + '">\n' + \
+              '\t\t' + '<param name="' + RestoreAction.restore_screen + '">' + restore_screen + '</param>\n' + \
               '\t</action>\n'
         return tag
 

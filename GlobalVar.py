@@ -123,6 +123,7 @@ class IconPath:
     Icon_custom_delete = 'config/Icon/custom_widget_icon/delete.png'
     Icon_custom_play = 'config/Icon/custom_widget_icon/play.png'
     Icon_custom_video_camera = 'config/Icon/custom_widget_icon/video_camera.png'
+    Icon_custom_restore = 'config/Icon/custom_widget_icon/restore.png'
     Icon_custom_sleep = 'config/Icon/custom_widget_icon/sleep.png'
     Icon_custom_case = 'config/Icon/custom_widget_icon/case.png'
     Icon_tab_widget_new = 'config/Icon/tab_widget_icon/new.png'
@@ -230,6 +231,11 @@ class RecordAction:
 class AssertAction:
     assert_template_name = 'assert_template_name'
     assert_screen_type = 'assert_screen_type'
+
+
+# 恢复首页相关操作
+class RestoreAction:
+    restore_screen = 'restore_screen'
 
 
 # 延时相关操作

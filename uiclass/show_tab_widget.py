@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 from uiclass.show_action_tab import ShowActionTab
 from uiclass.show_case_tab import ShowCaseTab
 from uiclass.show_script_tab import ShowScriptTab
-from GlobalVar import GloVar, WindowStatus, RecordAction, AssertAction, SleepAction, Logger, MotionAction
+from GlobalVar import *
 
 
 class ShowTabWidget(QTabWidget):
@@ -100,6 +100,9 @@ class ShowTabWidget(QTabWidget):
                             # assert控件
                             elif AssertAction.assert_template_name in dict_info_list[id]:
                                 self.action_tab.add_assert_item(dict_info_list[id], new_control_flag=False)
+                            # restore控件
+                            elif RestoreAction.restore_screen in dict_info_list[id]:
+                                self.action_tab.add_restore_item(dict_info_list[id], new_control_flag=False)
                             # 为sleep控件
                             elif SleepAction.sleep_time in dict_info_list[id]:
                                 self.action_tab.add_sleep_item(dict_info_list[id], new_control_flag=False)

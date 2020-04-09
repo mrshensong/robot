@@ -8,7 +8,7 @@ from uarm_action.uarm import SwiftAPI
 from GlobalVar import Logger
 from uarm_action.video_of_external_camera import ExternalCameraVideo
 from uarm_action.video_of_system_camera import SystemCameraVideo
-from GlobalVar import GloVar, RobotArmParam, WindowStatus, Profile, MergePath, AssertAction
+from GlobalVar import *
 
 
 class ArmAction:
@@ -224,6 +224,18 @@ class ArmAction:
             Logger('预期界面-->匹配错误')
             return False
 
+    # 恢复动作
+    def play_restore_action(self, info_dict):
+        # 恢复app到桌面
+        screen_type = info_dict[RestoreAction.restore_screen]
+        package = self.get_current_package_name(screen_type)
+        if package is not None:
+            self.restore_app(package)
+            Logger('退出当前app[%s]' % package)
+        else:
+            Logger('没有获取到app包名')
+        time.sleep(1)
+
     # 延时动作
     @staticmethod
     def play_sleep_action(info_dict):
@@ -283,13 +295,16 @@ class ArmAction:
                     pass
                 else:
                     # 恢复app到桌面
-                    package = self.get_current_package_name(action)
+                    screen_type = action[AssertAction.assert_screen_type]
+                    package = self.get_current_package_name(screen_type)
                     if package is not None:
                         self.restore_app(package)
                         Logger('恢复当前app为默认状态-->跳出本次测试, 进入下次测试')
                     else:
                         Logger('跳出本次测试, 进入下次测试')
                     break
+            elif action['execute_action'] == 'restore_action':
+                self.play_restore_action(action)
             elif action['execute_action'] == 'sleep_action':
                 self.play_sleep_action(action)
                 time.sleep(0.2)
@@ -324,8 +339,7 @@ class ArmAction:
         return stdout
 
     # 获取当前包名
-    def get_current_package_name(self, info_dict):
-        screen_type = info_dict[AssertAction.assert_screen_type]
+    def get_current_package_name(self, screen_type):
         command = GloVar.adb_command + ' shell dumpsys window | findstr mCurrentFocus'
         result = self.execute_adb_command(command)
         current_package = None
@@ -342,7 +356,7 @@ class ArmAction:
         package_list = pattern.findall(str(result))
         if len(package_list) > 0:
             current_package = package_list[0].split(' ')[-1].split('/')[0]
-        Logger('当前package: ' + current_package)
+        Logger('获取到当前package: ' + str(current_package))
         return current_package
 
     # 恢复当前app到初始状态
