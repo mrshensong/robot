@@ -35,7 +35,7 @@ class AddAssertTab(QWidget):
         self.start_select_assert_template.setCheckState(Qt.Unchecked)
         self.start_select_assert_template.stateChanged.connect(self.connect_select_assert_template)
         # 选择是哪个屏幕(中控屏和副驾屏操作不同)
-        self.screen_type_drop_down_box = QComboBox()
+        self.screen_type_drop_down_box = QComboBox(self)
         self.screen_type_drop_down_box.addItems(GloVar.screen_type)
         # 模板名称
         self.template_name_edit = QLineEdit(self)

@@ -45,6 +45,8 @@ class GloVar:
     select_template_flag = False
     # 全局传递模板图片路径
     mask_path = None
+    # 当前case路径
+    current_case_path = ''
     # 数据处理标志
     data_process_flag = False
     # 判断当前action是否已经保存成为case标志

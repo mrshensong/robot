@@ -80,7 +80,7 @@ class ShowTabWidget(QTabWidget):
                 dict_info_list = eval(signal_str.split('case_transform_to_action>')[1])
                 # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息
                 self.action_tab.case_file_name = dict_info_list[0]
-                self.action_tab.case_absolute_name = dict_info_list[1]
+                self.action_tab.case_absolute_name = GloVar.current_case_path = dict_info_list[1]
                 Logger('[打开的case路径为]: %s' % dict_info_list[1])
                 # 打开的case非空
                 if len(dict_info_list) > 2:

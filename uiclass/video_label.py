@@ -385,7 +385,13 @@ class VideoLabel(QLabel):
                 GloVar.mask_path = MergePath([GloVar.project_picture_path, 'template']).merged_path
             elif GloVar.draw_frame_flag == GloVar.assert_template:
                 # assert_template目录
-                GloVar.mask_path = MergePath([GloVar.project_picture_path, 'assert']).merged_path
+                if len(GloVar.current_case_path) > 0:
+                    case_type = GloVar.current_case_path.split('/')[-2:-1][0]
+                    case_name = GloVar.current_case_path.split('/')[-1].split('.')[0]
+                else:
+                    case_type = '其他'
+                    case_name = GloVar.assert_template
+                GloVar.mask_path = MergePath([GloVar.project_picture_path, 'assert', case_type, case_name]).merged_path
             # 其余情况
             else:
                 GloVar.mask_path = MergePath([GloVar.project_picture_path, '框选图']).merged_path
@@ -999,7 +1005,18 @@ class VideoLabel(QLabel):
                 elif GloVar.draw_frame_flag == GloVar.assert_template:
                     mask_path = GloVar.mask_path
                     # 获取断言模板图片名字
-                    default_name = GloVar.assert_template
+                    assert_template_list = os.listdir(mask_path)
+                    if os.path.exists(mask_path):
+                        if len(assert_template_list) > 0:
+                            if (GloVar.assert_template + '-') in assert_template_list[-1]:
+                                num = int(assert_template_list[-1].split('-')[1].split('.')[0])
+                            else:
+                                num = len(assert_template_list)
+                        else:
+                            num = 0
+                    else:
+                        num = 0
+                    default_name = GloVar.assert_template + '-' + str(num + 1)
                 else:
                     # 接收模板路径
                     mask_path = GloVar.mask_path

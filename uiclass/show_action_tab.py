@@ -183,7 +183,7 @@ class ShowActionTab(QWidget):
                 self.select_all_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_tab_widget_all_select + ')}')
                 GloVar.actions_saved_to_case = True
                 self.case_file_name = ''
-                self.case_absolute_name = ''
+                self.case_absolute_name = GloVar.current_case_path = ''
                 break
             # 遍历完item后退出
             elif index < 0:
@@ -328,7 +328,7 @@ class ShowActionTab(QWidget):
             Profile(type='write', file=GloVar.config_file_path, section='param', option='script_path',
                     value=current_path)
         with open(xml_file, 'w', encoding='utf-8') as f:
-            self.case_absolute_name = xml_file
+            self.case_absolute_name = GloVar.current_case_path = xml_file
             self.case_file_name = xml_file.split('/')[-1]
             script_tag = self.merge_to_script(''.join(self.tag_list))
             f.write(script_tag)
@@ -358,7 +358,7 @@ class ShowActionTab(QWidget):
         WindowStatus.action_tab_status = '空白!'
         GloVar.actions_saved_to_case = True
         self.case_file_name = ''
-        self.case_absolute_name = ''
+        self.case_absolute_name = GloVar.current_case_path = ''
 
     # 添加item(action/video/sleep可以共用)
     def add_item(self, item, obj, info_dict, new_control_flag, item_type):

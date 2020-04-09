@@ -398,7 +398,7 @@ class RestoreControl(QWidget):
     def describe_restore(self):
         if self.new_control_flag is True:
             # 打印新建video动作信息
-            Logger('新建-->id{:-<5}action{:-<16}延时时间{}'.format(self.str_decorate(self.id),
+            Logger('新建-->id{:-<5}action{:-<16}恢复屏幕{}'.format(self.str_decorate(self.id),
                                                              self.str_decorate(RestoreAction.restore_screen),
                                                              self.str_decorate(self.restore_screen)))
 

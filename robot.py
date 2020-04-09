@@ -61,7 +61,7 @@ class UiMainWindow(QMainWindow):
         GloVar.project_video_path = MergePath(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
 
         # 显示窗口状态栏
-        self.timer_window_status = Timer(frequent=3)
+        self.timer_window_status = Timer(frequent=1)
         self.timer_window_status.timeSignal[str].connect(self.show_window_status)
         self.timer_window_status.start()
 
@@ -986,7 +986,7 @@ class UiMainWindow(QMainWindow):
     '''分隔符移动触发事件(主要重新设置控件大小以及样式)'''
     # 调整show_tab_widget的tab_bar栏
     def adjust_show_tab_widget(self):
-        width = self.show_tab_widget.width() - 5
+        width = self.splitter_v_part_1.width() - 5
         tab_count = self.show_tab_widget.count()
         tab_width = int(width / tab_count)
         # 样式设置

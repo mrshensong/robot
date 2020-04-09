@@ -25,7 +25,7 @@ class AddRestoreTab(QWidget):
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
         # 设置表单内容
         # 恢复屏幕类型下拉框选择
-        self.restore_screen_drop_down_box = QComboBox()
+        self.restore_screen_drop_down_box = QComboBox(self)
         self.restore_screen_drop_down_box.addItems(GloVar.screen_type)
         # 表单布局
         self.from_layout.addRow('屏幕选择: ', self.restore_screen_drop_down_box)
