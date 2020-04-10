@@ -1005,8 +1005,8 @@ class VideoLabel(QLabel):
                 elif GloVar.draw_frame_flag == GloVar.assert_template:
                     mask_path = GloVar.mask_path
                     # 获取断言模板图片名字
-                    assert_template_list = os.listdir(mask_path)
                     if os.path.exists(mask_path):
+                        assert_template_list = os.listdir(mask_path)
                         if len(assert_template_list) > 0:
                             if (GloVar.assert_template + '-') in assert_template_list[-1]:
                                 num = int(assert_template_list[-1].split('-')[1].split('.')[0])

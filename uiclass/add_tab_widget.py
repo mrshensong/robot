@@ -21,7 +21,7 @@ class TabWidget(QWidget):
         self.setObjectName('LeftTabWidget')
         self.setWindowTitle('LeftTabWidget')
         # list_style样式
-        self.list_style = 'QListWidget{padding: 0px 0px 0px 0px;}\
+        self.list_style = 'QListWidget{padding: 0px 0px 0px 0px; border: 1px solid #0099FF;}\
                            QListWidget::item{color: #242424;}\
                            QListWidget::Item:selected{background: #0099FF;}\
                            QListWidget::item:hover{background: #99CCFF;}'
@@ -34,7 +34,7 @@ class TabWidget(QWidget):
         self.main_layout.addWidget(self.left_widget)
 
         self.right_widget = QStackedWidget()
-        self.stacked_style = 'QStackedWidget{ border: 1px solid #0099FF;}'
+        self.stacked_style = 'QStackedWidget{border: 1px solid #0099FF;}'
         self.right_widget.setStyleSheet(self.stacked_style)
         self.main_layout.addWidget(self.right_widget)
         # 设置比例
