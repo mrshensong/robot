@@ -11,32 +11,63 @@ from uiclass.add_restore_tab import AddRestoreTab
 from GlobalVar import *
 
 
-class TabWidget(QTabWidget):
+class TabWidget(QWidget):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent=None, case_name=None, action_tab='action', video_tab='video', assert_tab='assert', restore='restore', sleep_tab='sleep'):
+    def __init__(self, parent=None, case_name=None):
         super(TabWidget, self).__init__(parent)
         self.parent = parent
-        self.setTabPosition(self.North)
-        # 样式设置 height: 25px; width:108;
-        style_sheet = 'QTabWidget:pane{ border: 1px solid #0099FF; top: -2px; bottom: 0px;}\
-                       QTabWidget:tab-bar{alignment: right;}\
-                       QTabBar::tab{height: 25px; width:86; margin-right: 0px; margin-bottom:0px;}\
-                       QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: #FFFFFF; border-top: 2px solid #0099FF; border-bottom: 2px solid #FFFFFF;}\
-                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
-                       QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}'
-        self.setStyleSheet(style_sheet)
+        self.setObjectName('LeftTabWidget')
+        self.setWindowTitle('LeftTabWidget')
+        # list_style样式
+        self.list_style = 'QListWidget{padding: 0px 0px 0px 0px;}\
+                           QListWidget::item{color: #242424;}\
+                           QListWidget::Item:selected{background: #0099FF;}\
+                           QListWidget::item:hover{background: #99CCFF;}'
+        # 窗口的整体布局
+        self.main_layout = QHBoxLayout(self, spacing=0)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        # 左侧选项列表
+        self.left_widget = QListWidget()
+        self.left_widget.setStyleSheet(self.list_style)
+        self.main_layout.addWidget(self.left_widget)
+
+        self.right_widget = QStackedWidget()
+        self.stacked_style = 'QStackedWidget{ border: 1px solid #0099FF;}'
+        self.right_widget.setStyleSheet(self.stacked_style)
+        self.main_layout.addWidget(self.right_widget)
+        # 设置比例
+        self.main_layout.setStretch(0, 2)
+        self.main_layout.setStretch(1, 9)
+        # list和右侧窗口的index对应绑定
+        self.left_widget.currentRowChanged.connect(self.right_widget.setCurrentIndex)
+        # 去掉边框
+        self.left_widget.setFrameShape(QListWidget.NoFrame)
+        # 隐藏滚动条
+        self.left_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.left_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 添加tab
         self.action_tab = AddActionTab(self)
         self.record_tab = AddRecordTab(self, case_name)
         self.assert_tab = AddAssertTab(self, case_name)
         self.restore_tab = AddRestoreTab(self)
         self.sleep_tab = AddSleepTab(self)
-        self.addTab(self.action_tab, action_tab)
-        self.addTab(self.record_tab, video_tab)
-        self.addTab(self.assert_tab, assert_tab)
-        self.addTab(self.restore_tab, restore)
-        self.addTab(self.sleep_tab, sleep_tab)
+        self.add_tab(self.action_tab, 'action')
+        self.add_tab(self.record_tab, 'video')
+        self.add_tab(self.assert_tab, 'assert')
+        self.add_tab(self.restore_tab, 'restore')
+        self.add_tab(self.sleep_tab, 'sleep')
+        # 设置当前行为第0行
+        self.left_widget.setCurrentRow(0)
+
+
+    def add_tab(self, widget, tab_name):
+        item = QListWidgetItem(tab_name, self.left_widget)  # 左侧选项的添加
+        # 居中显示
+        # item.setTextAlignment(Qt.AlignCenter)
+        item.setTextAlignment(Qt.AlignLeft)
+        self.right_widget.addWidget(widget)
 
 
 class AddTabWidget(QDialog):
@@ -59,7 +90,7 @@ class AddTabWidget(QDialog):
         self.widget.restore_tab.signal[str].connect(self.recv_restore_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setFixedWidth(440)
+        self.setFixedWidth(500)
 
     # 接收action_tab传来的信号
     def recv_action_tab_signal(self, signal_str):
@@ -147,7 +178,6 @@ class AddTabWidget(QDialog):
         # sleep_tab复位
         self.widget.sleep_tab.sleep_time_edit.setText('')
         self.widget.sleep_tab.sleep_time_edit.setPlaceholderText('睡眠时间(单位:s)')
-        self.widget.setCurrentWidget(self.widget.action_tab)
         self.close()
 
 

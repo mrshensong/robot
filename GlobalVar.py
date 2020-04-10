@@ -245,6 +245,16 @@ class SleepAction:
     sleep_time = 'sleep_time'
 
 
+# 逻辑相关
+class LogicAction:
+    pass
+
+
+# 循环相关
+class LoopAction:
+    pass
+
+
 # 配置文件的读取和写入
 class Profile:
     def __init__(self, type=None, file=None, section=None, option=None, value=None):
