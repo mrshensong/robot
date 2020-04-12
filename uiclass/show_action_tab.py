@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import *
-from uiclass.controls import ActionControl, RecordControl, AssertControl, RestoreControl, SleepControl
+from uiclass.controls import *
 from uiclass.add_tab_widget import AddTabWidget
 
 
@@ -223,6 +223,9 @@ class ShowActionTab(QWidget):
                 elif 'sleep_time' in rewrite_info:
                     text = self.custom_control_list[current_row].sleep_des_text.text()
                     self.custom_control_list[current_row].sleep_des_text.setText(text)
+                elif 'logic_action' in rewrite_info:
+                    text = self.custom_control_list[current_row].logic_des_text.text()
+                    self.custom_control_list[current_row].logic_des_text.setText(text)
             except:
                 pass
 
@@ -294,6 +297,10 @@ class ShowActionTab(QWidget):
                     # 为sleep控件
                     elif SleepAction.sleep_time in self.info_list[index]:
                         self.info_list[index]['execute_action'] = 'sleep_action'
+                        GloVar.post_info_list.append(self.info_list[index])
+                    # 为logic逻辑控件
+                    elif LogicAction.logic_action in self.info_list[index]:
+                        self.info_list[index]['execute_action'] = 'logic_action'
                         GloVar.post_info_list.append(self.info_list[index])
             index += 1
         GloVar.post_info_list.append('stop')
@@ -378,6 +385,8 @@ class ShowActionTab(QWidget):
             self.tag_list.append(self.generate_restore_tag(info_dict))
         elif item_type == 'sleep':
             self.tag_list.append(self.generate_sleep_tag(info_dict))
+        elif item_type == 'logic':
+            self.tag_list.append(self.generate_logic_tag(info_dict))
         # 发送需要显示的脚本标签
         self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         if new_control_flag is True:
@@ -412,6 +421,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index, self.generate_restore_tag(info_dict))
             elif item_type == 'sleep':
                 self.tag_list.insert(self.insert_item_index, self.generate_sleep_tag(info_dict))
+            elif item_type == 'logic':
+                self.tag_list.insert(self.insert_item_index, self.generate_logic_tag(info_dict))
             # 重新排每个custom_control_list的id
             for index in range(self.insert_item_index, self.index + 1):
                 self.custom_control_list[index].id = index
@@ -432,6 +443,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_restore_tag(info_dict))
             elif item_type == 'sleep':
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_sleep_tag(info_dict))
+            elif item_type == 'logic':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_logic_tag(info_dict))
             # 重新拍每个custom_control_list的id
             for index in range(self.insert_item_index + 1, self.index + 1):
                 self.custom_control_list[index].id = index
@@ -571,6 +584,30 @@ class ShowActionTab(QWidget):
         if len(self.case_absolute_name) > 0:
             self.connect_save_script_tag()
 
+    # 添加logic逻辑控件
+    def add_logic_item(self, info_dict, new_control_flag=True):
+        # 给sleep动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = LogicControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
+        obj.signal[str].connect(self.recv_logic_control_signal)
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='logic')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
+
+    # 插入logic逻辑控件
+    def insert_logic_item(self, info_dict):
+        # 给sleep动作设置id
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = LogicControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_logic_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='logic')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
+
     # 接收action控件传来的删除和执行信号
     def recv_action_control_signal(self, signal_str):
         if signal_str.startswith('action_delete_item>'):
@@ -663,6 +700,23 @@ class ShowActionTab(QWidget):
             GloVar.post_info_list.append('stop')
             self.signal.emit('play_actions>')
 
+    # 接收logic控件传来的删除和执行信号
+    def recv_logic_control_signal(self, signal_str):
+        if signal_str.startswith('logic_delete_item>'):
+            id = int(signal_str.split('logic_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('logic_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
+            id = int(signal_str.split('logic_execute_item>')[1])
+            self.info_list[id]['execute_action'] = 'logic_action'
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
+
     # 接收从添加动作子窗口传来的信号
     def recv_add_action_window_signal(self, signal_str):
         # 按下action_tab页面确定按钮后, 添加控件
@@ -709,6 +763,13 @@ class ShowActionTab(QWidget):
                 self.add_sleep_item(info_dict)
             else:
                 self.insert_sleep_item(info_dict)
+        # 按下logic_tab页面确认按钮
+        elif signal_str.startswith('logic_tab_sure>'):
+            info_dict = json.loads(signal_str.split('logic_tab_sure>')[1])
+            if self.insert_item_index == -1:
+                self.add_logic_item(info_dict)
+            else:
+                self.insert_logic_item(info_dict)
         # 接收到框选模板信号
         elif signal_str.startswith(GloVar.result_template):
             self.signal.emit(signal_str)
@@ -793,6 +854,12 @@ class ShowActionTab(QWidget):
         tag = '\t<action ' + 'sleep' + '="' + 'time/s' + '">\n' + \
               '\t\t' + '<param name="' + SleepAction.sleep_time + '">' + sleep_time + '</param>\n' + \
               '\t</action>\n'
+        return tag
+
+    # 添加logic逻辑标签
+    def generate_logic_tag(self, info_dict):
+        logic_type = str(info_dict[LogicAction.logic_action])
+        tag = '\t<action ' + 'logic_action' + '="' + logic_type + '"></action>\n'
         return tag
 
     # 将所有action合并成为script

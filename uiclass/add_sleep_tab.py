@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLin
 from PyQt5.QtCore import pyqtSignal, Qt
 from GlobalVar import SleepAction
 
+
 # 动作添加控件
 class AddSleepTab(QWidget):
 

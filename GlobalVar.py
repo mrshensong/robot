@@ -151,6 +151,11 @@ class IconPath:
     Icon_main_tab_widget_save_text = 'config/Icon/main_tab_widget_icon/save_text.png'
     Icon_main_tab_widget_close_tab = 'config/Icon/main_tab_widget_icon/close_tab.png'
     Icon_main_tab_widget_close_tab_hover = 'config/Icon/main_tab_widget_icon/close_tab_hover.png'
+    # 逻辑相关图标
+    Icon_logic_if = 'config/Icon/logic_control_icon/if.png'
+    Icon_logic_then = 'config/Icon/logic_control_icon/then.png'
+    Icon_logic_else = 'config/Icon/logic_control_icon/else.png'
+    Icon_logic_end_if = 'config/Icon/logic_control_icon/end_if.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
     # case停止执行
@@ -247,7 +252,11 @@ class SleepAction:
 
 # 逻辑相关
 class LogicAction:
-    pass
+    logic_action = 'logic_action'
+    logic_if = 'if'
+    logic_then = 'then'
+    logic_else = 'else'
+    logic_end_if = 'end_if'
 
 
 # 循环相关

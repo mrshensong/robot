@@ -12,7 +12,7 @@ class AddLogicTab(QWidget):
     def __init__(self, parent):
         super(AddLogicTab, self).__init__(parent)
         self.parent = parent
-        self.info_dict = {RestoreAction.restore_screen: 'restore_screen'}
+        self.info_dict = {LogicAction.logic_action: 'logic_action'}
         self.initUI()
 
     # 初始化
@@ -25,10 +25,14 @@ class AddLogicTab(QWidget):
         self.from_layout.setLabelAlignment(Qt.AlignCenter)
         # 设置表单内容
         # 恢复屏幕类型下拉框选择
-        self.restore_screen_drop_down_box = QComboBox(self)
-        self.restore_screen_drop_down_box.addItems(GloVar.screen_type)
+        self.logic_type = [LogicAction.logic_if,
+                           LogicAction.logic_then,
+                           LogicAction.logic_else,
+                           LogicAction.logic_end_if]
+        self.logic_select_box = QComboBox(self)
+        self.logic_select_box.addItems(self.logic_type)
         # 表单布局
-        self.from_layout.addRow('屏幕选择: ', self.restore_screen_drop_down_box)
+        self.from_layout.addRow('逻辑选择: ', self.logic_select_box)
 
         # 确定按钮
         self.sure_button = QPushButton('确定', self)
@@ -45,9 +49,8 @@ class AddLogicTab(QWidget):
         # 设置最小尺寸
         self.setMinimumWidth(300)
 
-
     def connect_sure(self):
-        self.info_dict[RestoreAction.restore_screen] = self.restore_screen_drop_down_box.currentText()
+        self.info_dict[LogicAction.logic_action] = self.logic_select_box.currentText()
         signal = json.dumps(self.info_dict)
         # 发送开头sure标志-->判断是确认按钮按下
-        self.signal.emit('restore_tab_sure>' + signal)
+        self.signal.emit('logic_tab_sure>' + signal)

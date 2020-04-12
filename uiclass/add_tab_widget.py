@@ -8,6 +8,7 @@ from uiclass.add_record_tab import AddRecordTab
 from uiclass.add_sleep_tab import AddSleepTab
 from uiclass.add_assert_tab import AddAssertTab
 from uiclass.add_restore_tab import AddRestoreTab
+from uiclass.add_logic_tab import AddLogicTab
 from GlobalVar import *
 
 
@@ -53,14 +54,15 @@ class TabWidget(QWidget):
         self.assert_tab = AddAssertTab(self, case_name)
         self.restore_tab = AddRestoreTab(self)
         self.sleep_tab = AddSleepTab(self)
+        self.logic_tab = AddLogicTab(self)
         self.add_tab(self.action_tab, 'action')
         self.add_tab(self.record_tab, 'video')
         self.add_tab(self.assert_tab, 'assert')
         self.add_tab(self.restore_tab, 'restore')
         self.add_tab(self.sleep_tab, 'sleep')
+        self.add_tab(self.logic_tab, 'logic')
         # 设置当前行为第0行
         self.left_widget.setCurrentRow(0)
-
 
     def add_tab(self, widget, tab_name):
         item = QListWidgetItem(tab_name, self.left_widget)  # 左侧选项的添加
@@ -89,6 +91,7 @@ class AddTabWidget(QDialog):
         self.widget.assert_tab.signal[str].connect(self.recv_assert_tab_signal)
         self.widget.restore_tab.signal[str].connect(self.recv_restore_tab_signal)
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
+        self.widget.logic_tab.signal[str].connect(self.recv_logic_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(500)
 
@@ -140,6 +143,13 @@ class AddTabWidget(QDialog):
     # 接收sleep_tab传来的信号
     def recv_sleep_tab_signal(self, signal_str):
         if signal_str.startswith('sleep_tab_sure>'):
+            self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
+            self.close()
+
+    # 接收logic_tab传来的信号
+    def recv_logic_tab_signal(self, signal_str):
+        if signal_str.startswith('logic_tab_sure>'):
             self.signal.emit(signal_str)
             GloVar.add_action_window_opened_flag = False
             self.close()
