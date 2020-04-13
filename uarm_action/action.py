@@ -263,8 +263,9 @@ class ArmAction:
             # 去掉校验信息(掐头去尾, 只保留有用内容)
             data.pop(-1)
             data.pop(0)
-            # 开始执行动作
-            self.split_and_execute_action(data)
+            # 重新整理action_list并执行
+            action_list = self.arrange_actions(data)
+            self.deal_action_list(action_list)
             # 打印描述信息
             if description is not None:
                 if description == 'actions':
@@ -277,6 +278,92 @@ class ArmAction:
         #     return HttpResponse("data error")
     # return HttpResponse("ok")
 
+    # 先整理动作(遇到if-else将他们整理成逻辑语句)
+    @staticmethod
+    def arrange_actions(action_list):
+        # 存放新整理的动作列表
+        new_arrange_actions = []
+        # 存放逻辑语句动作
+        logic_action_dict = {'execute_action': 'logic_action',
+                             LogicAction.logic_if: [],
+                             LogicAction.logic_then: [],
+                             LogicAction.logic_else: [],
+                             LogicAction.logic_end_if: []}
+        # 判断是否逻辑语句标志
+        logic_flag = False
+        # 判断需要将当前action放入逻辑语句动作中的哪个键值中
+        logic_type = None
+        for i in range(len(action_list)):
+            action = action_list[i]
+            # 判断逻辑起点(logic_action = if 为起点)
+            if action['execute_action'] == 'logic_action':
+                if action[LogicAction.logic_action] == LogicAction.logic_if:
+                    new_arrange_actions.append(logic_action_dict)
+                    logic_flag = True
+                elif action[LogicAction.logic_action] == LogicAction.logic_end_if:
+                    logic_flag = False
+            # 通过logic_flag将动作装入新动作列表
+            if logic_flag is True:
+                # 通过逻辑改变当前逻辑语句动作键值
+                if action['execute_action'] == 'logic_action':
+                    if action[LogicAction.logic_action] == LogicAction.logic_if:
+                        logic_type = LogicAction.logic_if
+                    elif action[LogicAction.logic_action] == LogicAction.logic_then:
+                        logic_type = LogicAction.logic_then
+                    elif action[LogicAction.logic_action] == LogicAction.logic_else:
+                        logic_type = LogicAction.logic_else
+                    elif action[LogicAction.logic_action] == LogicAction.logic_end_if:
+                        logic_type = LogicAction.logic_end_if
+                else:
+                    logic_action_dict[logic_type].append(action)
+            else:
+                if action['execute_action'] != 'logic_action':
+                    new_arrange_actions.append(action)
+        return new_arrange_actions
+
+    # 处理action_list动作并执行(其中包含逻辑语句)
+    def deal_action_list(self, action_list):
+        # 开始执行动作
+        for i in range(len(action_list)):
+            action = action_list[i]
+            if action['execute_action'] == 'motion_action':
+                self.play_motion_action(action)
+                time.sleep(0.2)
+            elif action['execute_action'] == 'record_action':
+                self.play_record_action(action)
+                time.sleep(0.2)
+            elif action['execute_action'] == 'logic_action':
+                time.sleep(1)
+                self.execute_logic_action(action)
+            elif action['execute_action'] == 'restore_action':
+                self.play_restore_action(action)
+            elif action['execute_action'] == 'sleep_action':
+                self.play_sleep_action(action)
+                time.sleep(0.2)
+
+    # 执行逻辑动作
+    def execute_logic_action(self, logic_dict):
+        logic_if_action = None
+        logic_then_action_list = []
+        logic_else_action_list = []
+        if len(logic_dict[LogicAction.logic_if]) > 0:
+            logic_if_action = logic_dict[LogicAction.logic_if][0]
+        if len(logic_dict[LogicAction.logic_then]) > 0:
+            logic_then_action_list = logic_dict[LogicAction.logic_then]
+        if len(logic_dict[LogicAction.logic_else]) > 0:
+            logic_else_action_list = logic_dict[LogicAction.logic_else]
+        # 开始去执行
+        if logic_if_action is not None:
+            if logic_if_action['execute_action'] == 'assert_action':
+                flag = self.play_assert_action(logic_if_action)
+                # if
+                if flag is True:
+                    # then
+                    self.split_and_execute_action(logic_then_action_list)
+                # else
+                else:
+                    self.split_and_execute_action(logic_else_action_list)
+
     # 拆解action动作并执行
     def split_and_execute_action(self, action_list):
         # 开始执行动作
@@ -288,21 +375,6 @@ class ArmAction:
             elif action['execute_action'] == 'record_action':
                 self.play_record_action(action)
                 time.sleep(0.2)
-            elif action['execute_action'] == 'assert_action':
-                time.sleep(1)
-                go_down_flag = self.play_assert_action(action)
-                if go_down_flag is True:
-                    pass
-                else:
-                    # 恢复app到桌面
-                    screen_type = action[AssertAction.assert_screen_type]
-                    package = self.get_current_package_name(screen_type)
-                    if package is not None:
-                        self.restore_app(package)
-                        Logger('恢复当前app为默认状态-->跳出本次测试, 进入下次测试')
-                    else:
-                        Logger('跳出本次测试, 进入下次测试')
-                    break
             elif action['execute_action'] == 'restore_action':
                 self.play_restore_action(action)
             elif action['execute_action'] == 'sleep_action':
@@ -310,7 +382,8 @@ class ArmAction:
                 time.sleep(0.2)
 
     # 断言操作需要用到的模板匹配
-    def match_template(self, source_img, target_img):
+    @staticmethod
+    def match_template(source_img, target_img):
         """
         :param source_img: 源图像(大图)
         :param target_img: 靶子图像(小图)

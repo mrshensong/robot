@@ -1178,11 +1178,11 @@ class VideoLabel(QLabel):
         if num_length == 4:
             str_num = str(num)
         elif num_length == 3:
-            str_num = str(0) + str(num)
+            str_num = '0' + str(num)
         elif num_length == 2:
-            str_num = str(00) + str(num)
+            str_num = '00' + str(num)
         elif num_length == 1:
-            str_num = str(000) + str(num)
+            str_num = '000' + str(num)
         else:
             str_num = '1234'
         position_info = [int(list(str_num)[0]), int(list(str_num)[1]), int(list(str_num)[2]), int(list(str_num)[3])]

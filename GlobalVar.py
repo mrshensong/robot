@@ -237,7 +237,6 @@ class RecordAction:
 # 断言相关操作
 class AssertAction:
     assert_template_name = 'assert_template_name'
-    assert_screen_type = 'assert_screen_type'
 
 
 # 恢复首页相关操作

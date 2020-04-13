@@ -833,10 +833,8 @@ class ShowActionTab(QWidget):
     # 添加assert动作生成标签
     def generate_assert_tag(self, info_dict):
         assert_template_path = str(info_dict[AssertAction.assert_template_name])
-        assert_screen_type = str(info_dict[AssertAction.assert_screen_type])
         tag = '\t<action ' + 'assert_template' + '="' + 'picture' + '">\n' + \
               '\t\t' + '<param name="' + AssertAction.assert_template_name + '">' + assert_template_path + '</param>\n' + \
-              '\t\t' + '<param name="' + AssertAction.assert_screen_type + '">' + assert_screen_type + '</param>\n' + \
               '\t</action>\n'
         return tag
 
