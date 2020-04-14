@@ -156,6 +156,10 @@ class IconPath:
     Icon_logic_then = 'config/Icon/logic_control_icon/then.png'
     Icon_logic_else = 'config/Icon/logic_control_icon/else.png'
     Icon_logic_end_if = 'config/Icon/logic_control_icon/end_if.png'
+    # 循环相关图标
+    Icon_loop_start = 'config/Icon/loop_control_icon/loop.png'
+    Icon_loop_break = 'config/Icon/loop_control_icon/break.png'
+    Icon_loop_end = 'config/Icon/loop_control_icon/end_loop.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
     # case停止执行
@@ -260,7 +264,11 @@ class LogicAction:
 
 # 循环相关
 class LoopAction:
-    pass
+    loop_action = 'loop_action'
+    loop_start = 'loop_start'
+    loop_break = 'loop_break'
+    loop_end = 'loop_end'
+    loop_num = 'loop_num'
 
 
 # 配置文件的读取和写入

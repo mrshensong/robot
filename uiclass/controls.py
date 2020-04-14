@@ -553,6 +553,103 @@ class LogicControl(QWidget):
                                                              self.str_decorate(self.logic_type)))
 
 
+# 循环loop展示控件(if)
+class LoopControl(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent, id, info_dict, new_control_flag=True):
+        super(LoopControl, self).__init__(parent)
+        self.parent = parent
+        self.id = id
+        # 判断是真的新建record还是通过脚本导入的case(new_control_flag:True新建, False导入)
+        self.new_control_flag = new_control_flag
+        self.loop_type = info_dict[LoopAction.loop_action]
+        if LoopAction.loop_num in info_dict:
+            self.loop_num = int(info_dict[LoopAction.loop_num])
+        else:
+            self.loop_num = 0
+        self.initUI()
+        self.describe_sleep()
+
+    def initUI(self):
+        # 选择框
+        self.check_box = QCheckBox()
+        # 逻辑图标
+        if self.loop_type == LoopAction.loop_start:
+            icon_path = IconPath.Icon_loop_start
+        elif self.loop_type == LoopAction.loop_break:
+            icon_path = IconPath.Icon_loop_break
+        elif self.loop_type == LoopAction.loop_end:
+            icon_path = IconPath.Icon_loop_end
+        else:
+            icon_path = ''
+        self.loop_icon_label = QLabel(self)
+        self.loop_icon_label.setPixmap(QPixmap(icon_path))
+        # 显示循环次数(只有loop_start显示次数)
+        self.num_show = QSpinBox(self)
+        self.num_show.setValue(self.loop_num)
+        self.num_show.valueChanged.connect(self.loop_num_changed)
+        if self.loop_type == LoopAction.loop_start:
+            self.num_show.setHidden(False)
+        else:
+            self.num_show.setHidden(True)
+        # 逻辑显示
+        self.loop_des_text = QLineEdit(self)
+        self.loop_des_text.setReadOnly(True)
+        self.loop_des_text.setText(self.loop_type)
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.loop_execute_item)
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.loop_delete_item)
+        # 布局
+        self.h_box = QHBoxLayout()
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.loop_icon_label)
+        self.h_box.addWidget(self.loop_des_text)
+        self.h_box.addWidget(self.num_show)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
+        self.setLayout(self.h_box)
+        self.setMaximumWidth(400)
+
+    # 循环次数改变
+    def loop_num_changed(self):
+        self.loop_num = self.num_show.value()
+        self.signal.emit('loop_num_changed>' + str(self.id))
+
+    # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
+    def str_decorate(self, origin_str, decorate_str='[]'):
+        return str(origin_str).join(decorate_str)
+
+    def play_loop_item(self):
+        self.signal.emit('loop_execute_item>' + str(self.id))
+
+    # 执行单个动作(新建线程/控件中的执行按钮)
+    def loop_execute_item(self):
+        Thread(target=self.play_loop_item, args=()).start()
+
+    # 删除单个动作(控件中的删除按钮)
+    def loop_delete_item(self):
+        # 打印删除信息
+        Logger('删除-->id{:-<5}action{:-<16}循环动作{}'.format(self.str_decorate(self.id),
+                                                         self.str_decorate(LoopAction.loop_action),
+                                                         self.str_decorate(self.loop_type)))
+        self.signal.emit('logic_delete_item>' + str(self.id))
+
+    # 打印控件信息
+    def describe_sleep(self):
+        if self.new_control_flag is True:
+            # 打印新建video动作信息
+            Logger('新建-->id{:-<5}action{:-<16}循环动作{}'.format(self.str_decorate(self.id),
+                                                             self.str_decorate(LoopAction.loop_action),
+                                                             self.str_decorate(self.loop_type)))
+
+
 # 自定义动作展示控件(case)
 class CaseControl(QWidget):
 

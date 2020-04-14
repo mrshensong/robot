@@ -387,6 +387,10 @@ class ShowCaseTab(QWidget):
                 elif LogicAction.logic_action in dict_info_list[id]:
                     dict_info_list[id]['execute_action'] = 'logic_action'
                     GloVar.post_info_list.append(dict_info_list[id])
+                # 为loop控件
+                elif LoopAction.loop_action in dict_info_list[id]:
+                    dict_info_list[id]['execute_action'] = 'loop_action'
+                    GloVar.post_info_list.append(dict_info_list[id])
         GloVar.post_info_list.append('stop')
         # 执行一条case
         # self.signal.emit('sleep_execute_item>' + json.dumps(GloVar.post_info_list))

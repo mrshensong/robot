@@ -109,6 +109,9 @@ class ShowTabWidget(QTabWidget):
                             # 为logic控件
                             elif LogicAction.logic_action in dict_info_list[id]:
                                 self.action_tab.add_logic_item(dict_info_list[id], new_control_flag=False)
+                            # 为loop控件
+                            elif LoopAction.loop_action in dict_info_list[id]:
+                                self.action_tab.add_loop_item(dict_info_list[id], new_control_flag=False)
                 # 打开的case为空
                 else:
                     script_text = '<case name="' + self.action_tab.case_file_name + '">\n</case>'
