@@ -639,7 +639,7 @@ class LoopControl(QWidget):
         Logger('删除-->id{:-<5}action{:-<16}循环动作{}'.format(self.str_decorate(self.id),
                                                          self.str_decorate(LoopAction.loop_action),
                                                          self.str_decorate(self.loop_type)))
-        self.signal.emit('logic_delete_item>' + str(self.id))
+        self.signal.emit('loop_delete_item>' + str(self.id))
 
     # 打印控件信息
     def describe_sleep(self):
