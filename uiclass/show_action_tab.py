@@ -363,7 +363,13 @@ class ShowActionTab(QWidget):
     # 框选模板
     def connect_draw_frame(self):
         # 发出框选模板信号
-        self.signal.emit('draw_frame>')
+        # 先将当前视频类型和名字更新为当前case的名字(框选模板的时候才能知道模板的名字)
+        for info_dict in self.info_list:
+            if 'camera_video' in info_dict:
+                RecordAction.current_video_type = info_dict[RecordAction.video_type]
+                RecordAction.current_video_name = info_dict[RecordAction.video_name]
+                self.signal.emit(GloVar.result_template)
+                break
 
     # 清除所有动作
     def clear_all_items(self):
