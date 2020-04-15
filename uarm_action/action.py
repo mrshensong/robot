@@ -424,15 +424,17 @@ class ArmAction:
         if logic_if_action is not None:
             if logic_if_action['execute_action'] == 'assert_action':
                 flag = self.play_assert_action(logic_if_action)
+            # 可以添加其他类型的判断语句
             else:
                 return
             # if
             if flag is True:
                 # then
-                self.split_and_execute_action(logic_then_action_list)
+                break_flag = self.split_and_execute_action(logic_then_action_list)
             # else
             else:
-                self.split_and_execute_action(logic_else_action_list)
+                break_flag = self.split_and_execute_action(logic_else_action_list)
+            return break_flag
 
     # 执行循环动作
     def execute_loop_action(self, loop_dict):
@@ -441,6 +443,7 @@ class ArmAction:
         for i in range(loop_num):
             break_flag = self.split_and_execute_action(loop_action_list)
             if break_flag is True:
+                Logger('跳出当前loop循环')
                 break
 
     # 拆解action动作并执行(要使用break, 可以在此处返回值用来标记(break_flag,判断是否需要执行跳出循环))
@@ -461,7 +464,9 @@ class ArmAction:
                 self.play_sleep_action(action)
                 time.sleep(0.2)
             elif action['execute_action'] == 'logic_action':
-                self.execute_logic_action(action)
+                break_flag = self.execute_logic_action(action)
+                if break_flag is True:
+                    break
             elif action['execute_action'] == 'loop_action':
                 self.execute_loop_action(action)
             elif action['execute_action'] == 'break_action':
