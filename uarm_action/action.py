@@ -439,10 +439,13 @@ class ArmAction:
         loop_num = int(loop_dict[LoopAction.loop_num])
         loop_action_list = loop_dict[LoopAction.loop_start]
         for i in range(loop_num):
-            self.split_and_execute_action(loop_action_list)
+            break_flag = self.split_and_execute_action(loop_action_list)
+            if break_flag is True:
+                break
 
-    # 拆解action动作并执行(要使用break, 可以在此处返回值用来标记(break, no))
+    # 拆解action动作并执行(要使用break, 可以在此处返回值用来标记(break_flag,判断是否需要执行跳出循环))
     def split_and_execute_action(self, action_list):
+        break_flag = False
         # 开始执行动作
         for i in range(len(action_list)):
             action = action_list[i]
@@ -461,6 +464,10 @@ class ArmAction:
                 self.execute_logic_action(action)
             elif action['execute_action'] == 'loop_action':
                 self.execute_loop_action(action)
+            elif action['execute_action'] == 'break_action':
+                break_flag = True
+                break
+        return break_flag
 
     # 断言操作需要用到的模板匹配
     @staticmethod

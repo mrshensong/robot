@@ -10,6 +10,7 @@ from uiclass.add_assert_tab import AddAssertTab
 from uiclass.add_restore_tab import AddRestoreTab
 from uiclass.add_logic_tab import AddLogicTab
 from uiclass.add_loop_tab import AddLoopTab
+from uiclass.add_break_tab import AddBreakTab
 from GlobalVar import *
 
 
@@ -57,6 +58,7 @@ class TabWidget(QWidget):
         self.sleep_tab = AddSleepTab(self)
         self.logic_tab = AddLogicTab(self)
         self.loop_tab = AddLoopTab(self)
+        self.break_tab = AddBreakTab(self)
         self.add_tab(self.action_tab, 'action')
         self.add_tab(self.record_tab, 'video')
         self.add_tab(self.assert_tab, 'assert')
@@ -64,6 +66,7 @@ class TabWidget(QWidget):
         self.add_tab(self.sleep_tab, 'sleep')
         self.add_tab(self.logic_tab, 'logic')
         self.add_tab(self.loop_tab, 'loop')
+        self.add_tab(self.break_tab, 'break')
         # 设置当前行为第0行
         self.left_widget.setCurrentRow(0)
 
@@ -96,6 +99,7 @@ class AddTabWidget(QDialog):
         self.widget.sleep_tab.signal[str].connect(self.recv_sleep_tab_signal)
         self.widget.logic_tab.signal[str].connect(self.recv_logic_tab_signal)
         self.widget.loop_tab.signal[str].connect(self.recv_loop_tab_signal)
+        self.widget.break_tab.signal[str].connect(self.recv_break_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(500)
 
@@ -158,8 +162,16 @@ class AddTabWidget(QDialog):
             GloVar.add_action_window_opened_flag = False
             self.close()
 
+    # 接收loop_tab传来的信号
     def recv_loop_tab_signal(self, signal_str):
-        if signal_str.startswith('loop_tab_sure'):
+        if signal_str.startswith('loop_tab_sure>'):
+            self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
+            self.close()
+
+    # 接收break_tab传来的信号
+    def recv_break_tab_signal(self, signal_str):
+        if signal_str.startswith('break_tab_sure>'):
             self.signal.emit(signal_str)
             GloVar.add_action_window_opened_flag = False
             self.close()
