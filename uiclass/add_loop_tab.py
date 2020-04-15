@@ -26,7 +26,6 @@ class AddLoopTab(QWidget):
         # 设置表单内容
         # 恢复屏幕类型下拉框选择
         self.loop_type = [LoopAction.loop_start,
-                           LoopAction.loop_break,
                            LoopAction.loop_end]
         self.loop_select_box = QComboBox(self)
         self.loop_select_box.addItems(self.loop_type)

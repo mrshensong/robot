@@ -266,9 +266,14 @@ class LogicAction:
 class LoopAction:
     loop_action = 'loop_action'
     loop_start = 'loop_start'
-    loop_break = 'loop_break'
     loop_end = 'loop_end'
     loop_num = 'loop_num'
+
+
+# 跳出循环动作
+class BreakAction:
+    break_action = 'break_action'
+    break_out = 'break'
 
 
 # 配置文件的读取和写入

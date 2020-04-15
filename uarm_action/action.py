@@ -283,41 +283,107 @@ class ArmAction:
     def arrange_actions(action_list):
         # 存放新整理的动作列表
         new_arrange_actions = []
-        # 存放逻辑语句动作
-        logic_action_dict = {'execute_action': 'logic_action',
-                             LogicAction.logic_if: [],
-                             LogicAction.logic_then: [],
-                             LogicAction.logic_else: [],
-                             LogicAction.logic_end_if: []}
-        # 判断是否逻辑语句标志
-        logic_flag = False
-        # 判断需要将当前action放入逻辑语句动作中的哪个键值中
-        logic_type = None
+        # 存放嵌套的逻辑dict(按顺序, 目的为了获取每一级嵌套结束后, 获取当前的逻辑词典)
+        action_dict_list = []
+        # 判断是否逻辑语句标志(出现1个if时候=1, 2个if=2...)
+        logic_flag = 0
+        # 判断是否循环语句标志(出现1个loop_start时候=1, 2个loop_start=2...)
+        loop_flag = 0
+        # 判断需要将当前action放入逻辑语句动作中的哪个键值中(if/then/else)
+        logic_or_loop_type = None
+        # 保存上一次嵌套的类型, 以保证可以存放入正确的类型里面
+        old_logic_or_loop_type = None
         for i in range(len(action_list)):
             action = action_list[i]
             # 判断逻辑起点(logic_action = if 为起点)
             if action['execute_action'] == 'logic_action':
                 if action[LogicAction.logic_action] == LogicAction.logic_if:
-                    new_arrange_actions.append(logic_action_dict)
-                    logic_flag = True
+                    # 每进入一个新的嵌套(需要保证之前的类型, 一面当前嵌套结束后, 后面动作不知道归为哪一类)
+                    old_logic_or_loop_type = logic_or_loop_type
+                    logic_flag += 1
+                    # 存放逻辑语句动作
+                    logic_action_dict = {'execute_action': 'logic_action',
+                                         LogicAction.logic_if: [],
+                                         LogicAction.logic_then: [],
+                                         LogicAction.logic_else: [],
+                                         LogicAction.logic_end_if: []}
+                    # 将逻辑语句追加到action_list后面
+                    if logic_flag == 1:
+                        if loop_flag > 0:
+                            current_action_dict[logic_or_loop_type].append(logic_action_dict)
+                        else:
+                            # 只有最外层才可以追加进new_arrange_actions里面
+                            new_arrange_actions.append(logic_action_dict)
+                    # 其余情况追加到前一个逻辑里面
+                    else:
+                        current_action_dict[logic_or_loop_type].append(logic_action_dict)
+                    current_action_dict = logic_action_dict
+                    action_dict_list.append(current_action_dict)
                 elif action[LogicAction.logic_action] == LogicAction.logic_end_if:
-                    logic_flag = False
+                    logic_flag -= 1
+                    action_dict_list.pop(-1)
+                    if len(action_dict_list) > 0:
+                        current_action_dict = action_dict_list[-1]
+                    else:
+                        current_action_dict = {}
+            # 判断逻辑起点(loop_action = loop_start 为起点)
+            elif action['execute_action'] == 'loop_action':
+                if action[LoopAction.loop_action] == LoopAction.loop_start:
+                    # 每进入一个新的嵌套(需要保证之前的类型, 一面当前嵌套结束后, 后面动作不知道归为哪一类)
+                    old_logic_or_loop_type = logic_or_loop_type
+                    loop_flag += 1
+                    # 存放循环语句动作
+                    loop_action_dict = {'execute_action': 'loop_action',
+                                        LoopAction.loop_num: int(action[LoopAction.loop_num]),
+                                        LoopAction.loop_start: [],
+                                        LoopAction.loop_end: []}
+                    # 将循环语句追加到action_list后面
+                    if loop_flag == 1:
+                        if logic_flag > 0:
+                            current_action_dict[logic_or_loop_type].append(loop_action_dict)
+                        else:
+                            # 只有最外层才可以追加进new_arrange_actions里面
+                            new_arrange_actions.append(loop_action_dict)
+                    # 其余情况追加到前一个循环中
+                    else:
+                        current_action_dict[logic_or_loop_type].append(loop_action_dict)
+                    current_action_dict = loop_action_dict
+                    action_dict_list.append(current_action_dict)
+                elif action[LoopAction.loop_action] == LoopAction.loop_end:
+                    loop_flag -= 1
+                    action_dict_list.pop(-1)
+                    if len(action_dict_list) > 0:
+                        current_action_dict = action_dict_list[-1]
+                    else:
+                        current_action_dict = {}
             # 通过logic_flag将动作装入新动作列表
-            if logic_flag is True:
+            if logic_flag > 0 or loop_flag > 0:
                 # 通过逻辑改变当前逻辑语句动作键值
                 if action['execute_action'] == 'logic_action':
                     if action[LogicAction.logic_action] == LogicAction.logic_if:
-                        logic_type = LogicAction.logic_if
+                        logic_or_loop_type = LogicAction.logic_if
                     elif action[LogicAction.logic_action] == LogicAction.logic_then:
-                        logic_type = LogicAction.logic_then
+                        logic_or_loop_type = LogicAction.logic_then
                     elif action[LogicAction.logic_action] == LogicAction.logic_else:
-                        logic_type = LogicAction.logic_else
+                        logic_or_loop_type = LogicAction.logic_else
                     elif action[LogicAction.logic_action] == LogicAction.logic_end_if:
-                        logic_type = LogicAction.logic_end_if
+                        logic_or_loop_type = LogicAction.logic_end_if
+                        # 当嵌套结束时候恢复嵌套之前的类型(接着在此类型上添加action)
+                        logic_or_loop_type = old_logic_or_loop_type
+                # 通过循环改变当前循环语句动作键值
+                elif action['execute_action'] == 'loop_action':
+                    if action[LoopAction.loop_action] == LoopAction.loop_start:
+                        logic_or_loop_type = LoopAction.loop_start
+                    elif action[LoopAction.loop_action] == LoopAction.loop_end:
+                        logic_or_loop_type = LoopAction.loop_end
+                        # 当嵌套结束时候恢复嵌套之前的类型(接着在此类型上添加action)
+                        logic_or_loop_type = old_logic_or_loop_type
+                # 在当前action_dict中的键值中追加action
                 else:
-                    logic_action_dict[logic_type].append(action)
+                    # ?当前action属于loop还是logic???
+                    current_action_dict[logic_or_loop_type].append(action)
             else:
-                if action['execute_action'] != 'logic_action':
+                if action['execute_action'] != 'logic_action' and action['execute_action'] != 'loop_action':
                     new_arrange_actions.append(action)
         return new_arrange_actions
 
@@ -335,6 +401,8 @@ class ArmAction:
             elif action['execute_action'] == 'logic_action':
                 time.sleep(1)
                 self.execute_logic_action(action)
+            elif action['execute_action'] == 'loop_action':
+                self.execute_loop_action(action)
             elif action['execute_action'] == 'restore_action':
                 self.play_restore_action(action)
             elif action['execute_action'] == 'sleep_action':
@@ -356,15 +424,24 @@ class ArmAction:
         if logic_if_action is not None:
             if logic_if_action['execute_action'] == 'assert_action':
                 flag = self.play_assert_action(logic_if_action)
-                # if
-                if flag is True:
-                    # then
-                    self.split_and_execute_action(logic_then_action_list)
-                # else
-                else:
-                    self.split_and_execute_action(logic_else_action_list)
+            else:
+                return
+            # if
+            if flag is True:
+                # then
+                self.split_and_execute_action(logic_then_action_list)
+            # else
+            else:
+                self.split_and_execute_action(logic_else_action_list)
 
-    # 拆解action动作并执行
+    # 执行循环动作
+    def execute_loop_action(self, loop_dict):
+        loop_num = int(loop_dict[LoopAction.loop_num])
+        loop_action_list = loop_dict[LoopAction.loop_start]
+        for i in range(loop_num):
+            self.split_and_execute_action(loop_action_list)
+
+    # 拆解action动作并执行(要使用break, 可以在此处返回值用来标记(break, no))
     def split_and_execute_action(self, action_list):
         # 开始执行动作
         for i in range(len(action_list)):
@@ -380,6 +457,10 @@ class ArmAction:
             elif action['execute_action'] == 'sleep_action':
                 self.play_sleep_action(action)
                 time.sleep(0.2)
+            elif action['execute_action'] == 'logic_action':
+                self.execute_logic_action(action)
+            elif action['execute_action'] == 'loop_action':
+                self.execute_loop_action(action)
 
     # 断言操作需要用到的模板匹配
     @staticmethod
