@@ -1,6 +1,8 @@
+import os
 import time
 from other.operate_config import ConfigWithComment
 import configparser
+import xml.etree.cElementTree as ET
 
 
 # 文件之间参数传递
@@ -160,6 +162,9 @@ class IconPath:
     Icon_loop_start = 'config/Icon/loop_control_icon/loop.png'
     Icon_loop_break = 'config/Icon/loop_control_icon/break.png'
     Icon_loop_end = 'config/Icon/loop_control_icon/end_loop.png'
+    # 调用函数相关
+    Icon_call_function_icon = 'config/Icon/call_function_control_icon/call_function.png'
+    Icon_select_function_icon = 'config/Icon/call_function_control_icon/select_function.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
     # case停止执行
@@ -276,6 +281,12 @@ class BreakAction:
     break_out = 'break'
 
 
+# 调用函数功能
+class CallFunctionAction:
+    call_function = 'call_function'
+    function_name = 'function_name'
+
+
 # 配置文件的读取和写入
 class Profile:
     def __init__(self, type=None, file=None, section=None, option=None, value=None):
@@ -355,3 +366,75 @@ class BeautifyStyle:
     font_family = 'font-family: Times New Roman;'
     font_size = 'font-size: 13pt;'
     file_dialog_qss = 'QFileDialog {background-color: beige;}'
+
+
+# 共用函数
+class Common:
+
+    # 返回list为每个action的信息(字典形式)>>list第一个参数为case文件名, 后面参数为每个action的信息存储字典
+    @staticmethod
+    def read_script_tag(case_path):
+        case_file = case_path
+        try:
+            tree = ET.ElementTree(file=case_file)
+            root = tree.getroot()
+            dict_list, new_dict_info = [], []
+            for child_of_root in root:
+                child_info_list = []
+                if child_of_root.tag == 'action':
+                    child_info_list.append(child_of_root.attrib)
+                    for child_child_of_root in child_of_root:
+                        dict_info = {child_child_of_root.attrib['name']: child_child_of_root.text}
+                        child_info_list.append(dict_info)
+                    dict_list.append(child_info_list)
+            for info in dict_list:
+                dict_buffer = {}
+                for dict_info in info:
+                    dict_buffer.update(dict_info)
+                new_dict_info.append(dict_buffer)
+            return new_dict_info
+        except:
+            file_name = os.path.split(case_file)[1]
+            new_dict_info = [file_name, case_file]
+            return new_dict_info
+
+    # 给动作添加标识
+    @staticmethod
+    def add_action_mark(info_dict):
+        # 判断是action控件
+        if MotionAction.points in info_dict:
+            # info_dict长度大于2为action控件
+            # 将字典中的'(0, 0)'转为元祖(0, 0)
+            points = info_dict['points']
+            if isinstance(points, str):
+                info_dict['points'] = eval(points)
+            # 一个action字典中需要标明什么类型动作
+            info_dict['execute_action'] = 'motion_action'
+            info_dict['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
+        # 为record或者sleep控件
+        else:
+            # 为record控件
+            if RecordAction.record_status in info_dict:
+                info_dict['execute_action'] = 'record_action'
+                # 添加视频存放根目录
+                info_dict['video_path'] = GloVar.project_video_path
+            elif AssertAction.assert_template_name in info_dict:
+                info_dict['execute_action'] = 'assert_action'
+            elif RestoreAction.restore_screen in info_dict:
+                info_dict['execute_action'] = 'restore_action'
+            # 为sleep控件
+            elif SleepAction.sleep_time in info_dict:
+                info_dict['execute_action'] = 'sleep_action'
+            # 为logic控件
+            elif LogicAction.logic_action in info_dict:
+                info_dict['execute_action'] = 'logic_action'
+            # 为loop控件
+            elif LoopAction.loop_action in info_dict:
+                info_dict['execute_action'] = 'loop_action'
+            # 为break控件
+            elif BreakAction.break_action in info_dict:
+                info_dict['execute_action'] = 'break_action'
+            # 为call_function控件
+            elif CallFunctionAction.function_name in info_dict:
+                info_dict['execute_action'] = 'call_function_action'
+        return info_dict

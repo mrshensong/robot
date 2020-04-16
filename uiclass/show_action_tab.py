@@ -232,6 +232,9 @@ class ShowActionTab(QWidget):
                 elif 'break_action' in rewrite_info:
                     text = self.custom_control_list[current_row].break_des_text.text()
                     self.custom_control_list[current_row].break_des_text.setText(text)
+                elif 'call_function_action' in rewrite_info:
+                    text = self.custom_control_list[current_row].call_function_des_text.text()
+                    self.custom_control_list[current_row].call_function_des_text.setText(text)
             except:
                 pass
 
@@ -279,43 +282,9 @@ class ShowActionTab(QWidget):
         index = 0
         for i in range(len(self.item_list)):
             if self.custom_control_list[index].check_box.checkState() == Qt.Checked:
-                # 判断是action/record/sleep控件
-                if MotionAction.points in self.info_list[index]:
-                    self.info_list[index]['execute_action'] = 'motion_action'
-                    self.info_list[index]['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
-                    GloVar.post_info_list.append(self.info_list[index])
-                # 为record或者sleep控件
-                else:
-                    # 为record控件
-                    if RecordAction.record_status in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'record_action'
-                        # 添加视频存放根目录
-                        self.info_list[index]['video_path'] = GloVar.project_video_path
-                        GloVar.post_info_list.append(self.info_list[index])
-                    # 为assert控件
-                    elif AssertAction.assert_template_name in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'assert_action'
-                        GloVar.post_info_list.append(self.info_list[index])
-                    # 为restore控件
-                    elif RestoreAction.restore_screen in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'restore_action'
-                        GloVar.post_info_list.append(self.info_list[index])
-                    # 为sleep控件
-                    elif SleepAction.sleep_time in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'sleep_action'
-                        GloVar.post_info_list.append(self.info_list[index])
-                    # 为logic逻辑控件
-                    elif LogicAction.logic_action in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'logic_action'
-                        GloVar.post_info_list.append(self.info_list[index])
-                    # 为loop循环控件
-                    elif LoopAction.loop_action in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'loop_action'
-                        GloVar.post_info_list.append(self.info_list[index])
-                    # 为break循环控件
-                    elif BreakAction.break_action in self.info_list[index]:
-                        self.info_list[index]['execute_action'] = 'break_action'
-                        GloVar.post_info_list.append(self.info_list[index])
+                info_dict = self.info_list[index]
+                info_dict = Common.add_action_mark(info_dict)
+                GloVar.post_info_list.append(info_dict)
             index += 1
         GloVar.post_info_list.append('stop')
         # 将GloVar.post_info_list传递出去
@@ -411,6 +380,8 @@ class ShowActionTab(QWidget):
             self.tag_list.append(self.generate_loop_tag(info_dict))
         elif item_type == 'break':
             self.tag_list.append(self.generate_break_tag(info_dict))
+        elif item_type == 'call_function':
+            self.tag_list.append(self.generate_call_function_tag(info_dict))
         # 发送需要显示的脚本标签
         self.signal.emit('write_script_tag>' + self.merge_to_script(''.join(self.tag_list)))
         if new_control_flag is True:
@@ -451,6 +422,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index, self.generate_loop_tag(info_dict))
             elif item_type == 'break':
                 self.tag_list.insert(self.insert_item_index, self.generate_break_tag(info_dict))
+            elif item_type == 'call_function':
+                self.tag_list.insert(self.insert_item_index, self.generate_call_function_tag(info_dict))
             # 重新排每个custom_control_list的id
             for index in range(self.insert_item_index, self.index + 1):
                 self.custom_control_list[index].id = index
@@ -477,6 +450,8 @@ class ShowActionTab(QWidget):
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_loop_tag(info_dict))
             elif item_type == 'break':
                 self.tag_list.insert(self.insert_item_index + 1, self.generate_break_tag(info_dict))
+            elif item_type == 'call_function':
+                self.tag_list.insert(self.insert_item_index + 1, self.generate_call_function_tag(info_dict))
             # 重新拍每个custom_control_list的id
             for index in range(self.insert_item_index + 1, self.index + 1):
                 self.custom_control_list[index].id = index
@@ -505,7 +480,7 @@ class ShowActionTab(QWidget):
         obj = ActionControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_action_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='action')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入action动作控件
@@ -529,7 +504,7 @@ class ShowActionTab(QWidget):
         obj = RecordControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_record_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='record')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入record动作控件
@@ -553,7 +528,7 @@ class ShowActionTab(QWidget):
         obj = AssertControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_assert_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='assert')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入assert断言动作
@@ -577,7 +552,7 @@ class ShowActionTab(QWidget):
         obj = RestoreControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_restore_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='restore')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入restore动作控件
@@ -601,7 +576,7 @@ class ShowActionTab(QWidget):
         obj = SleepControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_sleep_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='sleep')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入sleep动作控件
@@ -625,7 +600,7 @@ class ShowActionTab(QWidget):
         obj = LogicControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_logic_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='logic')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入logic逻辑控件
@@ -649,7 +624,7 @@ class ShowActionTab(QWidget):
         obj = LoopControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_loop_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='loop')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入loop循环控件
@@ -671,7 +646,7 @@ class ShowActionTab(QWidget):
         obj = BreakControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
         obj.signal[str].connect(self.recv_break_control_signal)
         self.add_item(item, obj, info_dict, new_control_flag, item_type='break')
-        if len(self.case_absolute_name) > 0:
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
             self.connect_save_script_tag()
 
     # 插入break控件
@@ -682,6 +657,28 @@ class ShowActionTab(QWidget):
         obj = BreakControl(parent=None, id=self.index, info_dict=info_dict)
         obj.signal[str].connect(self.recv_break_control_signal)
         self.insert_item(item, obj, info_dict, item_type='break')
+        if len(self.case_absolute_name) > 0:
+            self.connect_save_script_tag()
+
+    # 调用call_function控件
+    def add_call_function_item(self, info_dict, new_control_flag=True):
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = CallFunctionControl(parent=None, id=self.index, info_dict=info_dict, new_control_flag=new_control_flag)
+        obj.signal[str].connect(self.recv_call_function_control_signal)
+        self.add_item(item, obj, info_dict, new_control_flag, item_type='call_function')
+        if len(self.case_absolute_name) > 0 and new_control_flag is True:
+            self.connect_save_script_tag()
+
+    # 插入call_function控件
+    def insert_call_function_item(self, info_dict):
+        self.index += 1
+        item = QListWidgetItem()
+        item.setSizeHint(QSize(330, 60))
+        obj = CallFunctionControl(parent=None, id=self.index, info_dict=info_dict)
+        obj.signal[str].connect(self.recv_call_function_control_signal)
+        self.insert_item(item, obj, info_dict, item_type='call_function')
         if len(self.case_absolute_name) > 0:
             self.connect_save_script_tag()
 
@@ -833,6 +830,23 @@ class ShowActionTab(QWidget):
             GloVar.post_info_list.append('stop')
             self.signal.emit('play_actions>')
 
+    # 接收call_function控件传来的信号
+    def recv_call_function_control_signal(self, signal_str):
+        if signal_str.startswith('call_function_delete_item>'):
+            id = int(signal_str.split('call_function_delete_item>')[1])
+            self.delete_item(id)
+        elif signal_str.startswith('call_function_execute_item>'):
+            if GloVar.request_status is None:
+                Logger('[当前还有正在执行的动作, 请稍后执行!]')
+                return
+            id = int(signal_str.split('call_function_execute_item>')[1])
+            self.info_list[id]['execute_action'] = 'call_function_action'
+            GloVar.post_info_list = []
+            GloVar.post_info_list.append('start')
+            GloVar.post_info_list.append(self.info_list[id])
+            GloVar.post_info_list.append('stop')
+            self.signal.emit('play_actions>')
+
     # 接收从添加动作子窗口传来的信号
     def recv_add_action_window_signal(self, signal_str):
         # 按下action_tab页面确定按钮后, 添加控件
@@ -900,6 +914,13 @@ class ShowActionTab(QWidget):
                 self.add_break_item(info_dict)
             else:
                 self.insert_break_item(info_dict)
+        # 按下call_function_tab页面确认按钮
+        elif signal_str.startswith('call_function_tab_sure'):
+            info_dict = json.loads(signal_str.split('call_function_tab_sure>')[1])
+            if self.insert_item_index == -1:
+                self.add_call_function_item(info_dict)
+            else:
+                self.insert_call_function_item(info_dict)
         # 接收到框选模板信号
         elif signal_str.startswith(GloVar.result_template):
             self.signal.emit(signal_str)
@@ -1006,6 +1027,12 @@ class ShowActionTab(QWidget):
     def generate_break_tag(self, info_dict):
         break_action = str(info_dict[BreakAction.break_action])
         tag = '\t<action ' + 'break_action' + '="' + break_action + '"></action>\n'
+        return tag
+
+    # 添加call_function标签
+    def generate_call_function_tag(self, info_dict):
+        function_name = str(info_dict[CallFunctionAction.function_name])
+        tag = '\t<action ' + 'function_name' + '="' + function_name + '"></action>\n'
         return tag
 
     # 将所有action合并成为script

@@ -33,7 +33,6 @@ class ShowCaseTab(QWidget):
         # 初始化
         self.case_tab_init()
 
-
     def case_tab_init(self):
         self.new_button = QToolButton()
         self.new_button.setToolTip('新建case')
@@ -244,8 +243,9 @@ class ShowCaseTab(QWidget):
                     while True:
                         if GloVar.request_status == 'ok' and GloVar.stop_execute_flag is False:
                             GloVar.request_status = None
-                            dict_info_list = self.read_script_tag(i)
-                            self.play_single_case(dict_info_list)
+                            case_path = self.case_file_list[i]
+                            info_dict_list = Common.read_script_tag(case_path)
+                            self.play_single_case(case_path, info_dict_list)
                             self.signal.emit('play_single_case>')
                             break
                         # 退出case的执行
@@ -301,7 +301,11 @@ class ShowCaseTab(QWidget):
         # 打开当前case(拆分为action)
         if signal_str.startswith('open_case>'):
             id = int(signal_str.split('>')[1])
-            case_info_list = self.read_script_tag(id)
+            case_path = self.case_file_list[id]
+            case_name = os.path.split(case_path)[1]
+            case_info_list = Common.read_script_tag(case_path)
+            case_info_list.insert(0, case_name)
+            case_info_list.insert(1, case_path)
             self.signal.emit('case_transform_to_action>'+str(case_info_list))
         # 执行单个case
         elif signal_str.startswith('play_single_case>'):
@@ -309,8 +313,9 @@ class ShowCaseTab(QWidget):
                 Logger('[当前还有正在执行的动作, 请稍后执行!]')
                 return
             id = int(signal_str.split('>')[1])
-            dict_info_list = self.read_script_tag(id)
-            self.play_single_case(dict_info_list)
+            case_path = self.case_file_list[id]
+            info_dict_list = Common.read_script_tag(case_path)
+            self.play_single_case(case_path, info_dict_list)
             self.signal.emit('play_single_case>')
         # 删除case
         elif signal_str.startswith('delete_case>'):
@@ -319,85 +324,14 @@ class ShowCaseTab(QWidget):
         else:
             pass
 
-    # 读取当前的script_xml文件(通过id可以获取到当前脚本文件)
-    # 返回list为每个action的信息(字典形式)>>list第一个参数为case文件名, 后面参数为每个action的信息存储字典
-    def read_script_tag(self, id):
-        case_file = self.case_file_list[id]
-        try:
-            tree = ET.ElementTree(file=case_file)
-            root = tree.getroot()
-            dict_list, new_dict_info = [], []
-            new_dict_info.append(root.attrib['name']) # 文件名
-            new_dict_info.append(self.case_file_list[id]) # 完整路径
-            for child_of_root in root:
-                child_info_list = []
-                if child_of_root.tag == 'action':
-                    child_info_list.append(child_of_root.attrib)
-                    for child_child_of_root in child_of_root:
-                        dict_info = {child_child_of_root.attrib['name']: child_child_of_root.text}
-                        child_info_list.append(dict_info)
-                    dict_list.append(child_info_list)
-            for info in dict_list:
-                dict_buffer = {}
-                for dict_info in info:
-                    dict_buffer.update(dict_info)
-                new_dict_info.append(dict_buffer)
-            return new_dict_info
-        except:
-            file_name = os.path.split(case_file)[1]
-            new_dict_info = [file_name, case_file]
-            return new_dict_info
-
     # 执行单个case(参数为从xml中读出来的)
-    def play_single_case(self, dict_info_list):
-        # list中第一个参数为case文件名, 第二个参数为case完整路径, 后面的为动作信息(action展示需要用到)
-        # self.action_tab.case_file_name = dict_info_list[0]
-        # self.action_tab.case_absolute_name = dict_info_list[1]
+    def play_single_case(self, case_path, info_dict_list):
         GloVar.post_info_list = []
-        GloVar.post_info_list.append('start>'+dict_info_list[1])
-        for id in range(2, len(dict_info_list)):
-            # 判断是action控件
-            if MotionAction.points in dict_info_list[id]:
-                # info_dict长度大于2为action控件
-                # 将字典中的'(0, 0)'转为元祖(0, 0)
-                dict_info_list[id]['points'] = eval(dict_info_list[id]['points'])
-                # 一个action字典中需要标明什么类型动作
-                dict_info_list[id]['execute_action'] = 'motion_action'
-                dict_info_list[id]['base'] = (RobotArmParam.base_x_point, RobotArmParam.base_y_point, RobotArmParam.base_z_point)
-                GloVar.post_info_list.append(dict_info_list[id])
-            # 为record或者sleep控件
-            else:
-                # 为record控件
-                if RecordAction.record_status in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'record_action'
-                    # 添加视频存放根目录
-                    dict_info_list[id]['video_path'] = GloVar.project_video_path
-                    GloVar.post_info_list.append(dict_info_list[id])
-                elif AssertAction.assert_template_name in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'assert_action'
-                    GloVar.post_info_list.append(dict_info_list[id])
-                elif RestoreAction.restore_screen in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'restore_action'
-                    GloVar.post_info_list.append(dict_info_list[id])
-                # 为sleep控件
-                elif SleepAction.sleep_time in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'sleep_action'
-                    GloVar.post_info_list.append(dict_info_list[id])
-                # 为logic控件
-                elif LogicAction.logic_action in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'logic_action'
-                    GloVar.post_info_list.append(dict_info_list[id])
-                # 为loop控件
-                elif LoopAction.loop_action in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'loop_action'
-                    GloVar.post_info_list.append(dict_info_list[id])
-                # 为break控件
-                elif BreakAction.break_action in dict_info_list[id]:
-                    dict_info_list[id]['execute_action'] = 'break_action'
-                    GloVar.post_info_list.append(dict_info_list[id])
+        GloVar.post_info_list.append('start>'+case_path)
+        for info_dict in info_dict_list:
+            info_dict = Common.add_action_mark(info_dict)
+            GloVar.post_info_list.append(info_dict)
         GloVar.post_info_list.append('stop')
-        # 执行一条case
-        # self.signal.emit('sleep_execute_item>' + json.dumps(GloVar.post_info_list))
 
     # 清除所有动作
     def clear_all_items(self):

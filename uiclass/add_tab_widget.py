@@ -11,6 +11,7 @@ from uiclass.add_restore_tab import AddRestoreTab
 from uiclass.add_logic_tab import AddLogicTab
 from uiclass.add_loop_tab import AddLoopTab
 from uiclass.add_break_tab import AddBreakTab
+from uiclass.add_call_function_tab import AddCallFunctionTab
 from GlobalVar import *
 
 
@@ -59,6 +60,7 @@ class TabWidget(QWidget):
         self.logic_tab = AddLogicTab(self)
         self.loop_tab = AddLoopTab(self)
         self.break_tab = AddBreakTab(self)
+        self.call_function_tab = AddCallFunctionTab(self)
         self.add_tab(self.action_tab, 'action')
         self.add_tab(self.record_tab, 'video')
         self.add_tab(self.assert_tab, 'assert')
@@ -67,6 +69,7 @@ class TabWidget(QWidget):
         self.add_tab(self.logic_tab, 'logic')
         self.add_tab(self.loop_tab, 'loop')
         self.add_tab(self.break_tab, 'break')
+        self.add_tab(self.call_function_tab, 'call_func')
         # 设置当前行为第0行
         self.left_widget.setCurrentRow(0)
 
@@ -100,6 +103,7 @@ class AddTabWidget(QDialog):
         self.widget.logic_tab.signal[str].connect(self.recv_logic_tab_signal)
         self.widget.loop_tab.signal[str].connect(self.recv_loop_tab_signal)
         self.widget.break_tab.signal[str].connect(self.recv_break_tab_signal)
+        self.widget.call_function_tab.signal[str].connect(self.recv_call_function_tab_signal)
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(500)
 
@@ -172,6 +176,13 @@ class AddTabWidget(QDialog):
     # 接收break_tab传来的信号
     def recv_break_tab_signal(self, signal_str):
         if signal_str.startswith('break_tab_sure>'):
+            self.signal.emit(signal_str)
+            GloVar.add_action_window_opened_flag = False
+            self.close()
+
+    # 接收call_function_tab传来的信号
+    def recv_call_function_tab_signal(self, signal_str):
+        if signal_str.startswith('call_function_tab_sure>'):
             self.signal.emit(signal_str)
             GloVar.add_action_window_opened_flag = False
             self.close()

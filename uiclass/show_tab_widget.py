@@ -115,6 +115,9 @@ class ShowTabWidget(QTabWidget):
                             # 为break控件
                             elif BreakAction.break_action in dict_info_list[id]:
                                 self.action_tab.add_break_item(dict_info_list[id], new_control_flag=False)
+                            # 为call_function控件
+                            elif CallFunctionAction.function_name in dict_info_list[id]:
+                                self.action_tab.add_call_function_item(dict_info_list[id], new_control_flag=False)
                 # 打开的case为空
                 else:
                     script_text = '<case name="' + self.action_tab.case_file_name + '">\n</case>'

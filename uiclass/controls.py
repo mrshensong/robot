@@ -720,6 +720,80 @@ class BreakControl(QWidget):
                                                              self.str_decorate(BreakAction.break_out)))
 
 
+# 调用函数动作展示控件
+class CallFunctionControl(QWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent, id, info_dict, new_control_flag=True):
+        super(CallFunctionControl, self).__init__(parent)
+        self.parent = parent
+        self.id = id
+        # 判断是真的新建record还是通过脚本导入的case(new_control_flag:True新建, False导入)
+        self.new_control_flag = new_control_flag
+        self.function_name = info_dict[CallFunctionAction.function_name]
+        self.initUI()
+        self.describe_break()
+
+    def initUI(self):
+        # 选择框
+        self.check_box = QCheckBox()
+        # 调用函数图标
+        self.call_function_icon_label = QLabel(self)
+        self.call_function_icon_label.setPixmap(QPixmap(IconPath.Icon_call_function_icon))
+        # function_name显示
+        self.call_function_des_text = QLineEdit(self)
+        self.call_function_des_text.setReadOnly(True)
+        self.call_function_des_text.setText(self.function_name)
+        self.play_button = QToolButton(self)
+        self.play_button.setToolTip('play')
+        self.play_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_play + ')}')
+        self.play_button.clicked.connect(self.call_function_execute_item)
+        self.delete_button = QToolButton(self)
+        self.delete_button.setToolTip('delete')
+        self.delete_button.setStyleSheet('QToolButton{border-image: url(' + IconPath.Icon_custom_delete + ')}')
+        self.delete_button.clicked.connect(self.call_function_delete_item)
+        # 布局
+        self.h_box = QHBoxLayout()
+        self.h_box.addWidget(self.check_box)
+        self.h_box.addWidget(self.call_function_icon_label)
+        self.h_box.addWidget(self.call_function_des_text)
+        self.h_box.addWidget(self.play_button)
+        self.h_box.addWidget(self.delete_button)
+        self.setLayout(self.h_box)
+        self.setMaximumWidth(400)
+
+    # 此仅仅为美化字符串格式, decorate_str为一个对称字符串(如'()'/'[]'/'{}')
+    def str_decorate(self, origin_str, decorate_str='[]'):
+        return str(origin_str).join(decorate_str)
+
+    # 执行单个动作的具体操作
+    def play_call_function_item(self):
+        # 执行单个动作(需要判断上一次动作完成没有, 如果完成则可以进行此次动作, 否则就等待上次动作执行完成)
+        # 发送触发信号以及详细信息到主程序(在主程序中执行动作)
+        self.signal.emit('call_function_execute_item>' + str(self.id))
+
+    # 执行单个动作(新建线程/控件中的执行按钮)
+    def call_function_execute_item(self):
+        Thread(target=self.play_call_function_item, args=()).start()
+
+    # 删除单个动作(控件中的删除按钮)
+    def call_function_delete_item(self):
+        # 打印删除信息
+        Logger('删除-->id{:-<5}action{:-<16}函数名:{}'.format(self.str_decorate(self.id),
+                                                         self.str_decorate(CallFunctionAction.call_function),
+                                                         self.str_decorate(self.function_name)))
+        self.signal.emit('call_function_delete_item>' + str(self.id))
+
+    # 打印控件信息
+    def describe_break(self):
+        if self.new_control_flag is True:
+            # 打印新建video动作信息
+            Logger('新建-->id{:-<5}action{:-<16}函数名:{}'.format(self.str_decorate(self.id),
+                                                             self.str_decorate(CallFunctionAction.call_function),
+                                                             self.str_decorate(self.function_name)))
+
+
 # 自定义动作展示控件(case)
 class CaseControl(QWidget):
 

@@ -244,6 +244,18 @@ class ArmAction:
         Logger('执行-->action[sleep]----status[%s]' % str(sleep_time))
         time.sleep(sleep_time)
 
+    # 执行调用的函数
+    def play_call_function_action(self, info_dict):
+        function_name = info_dict[CallFunctionAction.function_name]
+        function_name = MergePath([GloVar.project_path, 'function', function_name]).merged_path
+        function_info_dict_list = Common.read_script_tag(function_name)
+        info_dict_list = []
+        for info_dict in function_info_dict_list:
+            info_dict = Common.add_action_mark(info_dict)
+            info_dict_list.append(info_dict)
+        info_dict_list = self.arrange_actions(info_dict_list)
+        self.deal_action_list(info_dict_list)
+
     # 执行多条actions
     def execute_actions(self, info_list):
         data = info_list
@@ -408,6 +420,8 @@ class ArmAction:
             elif action['execute_action'] == 'sleep_action':
                 self.play_sleep_action(action)
                 time.sleep(0.2)
+            elif action['execute_action'] == 'call_function_action':
+                self.play_call_function_action(action)
 
     # 执行逻辑动作
     def execute_logic_action(self, logic_dict):
