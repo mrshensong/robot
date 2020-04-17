@@ -1,11 +1,9 @@
-import os
 import sys
-import cv2
-import time
 import datetime
 import subprocess
 from threading import Thread
 from processdata.get_startup_time import GetStartupTime
+from processdata.get_startup_time_by_stable_point import GetStartupTimeByStablePoint
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.show_tab_widget import ShowTabWidget
@@ -895,7 +893,12 @@ class UiMainWindow(QMainWindow):
         WindowStatus.operating_status = '使用状态/数据处理中...'
         # 此处调用数据处理函数
         video_path = self.get_path
-        test = GetStartupTime(video_path=video_path)
+        image_process_method = Profile(type='read', file=GloVar.config_file_path, section='param',
+                                       option='image_process_method').value
+        if image_process_method == 'method-1':
+            test = GetStartupTime(video_path=video_path)
+        elif image_process_method == 'method-2':
+            test = GetStartupTimeByStablePoint(video_path=video_path)
         Thread(target=test.data_processing, args=()).start()
         # 监控数据处理完成没有(一秒钟检测一次数据处理是否执行完成)
         self.monitor = Timer(frequent=1)

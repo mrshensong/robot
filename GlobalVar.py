@@ -1,5 +1,7 @@
 import os
 import time
+import cv2
+import numpy as np
 from other.operate_config import ConfigWithComment
 import configparser
 import xml.etree.cElementTree as ET
@@ -450,3 +452,24 @@ class Common:
             elif ADBAction.adb_command in info_dict:
                 info_dict['execute_action'] = 'adb_action'
         return info_dict
+
+    # 断言操作需要用到的模板匹配
+    @staticmethod
+    def match_template(source_img, target_img):
+        """
+        :param source_img: 源图像(大图)
+        :param target_img: 靶子图像(小图)
+        :return:
+        """
+        if type(source_img) is str:
+            source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
+        if type(target_img) is str:
+            target_img = cv2.imdecode(np.fromfile(target_img, dtype=np.uint8), -1)
+        # 匹配方法
+        match_method = cv2.TM_CCOEFF_NORMED
+        # 模板匹配
+        match_result = cv2.matchTemplate(source_img, target_img, match_method)
+        # 查找匹配度和坐标位置
+        min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
+        # 返回最大匹配率
+        return max_threshold

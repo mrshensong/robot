@@ -1,11 +1,8 @@
-import os
-import cv2
-import numpy as np
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill, colors
 from processdata.get_data_graph import GenerateDataGraph
 from processdata.get_report import GenerateReport
-from GlobalVar import MergePath, Logger, GloVar, Profile, WindowStatus
+from GlobalVar import *
 
 
 class GetStartupTime:
@@ -30,27 +27,9 @@ class GetStartupTime:
         # 待处理的视频列表
         self.videos_list = []
 
-    def match_template(self, source_img, target_img):
-        """
-        :param source_img: 源图像(大图)
-        :param target_img: 靶子图像(小图)
-        :return:
-        """
-        if type(source_img) is str:
-            source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
-        if type(target_img) is str:
-            target_img = cv2.imdecode(np.fromfile(target_img, dtype=np.uint8), -1)
-        # 匹配方法
-        match_method = cv2.TM_CCOEFF_NORMED
-        # 模板匹配
-        match_result = cv2.matchTemplate(source_img, target_img, match_method)
-        # 查找匹配度和坐标位置
-        min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
-        # 返回最大匹配率
-        return max_threshold
-
     # 获取roi模板的位置信息(roi图片/column行数,0-3)
-    def get_position_info_from_roi(self, roi, column):
+    @staticmethod
+    def get_position_info_from_roi(roi, column):
         thousands = roi[0][column] * 1000
         hundred = roi[1][column] * 100
         ten = roi[2][column] * 10
@@ -58,7 +37,7 @@ class GetStartupTime:
         num = thousands + hundred + ten + single
         return num
 
-    # 计算开始和结束位置
+    # 计算开始和结束位置(通过模板对比)
     def get_start_and_end_match_threshold(self, end_mask, video_file):
         """
         获取起止点的匹配率列表
@@ -122,7 +101,7 @@ class GetStartupTime:
                     continue
                 # 起点之后寻找模板出现的帧
                 elif template_appear_flag is False:
-                    threshold = self.match_template(target, end_mask_gray)
+                    threshold = Common.match_template(target, end_mask_gray)
                     if threshold >= self.template_start_frame_match_threshold:
                         template_appear_flag = True
                         last_picture = target
@@ -130,13 +109,14 @@ class GetStartupTime:
                         continue
                 # 终点(稳定点)
                 if template_appear_flag is True:
-                    match_rate = self.match_template(target, last_picture)
+                    match_rate = Common.match_template(target, last_picture)
                     if cycle_flag is True:
                         if match_rate > self.template_stability_frame_match_threshold:
                             cycle_flag = True
                             stability_num += 1
                             if stability_num == self.frame_stability_times:
-                                end_point_result = (frame_id - self.frame_stability_times, self.template_stability_frame_match_threshold)
+                                end_point_result = (frame_id - self.frame_stability_times,
+                                                    self.template_stability_frame_match_threshold)
                                 break
                         else:
                             cycle_flag = False
@@ -159,14 +139,16 @@ class GetStartupTime:
     def process_video(self, video_id, file, end_mask):
         Logger('正在计算<%s>起止点...' % file)
         # 计算起始帧和停止帧
-        (start_frame, start_threshold), (end_frame, end_threshold) = self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=file)
+        (start_frame, start_threshold), (end_frame, end_threshold) = \
+            self.get_start_and_end_match_threshold(end_mask=end_mask, video_file=file)
         start_frame = start_frame
         end_frame = end_frame
         frame_gap = end_frame - start_frame
         time_gap = int(frame_gap * (1000 / 120))
         Logger('%s-->起始点: 帧> %d, 匹配率> %.4f' % (file, start_frame, start_threshold))
         Logger('%s-->终止点: 帧> %d, 匹配率> %.4f' % (file, end_frame, end_threshold))
-        return {'次序':video_id, '开始帧':start_frame, '开始帧匹配率':start_threshold, '结束帧':end_frame, '结束帧匹配率':end_threshold, '差帧':frame_gap, '耗时':time_gap}
+        return {'次序': video_id, '开始帧': start_frame, '开始帧匹配率': start_threshold, '结束帧': end_frame,
+                '结束帧匹配率': end_threshold, '差帧': frame_gap, '耗时': time_gap}
 
     # 处理一条case(可能含有多次执行产生的多个视频, 传入的参数为产生的这些视频的当前目录路径)
     def process_case(self, video_name_path):
@@ -216,7 +198,8 @@ class GetStartupTime:
         # 当前case中有某次计算出异常的问题, 判断是否需要重新测试
         retest_flag = 'YES' if status == 'error' else 'NO'
         # 返回的信息跟excel模型相似(列表第一个参数代表case类型, 也就是sheet名字)
-        return [case_name, video_count, video_info_list, standard_frame_gap, standard_time_gap, average_frame_gap, average_time_gap, status, retest_flag]
+        return [case_name, video_count, video_info_list, standard_frame_gap, standard_time_gap, average_frame_gap,
+                average_time_gap, status, retest_flag]
 
     # 获取起止点以及对应匹配率等等
     def get_all_video_start_and_end_points(self):
@@ -258,7 +241,8 @@ class GetStartupTime:
             # 创建sheet表
             work_sheet = work_book.create_sheet(key)
             # 创建表头
-            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧', '标准耗时', '平均差帧', '平均耗时', '状态', '重新测试']
+            head = ['用例', '次数', '次序', '开始帧', '开始帧匹配率', '结束帧', '结束帧匹配率', '差帧', '耗时', '标准差帧',
+                    '标准耗时', '平均差帧', '平均耗时', '状态', '重新测试']
             work_sheet.append(head)
             # 表头背景颜色
             for i in range(1, len(head)+1):
@@ -280,7 +264,8 @@ class GetStartupTime:
         work_book.close()
 
     # 将case写入sheet表中
-    def write_case_to_excel(self, sheet, current_row, case_data, align, background_color):
+    @staticmethod
+    def write_case_to_excel(sheet, current_row, case_data, align, background_color):
         # 占用行直接获取次数即可(list第二个数为次数, 直接拿来用)
         occupied_row = int(case_data[1])
         # 下一个case当前行(也就是写完这个case后的下一行)
@@ -288,7 +273,7 @@ class GetStartupTime:
         # 如果执行了多次
         if occupied_row > 1:
             # 合并用例
-            sheet.merge_cells('A'+str(current_row) + ':' + 'A' +str(next_current_row -1))
+            sheet.merge_cells('A'+str(current_row) + ':' + 'A' + str(next_current_row - 1))
             # case名
             sheet.cell(current_row, 1).value = case_data[0]
             sheet.cell(current_row, 1).alignment = align
@@ -414,12 +399,14 @@ class GetStartupTime:
         return next_current_row
 
     # 通过excel获取柱形图
-    def get_graph_data(self, graph_path, case_date_dict):
+    @staticmethod
+    def get_graph_data(graph_path, case_date_dict):
         generate_graph = GenerateDataGraph(graph_path=graph_path, data_dict=case_date_dict)
         generate_graph.get_graphs()
 
     # 生成html并保存
-    def get_report(self, report_path, case_data_dict):
+    @staticmethod
+    def get_report(report_path, case_data_dict):
         generate_report = GenerateReport(report_path=report_path, data_dict=case_data_dict)
         generate_report.save_html()
 
@@ -439,7 +426,7 @@ class GetStartupTime:
         WindowStatus.operating_status = '空闲状态/测试结束'
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # video_path = 'D:/Code/robot/video/2019-10-15'
     # video_path = 'D:/Code/robot/video/2019-12-03/点击/点击设置'
     video_path = 'D:/Code/robot_exe/video/2020-03-23/15-13-51/启动/启动音乐'

@@ -205,7 +205,8 @@ class ArmAction:
                 time.sleep(0.02)
 
     # 断言动作
-    def play_assert_action(self, info_dict):
+    @staticmethod
+    def play_assert_action(info_dict):
         data = info_dict
         template_image = data[AssertAction.assert_template_name]
         Logger('执行-->action[assert]---------模板: %s' % str(template_image))
@@ -217,7 +218,7 @@ class ArmAction:
         template_image = cv2.imdecode(np.fromfile(template_image, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
         target_image = cv2.cvtColor(target_image, cv2.COLOR_BGR2GRAY)
         # 模板匹配
-        threshold = self.match_template(target_image, template_image)
+        threshold = Common.match_template(target_image, template_image)
         if threshold > 0.95:
             Logger('预期界面-->匹配正确')
             return True
@@ -288,7 +289,7 @@ class ArmAction:
                     Logger('[选中的actions执行结束]')
                 else:
                     Logger('[执行结束case] : %s' % description)
-                WindowStatus.operating_status = '空闲状态/动作执行结束'
+        WindowStatus.operating_status = '空闲状态/动作执行结束'
         GloVar.request_status = 'ok'
         # else:
         #     return HttpResponse("data error")
@@ -506,27 +507,6 @@ class ArmAction:
                 time.sleep(0.2)
         return break_flag
 
-    # 断言操作需要用到的模板匹配
-    @staticmethod
-    def match_template(source_img, target_img):
-        """
-        :param source_img: 源图像(大图)
-        :param target_img: 靶子图像(小图)
-        :return:
-        """
-        if type(source_img) is str:
-            source_img = cv2.imdecode(np.fromfile(source_img, dtype=np.uint8), -1)
-        if type(target_img) is str:
-            target_img = cv2.imdecode(np.fromfile(target_img, dtype=np.uint8), -1)
-        # 匹配方法
-        match_method = cv2.TM_CCOEFF_NORMED
-        # 模板匹配
-        match_result = cv2.matchTemplate(source_img, target_img, match_method)
-        # 查找匹配度和坐标位置
-        min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
-        # 返回最大匹配率
-        return max_threshold
-
     # 执行adb命令
     @staticmethod
     def execute_adb_command(command):
@@ -567,15 +547,3 @@ class ArmAction:
             command = GloVar.adb_command + ' shell am force-stop ' + package
         self.execute_adb_command(command)
         time.sleep(1)
-
-'''传入的样例'''
-# start / start>actions /start>D:/Code/robot/case/测试/滑动测试.xml(三种形式分别:单个action/选中的多个actions/一条case)
-# {'des_text': '单击', 'action_type': 'click', 'points': [-53.046, 100.332], 'speed': '200', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
-# {'des_text': '双击', 'action_type': 'double_click', 'points': [-64.662, 120.263], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
-# {'des_text': '长按', 'action_type': 'long_click', 'points': [-47.819, 93.744], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
-# {'des_text': '滑动', 'action_type': 'slide', 'points': [-63.5, 87.833, -63.5, 138.843], 'speed': '150', 'leave': '1', 'trigger': '0', 'execute_action': 'motion_action', 'base': [0.0, 0.0, 0.0]}
-# {'camera_video': 'record', 'record_status': 'record_start', 'video_type': 'test', 'video_name': 'test', 'execute_action': 'record_action'}
-# {'assert_template': 'picture', 'assert_template_name': 'D:/Code/robot/picture/assert/123.bmp', 'execute_action': 'assert_action'}
-# {'sleep': 'time/s', 'sleep_time': '5.0', 'execute_action': 'sleep_action'}
-# {'camera_video': 'record', 'record_status': 'record_stop', 'video_type': 'test', 'video_name': 'test', 'execute_action': 'record_action'}
-# stop
