@@ -208,6 +208,7 @@ class ArmAction:
     def play_assert_action(self, info_dict):
         data = info_dict
         template_image = data[AssertAction.assert_template_name]
+        Logger('执行-->action[assert]---------模板: %s' % str(template_image))
         if os.path.exists(template_image) is False:
             Logger('预期模板不存在: ' + template_image)
             return False
@@ -229,6 +230,7 @@ class ArmAction:
         # 恢复app到桌面
         screen_type = info_dict[RestoreAction.restore_screen]
         package = self.get_current_package_name(screen_type)
+        Logger('执行-->action[restore_screen]---------包名: %s' % str(package))
         if package is not None:
             self.restore_app(package)
             Logger('退出当前app[%s]' % package)
@@ -254,7 +256,9 @@ class ArmAction:
             info_dict = Common.add_action_mark(info_dict)
             info_dict_list.append(info_dict)
         info_dict_list = self.arrange_actions(info_dict_list)
+        Logger('执行-->action[call_function]----函数名[%s]' % str(function_name))
         self.deal_action_list(info_dict_list)
+        Logger('结束-->action[call_function]----函数名[%s]' % str(function_name))
 
     # 执行多条actions
     def execute_actions(self, info_list):
@@ -422,6 +426,12 @@ class ArmAction:
                 time.sleep(0.2)
             elif action['execute_action'] == 'call_function_action':
                 self.play_call_function_action(action)
+            elif action['execute_action'] == 'adb_action':
+                adb_command = action[ADBAction.adb_command]
+                adb_desc = action[ADBAction.adb_desc]
+                Logger('执行-->action[adb]----描述[%s]' % str(adb_desc))
+                self.execute_adb_command(adb_command)
+                time.sleep(0.2)
 
     # 执行逻辑动作
     def execute_logic_action(self, logic_dict):
@@ -486,6 +496,14 @@ class ArmAction:
             elif action['execute_action'] == 'break_action':
                 break_flag = True
                 break
+            elif action['execute_action'] == 'call_function_action':
+                self.play_call_function_action(action)
+            elif action['execute_action'] == 'adb_action':
+                adb_command = action[ADBAction.adb_command]
+                adb_desc = action[ADBAction.adb_desc]
+                Logger('执行-->action[adb]----描述[%s]' % str(adb_desc))
+                self.execute_adb_command(adb_command)
+                time.sleep(0.2)
         return break_flag
 
     # 断言操作需要用到的模板匹配
@@ -542,6 +560,8 @@ class ArmAction:
     # 恢复当前app到初始状态
     def restore_app(self, package):
         if package.startswith('com.chehejia'):
+            if 'launcher' in package:
+                return
             command = GloVar.adb_command + ' shell pm clear ' + package
         else:
             command = GloVar.adb_command + ' shell am force-stop ' + package

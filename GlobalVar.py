@@ -165,6 +165,8 @@ class IconPath:
     # 调用函数相关
     Icon_call_function_icon = 'config/Icon/call_function_control_icon/call_function.png'
     Icon_select_function_icon = 'config/Icon/call_function_control_icon/select_function.png'
+    # adb相关
+    Icon_adb = 'config/Icon/adb_control_icon/adb.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
     # case停止执行
@@ -285,6 +287,13 @@ class BreakAction:
 class CallFunctionAction:
     call_function = 'call_function'
     function_name = 'function_name'
+
+
+# adb功能
+class ADBAction:
+    ADB = 'ADB'
+    adb_desc = 'adb_desc'
+    adb_command = 'adb_command'
 
 
 # 配置文件的读取和写入
@@ -437,4 +446,7 @@ class Common:
             # 为call_function控件
             elif CallFunctionAction.function_name in info_dict:
                 info_dict['execute_action'] = 'call_function_action'
+            # 为adb控件
+            elif ADBAction.adb_command in info_dict:
+                info_dict['execute_action'] = 'adb_action'
         return info_dict
