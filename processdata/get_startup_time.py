@@ -19,7 +19,7 @@ class GetStartupTime:
         # 模板对比的目标图片比模板稍大一点(默认大10像素)
         self.template_edge = 10
         # 模板匹配率(匹配率大于此, 说明可以开始检测稳定帧)
-        self.template_start_frame_match_threshold = 0.93
+        self.template_start_frame_match_threshold = 0.80
         # 稳定帧匹配率(匹配率连续大于此匹配率, 才说明帧稳定)
         self.template_stability_frame_match_threshold = 0.98
         # 基准图片和视频帧匹配率连续超过某一匹配率的次数(可以说明帧稳定)
@@ -431,4 +431,8 @@ if __name__ == '__main__':
     # video_path = 'D:/Code/robot/video/2019-12-03/点击/点击设置'
     video_path = 'D:/Code/robot_exe/video/2020-03-23/15-13-51/启动/启动音乐'
     test = GetStartupTime(video_path=video_path)
-    test.data_processing()
+    # test.data_processing()
+    video = 'D:/Code/robot/video/2020-04-17/18-04-02/启动/tc_Fun_xingneng_0079/1.mp4'
+    template = 'D:/Code/robot/picture/template/启动/tc_Fun_xingneng_0079.bmp'
+    result = test.get_start_and_end_match_threshold(template, video)
+    print(result)

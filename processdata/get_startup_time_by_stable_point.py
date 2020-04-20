@@ -17,7 +17,7 @@ class GetStartupTimeByStablePoint:
         # excel存储数据
         self.report_excel = self.report_path + '/' + 'report.xlsx'
         # 模板对比的目标图片比模板稍大一点(默认大10像素)
-        self.template_edge = 0
+        self.template_edge = 10
         # 模板匹配率(匹配率大于此, 说明可以开始检测稳定帧)
         self.template_start_frame_match_threshold = 0.80
         # 稳定帧匹配率(匹配率连续大于此匹配率, 才说明帧稳定)
