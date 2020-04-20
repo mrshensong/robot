@@ -1,4 +1,5 @@
 import os
+import re
 from GlobalVar import Logger
 
 
@@ -98,10 +99,13 @@ class GenerateReport:
     def get_description_chart(self):
         # 报告路径
         report_path = self.report_name
+        # 获取路径中的时间
+        pattern = re.compile(r'\d+-\d+-\d+')
+        match_list = pattern.findall(report_path)
         # 开始时间
-        start_time = '-'.join(os.path.split(self.report_name)[0].split('/')[-2:])
+        start_time = '-'.join(match_list)
         # case总数
-        case_totle_num = 0
+        case_total_num = 0
         # 成功case个数
         case_success_num = 0
         # 失败case个数
@@ -111,7 +115,7 @@ class GenerateReport:
         for key, data in self.data_dict.items():
             data_length = len(data)
             for i in range(data_length):
-                case_totle_num += 1
+                case_total_num += 1
                 if data[i][7] == 'pass':
                     case_success_num += 1
                 elif data[i][7] == 'failed':
@@ -119,7 +123,7 @@ class GenerateReport:
                 elif data[i][7] == 'error':
                     case_error_num += 1
         # 成功率
-        case_success_rate = '%.0f%%' % ((case_success_num / case_totle_num) * 100)
+        case_success_rate = '%.0f%%' % ((case_success_num / case_total_num) * 100)
         report_status = 'pass' if case_fail_num == 0 else 'failed'
         result_status_color = '#18C0A8' if report_status == 'pass' else '#FF3030'
         html_description = '<p style="font-family:arial;font-size:20px;font-weight:bold"><i>' + str(start_time) + '</i>/测试报告详情如下: </p>\n' \
@@ -141,7 +145,7 @@ class GenerateReport:
                         '<td><font color="#1890C0">' + str(case_success_num) + '</font></td>\n' \
                         '<td><font color="#30D8D8">' + str(case_fail_num) + '</font></td>\n' \
                         '<td><font color="#60A8D8">' + str(case_error_num) + '</font></td>\n' \
-                        '<td><font color="#0078C0">' + str(case_totle_num) + '</font></td>\n' \
+                        '<td><font color="#0078C0">' + str(case_total_num) + '</font></td>\n' \
                         '<td><font color="#996699">' + str(case_success_rate) + '</font></td>\n' \
                         '<td style="font-weight: bold; font-size: 16pt"><font color="' + str(result_status_color) + '">' + str(report_status) +'</font></td>\n' \
                         '</tr>\n' \

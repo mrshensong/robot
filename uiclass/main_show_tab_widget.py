@@ -123,7 +123,7 @@ class VideoTab(QWidget):
     def video_label_adaptive(self, video_width, video_height):
         # video_label高度和VideoTab的高度大致相同(留点余量)
         # video_label宽度为VideoTab的宽度大致相同(留点余量)
-        self.video_label.video_label_size_width  = int(self.video_scroll_area.width() - 2)
+        self.video_label.video_label_size_width = int(self.video_scroll_area.width() - 2)
         self.video_label.video_label_size_height = int(self.video_scroll_area.height() - 2)
         # 更改label_video大小以确保视频展示不失比例
         # 真实视频比例
@@ -144,9 +144,9 @@ class VideoTab(QWidget):
         if sum(self.video_label.box_screen_scale) > 0:
             # 车机是否框选了标志
             GloVar.add_action_button_flag = True
-            self.video_label.box_screen_size[0] = int(self.video_label.width()  * self.video_label.box_screen_scale[0])
+            self.video_label.box_screen_size[0] = int(self.video_label.width() * self.video_label.box_screen_scale[0])
             self.video_label.box_screen_size[1] = int(self.video_label.height() * self.video_label.box_screen_scale[1])
-            self.video_label.box_screen_size[2] = int(self.video_label.width()  * (self.video_label.box_screen_scale[2] - self.video_label.box_screen_scale[0]))
+            self.video_label.box_screen_size[2] = int(self.video_label.width() * (self.video_label.box_screen_scale[2] - self.video_label.box_screen_scale[0]))
             self.video_label.box_screen_size[3] = int(self.video_label.height() * (self.video_label.box_screen_scale[3] - self.video_label.box_screen_scale[1]))
 
     def resizeEvent(self, event):

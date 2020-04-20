@@ -909,7 +909,7 @@ class VideoLabel(QLabel):
             # 如果是机械臂滑动动作
             elif RobotArmAction.uArm_action_type == RobotArmAction.uArm_slide:
                 start = self.calculating_point(self.x0, self.y0)
-                end   = self.calculating_point(self.x1, self.y1)
+                end = self.calculating_point(self.x1, self.y1)
                 position = start + end
                 info_list = [RobotArmAction.uArm_slide, position]
                 # 发送机械臂操作信息
