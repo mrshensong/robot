@@ -1027,9 +1027,9 @@ class CameraParamAdjustControl(QDialog):
         self.screen_size_label = QLabel(self)
         self.screen_size_label.setText('屏幕尺寸:')
         self.screen_size_drop_down_box = QComboBox()
-        screen_list = Profile().get_config_options(file=GloVar.config_file_path, section='screen_size')
+        self.screen_list = Profile().get_config_options(file=GloVar.config_file_path, section='screen_size')
         self.screen_size_list = []
-        for screen_name in screen_list:
+        for screen_name in self.screen_list:
             screen_size = eval(Profile(type='read', file=GloVar.config_file_path, section='screen_size',
                                        option=screen_name).value)
             self.screen_size_list.append(screen_size)
