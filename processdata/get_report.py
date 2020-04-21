@@ -14,6 +14,7 @@ class GenerateReport:
         self.chart_border_color = '#A8A8A8'
         self.chart_skip_line_color = '#FFF0D8'
         self.chart_hover_line_color = '#99CC99'
+        self.customize_color = '#CCFFCC'
 
     # 获取report路径下的所有report图片(.png)
     def get_report_graph(self):
@@ -25,7 +26,8 @@ class GenerateReport:
         return graph_list
 
     # 通过柱形图表来生成html中的一部分
-    def generate_html_by_graph(self, graph):
+    @staticmethod
+    def generate_html_by_graph(graph):
         # 居左必须加此句
         # '<p style="text-align:left"><img src="'+ graph +'"/></p>\n'
         case_type = graph.split('.')[0]
@@ -40,58 +42,105 @@ class GenerateReport:
                     '<hr/>\n' \
                     '<table width="100%" border= "1px solid ' + self.chart_border_color + '" cellspacing="0">\n' \
                     '<tr height="50" align="center" style="font-weight: bold">\n' \
-                    '<td width="10%"><font color="#606060">类型</font></td>\n' \
-                    '<td width="27%"><font color="#606060">用例</font></td>\n' \
-                    '<td width="9%"><font color="#606060">次数</font></td>\n' \
-                    '<td width="9%"><font color="#606060">标准(ms)</font></td>\n' \
-                    '<td width="9%"><font color="#606060">平均值(ms)</font></td>\n' \
-                    '<td width="9%"><font color="#606060">最大值(ms)</font></td>\n' \
-                    '<td width="9%"><font color="#606060">最小值(ms)</font></td>\n' \
-                    '<td width="9%"><font color="#606060">状态</font></td>\n' \
-                    '<td width="9%"><font color="#606060">重新测试(是/否)</font></td>\n' \
+                    '<td width="7%"><font color="#606060">类型</font></td>\n' \
+                    '<td width="16%"><font color="#606060">用例</font></td>\n' \
+                    '<td width="7%"><font color="#606060">次数</font></td>\n' \
+                    '<td width="7%"><font color="#606060">次序</font></td>\n' \
+                    '<td width="7%"><font color="#606060">开始帧</font></td>\n' \
+                    '<td width="7%"><font color="#606060">结束帧</font></td>\n' \
+                    '<td width="7%"><font color="#606060">耗时(ms)</font></td>\n' \
+                    '<td width="7%"><font color="#606060">标准(ms)</font></td>\n' \
+                    '<td width="7%"><font color="#606060">平均耗时(ms)</font></td>\n' \
+                    '<td width="7%"><font color="#606060">最大耗时(ms)</font></td>\n' \
+                    '<td width="7%"><font color="#606060">最小耗时(ms)</font></td>\n' \
+                    '<td width="7%"><font color="#606060">状态</font></td>\n' \
+                    '<td width="7%"><font color="#606060">重新测试(是/否)</font></td>\n' \
                     '</tr>\n'
-        for key, data in self.data_dict.items():
-            data_length = len(data)
-            for i in range(data_length):
+        for key, data_list in self.data_dict.items():
+            # 获取总长度(也就是测试类型所占行数)
+            row_length = 0
+            for data in data_list:
+                row_length += len(data[2])
+            # index 遍历次数(也就是)
+            index = 0
+            for data in data_list:
+                index += 1
+                if index % 2 == 0:
+                    self.customize_color = self.chart_background_color
+                else:
+                    self.customize_color = self.chart_skip_line_color
+                # case名
+                case_name = data[0]
+                # 判断每条case执行的次数
+                current_case_times = data[1]
                 # 计算耗时最大值和最小值
-                time_consume_list = [execute_info['耗时'] for execute_info in data[i][2]]
+                time_consume_list = [execute_info['耗时'] for execute_info in data[2]]
                 time_consume_max_value = max(time_consume_list)
                 time_consume_min_value = min(time_consume_list)
-                if data[i][7] == 'failed':
+                # 标准值
+                standard_value = data[4]
+                # 平均值
+                average_value = data[6]
+                # 测试结果
+                test_result = data[7]
+                # 测试状态
+                test_status = data[8]
+                # 不同结果颜色
+                if data[7] == 'failed':
                     result_color = '#FF3030'
-                elif data[i][7] == 'error':
+                elif data[7] == 'error':
                     result_color = '#CC6699'
-                elif data[i][7] == 'pass':
+                elif data[7] == 'pass':
                     result_color = '#18C0A8'
                 # 是否重新测试颜色(YES/NO)
-                if data[i][8] == 'YES':
+                if data[8] == 'YES':
                     retest_text_color = '#FF3030'
-                elif data[i][8] == 'NO':
+                elif data[8] == 'NO':
                     retest_text_color = '#18C0A8'
-                # 第一个需要合并单元格(展示测试类型)
-                if i == 0:
-                    html_chat += '<tr height="30" align="center">\n' \
-                                 '<td rowspan="' + str(data_length) + '" bgcolor="99CC99"><font color="#60A8D8">' + str(key) + '</font></td>\n' \
-                                 '<td><font color="#30D878">' + str(data[i][0]) +'</font></td>\n' \
-                                 '<td><font color="#1890C0">' + str(data[i][1]) +'</font></td>\n' \
-                                 '<td><font color="#30D8D8">' + str(data[i][4]) +'</font></td>\n' \
-                                 '<td><font color="#FFA860">' + str(data[i][6]) +'</font></td>\n' \
-                                 '<td><font color="#0078C0">' + str(time_consume_max_value) +'</font></td>\n' \
-                                 '<td><font color="#996699">' + str(time_consume_min_value) +'</font></td>\n' \
-                                 '<td style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' \
-                                 '<td><font color="' + retest_text_color + '">' + str(data[i][8]) + '</font></td>\n' \
-                                 '</tr>\n'
-                else:
-                    html_chat += '<tr height="30" align="center">\n' \
-                                 '<td><font color="#30D878">' + str(data[i][0]) + '</font></td>\n' \
-                                 '<td><font color="#1890C0">' + str(data[i][1]) + '</font></td>\n' \
-                                 '<td><font color="#30D8D8">' + str(data[i][4]) + '</font></td>\n' \
-                                 '<td><font color="#FFA860">' + str(data[i][6]) + '</font></td>\n' \
-                                 '<td><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' \
-                                 '<td><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' \
-                                 '<td style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(data[i][7]) + '</font></td>\n' \
-                                 '<td><font color="' + retest_text_color + '">' + str(data[i][8]) + '</font></td>\n' \
-                                 '</tr>\n'
+                # 写入每次的数据(可能多次或者单次)
+                for sub_data in data[2]:
+                    serial_number = sub_data['次序']
+                    start_frame = sub_data['开始帧']
+                    end_frame = sub_data['结束帧']
+                    time_value = sub_data['耗时']
+                    if index == 1 and serial_number == 1:
+                        html_chat += '<tr height="30" align="center">\n' \
+                                     '<td rowspan="' + str(row_length) + '" bgcolor="' + self.chart_hover_line_color + '"><font color="#60A8D8">' + str(key) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#30D878">' + str(case_name) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#1890C0">' + str(current_case_times) + '</font></td>\n' \
+                                     '<td><font color="#FFA860">' + str(serial_number) + '</font></td>\n' \
+                                     '<td><font color="#30D8D8">' + str(start_frame) + '</font></td>\n' \
+                                     '<td><font color="#1890C0">' + str(end_frame) + '</font></td>\n' \
+                                     '<td><font color="#FFA860">' + str(time_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#996699">' + str(standard_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#FFA860">' + str(average_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(test_result) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="' + retest_text_color + '">' + str(test_status) + '</font></td>\n' \
+                                     '</tr>\n'
+                    elif serial_number == 1:
+                        html_chat += '<tr height="30" align="center">\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#30D878">' + str(case_name) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#1890C0">' + str(current_case_times) + '</font></td>\n' \
+                                     '<td><font color="#FFA860">' + str(serial_number) + '</font></td>\n' \
+                                     '<td><font color="#30D8D8">' + str(start_frame) + '</font></td>\n' \
+                                     '<td><font color="#1890C0">' + str(end_frame) + '</font></td>\n' \
+                                     '<td><font color="#FFA860">' + str(time_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#996699">' + str(standard_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#FFA860">' + str(average_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#0078C0">' + str(time_consume_max_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#996699">' + str(time_consume_min_value) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '" style="font-weight: bold; font-size: 14pt"><font color="' + result_color + '">' + str(test_result) + '</font></td>\n' \
+                                     '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="' + retest_text_color + '">' + str(test_status) + '</font></td>\n' \
+                                     '</tr>\n'
+                    else:
+                        html_chat += '<tr height="30" align="center">\n' \
+                                     '<td><font color="#FFA860">' + str(serial_number) + '</font></td>\n' \
+                                     '<td><font color="#30D8D8">' + str(start_frame) + '</font></td>\n' \
+                                     '<td><font color="#1890C0">' + str(end_frame) + '</font></td>\n' \
+                                     '<td><font color="#FFA860">' + str(time_value) + '</font></td>\n' \
+                                     '</tr>\n'
         html_chat += '</table>\n'
         return html_chat
 
@@ -160,9 +209,9 @@ class GenerateReport:
                 '<meta charset="utf-8">\n' \
                 '<style type="text/css">\n' \
                 'table{ border-collapse:collapse; border-spacing:0; border:1 px solid ' + self.body_background_color + '}\n' \
-                'table{width: 100%; background-color: '+ self.chart_background_color + ';}\n' \
-                'table tr:nth-child(2n){background-color: '+ self.chart_skip_line_color + '}\n' \
-                'table tr:hover{background-color: '+ self.chart_hover_line_color + '}\n' \
+                'table{width: 100%; background-color: ' + self.chart_background_color + ';}\n' \
+                'table tr:nth-child(2n){background-color: ' + self.chart_skip_line_color + '}\n' \
+                'table tr:hover{background-color: ' + self.chart_hover_line_color + '}\n' \
                 '</style>\n' \
                 '</head>\n' \
                 '<body bgcolor=' + self.body_background_color + '>\n'
