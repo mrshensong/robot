@@ -1,6 +1,3 @@
-import os
-import time
-import xml.etree.cElementTree as ET
 from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
