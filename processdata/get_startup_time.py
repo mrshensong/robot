@@ -1,3 +1,4 @@
+import re
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill, colors
 from processdata.get_data_graph import GenerateDataGraph
@@ -10,8 +11,13 @@ class GetStartupTime:
     def __init__(self, video_path):
         # 视频路径
         self.video_path = video_path
-        # 报告路径
-        self.report_path = video_path.replace('/video/', '/report/')
+        # 获取路径中的时间
+        pattern = re.compile(r'\d+-\d+-\d+')
+        time_list = pattern.findall(self.video_path)
+        # 开始时间
+        test_time = '/'.join(time_list)
+        # 更改report路径
+        self.report_path = MergePath([GloVar.project_path, 'report', test_time]).merged_path
         if os.path.exists(self.report_path) is False:
             os.makedirs(self.report_path)
         # excel存储数据
@@ -424,6 +430,28 @@ class GetStartupTime:
         GloVar.data_process_finished_flag = True
         Logger('data process finished!')
         WindowStatus.operating_status = '空闲状态/测试结束'
+
+    # 实时数据处理
+    def data_processing_by_real_time(self):
+        # 获取数据(dict类型)
+        video_data_dict = self.get_all_video_start_and_end_points()
+        if GloVar.video_process_data:
+            video_type_list = video_data_dict.keys()
+            for video_type in video_type_list:
+                if video_type in GloVar.video_process_data.keys():
+                    for video_data in video_data_dict[video_type]:
+                        GloVar.video_process_data[video_type].append(video_data)
+                else:
+                    GloVar.video_process_data.update(video_data_dict)
+        else:
+            GloVar.video_process_data = video_data_dict
+        # 保存excel
+        self.write_data_to_excel(file=self.report_excel, original_data_dict=GloVar.video_process_data)
+        # 获取柱形图
+        self.get_graph_data(graph_path=self.report_path, case_date_dict=GloVar.video_process_data)
+        # 生成html并保存
+        self.get_report(report_path=self.report_path, case_data_dict=GloVar.video_process_data)
+        Logger('[当前case产生的数据更新完毕]')
 
 
 if __name__ == '__main__':

@@ -75,6 +75,10 @@ class GloVar:
     exit_thread_flag = False
     # 停止执行标志(当前有很多case正在执行, 需要停下来的时候, 改变此标志位)
     stop_execute_flag = False
+    # 是否实时展示报告
+    real_time_show_report_flag = False
+    # 存放数据处理后产生的数据(实时数据处理会用到)
+    video_process_data = {}
 
 
 # Icon路径
@@ -473,3 +477,22 @@ class Common:
         min_threshold, max_threshold, min_threshold_position, max_threshold_position = cv2.minMaxLoc(match_result)
         # 返回最大匹配率
         return max_threshold
+
+
+    # 通过case名获取视频目录
+    @staticmethod
+    def get_video_folder_by_case(case_path):
+        case_name = os.path.split(case_path)[1].split('.')[0]
+        # 视频存放根目录
+        root_folder = MergePath([GloVar.project_video_path, GloVar.current_time]).merged_path
+        # 遍历视频目录下所有case目录(寻找当前case视频所在目录)
+        video_folder = None
+        for home, dirs, files in os.walk(root_folder):
+            for _ in files:
+                if case_name in home:
+                    video_folder = MergePath([home]).merged_path
+                    break
+        # 数据处理
+        if os.path.exists(video_folder) is False:
+            video_folder = None
+        return video_folder

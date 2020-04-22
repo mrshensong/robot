@@ -57,7 +57,13 @@ class UiMainWindow(QMainWindow):
         GloVar.project_path = MergePath(section_path=[os.path.abspath(os.getcwd())]).merged_path
         # 获取工程视频保存路径
         GloVar.project_video_path = MergePath(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
-
+        # 是否需要实时展示报告
+        real_time_show_report = Profile(type='read', file=GloVar.config_file_path, section='param',
+                                        option='real_time_show_report').value
+        if real_time_show_report == 'True':
+            GloVar.real_time_show_report_flag = True
+        else:
+            GloVar.real_time_show_report_flag = False
         # 显示窗口状态栏
         self.timer_window_status = Timer(frequent=1)
         self.timer_window_status.timeSignal[str].connect(self.show_window_status)
@@ -498,6 +504,26 @@ class UiMainWindow(QMainWindow):
             # 打印测试结束信息
             else:
                 Logger('此次测试完成, 不需要进行数据处理!')
+        # 实时更新展示
+        elif signal_str.startswith('real_time_show_report_update>'):
+            report_path = signal_str.split('>')[1]
+            # 如果报告已经存在(刷新即可)
+            if report_path in self.main_show_tab_widget.file_list:
+                index = self.main_show_tab_widget.file_list.index(report_path)
+                report_tab = self.main_show_tab_widget.widget(index)
+                report_tab.refresh_report()
+            else:
+                self.project_bar_widget.operation_file(file_path=report_path)
+        # 实时更新report结束
+        elif signal_str.startswith('real_time_show_report_stop>'):
+            # 此时可以使能执行数据处理按钮
+            self.data_process_execute_action.setEnabled(False)
+            self.data_process_setting_action.setEnabled(False)
+            if self.camera_param_setting_widget.stable_frame_rate_flag is True:
+                # 通过模拟点击来恢复实时流(达到稳定帧率的目的, 需要先使能视频状态按钮)
+                self.main_show_tab_widget.video_tab.video_label.status_video_button.setEnabled(True)
+                self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
+                self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
         else:
             pass
 
@@ -961,7 +987,8 @@ class UiMainWindow(QMainWindow):
         self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
 
     # 打开系统文件
-    def open_system_file(self, file):
+    @staticmethod
+    def open_system_file(file):
         # 带cmd黑框
         # os.system(file)
         # 不带cmd黑框

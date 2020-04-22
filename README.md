@@ -1,12 +1,12 @@
-# robot
+## robot
 
-### 代码运行  
+#### 代码运行  
 - 下载工程  
 - 创建虚拟环境  
 - pip install -r config/packages.txt(安装需要用到的包)  
 - 直接运行robot.py  
 
-### exe运行  
+#### exe运行  
 - pyinstaller -F -w robot.py(在dist文件夹中生成可执行文件)  
 - 将exe文件放置在工作路径
 - 拷贝虚拟环境venv\Lib\site-packages\cv2\opencv_videoio_ffmpeg411_64.dll到工作目录  

@@ -139,3 +139,5 @@ class ShowTabWidget(QTabWidget):
         # 测试结束命令
         elif signal_str.startswith('test_finished>'):
             self.signal.emit(signal_str)
+        else:
+            self.signal.emit(signal_str)

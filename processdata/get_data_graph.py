@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 from GlobalVar import Logger, MergePath
+import matplotlib
+# 可以不显示图片
+matplotlib.use('Agg')
 # 设置中文字体和负号正常显示
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
@@ -95,7 +98,7 @@ class GenerateDataGraph:
 
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     graph_path = 'D:/Code/robot/report/2019-11-27'
     data_dict = {}
     data_graph = GenerateDataGraph(graph_path=graph_path, data_dict=data_dict)

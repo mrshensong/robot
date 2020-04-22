@@ -427,6 +427,10 @@ class ReportTab(QWidget):
         self.html_show_text.load(QUrl('file:///' + self.report_path))
         # self.html_show_text.show()
 
+    # 刷新报告(实时展示报告需要用到)
+    def refresh_report(self):
+        self.html_show_text.load(QUrl('file:///' + self.report_path))
+
     def resizeEvent(self, event):
         self.signal.emit('resize>')
 

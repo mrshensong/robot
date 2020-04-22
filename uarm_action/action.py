@@ -1,11 +1,6 @@
-import os
 import re
-import cv2
-import time
 import subprocess
-import numpy as np
 from uarm_action.uarm import SwiftAPI
-from GlobalVar import Logger
 from uarm_action.video_of_external_camera import ExternalCameraVideo
 from uarm_action.video_of_system_camera import SystemCameraVideo
 from GlobalVar import *
@@ -291,9 +286,6 @@ class ArmAction:
                     Logger('[执行结束case] : %s' % description)
         WindowStatus.operating_status = '空闲状态/动作执行结束'
         GloVar.request_status = 'ok'
-        # else:
-        #     return HttpResponse("data error")
-    # return HttpResponse("ok")
 
     # 先整理动作(遇到if-else将他们整理成逻辑语句)
     @staticmethod

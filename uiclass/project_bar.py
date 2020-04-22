@@ -196,14 +196,12 @@ class ProjectBar(QWidget):
                 shutil.rmtree(node_path)
                 Logger('删除文件夹: %s' % node_path)
 
-
     # 更新选中item(必须异步线程才能选中, 也就是等待文件model更新完成, 延时时间不能太短)
     def update_selecte_item(self, path):
         time.sleep(0.04)
         new_index = self.model.index(path)
         self.tree.setCurrentIndex(new_index)
         self.info_label.setText(path)
-
 
     # 更新文件名字显示
     def show_info(self):  # 4
@@ -212,7 +210,6 @@ class ProjectBar(QWidget):
             file_name = self.model.fileName(index)
             file_path = self.model.filePath(index)
             self.info_label.setText(file_path)
-
 
     # 双击操作
     def operation_file(self, file_path=None):

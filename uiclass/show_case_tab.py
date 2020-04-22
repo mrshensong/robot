@@ -1,9 +1,12 @@
+import re
 from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from GlobalVar import *
 from uiclass.controls import CaseControl
+from processdata.get_startup_time_by_stable_point import GetStartupTimeByStablePoint
+from processdata.get_startup_time import GetStartupTime
 
 
 class ShowCaseTab(QWidget):
@@ -255,13 +258,45 @@ class ShowCaseTab(QWidget):
                     # 退出case的执行
                     if GloVar.stop_execute_flag is True:
                         break
-                # 退出case的执行
+                # 一条case执行完毕后(实时处理视频)
+                while True:
+                    if GloVar.request_status == 'ok':
+                        if GloVar.real_time_show_report_flag is True:
+                            Logger('[开始计算测试结果] : %s' % case_path)
+                            video_path = Common.get_video_folder_by_case(case_path)
+                            image_process_method = Profile(type='read', file=GloVar.config_file_path, section='param',
+                                                           option='image_process_method').value
+                            if image_process_method == 'method-1':
+                                test = GetStartupTime(video_path=video_path)
+                            elif image_process_method == 'method-2':
+                                test = GetStartupTimeByStablePoint(video_path=video_path)
+                            # 实时数据处理
+                            test.data_processing_by_real_time()
+                            Logger('[测试结果处理完毕] : %s' % case_path)
+                            # 发送更新消息
+                            # 获取路径中的时间
+                            pattern = re.compile(r'\d+-\d+-\d+')
+                            time_list = pattern.findall(video_path)
+                            # 开始时间
+                            test_time = '/'.join(time_list)
+                            # 更改report路径
+                            report_path = MergePath([GloVar.project_path, 'report', test_time, 'report.html']).merged_path
+                            self.signal.emit('real_time_show_report_update>' + report_path)
+                            break
+                        else:
+                            break
+                    else:
+                        time.sleep(0.2)
+                # 是否退出case的执行
                 if GloVar.stop_execute_flag is True:
                     break
         # 测试执行结束(改变标志位, 触发数据处理函数)
         while True:
             if GloVar.request_status == 'ok':
-                self.signal.emit('test_finished>')
+                if GloVar.real_time_show_report_flag is True:
+                    self.signal.emit('real_time_show_report_stop>')
+                else:
+                    self.signal.emit('test_finished>')
                 # 退出case的执行标志位复位
                 GloVar.stop_execute_flag = False
                 break
@@ -277,7 +312,8 @@ class ShowCaseTab(QWidget):
         Thread(target=self.execute_selected_items, args=(execute_times,)).start()
 
     # 停止执行case
-    def connect_stop_execute_case(self):
+    @staticmethod
+    def connect_stop_execute_case():
         GloVar.stop_execute_flag = True
 
     # 视频处理开关切换
