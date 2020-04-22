@@ -51,12 +51,8 @@ class UiMainWindow(QMainWindow):
         self.videos_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='videos_path').value
         # 如果需要检测, 数据处理需要用到的模板, 是否准备完成(True:确认需要检测/False:退出检测)
         self.need_detect_data_flag = False
-        # 今天的日期(用作文件夹名)
-        self.today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
         # 获取当前工程路径(连接符标准化为正斜杠模式)
         GloVar.project_path = MergePath(section_path=[os.path.abspath(os.getcwd())]).merged_path
-        # 获取工程视频保存路径
-        GloVar.project_video_path = MergePath(section_path=[os.path.abspath(os.getcwd()), 'video', self.today_data]).merged_path
         # 是否需要实时展示报告
         real_time_show_report = Profile(type='read', file=GloVar.config_file_path, section='param',
                                         option='real_time_show_report').value

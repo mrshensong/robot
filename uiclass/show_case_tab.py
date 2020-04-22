@@ -294,6 +294,9 @@ class ShowCaseTab(QWidget):
         while True:
             if GloVar.request_status == 'ok':
                 if GloVar.real_time_show_report_flag is True:
+                    # 清除视频处理缓存数据
+                    GloVar.video_process_data = {}
+                    # 发送实时更新停止信号
                     self.signal.emit('real_time_show_report_stop>')
                 else:
                     self.signal.emit('test_finished>')
@@ -305,6 +308,10 @@ class ShowCaseTab(QWidget):
 
     # 线程中执行选中的case
     def connect_execute_selected_items(self):
+        # 今天的日期(用作文件夹名)
+        today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        # 获取工程视频保存路径
+        GloVar.project_video_path = MergePath([GloVar.project_path, 'video', today_data]).merged_path
         # 每执行一次都需要获取当前时间(作为文件夹)
         GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         # 获取执行次数

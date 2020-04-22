@@ -295,6 +295,10 @@ class ShowActionTab(QWidget):
 
     # 执行选中的actions(execute_button/单独起线程)
     def connect_execute_selected_actions(self):
+        # 今天的日期(用作文件夹名)
+        today_data = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        # 获取工程视频保存路径
+        GloVar.project_video_path = MergePath([GloVar.project_path, 'video', today_data]).merged_path
         # 每执行一次都需要获取当前时间(作为文件夹)
         GloVar.current_time = time.strftime('%H-%M-%S', time.localtime(time.time()))
         Thread(target=self.execute_selected_actions, args=()).start()
