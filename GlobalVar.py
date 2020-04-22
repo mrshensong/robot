@@ -175,6 +175,7 @@ class IconPath:
     Icon_adb = 'config/Icon/adb_control_icon/adb.png'
     # 切换目录树图标
     Icon_switch_tree = 'config/Icon/total_toolbar_icon/switch_tree.png'
+    Icon_setting = 'config/Icon/total_toolbar_icon/setting.png'
     # case停止执行
     Icon_stop_execute = 'config/Icon/total_toolbar_icon/stop_execute.png'
     # 照片图标
@@ -313,14 +314,16 @@ class Profile:
             pass
 
     '''更改配置文件会去掉注释'''
-    def get_config_value(self, file, section, option):
+    @staticmethod
+    def get_config_value(file, section, option):
         config = configparser.ConfigParser()
         config.read(file, encoding='utf-8')
         value = config.get(section, option)
         return value
 
     # 设置config的参数
-    def set_config_value(self, file, section, option, value):
+    @staticmethod
+    def set_config_value(file, section, option, value):
         config = configparser.ConfigParser()
         config.read(file, encoding='utf-8')
         if section not in config.sections():
@@ -330,7 +333,8 @@ class Profile:
             config.write(cf)
 
     # 获取节点options
-    def get_config_options(self, file, section):
+    @staticmethod
+    def get_config_options(file, section):
         config = configparser.ConfigParser()
         config.read(file, encoding='utf-8-sig')
         options = config.options(section)

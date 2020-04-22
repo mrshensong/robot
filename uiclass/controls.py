@@ -928,19 +928,23 @@ class CaseControl(QWidget):
         self.signal.emit('delete_case>' + str(self.id))
 
 
-# 相机参数调节控件
-class CameraParamAdjustControl(QDialog):
+# 设置控件
+class SettingControl(QDialog):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, use_external_camera_flag):
-        super(CameraParamAdjustControl, self).__init__(parent)
+    def __init__(self, parent):
+        super(SettingControl, self).__init__(parent)
         self.parent = parent
-        self.use_external_camera_flag = use_external_camera_flag
         self.picture_path = Profile(type='read', file=GloVar.config_file_path, section='param', option='picture_path').value
-        self.exposure_time_value = 1000
-        self.gain_value = 0
         self.stable_frame_rate_flag = True
+        # 是否需要实时展示报告
+        real_time_show_report = Profile(type='read', file=GloVar.config_file_path, section='param',
+                                        option='real_time_show_report').value
+        if real_time_show_report == 'True':
+            GloVar.real_time_show_report_flag = True
+        else:
+            GloVar.real_time_show_report_flag = False
         self.initUI()
 
     def initUI(self):
@@ -950,40 +954,25 @@ class CameraParamAdjustControl(QDialog):
         self.grid_layout = QGridLayout()
         # 确认button布局
         self.sure_button_layout = QHBoxLayout()
-
-        # 设置曝光
-        self.exposure_time_label = QLabel(self)
-        self.exposure_time_label.setText('曝光: ')
-        self.exposure_time_slider = QSlider(Qt.Horizontal, self)
-        self.exposure_time_slider.setRange(1000, 100000)
-        self.exposure_time_slider.valueChanged.connect(self.connect_exposure_time_slider)
-        self.exposure_time_spinbox = QSpinBox(self)
-        self.exposure_time_spinbox.setRange(1000, 100000)
-        self.exposure_time_spinbox.valueChanged.connect(self.connect_exposure_time_spinbox)
-        # 用户不可以修改曝光(关系到帧率)
-        self.exposure_time_slider.setEnabled(False)
-        self.exposure_time_spinbox.setEnabled(False)
-        self.grid_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
-        self.grid_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 5)
-        self.grid_layout.addWidget(self.exposure_time_spinbox, 0, 6, 1, 1)
-        # 设置增益
-        self.gain_label = QLabel(self)
-        self.gain_label.setText('增益: ')
-        self.gain_slider = QSlider(Qt.Horizontal, self)
-        self.gain_slider.setRange(0, 24)
-        self.gain_slider.valueChanged.connect(self.connect_gain_slider)
-        self.gain_spinbox = QSpinBox(self)
-        self.gain_spinbox.setRange(0, 24)
-        self.gain_spinbox.valueChanged.connect(self.connect_gain_spinbox)
-        if self.use_external_camera_flag is True:
-            self.gain_slider.setEnabled(True)
-            self.gain_spinbox.setEnabled(True)
+        # 设置case执行过程中是否需要关闭界面实时流(关闭实时流可以保证录制视频不丢帧)
+        self.real_time_show_report_label = QLabel(self)
+        self.real_time_show_report_label.setText('实时报告: ')
+        self.real_time_show_report_des = QLineEdit(self)
+        self.real_time_show_report_des.setReadOnly(True)
+        self.real_time_show_report_button = QPushButton(self)
+        self.real_time_show_report_button.setMaximumWidth(40)
+        self.real_time_show_report_button.clicked.connect(self.change_real_time_show_report_status)
+        if GloVar.real_time_show_report_flag is True:
+            self.real_time_show_report_button.setStyleSheet(
+                 'QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.real_time_show_report_des.setText('开启状态,每执行一条case后,会处理数据,会实时刷新报告')
         else:
-            self.gain_slider.setEnabled(False)
-            self.gain_spinbox.setEnabled(False)
-        self.grid_layout.addWidget(self.gain_label, 1, 0, 1, 1)
-        self.grid_layout.addWidget(self.gain_slider, 1, 1, 1, 5)
-        self.grid_layout.addWidget(self.gain_spinbox, 1, 6, 1, 1)
+            self.real_time_show_report_button.setStyleSheet(
+                'QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.real_time_show_report_des.setText('关闭状态,所有case执行完成后,才会处理数据,不会实时刷新报告')
+        self.grid_layout.addWidget(self.real_time_show_report_label, 0, 0, 1, 1)
+        self.grid_layout.addWidget(self.real_time_show_report_des, 0, 1, 1, 5)
+        self.grid_layout.addWidget(self.real_time_show_report_button, 0, 6, 1, 1)
         # 设置case执行过程中是否需要关闭界面实时流(关闭实时流可以保证录制视频不丢帧)
         self.stable_frame_rate_label = QLabel(self)
         self.stable_frame_rate_label.setText('稳定帧率: ')
@@ -993,10 +982,11 @@ class CameraParamAdjustControl(QDialog):
         self.stable_frame_rate_button = QPushButton(self)
         self.stable_frame_rate_button.setMaximumWidth(40)
         self.stable_frame_rate_button.clicked.connect(self.change_stable_frame_rate_status)
-        self.stable_frame_rate_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
-        self.grid_layout.addWidget(self.stable_frame_rate_label, 2, 0, 1, 1)
-        self.grid_layout.addWidget(self.stable_frame_rate_des, 2, 1, 1, 5)
-        self.grid_layout.addWidget(self.stable_frame_rate_button, 2, 6, 1, 1)
+        self.stable_frame_rate_button.setStyleSheet(
+            'QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+        self.grid_layout.addWidget(self.stable_frame_rate_label, 1, 0, 1, 1)
+        self.grid_layout.addWidget(self.stable_frame_rate_des, 1, 1, 1, 5)
+        self.grid_layout.addWidget(self.stable_frame_rate_button, 1, 6, 1, 1)
         # 设置新建动作过程中机械臂是否随着动作的新建而动
         self.robot_follow_action_flag_label = QLabel(self)
         self.robot_follow_action_flag_label.setText('动作跟随:')
@@ -1007,9 +997,9 @@ class CameraParamAdjustControl(QDialog):
         self.robot_follow_action_flag_button.setMaximumWidth(40)
         self.robot_follow_action_flag_button.clicked.connect(self.change_robot_follow_action_flag)
         self.robot_follow_action_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
-        self.grid_layout.addWidget(self.robot_follow_action_flag_label, 3, 0, 1, 1)
-        self.grid_layout.addWidget(self.robot_follow_action_flag_des, 3, 1, 1, 5)
-        self.grid_layout.addWidget(self.robot_follow_action_flag_button, 3, 6, 1, 1)
+        self.grid_layout.addWidget(self.robot_follow_action_flag_label, 2, 0, 1, 1)
+        self.grid_layout.addWidget(self.robot_follow_action_flag_des, 2, 1, 1, 5)
+        self.grid_layout.addWidget(self.robot_follow_action_flag_button, 2, 6, 1, 1)
         # 机械臂动作默认收回与否
         self.robot_action_take_back_label = QLabel(self)
         self.robot_action_take_back_label.setText('动作收回:')
@@ -1020,9 +1010,9 @@ class CameraParamAdjustControl(QDialog):
         self.robot_action_take_back_flag_button.setMaximumWidth(40)
         self.robot_action_take_back_flag_button.clicked.connect(self.change_robot_action_take_back_flag)
         self.robot_action_take_back_flag_button.setStyleSheet('QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
-        self.grid_layout.addWidget(self.robot_action_take_back_label, 4, 0, 1, 1)
-        self.grid_layout.addWidget(self.robot_action_take_back_des, 4, 1, 1, 5)
-        self.grid_layout.addWidget(self.robot_action_take_back_flag_button, 4, 6, 1, 1)
+        self.grid_layout.addWidget(self.robot_action_take_back_label, 3, 0, 1, 1)
+        self.grid_layout.addWidget(self.robot_action_take_back_des, 3, 1, 1, 5)
+        self.grid_layout.addWidget(self.robot_action_take_back_flag_button, 3, 6, 1, 1)
         # 设置屏幕真实尺寸
         self.screen_size_label = QLabel(self)
         self.screen_size_label.setText('屏幕尺寸:')
@@ -1041,9 +1031,9 @@ class CameraParamAdjustControl(QDialog):
         self.screen_size_drop_down_box.setEnabled(False)
         self.screen_size_button = QPushButton('修改')
         self.screen_size_button.clicked.connect(self.change_screen_size)
-        self.grid_layout.addWidget(self.screen_size_label, 5, 0, 1, 1)
-        self.grid_layout.addWidget(self.screen_size_drop_down_box, 5, 1, 1, 5)
-        self.grid_layout.addWidget(self.screen_size_button, 5, 6, 1, 1)
+        self.grid_layout.addWidget(self.screen_size_label, 4, 0, 1, 1)
+        self.grid_layout.addWidget(self.screen_size_drop_down_box, 4, 1, 1, 5)
+        self.grid_layout.addWidget(self.screen_size_button, 4, 6, 1, 1)
         # 设置图片路径
         self.picture_path_show_label = QLabel(self)
         self.picture_path_show_label.setText('图片路径: ')
@@ -1052,9 +1042,9 @@ class CameraParamAdjustControl(QDialog):
         self.picture_path_show_edit.setText(self.picture_path)
         self.picture_path_change_button = QPushButton('更改')
         self.picture_path_change_button.clicked.connect(self.connect_change_picture_path)
-        self.grid_layout.addWidget(self.picture_path_show_label, 6, 0, 1, 1)
-        self.grid_layout.addWidget(self.picture_path_show_edit, 6, 1, 1, 5)
-        self.grid_layout.addWidget(self.picture_path_change_button, 6, 6, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_label, 5, 0, 1, 1)
+        self.grid_layout.addWidget(self.picture_path_show_edit, 5, 1, 1, 5)
+        self.grid_layout.addWidget(self.picture_path_change_button, 5, 6, 1, 1)
         # 确定按钮
         self.sure_button = QPushButton('确定')
         self.sure_button.clicked.connect(self.connect_sure_button)
@@ -1069,25 +1059,21 @@ class CameraParamAdjustControl(QDialog):
         # 设置最小尺寸
         self.setMinimumWidth(400)
         self.setFixedWidth(750)
-        self.setWindowTitle('摄像头参数')
+        self.setWindowTitle('设置参数')
 
-    def connect_exposure_time_slider(self):
-        self.exposure_time_value = int(self.exposure_time_slider.value())
-        self.exposure_time_spinbox.setValue(self.exposure_time_value)
-        self.signal.emit('exposure_time>' + str(self.exposure_time_value))
-
-    def connect_exposure_time_spinbox(self):
-        self.exposure_time_value = int(self.exposure_time_spinbox.value())
-        self.exposure_time_slider.setValue(self.exposure_time_value)
-
-    def connect_gain_slider(self):
-        self.gain_value = int(self.gain_slider.value())
-        self.gain_spinbox.setValue(self.gain_value)
-        self.signal.emit('gain>' + str(self.gain_value))
-
-    def connect_gain_spinbox(self):
-        self.gain_value = int(self.gain_spinbox.value())
-        self.gain_slider.setValue(self.gain_value)
+    def change_real_time_show_report_status(self):
+        if GloVar.real_time_show_report_flag is True:
+            GloVar.real_time_show_report_flag = False
+            self.real_time_show_report_button.setStyleSheet(
+                'QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_off + ')}')
+            self.real_time_show_report_des.setText('关闭状态,所有case执行完成后,才会处理数据,不会实时刷新报告')
+        else:
+            GloVar.real_time_show_report_flag = True
+            self.real_time_show_report_button.setStyleSheet(
+                'QPushButton{border-image: url(' + IconPath.Icon_tab_widget_switch_on + ')}')
+            self.real_time_show_report_des.setText('开启状态,每执行一条case后,会处理数据,会实时刷新报告')
+        Profile(type='write', file=GloVar.config_file_path, section='param', option='real_time_show_report',
+                value=str(GloVar.real_time_show_report_flag))
 
     def change_stable_frame_rate_status(self):
         if self.stable_frame_rate_flag is True:
@@ -1148,6 +1134,103 @@ class CameraParamAdjustControl(QDialog):
                     value=self.picture_path)
             Logger('修改保存图片路径为: %s' % self.picture_path)
             self.signal.emit('picture_path>' + self.picture_path)
+
+    # 确认按钮按下触发事件
+    def connect_sure_button(self):
+        self.close()
+
+    # 重写窗口关闭事件
+    def closeEvent(self, event):
+        self.close()
+
+
+# 相机参数调节控件
+class CameraParamAdjustControl(QDialog):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent, use_external_camera_flag):
+        super(CameraParamAdjustControl, self).__init__(parent)
+        self.parent = parent
+        self.use_external_camera_flag = use_external_camera_flag
+        self.exposure_time_value = 1000
+        self.gain_value = 0
+        self.initUI()
+
+    def initUI(self):
+        # 控件总布局
+        self.general_layout = QVBoxLayout()
+        # 曝光增益使用栅格布局
+        self.grid_layout = QGridLayout()
+        # 确认button布局
+        self.sure_button_layout = QHBoxLayout()
+
+        # 设置曝光
+        self.exposure_time_label = QLabel(self)
+        self.exposure_time_label.setText('曝光: ')
+        self.exposure_time_slider = QSlider(Qt.Horizontal, self)
+        self.exposure_time_slider.setRange(1000, 100000)
+        self.exposure_time_slider.valueChanged.connect(self.connect_exposure_time_slider)
+        self.exposure_time_spinbox = QSpinBox(self)
+        self.exposure_time_spinbox.setRange(1000, 100000)
+        self.exposure_time_spinbox.valueChanged.connect(self.connect_exposure_time_spinbox)
+        # 用户不可以修改曝光(关系到帧率)
+        self.exposure_time_slider.setEnabled(False)
+        self.exposure_time_spinbox.setEnabled(False)
+        self.grid_layout.addWidget(self.exposure_time_label, 0, 0, 1, 1)
+        self.grid_layout.addWidget(self.exposure_time_slider, 0, 1, 1, 5)
+        self.grid_layout.addWidget(self.exposure_time_spinbox, 0, 6, 1, 1)
+        # 设置增益
+        self.gain_label = QLabel(self)
+        self.gain_label.setText('增益: ')
+        self.gain_slider = QSlider(Qt.Horizontal, self)
+        self.gain_slider.setRange(0, 24)
+        self.gain_slider.valueChanged.connect(self.connect_gain_slider)
+        self.gain_spinbox = QSpinBox(self)
+        self.gain_spinbox.setRange(0, 24)
+        self.gain_spinbox.valueChanged.connect(self.connect_gain_spinbox)
+        if self.use_external_camera_flag is True:
+            self.gain_slider.setEnabled(True)
+            self.gain_spinbox.setEnabled(True)
+        else:
+            self.gain_slider.setEnabled(False)
+            self.gain_spinbox.setEnabled(False)
+        self.grid_layout.addWidget(self.gain_label, 1, 0, 1, 1)
+        self.grid_layout.addWidget(self.gain_slider, 1, 1, 1, 5)
+        self.grid_layout.addWidget(self.gain_spinbox, 1, 6, 1, 1)
+        # 确定按钮
+        self.sure_button = QPushButton('确定')
+        self.sure_button.clicked.connect(self.connect_sure_button)
+        self.sure_button_layout.addStretch(1)
+        self.sure_button_layout.addWidget(self.sure_button)
+        self.sure_button_layout.addStretch(1)
+
+        self.general_layout.addLayout(self.grid_layout)
+        self.general_layout.addSpacing(40)
+        self.general_layout.addLayout(self.sure_button_layout)
+        self.setLayout(self.general_layout)
+        # 设置最小尺寸
+        self.setMinimumWidth(400)
+        self.setFixedWidth(750)
+        self.setWindowTitle('摄像头参数')
+
+    def connect_exposure_time_slider(self):
+        self.exposure_time_value = int(self.exposure_time_slider.value())
+        self.exposure_time_spinbox.setValue(self.exposure_time_value)
+        self.signal.emit('exposure_time>' + str(self.exposure_time_value))
+
+    def connect_exposure_time_spinbox(self):
+        self.exposure_time_value = int(self.exposure_time_spinbox.value())
+        self.exposure_time_slider.setValue(self.exposure_time_value)
+
+    def connect_gain_slider(self):
+        self.gain_value = int(self.gain_slider.value())
+        self.gain_spinbox.setValue(self.gain_value)
+        self.signal.emit('gain>' + str(self.gain_value))
+
+    def connect_gain_spinbox(self):
+        self.gain_value = int(self.gain_spinbox.value())
+        self.gain_slider.setValue(self.gain_value)
 
     # 确认按钮按下触发事件
     def connect_sure_button(self):

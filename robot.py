@@ -1,13 +1,12 @@
 import sys
 import datetime
 import subprocess
-from threading import Thread
 from processdata.get_startup_time import GetStartupTime
 from processdata.get_startup_time_by_stable_point import GetStartupTimeByStablePoint
 from uiclass.stream import Stream
 from uiclass.timer import Timer
 from uiclass.show_tab_widget import ShowTabWidget
-from uiclass.controls import CameraParamAdjustControl, FrameRateAdjustControl
+from uiclass.controls import *
 from uiclass.main_show_tab_widget import MainShowTabWidget
 from uiclass.project_bar import ProjectBar
 from PyQt5.QtCore import *
@@ -53,13 +52,6 @@ class UiMainWindow(QMainWindow):
         self.need_detect_data_flag = False
         # 获取当前工程路径(连接符标准化为正斜杠模式)
         GloVar.project_path = MergePath(section_path=[os.path.abspath(os.getcwd())]).merged_path
-        # 是否需要实时展示报告
-        real_time_show_report = Profile(type='read', file=GloVar.config_file_path, section='param',
-                                        option='real_time_show_report').value
-        if real_time_show_report == 'True':
-            GloVar.real_time_show_report_flag = True
-        else:
-            GloVar.real_time_show_report_flag = False
         # 显示窗口状态栏
         self.timer_window_status = Timer(frequent=1)
         self.timer_window_status.timeSignal[str].connect(self.show_window_status)
@@ -108,6 +100,9 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar = self.addToolBar('local_video_toolbar')
         # 数据处理工具栏
         self.data_process_toolbar = self.addToolBar('data_process_toolbar')
+        # 设置框
+        self.setting_widget = SettingControl(self)
+        self.setting_widget.signal[str].connect(self.recv_setting_widget)
         # 视频实时流参数设置框
         self.camera_param_setting_widget = CameraParamAdjustControl(self, self.use_external_camera_flag)
         self.camera_param_setting_widget.signal[str].connect(self.recv_camera_param_setting_widget)
@@ -164,6 +159,8 @@ class UiMainWindow(QMainWindow):
         # 总工具栏
         self.total_toolbar_switch_tree_action = QAction(QIcon(IconPath.Icon_switch_tree), '显示树目录', self)
         self.total_toolbar_switch_tree_action.triggered.connect(self.connect_switch_tree)
+        self.total_toolbar_setting_action = QAction(QIcon(IconPath.Icon_setting), '设置', self)
+        self.total_toolbar_setting_action.triggered.connect(self.connect_setting)
         # 实时流相关action
         self.live_video_toolbar_label = QLabel(self)
         self.live_video_toolbar_label.setText('实时流:')
@@ -227,6 +224,7 @@ class UiMainWindow(QMainWindow):
         self.data_process_execute_action.triggered.connect(self.data_process_execute)
         # 总工具栏
         self.total_toolbar.addAction(self.total_toolbar_switch_tree_action)
+        self.total_toolbar.addAction(self.total_toolbar_setting_action)
         # 实时流工具栏
         self.live_video_toolbar.addWidget(self.live_video_toolbar_label)
         self.live_video_toolbar.addAction(self.live_video_switch_camera_status_action)
@@ -350,6 +348,13 @@ class UiMainWindow(QMainWindow):
         self.console.setTextCursor(cursor)
         self.console.ensureCursorVisible()
 
+    # 接收设置框消息
+    def recv_setting_widget(self, signal_str):
+        if signal_str.startswith('picture_path>'):
+            self.picture_path = signal_str.split('>')[1]
+            self.main_show_tab_widget.video_tab.video_label.picture_path = self.picture_path
+            GloVar.project_picture_path = self.picture_path
+
     # 接收实时流的相关参数调整(暂时没有用到)
     def recv_camera_param_setting_widget(self, signal_str):
         if signal_str.startswith('exposure_time>'):
@@ -357,10 +362,6 @@ class UiMainWindow(QMainWindow):
         elif signal_str.startswith('gain>'):
             gain = int(signal_str.split('gain>')[1])
             Thread(target=self.robot.video.cam.Gain.set, args=(gain,)).start()
-        elif signal_str.startswith('picture_path>'):
-            self.picture_path = signal_str.split('>')[1]
-            self.main_show_tab_widget.video_tab.video_label.picture_path = self.picture_path
-            GloVar.project_picture_path = self.picture_path
 
     # 接收本地视频帧率调整的信号
     def recv_frame_rate_adjust_widget(self, signal_str):
@@ -472,7 +473,7 @@ class UiMainWindow(QMainWindow):
             self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
         # 准备开始执行测试用例
         elif signal_str.startswith('ready_execute_case>'):
-            if self.camera_param_setting_widget.stable_frame_rate_flag is True:
+            if self.setting_widget.stable_frame_rate_flag is True:
                 # 通过模拟点击来暂停实时流(达到稳定帧率的目的, 并暂时不让视频状态按钮使能)
                 self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PLAYING
                 self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
@@ -515,7 +516,7 @@ class UiMainWindow(QMainWindow):
             # 此时可以使能执行数据处理按钮
             self.data_process_execute_action.setEnabled(False)
             self.data_process_setting_action.setEnabled(False)
-            if self.camera_param_setting_widget.stable_frame_rate_flag is True:
+            if self.setting_widget.stable_frame_rate_flag is True:
                 # 通过模拟点击来恢复实时流(达到稳定帧率的目的, 需要先使能视频状态按钮)
                 self.main_show_tab_widget.video_tab.video_label.status_video_button.setEnabled(True)
                 self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
@@ -601,6 +602,11 @@ class UiMainWindow(QMainWindow):
         else:
             self.splitter_v_part_1.setCurrentWidget(self.project_bar_widget)
             self.total_toolbar_switch_tree_action.setToolTip('显示工作区')
+
+    # 总的设置选项
+    def connect_setting(self):
+        self.setting_widget.show()
+        self.setting_widget.exec()
 
     '''以下内容为实时流工具栏相关操作'''
     # 切换摄像头状态
