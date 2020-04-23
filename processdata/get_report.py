@@ -42,19 +42,20 @@ class GenerateReport:
                     '<hr/>\n' \
                     '<table width="100%" border= "1px solid ' + self.chart_border_color + '" cellspacing="0">\n' \
                     '<tr height="50" align="center" style="font-weight: bold">\n' \
-                    '<td width="7%"><font color="#606060">类型</font></td>\n' \
+                    '<td width="6%"><font color="#606060">类型</font></td>\n' \
                     '<td width="16%"><font color="#606060">用例</font></td>\n' \
-                    '<td width="7%"><font color="#606060">次数</font></td>\n' \
-                    '<td width="7%"><font color="#606060">次序</font></td>\n' \
-                    '<td width="7%"><font color="#606060">开始帧</font></td>\n' \
-                    '<td width="7%"><font color="#606060">结束帧</font></td>\n' \
-                    '<td width="7%"><font color="#606060">耗时(ms)</font></td>\n' \
-                    '<td width="7%"><font color="#606060">标准(ms)</font></td>\n' \
-                    '<td width="7%"><font color="#606060">平均耗时(ms)</font></td>\n' \
-                    '<td width="7%"><font color="#606060">最大耗时(ms)</font></td>\n' \
-                    '<td width="7%"><font color="#606060">最小耗时(ms)</font></td>\n' \
-                    '<td width="7%"><font color="#606060">状态</font></td>\n' \
-                    '<td width="7%"><font color="#606060">重新测试(是/否)</font></td>\n' \
+                    '<td width="6%"><font color="#606060">次数</font></td>\n' \
+                    '<td width="6%"><font color="#606060">次序</font></td>\n' \
+                    '<td width="12%"><font color="#606060">时间</font></td>\n' \
+                    '<td width="6%"><font color="#606060">开始帧</font></td>\n' \
+                    '<td width="6%"><font color="#606060">结束帧</font></td>\n' \
+                    '<td width="6%"><font color="#606060">耗时(ms)</font></td>\n' \
+                    '<td width="6%"><font color="#606060">标准(ms)</font></td>\n' \
+                    '<td width="6%"><font color="#606060">平均耗时(ms)</font></td>\n' \
+                    '<td width="6%"><font color="#606060">最大耗时(ms)</font></td>\n' \
+                    '<td width="6%"><font color="#606060">最小耗时(ms)</font></td>\n' \
+                    '<td width="6%"><font color="#606060">状态</font></td>\n' \
+                    '<td width="6%"><font color="#606060">重新测试(是/否)</font></td>\n' \
                     '</tr>\n'
         for key, data_list in self.data_dict.items():
             # 获取总长度(也就是测试类型所占行数)
@@ -99,6 +100,7 @@ class GenerateReport:
                     retest_text_color = '#18C0A8'
                 # 写入每次的数据(可能多次或者单次)
                 for sub_data in data[2]:
+                    video_time = sub_data['时间']
                     serial_number = sub_data['次序']
                     start_frame = sub_data['开始帧']
                     end_frame = sub_data['结束帧']
@@ -109,6 +111,7 @@ class GenerateReport:
                                      '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#30D878">' + str(case_name) + '</font></td>\n' \
                                      '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#1890C0">' + str(current_case_times) + '</font></td>\n' \
                                      '<td><font color="#FFA860">' + str(serial_number) + '</font></td>\n' \
+                                     '<td><font color="#996699">' + str(video_time) + '</font></td>\n' \
                                      '<td><font color="#30D8D8">' + str(start_frame) + '</font></td>\n' \
                                      '<td><font color="#1890C0">' + str(end_frame) + '</font></td>\n' \
                                      '<td><font color="#FFA860">' + str(time_value) + '</font></td>\n' \
@@ -124,6 +127,7 @@ class GenerateReport:
                                      '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#30D878">' + str(case_name) + '</font></td>\n' \
                                      '<td rowspan="' + str(current_case_times) + '" bgcolor="' + self.customize_color + '"><font color="#1890C0">' + str(current_case_times) + '</font></td>\n' \
                                      '<td><font color="#FFA860">' + str(serial_number) + '</font></td>\n' \
+                                     '<td><font color="#996699">' + str(video_time) + '</font></td>\n' \
                                      '<td><font color="#30D8D8">' + str(start_frame) + '</font></td>\n' \
                                      '<td><font color="#1890C0">' + str(end_frame) + '</font></td>\n' \
                                      '<td><font color="#FFA860">' + str(time_value) + '</font></td>\n' \
@@ -137,6 +141,7 @@ class GenerateReport:
                     else:
                         html_chat += '<tr height="30" align="center">\n' \
                                      '<td><font color="#FFA860">' + str(serial_number) + '</font></td>\n' \
+                                     '<td><font color="#996699">' + str(video_time) + '</font></td>\n' \
                                      '<td><font color="#30D8D8">' + str(start_frame) + '</font></td>\n' \
                                      '<td><font color="#1890C0">' + str(end_frame) + '</font></td>\n' \
                                      '<td><font color="#FFA860">' + str(time_value) + '</font></td>\n' \

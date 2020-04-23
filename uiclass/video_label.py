@@ -1175,7 +1175,8 @@ class VideoLabel(QLabel):
             self.x0, self.y0, self.x1, self.y1 = 0, 0, 0, 0
 
     # 在模板图片中的前4行4列写入位置信息(roi图片/column列数,从0-3/num坐标信息)
-    def write_position_info_to_roi(self, roi, column, num):
+    @staticmethod
+    def write_position_info_to_roi(roi, column, num):
         num_length = len(str(num))
         if num_length == 4:
             str_num = str(num)

@@ -206,9 +206,11 @@ class ExternalCameraVideo:
         video_path = self.video_path + '/' + self.case_type + '/' + self.case_name
         if os.path.exists(video_path) is False:
             os.makedirs(video_path)
+        # 获取拍摄视频的开始时间
+        current_time = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime(time.time()))
         # 以当前目录的文件产生顺序命名
         video_count = len(os.listdir(video_path))
-        self.video_file_name = video_path + '/' + str(video_count + 1) + '.mp4'
+        self.video_file_name = video_path + '/' + str(video_count + 1) + '(' + current_time + ')' + '.mp4'
         # 重新录制视频标志重新置位
         self.restart_record_flag = False
         '''开始录像(通过标志位)'''
