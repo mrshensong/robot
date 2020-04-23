@@ -1021,6 +1021,7 @@ class VideoLabel(QLabel):
                     # 接收模板路径
                     mask_path = GloVar.mask_path
                     default_name = '截图'
+                    # default_name = '[' + str(x0) + ',' + str(y0) + ']' + '[' + str(x1) + ',' + str(y1) + ']'
             # 本地视频播放
             elif self.video_play_flag is True:
                 # 数据处理产生的模板
@@ -1031,6 +1032,7 @@ class VideoLabel(QLabel):
                 else:
                     mask_path = GloVar.mask_path
                     default_name = '截图'
+                    # default_name = '[' + str(x0) + ',' + str(y0) + ']' + '[' + str(x1) + ',' + str(y1) + ']'
             else:
                 Logger('[当前状态不允许保存模板!]')
                 return

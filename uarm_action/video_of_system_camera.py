@@ -38,7 +38,6 @@ class SystemCameraVideo:
         # 开启视频流
         Thread(target=self.video_stream, args=()).start()
 
-
     # 调用笔记本摄像头模拟工业摄像头
     def video_stream(self):
         cap = cv2.VideoCapture(0)
@@ -58,7 +57,6 @@ class SystemCameraVideo:
                 self.frame_id += 1
         cap.release()
         Logger('退出视频录像线程')
-
 
     # 保存视频
     def save_video(self):
@@ -80,8 +78,7 @@ class SystemCameraVideo:
                 time.sleep(0.001)
         out.release()
         self.restart_record_flag = True
-        Logger('视频保存结束: %s' %self.video_file_name)
-
+        Logger('视频保存结束: %s' % self.video_file_name)
 
     def start_record_video(self, case_type='test', case_name='test'):
         # 判断视频是否保存完成(保存完毕才允许再次开始录像)
@@ -104,17 +101,15 @@ class SystemCameraVideo:
         '''开始录像(通过标志位)'''
         self.record_flag = True
         Thread(target=self.save_video, args=()).start()
-        Logger('开始录制视频: %s' %self.video_file_name)
-
+        Logger('开始录制视频: %s' % self.video_file_name)
 
     def stop_record_video(self):
         # 多录制一秒钟(预防结束的太早)
         time.sleep(1)
         self.record_flag = False
-        Logger('当前视频总帧数为: %d' %self.frame_id)
+        Logger('当前视频总帧数为: %d' % self.frame_id)
         Logger('正在保存缓存区的视频...')
         self.frame_id = 0
-
 
     def stop_record_thread(self):
         # 判断视频是否保存完成(保存完才能停止线程)
@@ -126,7 +121,7 @@ class SystemCameraVideo:
         self.record_thread_flag = False
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     video = SystemCameraVideo(video_path='D:/Code/robot/video', video_width=1600, video_height=800)
     # time.sleep(2)
     time.sleep(5)
