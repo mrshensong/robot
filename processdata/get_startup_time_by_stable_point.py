@@ -19,8 +19,6 @@ class GetStartupTimeByStablePoint:
         self.report_path = MergePath([GloVar.project_path, 'report', test_time]).merged_path
         if os.path.exists(self.report_path) is False:
             os.makedirs(self.report_path)
-        # 模板对比的目标图片比模板稍大一点(默认大10像素)
-        self.template_edge = 10
         # 模板匹配率(匹配率大于此, 说明可以开始检测稳定帧)
         self.template_start_frame_match_threshold = 0.80
         # 稳定帧匹配率(匹配率连续大于此匹配率, 才说明帧稳定)
@@ -73,16 +71,16 @@ class GetStartupTimeByStablePoint:
         end_mask_gray = cv2.imdecode(np.fromfile(end_mask, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
         # 根据模板图片中第一行像素值, 找到模板所在当前帧中的位置(将带查找图片选择的稍微比模板图片大一点点每个边大20像素)
         # 行起点
-        row_start = self.get_position_info_from_roi(end_mask_gray, 0) - self.template_edge
+        row_start = self.get_position_info_from_roi(end_mask_gray, 0) - GloVar.template_border
         row_start = 0 if row_start < 0 else row_start
         # 行终点
-        row_end = self.get_position_info_from_roi(end_mask_gray, 1) + self.template_edge
+        row_end = self.get_position_info_from_roi(end_mask_gray, 1) + GloVar.template_border
         row_end = frame_height - 1 if row_end >= frame_height else row_end
         # 列起点
-        column_start = self.get_position_info_from_roi(end_mask_gray, 2) - self.template_edge
+        column_start = self.get_position_info_from_roi(end_mask_gray, 2) - GloVar.template_border
         column_start = 0 if column_start < 0 else column_start
         # 列终点
-        column_end = self.get_position_info_from_roi(end_mask_gray, 3) + self.template_edge
+        column_end = self.get_position_info_from_roi(end_mask_gray, 3) + GloVar.template_border
         column_end = frame_width - 1 if column_end >= frame_width else column_end
         # 视频读取
         while video_cap.isOpened():

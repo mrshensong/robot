@@ -79,6 +79,8 @@ class GloVar:
     real_time_show_report_flag = False
     # 存放数据处理后产生的数据(实时数据处理会用到)
     video_process_data = {}
+    # 模板边界值
+    template_border = 10
 
 
 # Icon路径

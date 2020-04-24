@@ -1045,6 +1045,19 @@ class SettingControl(QDialog):
         self.grid_layout.addWidget(self.picture_path_show_label, 5, 0, 1, 1)
         self.grid_layout.addWidget(self.picture_path_show_edit, 5, 1, 1, 5)
         self.grid_layout.addWidget(self.picture_path_change_button, 5, 6, 1, 1)
+        # 设置匹配模板的边界
+        GloVar.template_border = int(Profile(type='read', file=GloVar.config_file_path, section='param',
+                                             option='template_border').value)
+        self.template_border_label = QLabel(self)
+        self.template_border_label.setText('模板边界: ')
+        self.template_border_edit = QLineEdit(self)
+        self.template_border_edit.setReadOnly(True)
+        self.template_border_edit.setText(str(GloVar.template_border))
+        self.template_border_change_button = QPushButton('更改')
+        self.template_border_change_button.clicked.connect(self.connect_template_border)
+        self.grid_layout.addWidget(self.template_border_label, 6, 0, 1, 1)
+        self.grid_layout.addWidget(self.template_border_edit, 6, 1, 1, 5)
+        self.grid_layout.addWidget(self.template_border_change_button, 6, 6, 1, 1)
         # 确定按钮
         self.sure_button = QPushButton('确定')
         self.sure_button.clicked.connect(self.connect_sure_button)
@@ -1134,6 +1147,17 @@ class SettingControl(QDialog):
                     value=self.picture_path)
             Logger('修改保存图片路径为: %s' % self.picture_path)
             self.signal.emit('picture_path>' + self.picture_path)
+
+    def connect_template_border(self):
+        if self.template_border_change_button.text() == '更改':
+            self.template_border_change_button.setText('保存')
+            self.template_border_edit.setReadOnly(False)
+        elif self.template_border_change_button.text() == '保存':
+            GloVar.template_border = int(self.template_border_edit.text())
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='template_border',
+                    value=str(GloVar.template_border))
+            self.template_border_change_button.setText('更改')
+            self.template_border_edit.setReadOnly(True)
 
     # 确认按钮按下触发事件
     def connect_sure_button(self):
