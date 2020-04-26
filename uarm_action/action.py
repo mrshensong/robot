@@ -10,6 +10,8 @@ class ArmAction:
     def __init__(self, use_external_camera_flag, camera_width, camera_height):
         # 连接机械臂
         self.connect_robot()
+        # 机械臂抬起多高触发起点事件
+        self.trigger_height = 1.3
         # 如果为True则使用外接相机, False使用电脑内置相机
         # 视频线程
         if use_external_camera_flag is True:
@@ -27,7 +29,8 @@ class ArmAction:
             self.swift.connect()
             WindowStatus.robot_connect_status = '机械臂连接成功'
             Logger("机械臂连接成功  端口: {}".format(self.swift.port))
-        except:
+        except Exception as e:
+            Logger(e)
             WindowStatus.robot_connect_status = '机械臂连接失败'
             Logger("连接机械臂失败")
         self.swift.waiting_ready()
@@ -84,7 +87,7 @@ class ArmAction:
         z_h = round(z_l + 30, 4)
         self.set_position(x, y, z_h, speed)
         self.set_position(x, y, z_l, speed)
-        self.set_position(x, y, z_l+1.3, speed)
+        self.set_position(x, y, z_l + self.trigger_height, speed)
         if trigger == 1:
             self.video.allow_start_flag = True
         self.set_position(x, y, z_h, speed)
@@ -130,11 +133,11 @@ class ArmAction:
         self.set_position(x, y, z_h, speed)
         self.set_position(x, y, z_l, speed)
         time.sleep(pressure_duration / 1000)
-        self.set_position(x, y, z_h, speed)
+        self.set_position(x, y, z_l + self.trigger_height, speed)
         # 此处为视频中的当前帧插入标记(抬起前还是抬起后插入标记)
         if trigger == 1:
             self.video.allow_start_flag = True
-        # self.set_position(x, y, z_h, speed)
+        self.set_position(x, y, z_h, speed)
         if leave == 1:
             self.set_position(50, 100, 40)
 
@@ -157,16 +160,13 @@ class ArmAction:
         z_l = round(base_position[2], 4)
         z_h = round(z_l + 30, 4)
         self.swift.set_position(x_s, y_s, z_h, speed)
-        self.swift.flush_cmd()
         self.swift.set_position(z=z_l, speed=speed)
-        self.swift.flush_cmd()
+        self.swift.set_position(x_e, y_e, speed=speed, cmd=self.cmd_g1)
+        self.swift.set_position(z=z_l + self.trigger_height, speed=speed)
         # 此处为视频中的当前帧插入标记
         if trigger == 1:
             self.video.allow_start_flag = True
-        self.swift.set_position(x_e, y_e, speed=speed, cmd=self.cmd_g1)
-        self.swift.flush_cmd()
         self.swift.set_position(z=z_h, speed=speed)
-        self.swift.flush_cmd()
         if leave == 1:
             self.set_position(50, 100, 40)
 
