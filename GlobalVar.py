@@ -131,6 +131,8 @@ class IconPath:
     Icon_data_process_import_video = 'config/Icon/data_process_toolbar_icon/import_video.png'
     Icon_data_process_setting = 'config/Icon/data_process_toolbar_icon/setting.png'
     Icon_data_process_execute = 'config/Icon/data_process_toolbar_icon/data_process_execute.png'
+    # 逐鹿操作工具栏相关图标
+    Icon_compete_data_process = 'config/Icon/total_toolbar_icon/compete_data_process.png'
     # 自定义控件相关图标
     Icon_custom_delete = 'config/Icon/custom_widget_icon/delete.png'
     Icon_custom_play = 'config/Icon/custom_widget_icon/play.png'

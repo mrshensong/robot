@@ -3,7 +3,8 @@
 #### 代码运行  
 - 下载工程  
 - 创建虚拟环境  
-- pip install -r config/packages.txt(安装需要用到的包)  
+- pip install -r config/packages.txt(安装需要用到的包)
+    - 可能依然不行(需要卸载掉serial和pyserial相关包,然后重新安装即可)  
 - 直接运行robot.py  
 
 #### exe运行  

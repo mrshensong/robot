@@ -100,6 +100,8 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar = self.addToolBar('local_video_toolbar')
         # 数据处理工具栏
         self.data_process_toolbar = self.addToolBar('data_process_toolbar')
+        # 逐鹿相关操作
+        self.compete_toolbar = self.addToolBar('compete_toolbar')
         # 设置框
         self.setting_widget = SettingControl(self)
         self.setting_widget.signal[str].connect(self.recv_setting_widget)
@@ -222,6 +224,13 @@ class UiMainWindow(QMainWindow):
         self.data_process_import_video_action.triggered.connect(self.data_process_import_video)
         self.data_process_setting_action.triggered.connect(self.set_frame_rate)
         self.data_process_execute_action.triggered.connect(self.data_process_execute)
+        # 逐鹿工具栏
+        self.compete_toolbar_label = QLabel(self)
+        self.compete_toolbar_label.setText('逐鹿平台:')
+        self.compete_toolbar_label.setStyleSheet('color:#0099FF')
+        self.compete_toolbar_data_process_action = QAction(QIcon(IconPath.Icon_compete_data_process), '视频处理', self)
+        # 绑定函数
+        self.compete_toolbar_data_process_action.triggered.connect(self.compete_data_process)
         # 总工具栏
         self.total_toolbar.addAction(self.total_toolbar_switch_tree_action)
         self.total_toolbar.addAction(self.total_toolbar_setting_action)
@@ -253,6 +262,9 @@ class UiMainWindow(QMainWindow):
         self.data_process_toolbar.addAction(self.data_process_import_video_action)
         self.data_process_toolbar.addAction(self.data_process_setting_action)
         self.data_process_toolbar.addAction(self.data_process_execute_action)
+        # 逐鹿平台工具栏
+        self.compete_toolbar.addWidget(self.compete_toolbar_label)
+        self.compete_toolbar.addAction(self.compete_toolbar_data_process_action)
         # 关闭此时不能打开的控件
         self.robot_toolbar.setEnabled(False)
         self.live_video_box_screen_action.setEnabled(False)
@@ -932,6 +944,10 @@ class UiMainWindow(QMainWindow):
         self.monitor = Timer(frequent=1)
         self.monitor.timeSignal[str].connect(self.data_process_finished)
         self.monitor.start()
+
+    # 逐鹿平台数据处理
+    def compete_data_process(self):
+        pass
 
     # 检测数据有没有准备(准备好就可以开始执行数据处理)
     def detect_data_is_ready(self):
