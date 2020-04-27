@@ -209,12 +209,30 @@ class VideoLabel(QLabel):
         self.button_h_layout.addSpacing(30)
         self.button_h_layout.addWidget(self.next_frame_button)
         self.button_h_layout.addStretch(1)
+        # 隐藏掉视频进度条栏
+        self.button_frame = QFrame(self)
+        self.button_frame.setStyleSheet('background-color: #646464')
+        self.button_frame.installEventFilter(self)
+        # 设置透明度
+        self.button_frame_opacity = QGraphicsOpacityEffect()
+        self.button_frame_opacity.setOpacity(0.0)
+        self.button_frame.setGraphicsEffect(self.button_frame_opacity)
+        self.button_frame.setAutoFillBackground(True)
+        # button_frame布局
+        self.button_frame.setMinimumHeight(60)
+        self.button_frame_layout = QVBoxLayout(self.button_frame)
+        self.button_frame_layout.setContentsMargins(0, 0, 0, 0)
+        self.button_frame_layout.setSpacing(1)
+        self.button_frame_layout.addWidget(self.label_frame_show)
+        self.button_frame_layout.addWidget(self.video_progress_bar)
+        self.button_frame_layout.addLayout(self.button_h_layout)
         # label布局管理
         self.label_v_layout.addWidget(self.label_video_title)
         self.label_v_layout.addStretch(1)
-        self.label_v_layout.addWidget(self.label_frame_show)
-        self.label_v_layout.addWidget(self.video_progress_bar)
-        self.label_v_layout.addLayout(self.button_h_layout)
+        self.label_v_layout.addWidget(self.button_frame)
+        # self.label_v_layout.addWidget(self.label_frame_show)
+        # self.label_v_layout.addWidget(self.video_progress_bar)
+        # self.label_v_layout.addLayout(self.button_h_layout)
         # 重置控件布局
         self.setLayout(self.label_v_layout)
 
@@ -1202,6 +1220,20 @@ class VideoLabel(QLabel):
         j = y - (self.box_screen_size[1] + self.box_screen_size[3])
         robot_x_offset = round((j / self.box_screen_size[3] * RobotArmParam.actual_screen_height), 3)
         return robot_x_offset, robot_y_offset
+
+    # 事件过滤(捕捉是否进入button_frame事件)
+    def eventFilter(self, obj, event):
+        if obj is self.button_frame:
+            event_type = event.type()
+            if event_type == QEvent.Enter:
+                self.button_frame_opacity.setOpacity(0.4)
+                self.button_frame.setGraphicsEffect(self.button_frame_opacity)
+                self.button_frame.setAutoFillBackground(True)
+            elif event_type == QEvent.Leave:
+                self.button_frame_opacity.setOpacity(0.0)
+                self.button_frame.setGraphicsEffect(self.button_frame_opacity)
+                self.button_frame.setAutoFillBackground(True)
+        return super().eventFilter(obj, event)
 
 
 if __name__ == "__main__":
