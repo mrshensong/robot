@@ -3,6 +3,7 @@ from processdata.get_data_graph import GenerateDataGraph
 from processdata.get_report import GenerateReport
 from processdata.get_excel import GenerateExcel
 from GlobalVar import *
+from datetime import datetime
 
 
 class GetStartupTime:
@@ -50,6 +51,14 @@ class GetStartupTime:
         video_cap = cv2.VideoCapture(video_file)
         # 帧编号
         frame_id = 0
+        # 处理逐鹿需要的信息
+        if GloVar.compete_platform_flag is True:
+            # 视频起始(第一帧)时间
+            first_frame_time = float(os.path.split(video_file)[1].split('.')[0].split('-')[1])
+            # 视频中起点时间
+            start_flag_time = float(os.path.split(video_file)[1].split('.')[0].split('-')[0])
+            # 最小时间差值(给一个尽可能大的值)
+            min_time_diff = 1000000000
         # 起点结果是否找到标志位
         start_point_exist_flag = False
         # 模板出现标志
@@ -87,6 +96,8 @@ class GetStartupTime:
             # 帧从1开始
             frame_id += 1
             successfully_read, frame = video_cap.read()
+            # 获取帧所在时间
+            current_time = video_cap.get(cv2.CAP_PROP_POS_MSEC)
             if successfully_read is True:
                 # 灰度化
                 frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -94,10 +105,20 @@ class GetStartupTime:
                 target = frame_gray[row_start: row_end, column_start: column_end]
                 # 起点
                 if start_point_exist_flag is False:
-                    # 如果图像第一行像素为白色(排除前十帧可能出现的乱帧)
-                    if frame[0].mean() > 245 and frame_id > 10:
-                        start_point_result = (frame_id, 1.0)
-                        start_point_exist_flag = True
+                    # 系统本身通过视频第一行颜色判断
+                    if GloVar.compete_platform_flag is False:
+                        # 如果图像第一行像素为白色(排除前十帧可能出现的乱帧)
+                        if frame[0].mean() > 245 and frame_id > 10:
+                            start_point_result = (frame_id, 1.0)
+                            start_point_exist_flag = True
+                    # 逐鹿平台通过时间判断
+                    else:
+                        current_time_diff = abs(first_frame_time + current_time - start_flag_time)
+                        if current_time_diff <= min_time_diff:
+                            min_time_diff = current_time_diff
+                        elif current_time_diff > min_time_diff:
+                            start_point_result = (frame_id, 1.0)
+                            start_point_exist_flag = True
                     # 先寻找起点(没有找到起点进行下一循环)
                     continue
                 # 起点之后寻找模板出现的帧
@@ -145,11 +166,19 @@ class GetStartupTime:
         start_frame = start_frame
         end_frame = end_frame
         frame_gap = end_frame - start_frame
-        time_gap = int(frame_gap * (1000 / 120))
-        # 获取拍摄视频的时间
-        file_name = os.path.split(file)[1]
-        pattern = re.compile(r'\d+_\d+_\d+_\d+_\d+_\d+')
-        current_time = pattern.findall(file_name)[0]
+        # 不同平台不同方法(系统和逐鹿)
+        if GloVar.compete_platform_flag is False:
+            frame_rate = 120
+            # 获取拍摄视频的时间
+            file_name = os.path.split(file)[1]
+            pattern = re.compile(r'\d+_\d+_\d+_\d+_\d+_\d+')
+            current_time = pattern.findall(file_name)[0]
+        else:
+            frame_rate = 30
+            # 需要将文件名中的时间戳转为标准时间
+            time_stamp = int(os.path.split(file)[1].split('-')[0])
+            current_time = datetime.fromtimestamp(time_stamp / 1000.0).strftime('%Y_%m_%d_%H_%M_%S')
+        time_gap = int(frame_gap * (1000 / frame_rate))
         # 将拍摄时间格式更改为2020-04-23 14:20:54
         current_time_list = current_time.split('_')
         current_time = '-'.join(current_time_list[:3]) + ' ' + ':'.join(current_time_list[3:])
@@ -168,27 +197,29 @@ class GetStartupTime:
         video_name_path_cut_list = video_name_path.split('/')
         new_video_name_path_cut_list = video_name_path_cut_list[:-4] + ['template'] + video_name_path_cut_list[-2:]
         end_mask = '/'.join(new_video_name_path_cut_list).replace('/video/', '/picture/') + '.bmp'
-        # 通过读取配置文件获取标准耗时(单位/ms)
-        option = '/'.join(video_name_path_cut_list[-2:])
-        # standard_time_gap = 800
-        standard_time_gap = int(Profile(type='read', file=GloVar.config_file_path, section='standard', option=option).value)
+        # 选择不同平台(此处处理不同(分为系统和逐鹿))
+        if GloVar.compete_platform_flag is False:
+            # 通过读取配置文件获取标准耗时(单位/ms)
+            option = '/'.join(video_name_path_cut_list[-2:])
+            # standard_time_gap = 800
+            standard_time_gap = int(Profile(type='read', file=GloVar.config_file_path, section='standard', option=option).value)
+            frame_rate = 120
+        else:
+            standard_time_gap = int(os.listdir(video_name_path)[0].split('.')[0].split('-')[-1])
+            frame_rate = 30
         # 标准差帧
-        standard_frame_gap = int(standard_time_gap / (1000 / 120))
+        standard_frame_gap = int(standard_time_gap / (1000 / frame_rate))
         # 差帧总和 & 平均差帧
         sum_frame_gap, average_frame_gap = 0, 0
         # 处理一个case中的多次执行产生的视频
         for video_file in video_files:
             (file_text, extension) = os.path.splitext(video_file)
-            # 获取视频文件名中的数字序号
-            file_text = file_text.split('(')[0]
             if extension in ['.mp4', '.MP4', '.avi', '.AVI']:
                 video_count += 1
                 file = MergePath([video_name_path, video_file]).merged_path
                 # 获取到视频处理后的信息
                 video_info = self.process_video(video_id=video_count, file=file, end_mask=end_mask)
-                # video_info_list.append(video_info)
-                # 根据视频名的数字插入info(确保视频的先后顺序和info对应)
-                video_info_list.insert(int(file_text), video_info)
+                video_info_list.append(video_info)
                 if video_info['开始帧'] != 1 and video_info['结束帧'] != 1 and video_info['开始帧'] != video_info['结束帧']:
                     video_valid_count += 1
                     sum_frame_gap += int(video_info['差帧'])
@@ -196,12 +227,12 @@ class GetStartupTime:
         if sum_frame_gap == 0:
             video_valid_count = 1
         average_frame_gap = int(sum_frame_gap / video_valid_count)
-        average_time_gap = int((sum_frame_gap * (1000 / 120)) / video_valid_count)
+        average_time_gap = int((sum_frame_gap * (1000 / frame_rate)) / video_valid_count)
         # 获取状态
         if average_frame_gap == 0 or video_valid_count < video_count:
             status = 'error'
         else:
-            if average_time_gap > standard_time_gap:
+            if average_time_gap > int(standard_time_gap * 1.1):
                 status = 'failed'
             else:
                 status = 'pass'

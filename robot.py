@@ -1,3 +1,4 @@
+import re
 import sys
 import datetime
 import subprocess
@@ -100,8 +101,6 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar = self.addToolBar('local_video_toolbar')
         # 数据处理工具栏
         self.data_process_toolbar = self.addToolBar('data_process_toolbar')
-        # 逐鹿相关操作
-        self.compete_toolbar = self.addToolBar('compete_toolbar')
         # 设置框
         self.setting_widget = SettingControl(self)
         self.setting_widget.signal[str].connect(self.recv_setting_widget)
@@ -209,28 +208,25 @@ class UiMainWindow(QMainWindow):
         self.local_video_setting_action = QAction(QIcon(IconPath.Icon_local_video_setting), '设置', self)
         self.local_video_setting_action.setEnabled(False)
         # 绑定函数
-        self.local_video_import_video_action.triggered.connect(lambda : self.import_local_video(None))
+        self.local_video_import_video_action.triggered.connect(lambda: self.import_local_video(None))
         self.local_video_setting_action.triggered.connect(self.set_frame_rate)
         # 数据处理工具栏
         self.data_process_toolbar_label = QLabel(self)
         self.data_process_toolbar_label.setText('数据处理:')
         self.data_process_toolbar_label.setStyleSheet('color:#0099FF')
+        self.data_process_toolbar_combox = QComboBox(self)
+        self.data_process_toolbar_combox.setStyleSheet('background-color: #99CCFF')
+        self.data_process_toolbar_combox.addItems(['系统', '逐鹿'])
         self.data_process_import_video_action = QAction(QIcon(IconPath.Icon_data_process_import_video), '导入视频', self)
         self.data_process_setting_action = QAction(QIcon(IconPath.Icon_data_process_setting), '设置', self)
         self.data_process_execute_action = QAction(QIcon(IconPath.Icon_data_process_execute), '计算数据', self)
         self.data_process_setting_action.setEnabled(False)
         self.data_process_execute_action.setEnabled(False)
         # 绑定函数
+        self.data_process_toolbar_combox.currentTextChanged.connect(self.select_data_process_combox)
         self.data_process_import_video_action.triggered.connect(self.data_process_import_video)
         self.data_process_setting_action.triggered.connect(self.set_frame_rate)
         self.data_process_execute_action.triggered.connect(self.data_process_execute)
-        # 逐鹿工具栏
-        self.compete_toolbar_label = QLabel(self)
-        self.compete_toolbar_label.setText('逐鹿平台:')
-        self.compete_toolbar_label.setStyleSheet('color:#0099FF')
-        self.compete_toolbar_data_process_action = QAction(QIcon(IconPath.Icon_compete_data_process), '视频处理', self)
-        # 绑定函数
-        self.compete_toolbar_data_process_action.triggered.connect(self.compete_data_process)
         # 总工具栏
         self.total_toolbar.addAction(self.total_toolbar_switch_tree_action)
         self.total_toolbar.addAction(self.total_toolbar_setting_action)
@@ -259,12 +255,10 @@ class UiMainWindow(QMainWindow):
         self.local_video_toolbar.addAction(self.local_video_setting_action)
         # 数据处理工具栏
         self.data_process_toolbar.addWidget(self.data_process_toolbar_label)
+        self.data_process_toolbar.addWidget(self.data_process_toolbar_combox)
         self.data_process_toolbar.addAction(self.data_process_import_video_action)
         self.data_process_toolbar.addAction(self.data_process_setting_action)
         self.data_process_toolbar.addAction(self.data_process_execute_action)
-        # 逐鹿平台工具栏
-        self.compete_toolbar.addWidget(self.compete_toolbar_label)
-        self.compete_toolbar.addAction(self.compete_toolbar_data_process_action)
         # 关闭此时不能打开的控件
         self.robot_toolbar.setEnabled(False)
         self.live_video_box_screen_action.setEnabled(False)
@@ -837,6 +831,12 @@ class UiMainWindow(QMainWindow):
         self.frame_rate_adjust_widget.exec()
 
     '''数据处理相关操作'''
+    def select_data_process_combox(self):
+        if self.data_process_toolbar_combox.currentText() == '系统':
+            GloVar.compete_platform_flag = False
+        else:
+            GloVar.compete_platform_flag = True
+
     # 数据处理导入视频
     def data_process_import_video(self):
         # 先停掉视频
@@ -860,7 +860,7 @@ class UiMainWindow(QMainWindow):
             for home, dirs, files in os.walk(self.get_path):
                 if len(files) > 0:
                     # 合并路径
-                    file = MergePath([home, '1.mp4']).merged_path
+                    file = MergePath([home, files[0]]).merged_path
                     videos.append(file)
                     videos_title.append(file)
         # 没有选择路径
@@ -945,10 +945,6 @@ class UiMainWindow(QMainWindow):
         self.monitor.timeSignal[str].connect(self.data_process_finished)
         self.monitor.start()
 
-    # 逐鹿平台数据处理
-    def compete_data_process(self):
-        pass
-
     # 检测数据有没有准备(准备好就可以开始执行数据处理)
     def detect_data_is_ready(self):
         # 用来判断数据是否准备完毕(也就是视频对应的模板图片是否全部存在)
@@ -997,12 +993,22 @@ class UiMainWindow(QMainWindow):
         # self.live_video_switch_camera_status_action.setToolTip('打开摄像头')
         # self.main_show_tab_widget.video_tab.video_label.data_process_finished()
         # 自动打开报告
-        report_path = MergePath([self.get_path.replace('video', 'report'), 'report.html']).merged_path
+
+        # 获取路径中的时间
+        pattern = re.compile(r'\d+-\d+-\d+')
+        time_list = pattern.findall(self.get_path)
+        # 开始时间
+        test_time = '/'.join(time_list)
+        # 更改report路径
+        report_path = MergePath([GloVar.project_path, 'report', test_time, 'report.html']).merged_path
+        # report_path = MergePath([self.get_path.replace('video', 'report'), 'report.html']).merged_path
         self.project_bar_widget.operation_file(file_path=report_path)
         # 通过模拟点击来恢复实时流(达到稳定帧率的目的, 需要先使能视频状态按钮)
         self.main_show_tab_widget.video_tab.video_label.status_video_button.setEnabled(True)
         self.main_show_tab_widget.video_tab.video_label.video_status = self.main_show_tab_widget.video_tab.video_label.STATUS_PAUSE
         self.main_show_tab_widget.video_tab.video_label.status_video_button.click()
+        # 数据处理完成后(及时关闭逐鹿标志位, 以免影响后续测试)
+        self.data_process_toolbar_combox.setCurrentIndex(0)
 
     # 打开系统文件
     @staticmethod

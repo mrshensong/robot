@@ -81,6 +81,8 @@ class GloVar:
     video_process_data = {}
     # 模板边界值
     template_border = 10
+    # 处理逐鹿产生的视频
+    compete_platform_flag = False
 
 
 # Icon路径
