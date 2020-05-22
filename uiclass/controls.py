@@ -1058,6 +1058,19 @@ class SettingControl(QDialog):
         self.grid_layout.addWidget(self.template_border_label, 6, 0, 1, 1)
         self.grid_layout.addWidget(self.template_border_edit, 6, 1, 1, 5)
         self.grid_layout.addWidget(self.template_border_change_button, 6, 6, 1, 1)
+        # 设置机械臂起点触发高度
+        GloVar.trigger_height = float(Profile(type='read', file=GloVar.config_file_path, section='param',
+                                              option='trigger_height').value)
+        self.trigger_height_label = QLabel(self)
+        self.trigger_height_label.setText('触发高度: ')
+        self.trigger_height_edit = QLineEdit(self)
+        self.trigger_height_edit.setReadOnly(True)
+        self.trigger_height_edit.setText(str(GloVar.trigger_height))
+        self.trigger_height_change_button = QPushButton('更改')
+        self.trigger_height_change_button.clicked.connect(self.connect_trigger_height)
+        self.grid_layout.addWidget(self.trigger_height_label, 7, 0, 1, 1)
+        self.grid_layout.addWidget(self.trigger_height_edit, 7, 1, 1, 5)
+        self.grid_layout.addWidget(self.trigger_height_change_button, 7, 6, 1, 1)
         # 确定按钮
         self.sure_button = QPushButton('确定')
         self.sure_button.clicked.connect(self.connect_sure_button)
@@ -1152,12 +1165,25 @@ class SettingControl(QDialog):
         if self.template_border_change_button.text() == '更改':
             self.template_border_change_button.setText('保存')
             self.template_border_edit.setReadOnly(False)
+            self.template_border_edit.selectAll()
         elif self.template_border_change_button.text() == '保存':
             GloVar.template_border = int(self.template_border_edit.text())
             Profile(type='write', file=GloVar.config_file_path, section='param', option='template_border',
                     value=str(GloVar.template_border))
             self.template_border_change_button.setText('更改')
             self.template_border_edit.setReadOnly(True)
+
+    def connect_trigger_height(self):
+        if self.trigger_height_change_button.text() == '更改':
+            self.trigger_height_change_button.setText('保存')
+            self.trigger_height_edit.setReadOnly(False)
+            self.trigger_height_edit.selectAll()
+        elif self.trigger_height_change_button.text() == '保存':
+            GloVar.trigger_height = float(self.trigger_height_edit.text())
+            Profile(type='write', file=GloVar.config_file_path, section='param', option='trigger_height',
+                    value=str(GloVar.trigger_height))
+            self.trigger_height_change_button.setText('更改')
+            self.trigger_height_edit.setReadOnly(True)
 
     # 确认按钮按下触发事件
     def connect_sure_button(self):

@@ -81,6 +81,8 @@ class GloVar:
     video_process_data = {}
     # 模板边界值
     template_border = 10
+    # 触发起点的高度
+    trigger_height = 1.3
     # 处理逐鹿产生的视频
     compete_platform_flag = False
 

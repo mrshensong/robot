@@ -498,8 +498,7 @@ class TextTab(QWidget):
 
         # text展示
         self.text_show_text = QTextEdit(self)
-        # self.text_show_text.setFont(QFont('Times New Roman', 13))
-        self.text_show_text.setStyleSheet('font-family:Consolas;')
+        self.text_show_text.setFont(QFont('Times New Roman', 13))
         self.text_show_text.setReadOnly(True)
         self.text_h_layout.addWidget(self.text_show_text)
 

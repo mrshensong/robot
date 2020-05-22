@@ -11,6 +11,8 @@ class GetStartupTimeByStablePoint:
     def __init__(self, video_path):
         # 视频路径
         self.video_path = video_path
+        # 视频帧率(统一为120fps)
+        self.frame_rate = 120
         # 获取路径中的时间
         pattern = re.compile(r'\d+-\d+-\d+')
         time_list = pattern.findall(self.video_path)
@@ -167,17 +169,15 @@ class GetStartupTimeByStablePoint:
         frame_gap = end_frame - start_frame
         # 不同平台不同方法(系统和逐鹿)
         if GloVar.compete_platform_flag is False:
-            frame_rate = 120
             # 获取拍摄视频的时间
             file_name = os.path.split(file)[1]
             pattern = re.compile(r'\d+_\d+_\d+_\d+_\d+_\d+')
             current_time = pattern.findall(file_name)[0]
         else:
-            frame_rate = 30
             # 需要将时间戳转为时间
             time_stamp = int(os.path.split(file)[1].split('-')[0])
             current_time = datetime.fromtimestamp(time_stamp / 1000.0).strftime('%Y_%m_%d_%H_%M_%S')
-        time_gap = int(frame_gap * (1000 / frame_rate))
+        time_gap = int(1000 * (frame_gap / self.frame_rate))
         # 将拍摄时间格式更改为2020-04-23 14:20:54
         current_time_list = current_time.split('_')
         current_time = '-'.join(current_time_list[:3]) + ' ' + ':'.join(current_time_list[3:])
@@ -202,12 +202,10 @@ class GetStartupTimeByStablePoint:
             option = '/'.join(video_name_path_cut_list[-2:])
             # standard_time_gap = 800
             standard_time_gap = int(Profile(type='read', file=GloVar.config_file_path, section='standard', option=option).value)
-            frame_rate = 120
         else:
             standard_time_gap = int(os.listdir(video_name_path)[0].split('.')[0].split('-')[-1])
-            frame_rate = 30
         # 标准差帧
-        standard_frame_gap = int(standard_time_gap / (1000 / frame_rate))
+        standard_frame_gap = int(standard_time_gap / (1000 / self.frame_rate))
         # 差帧总和 & 平均差帧
         sum_frame_gap, average_frame_gap = 0, 0
         # 处理一个case中的多次执行产生的视频
@@ -226,7 +224,7 @@ class GetStartupTimeByStablePoint:
         if sum_frame_gap == 0:
             video_valid_count = 1
         average_frame_gap = int(sum_frame_gap / video_valid_count)
-        average_time_gap = int((sum_frame_gap * (1000 / frame_rate)) / video_valid_count)
+        average_time_gap = int((sum_frame_gap * (1000 / self.frame_rate)) / video_valid_count)
         # 获取状态
         if average_frame_gap == 0 or video_valid_count < video_count:
             status = 'error'
